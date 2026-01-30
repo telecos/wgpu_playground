@@ -1,0 +1,719 @@
+{
+  "repository": "telecos/wgpu_playground",
+  "tasks": [
+    {
+      "id": "TASK-023",
+      "title": "TASK-023: Implement render pass with all operations",
+      "body": "Create render pass encoder supporting color attachments, depth-stencil attachments, load/store operations, clear values. Implement draw commands (draw, drawIndexed, drawIndirect, drawIndexedIndirect).\n\n## Task Metadata\n- **Task ID**: TASK-023\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-024",
+      "title": "TASK-024: Implement compute pass operations",
+      "body": "Create compute pass encoder with dispatch operations (dispatch, dispatchIndirect). Support pipeline and bind group setting.\n\n## Task Metadata\n- **Task ID**: TASK-024\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-025",
+      "title": "TASK-025: Implement buffer-to-buffer and buffer-texture copies",
+      "body": "Implement copyBufferToBuffer, copyBufferToTexture, and copyTextureToBuffer operations in command encoder. Handle size and offset validation.\n\n## Task Metadata\n- **Task ID**: TASK-025\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-026",
+      "title": "TASK-026: Implement texture-to-texture copy operations",
+      "body": "Implement copyTextureToTexture operations supporting different mip levels, array layers, and aspects.\n\n## Task Metadata\n- **Task ID**: TASK-026\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-027",
+      "title": "TASK-027: Implement GPU query sets for timestamps and statistics",
+      "body": "Create query set creation supporting occlusion and timestamp queries. Implement query result resolution and retrieval.\n\n## Task Metadata\n- **Task ID**: TASK-027\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-028",
+      "title": "TASK-028: Implement surface/canvas context management",
+      "body": "Create canvas context configuration for render targets. Handle surface creation, configuration (format, present mode, alpha mode), and getCurrentTexture operations.\n\n## Task Metadata\n- **Task ID**: TASK-028\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-029",
+      "title": "TASK-029: Implement vertex buffer binding and layouts",
+      "body": "Create vertex buffer state configuration with multiple buffer slots, step modes (vertex, instance), and attribute formats. Support setVertexBuffer operations in render passes.\n\n## Task Metadata\n- **Task ID**: TASK-029\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-030",
+      "title": "TASK-030: Implement index buffer binding",
+      "body": "Implement index buffer setup with uint16 and uint32 formats. Support setIndexBuffer operations in render passes.\n\n## Task Metadata\n- **Task ID**: TASK-030\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-031",
+      "title": "TASK-031: Implement render bundles for command reuse",
+      "body": "Create render bundle encoder for recording reusable draw commands. Support render bundle execution in render passes for optimization.\n\n## Task Metadata\n- **Task ID**: TASK-031\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-032",
+      "title": "TASK-032: Implement comprehensive error handling",
+      "body": "Set up error scopes, validation errors, out-of-memory errors, and internal errors handling. Implement error callbacks and logging throughout the API.\n\n## Task Metadata\n- **Task ID**: TASK-032\n- **Category**: webgpu-api, core-functionality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "webgpu-api",
+        "core-functionality"
+      ]
+    },
+    {
+      "id": "TASK-040",
+      "title": "TASK-040: Evaluate and select GUI framework",
+      "body": "Research and select appropriate Rust GUI framework (egui, iced, or custom imgui-wgpu). Consider ease of integration with wgpu, WASM support, and feature richness. Document decision rationale.\n\n## Task Metadata\n- **Task ID**: TASK-040\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-041",
+      "title": "TASK-041: Create main application window with GUI framework",
+      "body": "Set up main application window using selected GUI framework. Integrate with winit event loop. Create basic layout with menu bar, sidebar, and main canvas area.\n\n## Task Metadata\n- **Task ID**: TASK-041\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-042",
+      "title": "TASK-042: Create UI for GPU adapter selection",
+      "body": "Build UI panel displaying available GPU adapters with their properties (name, vendor, device type). Allow user to select adapter and configure power preference options.\n\n## Task Metadata\n- **Task ID**: TASK-042\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-043",
+      "title": "TASK-043: Create UI for device limits and features",
+      "body": "Build UI panel showing available device features and limits. Allow users to enable/disable features and adjust limits before device creation.\n\n## Task Metadata\n- **Task ID**: TASK-043\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-044",
+      "title": "TASK-044: Create UI panel for buffer configuration",
+      "body": "Build interface for creating GPU buffers with controls for size, usage flags (checkboxes for each flag), label, and mapped-at-creation option. Include validation and creation button.\n\n## Task Metadata\n- **Task ID**: TASK-044\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-045",
+      "title": "TASK-045: Create UI panel for texture configuration",
+      "body": "Build interface for creating textures with controls for dimensions, format (dropdown), mip levels, sample count, usage flags, and label. Support all texture formats from the spec.\n\n## Task Metadata\n- **Task ID**: TASK-045\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-046",
+      "title": "TASK-046: Create UI panel for sampler settings",
+      "body": "Build sampler configuration interface with controls for address modes (U, V, W), filter modes (mag, min, mipmap), LOD clamp, compare function, and anisotropy.\n\n## Task Metadata\n- **Task ID**: TASK-046\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-047",
+      "title": "TASK-047: Create WGSL shader editor with syntax highlighting",
+      "body": "Implement shader editor panel with WGSL syntax highlighting, line numbers, and compilation error display. Support loading from file and inline editing. Show compilation results.\n\n## Task Metadata\n- **Task ID**: TASK-047\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-048",
+      "title": "TASK-048: Create UI for bind group layout configuration",
+      "body": "Build interface for defining bind group layouts with dynamic entry addition. For each entry: binding number, visibility (vertex/fragment/compute checkboxes), and resource type configuration.\n\n## Task Metadata\n- **Task ID**: TASK-048\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-049",
+      "title": "TASK-049: Create UI for bind group resource binding",
+      "body": "Build interface for creating bind groups by selecting layout and binding resources. Display available resources (buffers, textures, samplers) and allow assignment to binding slots.\n\n## Task Metadata\n- **Task ID**: TASK-049\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-050",
+      "title": "TASK-050: Create UI for render pipeline configuration",
+      "body": "Build comprehensive render pipeline editor with sections for vertex state, primitive state (topology, culling, front face), depth-stencil, multisample, and fragment state. Include preset configurations.\n\n## Task Metadata\n- **Task ID**: TASK-050\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-051",
+      "title": "TASK-051: Create UI for compute pipeline configuration",
+      "body": "Build compute pipeline editor with shader module selection, entry point input, and pipeline layout configuration.\n\n## Task Metadata\n- **Task ID**: TASK-051\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-052",
+      "title": "TASK-052: Create UI for render pass configuration",
+      "body": "Build interface for configuring render pass with color attachments (load/store ops, clear color), depth-stencil attachment, and timestamp writes.\n\n## Task Metadata\n- **Task ID**: TASK-052\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-053",
+      "title": "TASK-053: Create UI for draw command parameters",
+      "body": "Build interface for executing draw commands with controls for vertex count, instance count, first vertex/instance, and indexed drawing parameters.\n\n## Task Metadata\n- **Task ID**: TASK-053\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-054",
+      "title": "TASK-054: Create UI for compute dispatch configuration",
+      "body": "Build interface for compute dispatch with workgroup count inputs (X, Y, Z dimensions) and indirect dispatch buffer selection.\n\n## Task Metadata\n- **Task ID**: TASK-054\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-055",
+      "title": "TASK-055: Create resource inspector panel",
+      "body": "Build panel displaying all created resources (buffers, textures, pipelines) with their properties, current state, and memory usage. Support filtering and searching.\n\n## Task Metadata\n- **Task ID**: TASK-055\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-056",
+      "title": "TASK-056: Create main rendering canvas with controls",
+      "body": "Implement main canvas area for WebGPU rendering output. Add controls for clear color, canvas size, and screenshot capture. Support mouse interaction for camera control in 3D examples.\n\n## Task Metadata\n- **Task ID**: TASK-056\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-057",
+      "title": "TASK-057: Create command recording and playback panel",
+      "body": "Build panel showing recorded GPU commands with timeline. Support command inspection, replay, and export. Display command buffer contents.\n\n## Task Metadata\n- **Task ID**: TASK-057\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-058",
+      "title": "TASK-058: Create example gallery and loader",
+      "body": "Build UI for browsing and loading preset examples (triangle, cube, texture mapping, compute shader). Include example descriptions and source code display.\n\n## Task Metadata\n- **Task ID**: TASK-058\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-059",
+      "title": "TASK-059: Create performance metrics panel",
+      "body": "Build panel displaying FPS, frame time, GPU memory usage, and command buffer statistics. Support performance graphs and profiling data.\n\n## Task Metadata\n- **Task ID**: TASK-059\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-060",
+      "title": "TASK-060: Create error and warning console",
+      "body": "Build console panel displaying WebGPU errors, warnings, and validation messages. Support filtering by severity and clearing. Include error details and stack traces.\n\n## Task Metadata\n- **Task ID**: TASK-060\n- **Category**: ui, gui\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ui",
+        "gui"
+      ]
+    },
+    {
+      "id": "TASK-070",
+      "title": "TASK-070: Create basic triangle rendering example",
+      "body": "Implement classic triangle example with vertex buffer, simple shader, and render pipeline. Demonstrate basic rendering setup and draw command.\n\n## Task Metadata\n- **Task ID**: TASK-070\n- **Category**: examples, documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "examples",
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-071",
+      "title": "TASK-071: Create texture mapping example",
+      "body": "Implement textured quad example demonstrating texture creation, sampler configuration, and texture binding in shaders.\n\n## Task Metadata\n- **Task ID**: TASK-071\n- **Category**: examples, documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "examples",
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-072",
+      "title": "TASK-072: Create rotating 3D cube example",
+      "body": "Implement 3D cube with rotation using uniform buffers for transformation matrices. Demonstrate depth testing and index buffers.\n\n## Task Metadata\n- **Task ID**: TASK-072\n- **Category**: examples, documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "examples",
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-073",
+      "title": "TASK-073: Create basic compute shader example",
+      "body": "Implement compute shader example performing simple calculations (e.g., array processing). Demonstrate compute pipeline and buffer sharing between compute and render.\n\n## Task Metadata\n- **Task ID**: TASK-073\n- **Category**: examples, documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "examples",
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-074",
+      "title": "TASK-074: Create instanced rendering example",
+      "body": "Implement instanced rendering example with multiple objects. Demonstrate instance buffers and per-instance attributes.\n\n## Task Metadata\n- **Task ID**: TASK-074\n- **Category**: examples, documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "examples",
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-075",
+      "title": "TASK-075: Create render-to-texture example",
+      "body": "Implement example rendering to texture and using it in subsequent render pass. Demonstrate framebuffer usage and multi-pass rendering.\n\n## Task Metadata\n- **Task ID**: TASK-075\n- **Category**: examples, documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "examples",
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-076",
+      "title": "TASK-076: Create multisampling example",
+      "body": "Implement example using multisampling for anti-aliasing. Demonstrate MSAA render targets and resolve operations.\n\n## Task Metadata\n- **Task ID**: TASK-076\n- **Category**: examples, documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "examples",
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-080",
+      "title": "TASK-080: Configure unit testing infrastructure",
+      "body": "Set up Rust unit testing framework with test modules in each crate. Configure test organization following Rust best practices. Add test utilities and helper functions.\n\n## Task Metadata\n- **Task ID**: TASK-080\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-081",
+      "title": "TASK-081: Create unit tests for buffer operations",
+      "body": "Write unit tests for buffer creation, mapping, writing, and reading. Test all usage flag combinations and error conditions.\n\n## Task Metadata\n- **Task ID**: TASK-081\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-082",
+      "title": "TASK-082: Create unit tests for texture operations",
+      "body": "Write unit tests for texture creation, format support, dimension validation, and texture operations. Test error conditions and edge cases.\n\n## Task Metadata\n- **Task ID**: TASK-082\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-083",
+      "title": "TASK-083: Create unit tests for pipeline creation",
+      "body": "Write unit tests for render and compute pipeline creation. Test valid and invalid configurations, shader compilation, and pipeline state.\n\n## Task Metadata\n- **Task ID**: TASK-083\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-084",
+      "title": "TASK-084: Create unit tests for command encoding",
+      "body": "Write unit tests for command encoder operations, render/compute pass recording, and copy operations. Validate command sequences.\n\n## Task Metadata\n- **Task ID**: TASK-084\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-085",
+      "title": "TASK-085: Create integration tests for complete workflows",
+      "body": "Write integration tests for complete rendering workflows (setup \u2192 encode \u2192 submit). Test multiple examples end-to-end.\n\n## Task Metadata\n- **Task ID**: TASK-085\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-086",
+      "title": "TASK-086: Configure headless GPU testing",
+      "body": "Set up headless testing using software adapter or offscreen rendering. Enable tests to run in CI without display. Configure appropriate backends for testing.\n\n## Task Metadata\n- **Task ID**: TASK-086\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-087",
+      "title": "TASK-087: Create visual regression test framework",
+      "body": "Set up visual regression testing by capturing rendered output and comparing with reference images. Use image comparison libraries. Store reference images in repository.\n\n## Task Metadata\n- **Task ID**: TASK-087\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-088",
+      "title": "TASK-088: Create GUI interaction tests",
+      "body": "Write tests for GUI components and user interactions. Test UI state management, input handling, and rendering output. Mock user input events.\n\n## Task Metadata\n- **Task ID**: TASK-088\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-089",
+      "title": "TASK-089: Create performance benchmark suite",
+      "body": "Set up criterion.rs or similar benchmarking framework. Create benchmarks for critical paths (buffer operations, draw calls, pipeline creation). Configure benchmark CI jobs.\n\n## Task Metadata\n- **Task ID**: TASK-089\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-090",
+      "title": "TASK-090: Create WASM-specific tests",
+      "body": "Write tests specifically for WASM build. Test web-sys integration, wasm-bindgen exports, and browser-specific functionality. Configure wasm-pack test.\n\n## Task Metadata\n- **Task ID**: TASK-090\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-091",
+      "title": "TASK-091: Configure code coverage tools",
+      "body": "Set up tarpaulin or llvm-cov for test coverage reporting. Configure coverage thresholds and reporting format. Integrate with CI.\n\n## Task Metadata\n- **Task ID**: TASK-091\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-092",
+      "title": "TASK-092: Create tests for error conditions",
+      "body": "Write tests validating error handling for invalid operations, out-of-bounds access, device lost scenarios, and validation errors.\n\n## Task Metadata\n- **Task ID**: TASK-092\n- **Category**: testing, quality\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "testing",
+        "quality"
+      ]
+    },
+    {
+      "id": "TASK-100",
+      "title": "TASK-100: Create base GitHub Actions CI configuration",
+      "body": "Set up .github/workflows directory with main CI workflow. Configure triggers (push, PR) and basic job structure. Set up caching for cargo dependencies.\n\n## Task Metadata\n- **Task ID**: TASK-100\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-101",
+      "title": "TASK-101: Create CI jobs for native builds",
+      "body": "Configure CI jobs for building on Linux, macOS, and Windows. Set up Rust toolchain installation and build matrix. Test all native targets.\n\n## Task Metadata\n- **Task ID**: TASK-101\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-102",
+      "title": "TASK-102: Create CI jobs for WASM builds",
+      "body": "Configure wasm-pack in CI. Create jobs for building and testing WASM target. Validate web bundle creation and deployment artifacts.\n\n## Task Metadata\n- **Task ID**: TASK-102\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-103",
+      "title": "TASK-103: Create CI jobs for code quality checks",
+      "body": "Set up clippy for linting with strict rules. Configure rustfmt checks for code formatting. Fail CI on warnings or formatting issues.\n\n## Task Metadata\n- **Task ID**: TASK-103\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-104",
+      "title": "TASK-104: Create CI jobs for running test suite",
+      "body": "Configure jobs running unit tests, integration tests, and doc tests. Set up test reporting and failure notifications. Run tests on all platforms.\n\n## Task Metadata\n- **Task ID**: TASK-104\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-105",
+      "title": "TASK-105: Create CI jobs for security scanning",
+      "body": "Set up cargo-audit for dependency vulnerability scanning. Configure cargo-deny for license and security policy enforcement. Run security checks on schedule and PRs.\n\n## Task Metadata\n- **Task ID**: TASK-105\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-106",
+      "title": "TASK-106: Create CI jobs for documentation building",
+      "body": "Configure cargo doc generation in CI. Build and publish documentation to GitHub Pages. Validate documentation completeness and links.\n\n## Task Metadata\n- **Task ID**: TASK-106\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-107",
+      "title": "TASK-107: Create CI jobs for performance benchmarks",
+      "body": "Set up benchmark running on schedule or manual trigger. Compare results against baseline. Store and visualize benchmark history.\n\n## Task Metadata\n- **Task ID**: TASK-107\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-108",
+      "title": "TASK-108: Create CI jobs for release artifacts",
+      "body": "Configure artifact creation for releases: native binaries, WASM bundles, and documentation. Set up automatic publishing to GitHub Releases.\n\n## Task Metadata\n- **Task ID**: TASK-108\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-109",
+      "title": "TASK-109: Create deployment workflow for WASM demo",
+      "body": "Set up automatic deployment of WASM build to GitHub Pages or other hosting. Deploy on main branch updates. Configure custom domain if applicable.\n\n## Task Metadata\n- **Task ID**: TASK-109\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-110",
+      "title": "TASK-110: Configure Dependabot or similar for updates",
+      "body": "Set up automated dependency update PRs. Configure update frequency and grouping. Add auto-merge for minor updates passing CI.\n\n## Task Metadata\n- **Task ID**: TASK-110\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-111",
+      "title": "TASK-111: Create comprehensive PR check workflow",
+      "body": "Configure required status checks for PRs: builds, tests, linting, formatting. Set up PR labeling based on changes. Configure branch protection rules.\n\n## Task Metadata\n- **Task ID**: TASK-111\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-112",
+      "title": "TASK-112: Create CI jobs for coverage reporting",
+      "body": "Configure coverage collection in CI. Upload results to Codecov or similar. Add coverage badges to README. Set minimum coverage thresholds.\n\n## Task Metadata\n- **Task ID**: TASK-112\n- **Category**: ci-cd, devops\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "ci-cd",
+        "devops"
+      ]
+    },
+    {
+      "id": "TASK-120",
+      "title": "TASK-120: Document system architecture and design",
+      "body": "Create docs/architecture.md documenting overall system design, module structure, data flow, and key design decisions. Include diagrams if applicable.\n\n## Task Metadata\n- **Task ID**: TASK-120\n- **Category**: documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-121",
+      "title": "TASK-121: Document public API with examples",
+      "body": "Write comprehensive rustdoc comments for all public APIs. Include usage examples, parameter descriptions, and return value documentation. Document error conditions.\n\n## Task Metadata\n- **Task ID**: TASK-121\n- **Category**: documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-122",
+      "title": "TASK-122: Create end-user documentation",
+      "body": "Write user guide covering GUI usage, example workflows, and common tasks. Include screenshots and step-by-step tutorials.\n\n## Task Metadata\n- **Task ID**: TASK-122\n- **Category**: documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-123",
+      "title": "TASK-123: Create developer/contributor guide",
+      "body": "Write guide for developers contributing to the project. Cover development setup, coding standards, PR process, and testing requirements.\n\n## Task Metadata\n- **Task ID**: TASK-123\n- **Category**: documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-124",
+      "title": "TASK-124: Document WGSL shader development",
+      "body": "Create guide for writing WGSL shaders in the playground. Cover shader structure, built-in functions, and debugging techniques.\n\n## Task Metadata\n- **Task ID**: TASK-124\n- **Category**: documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-125",
+      "title": "TASK-125: Document WebGPU API coverage",
+      "body": "Create comprehensive document mapping WebGPU API features to playground implementation. Mark implemented, partial, and missing features.\n\n## Task Metadata\n- **Task ID**: TASK-125\n- **Category**: documentation\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "documentation"
+      ]
+    },
+    {
+      "id": "TASK-130",
+      "title": "TASK-130: Add hot reload for shader changes",
+      "body": "Implement file watching for shader files and automatic reload on changes. Update pipelines dynamically without restarting application.\n\n## Task Metadata\n- **Task ID**: TASK-130\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-131",
+      "title": "TASK-131: Add saving and loading of playground state",
+      "body": "Implement serialization of current playground state (resources, pipeline configs, shaders). Support loading saved states. Use JSON or binary format.\n\n## Task Metadata\n- **Task ID**: TASK-131\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-132",
+      "title": "TASK-132: Add standalone code generation",
+      "body": "Generate standalone Rust code from current playground configuration. Export as buildable cargo project. Include all shaders and resources.\n\n## Task Metadata\n- **Task ID**: TASK-132\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-133",
+      "title": "TASK-133: Add theme switching support",
+      "body": "Implement dark and light UI themes. Add theme selector in settings. Persist theme preference.\n\n## Task Metadata\n- **Task ID**: TASK-133\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-134",
+      "title": "TASK-134: Add sharing and collaboration features",
+      "body": "Implement URL-based state sharing (encode state in URL). Optional: Add cloud save for sharing configurations. Generate shareable links.\n\n## Task Metadata\n- **Task ID**: TASK-134\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-135",
+      "title": "TASK-135: Add texture loading from files",
+      "body": "Implement texture loading from image files (PNG, JPG, etc.). Support drag-and-drop. Include image decoding libraries. Allow texture export.\n\n## Task Metadata\n- **Task ID**: TASK-135\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-136",
+      "title": "TASK-136: Add 3D model import support",
+      "body": "Implement loading of 3D models (glTF, OBJ). Parse model data into buffers. Support materials and textures from model files.\n\n## Task Metadata\n- **Task ID**: TASK-136\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-137",
+      "title": "TASK-137: Add GPU debugging utilities",
+      "body": "Implement debugging tools: buffer inspector (view buffer contents), texture inspector (visualize textures), and pipeline debugger.\n\n## Task Metadata\n- **Task ID**: TASK-137\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-138",
+      "title": "TASK-138: Add mobile device support",
+      "body": "Optimize UI for mobile screens. Test on mobile browsers with WebGPU support. Implement touch controls and responsive layout.\n\n## Task Metadata\n- **Task ID**: TASK-138\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    },
+    {
+      "id": "TASK-139",
+      "title": "TASK-139: Add accessibility improvements",
+      "body": "Implement keyboard navigation for all UI elements. Add ARIA labels. Support screen readers. Ensure sufficient contrast ratios.\n\n## Task Metadata\n- **Task ID**: TASK-139\n- **Category**: enhancement, nice-to-have\n- **Estimated Time**: 1-4 hours\n\n## Dependencies\nThis task may depend on completion of previous tasks in its category. Please check the project roadmap for dependencies.\n\n## Acceptance Criteria\n- Implementation follows Rust and WebGPU best practices\n- Code includes appropriate error handling\n- Changes are tested (unit/integration tests as applicable)\n- Documentation is updated if needed\n- Cross-platform compatibility maintained (native + WASM)\n",
+      "labels": [
+        "enhancement",
+        "nice-to-have"
+      ]
+    }
+  ]
+}

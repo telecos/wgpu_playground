@@ -58,6 +58,40 @@ cargo run --release
 
 **Note:** This application requires a display/window system to run. On Linux, ensure you have either X11 or Wayland available. On headless systems, the application won't run as it requires GPU rendering capabilities.
 
+### Backend Selection
+
+The application supports multiple WebGPU backend implementations (similar to Chromium's Dawn). You can select which backend to use via the `WGPU_BACKEND` environment variable:
+
+```bash
+# Use Vulkan backend
+WGPU_BACKEND=vulkan cargo run --release
+
+# Use Metal backend (macOS/iOS)
+WGPU_BACKEND=metal cargo run --release
+
+# Use DirectX 12 backend (Windows)
+WGPU_BACKEND=dx12 cargo run --release
+
+# Use OpenGL backend
+WGPU_BACKEND=gl cargo run --release
+
+# Use primary backends (default for platform)
+WGPU_BACKEND=primary cargo run --release
+
+# Use all available backends (default if not specified)
+WGPU_BACKEND=all cargo run --release
+```
+
+**Available Backend Options:**
+- `vulkan` or `vk` - Vulkan API (Windows, Linux, Android, macOS via MoltenVK)
+- `metal` or `mtl` - Metal API (macOS, iOS)
+- `dx12`, `d3d12`, or `directx12` - DirectX 12 API (Windows 10+)
+- `gl` or `opengl` - OpenGL/OpenGL ES API
+- `primary` - Platform's primary backends (Vulkan, Metal, DX12, Browser WebGPU)
+- `all` - All available backends (default)
+
+The active backend is displayed prominently in the **Device Info** tab of the application.
+
 ## Project Structure
 
 This project uses a Cargo workspace structure with the following crates:

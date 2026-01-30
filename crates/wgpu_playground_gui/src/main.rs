@@ -27,17 +27,29 @@ struct AppState {
 impl AppState {
     async fn new(window: Arc<Window>) -> Self {
         let size = window.inner_size();
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: wgpu::Backends::all(),
-            ..Default::default()
-        });
+
+        // Check for WGPU_BACKEND environment variable to select backend
+        let backends = std::env::var("WGPU_BACKEND")
+            .ok()
+            .and_then(|backend_str| {
+                log::info!("WGPU_BACKEND environment variable set to: {}", backend_str);
+                #[allow(deprecated)]
+                wgpu_playground_core::adapter::parse_backend(&backend_str)
+            })
+            .unwrap_or_else(|| {
+                log::info!("Using all available backends");
+                wgpu::Backends::all()
+            });
+
+        let instance = wgpu_playground_core::adapter::create_instance(backends);
 
         let surface = instance
             .create_surface(window.clone())
             .expect("Failed to create surface");
 
         // Use the adapter module for better error handling and configurability
-        let adapter_options = wgpu_playground_core::adapter::AdapterOptions::default();
+        let adapter_options =
+            wgpu_playground_core::adapter::AdapterOptions::default().with_backends(backends);
         let adapter = wgpu_playground_core::adapter::request_adapter(
             &instance,
             &adapter_options,
@@ -45,6 +57,12 @@ impl AppState {
         )
         .await
         .expect("Failed to find a suitable GPU adapter");
+
+        log::info!(
+            "Using adapter: {} (Backend: {})",
+            adapter.get_info().name,
+            wgpu_playground_core::adapter::backend_to_str(&adapter.get_info().backend)
+        );
 
         let (device, queue) = adapter
             .request_device(

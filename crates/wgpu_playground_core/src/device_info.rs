@@ -1,4 +1,6 @@
 pub struct DeviceInfo {
+    adapter_name: String,
+    backend: String,
     adapter_info: String,
     device_limits: String,
     device_features: String,
@@ -7,9 +9,12 @@ pub struct DeviceInfo {
 impl DeviceInfo {
     pub fn new(adapter: &wgpu::Adapter, device: &wgpu::Device) -> Self {
         let info = adapter.get_info();
+        let backend = crate::adapter::backend_to_str(&info.backend).to_string();
+        let adapter_name = info.name.clone();
+
         let adapter_info = format!(
-            "Name: {}\nVendor: {}\nDevice: {}\nDevice Type: {:?}\nDriver: {}\nDriver Info: {}\nBackend: {:?}",
-            info.name, info.vendor, info.device, info.device_type, info.driver, info.driver_info, info.backend
+            "Name: {}\nVendor: {}\nDevice: {}\nDevice Type: {:?}\nDriver: {}\nDriver Info: {}\nBackend: {}",
+            info.name, info.vendor, info.device, info.device_type, info.driver, info.driver_info, backend
         );
 
         let limits = device.limits();
@@ -76,6 +81,8 @@ impl DeviceInfo {
         let device_features = format!("{:?}", features);
 
         Self {
+            adapter_name,
+            backend,
             adapter_info,
             device_limits,
             device_features,
@@ -84,6 +91,24 @@ impl DeviceInfo {
 
     pub fn ui(&self, ui: &mut egui::Ui) {
         egui::ScrollArea::vertical().show(ui, |ui| {
+            // Highlight the backend being used
+            ui.heading("🖥️ Active WebGPU Backend");
+            ui.separator();
+            ui.horizontal(|ui| {
+                ui.label("Backend Implementation:");
+                ui.strong(&self.backend);
+            });
+            ui.horizontal(|ui| {
+                ui.label("Adapter:");
+                ui.strong(&self.adapter_name);
+            });
+            ui.add_space(10.0);
+            ui.label(
+                "💡 Tip: Set the WGPU_BACKEND environment variable to select a specific backend.",
+            );
+            ui.label("   Available: vulkan, metal, dx12, gl, primary, all");
+            ui.add_space(20.0);
+
             ui.heading("Adapter Information");
             ui.separator();
             ui.label(&self.adapter_info);

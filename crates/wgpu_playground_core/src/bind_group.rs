@@ -1,6 +1,6 @@
 use std::fmt;
 use std::num::{NonZeroU32, NonZeroU64};
-use wgpu::{BindGroupLayout, Device, ShaderStages};
+use wgpu::{BindGroup, BindGroupLayout, Buffer, Device, Sampler, ShaderStages, TextureView};
 
 /// Errors that can occur during bind group layout operations
 #[derive(Debug)]
@@ -9,6 +9,10 @@ pub enum BindGroupError {
     InvalidBinding(String),
     /// Binding number conflict
     DuplicateBinding(u32),
+    /// Missing binding
+    MissingBinding(u32),
+    /// Invalid resource type for binding
+    InvalidResourceType(String),
 }
 
 impl fmt::Display for BindGroupError {
@@ -17,6 +21,12 @@ impl fmt::Display for BindGroupError {
             BindGroupError::InvalidBinding(msg) => write!(f, "Invalid binding: {}", msg),
             BindGroupError::DuplicateBinding(binding) => {
                 write!(f, "Duplicate binding number: {}", binding)
+            }
+            BindGroupError::MissingBinding(binding) => {
+                write!(f, "Missing binding: {}", binding)
+            }
+            BindGroupError::InvalidResourceType(msg) => {
+                write!(f, "Invalid resource type: {}", msg)
             }
         }
     }
@@ -426,6 +436,277 @@ impl BindGroupLayoutDescriptor {
 impl Default for BindGroupLayoutDescriptor {
     fn default() -> Self {
         Self::new(None)
+    }
+}
+
+/// A resource that can be bound in a bind group
+#[derive(Debug, Clone)]
+pub enum BindingResource<'a> {
+    /// A buffer binding
+    Buffer(BufferBinding<'a>),
+    /// A sampler binding
+    Sampler(&'a Sampler),
+    /// A texture view binding
+    TextureView(&'a TextureView),
+}
+
+impl<'a> BindingResource<'a> {
+    /// Convert to wgpu::BindingResource
+    pub fn to_wgpu(&self) -> wgpu::BindingResource<'a> {
+        match self {
+            BindingResource::Buffer(binding) => wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                buffer: binding.buffer,
+                offset: binding.offset,
+                size: binding.size,
+            }),
+            BindingResource::Sampler(sampler) => wgpu::BindingResource::Sampler(sampler),
+            BindingResource::TextureView(view) => wgpu::BindingResource::TextureView(view),
+        }
+    }
+}
+
+/// A buffer binding for use in a bind group
+#[derive(Debug, Clone, Copy)]
+pub struct BufferBinding<'a> {
+    /// The buffer to bind
+    pub buffer: &'a Buffer,
+    /// Offset in bytes from the start of the buffer
+    pub offset: u64,
+    /// Size of the binding in bytes (None means use the rest of the buffer)
+    pub size: Option<NonZeroU64>,
+}
+
+impl<'a> BufferBinding<'a> {
+    /// Create a new buffer binding that binds the entire buffer
+    ///
+    /// # Arguments
+    /// * `buffer` - The buffer to bind
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::BufferBinding;
+    /// # fn example(buffer: &wgpu::Buffer) {
+    /// let binding = BufferBinding::entire(buffer);
+    /// # }
+    /// ```
+    pub fn entire(buffer: &'a Buffer) -> Self {
+        Self {
+            buffer,
+            offset: 0,
+            size: None,
+        }
+    }
+
+    /// Create a new buffer binding with offset and size
+    ///
+    /// # Arguments
+    /// * `buffer` - The buffer to bind
+    /// * `offset` - Offset in bytes from the start of the buffer
+    /// * `size` - Size of the binding in bytes (None means use the rest of the buffer)
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::BufferBinding;
+    /// use std::num::NonZeroU64;
+    /// # fn example(buffer: &wgpu::Buffer) {
+    /// let binding = BufferBinding::new(buffer, 0, Some(NonZeroU64::new(256).unwrap()));
+    /// # }
+    /// ```
+    pub fn new(buffer: &'a Buffer, offset: u64, size: Option<NonZeroU64>) -> Self {
+        Self {
+            buffer,
+            offset,
+            size,
+        }
+    }
+}
+
+/// A single binding entry in a bind group
+#[derive(Debug, Clone)]
+pub struct BindGroupEntry<'a> {
+    /// Binding number (must match the layout)
+    pub binding: u32,
+    /// The resource to bind
+    pub resource: BindingResource<'a>,
+}
+
+impl<'a> BindGroupEntry<'a> {
+    /// Create a new bind group entry
+    ///
+    /// # Arguments
+    /// * `binding` - The binding number
+    /// * `resource` - The resource to bind
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::{BindGroupEntry, BufferBinding, BindingResource};
+    /// # fn example(buffer: &wgpu::Buffer) {
+    /// let entry = BindGroupEntry::new(
+    ///     0,
+    ///     BindingResource::Buffer(BufferBinding::entire(buffer))
+    /// );
+    /// # }
+    /// ```
+    pub fn new(binding: u32, resource: BindingResource<'a>) -> Self {
+        Self { binding, resource }
+    }
+
+    /// Convert to wgpu::BindGroupEntry
+    pub fn to_wgpu(&self) -> wgpu::BindGroupEntry<'a> {
+        wgpu::BindGroupEntry {
+            binding: self.binding,
+            resource: self.resource.to_wgpu(),
+        }
+    }
+}
+
+/// Descriptor for creating a bind group
+#[derive(Debug, Clone)]
+pub struct BindGroupDescriptor<'a> {
+    /// Optional label for debugging
+    label: Option<String>,
+    /// The bind group layout
+    layout: &'a BindGroupLayout,
+    /// The entries in the bind group
+    entries: Vec<BindGroupEntry<'a>>,
+}
+
+impl<'a> BindGroupDescriptor<'a> {
+    /// Create a new bind group descriptor
+    ///
+    /// # Arguments
+    /// * `label` - Optional label for debugging
+    /// * `layout` - The bind group layout
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::BindGroupDescriptor;
+    /// # fn example(layout: &wgpu::BindGroupLayout) {
+    /// let descriptor = BindGroupDescriptor::new(Some("my_bind_group"), layout);
+    /// # }
+    /// ```
+    pub fn new(label: Option<&str>, layout: &'a BindGroupLayout) -> Self {
+        Self {
+            label: label.map(String::from),
+            layout,
+            entries: Vec::new(),
+        }
+    }
+
+    /// Add a binding entry to the bind group
+    ///
+    /// # Arguments
+    /// * `entry` - The bind group entry to add
+    ///
+    /// # Returns
+    /// Self for method chaining
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::{BindGroupDescriptor, BindGroupEntry, BufferBinding, BindingResource};
+    /// # fn example(layout: &wgpu::BindGroupLayout, buffer: &wgpu::Buffer) {
+    /// let descriptor = BindGroupDescriptor::new(Some("my_bind_group"), layout)
+    ///     .with_entry(BindGroupEntry::new(
+    ///         0,
+    ///         BindingResource::Buffer(BufferBinding::entire(buffer))
+    ///     ));
+    /// # }
+    /// ```
+    pub fn with_entry(mut self, entry: BindGroupEntry<'a>) -> Self {
+        self.entries.push(entry);
+        self
+    }
+
+    /// Add multiple binding entries to the bind group
+    ///
+    /// # Arguments
+    /// * `entries` - A slice of bind group entries to add
+    ///
+    /// # Returns
+    /// Self for method chaining
+    pub fn with_entries(mut self, entries: &[BindGroupEntry<'a>]) -> Self
+    where
+        BindGroupEntry<'a>: Clone,
+    {
+        self.entries.extend_from_slice(entries);
+        self
+    }
+
+    /// Get the label
+    pub fn label(&self) -> Option<&str> {
+        self.label.as_deref()
+    }
+
+    /// Get the layout
+    pub fn layout(&self) -> &BindGroupLayout {
+        self.layout
+    }
+
+    /// Get the entries
+    pub fn entries(&self) -> &[BindGroupEntry<'a>] {
+        &self.entries
+    }
+
+    /// Validate the bind group descriptor
+    ///
+    /// Checks for:
+    /// - Duplicate binding numbers
+    /// - Empty entry list
+    ///
+    /// # Returns
+    /// Ok(()) if valid, Err with BindGroupError if invalid
+    pub fn validate(&self) -> Result<(), BindGroupError> {
+        if self.entries.is_empty() {
+            return Err(BindGroupError::InvalidBinding(
+                "Bind group must have at least one entry".to_string(),
+            ));
+        }
+
+        // Check for duplicate binding numbers
+        let mut bindings = std::collections::HashSet::new();
+        for entry in &self.entries {
+            if !bindings.insert(entry.binding) {
+                return Err(BindGroupError::DuplicateBinding(entry.binding));
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Create a wgpu bind group from this descriptor
+    ///
+    /// This method validates the descriptor and creates the actual bind group.
+    ///
+    /// # Arguments
+    /// * `device` - The wgpu device to create the bind group on
+    ///
+    /// # Returns
+    /// A Result containing the BindGroup or a BindGroupError
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::{BindGroupDescriptor, BindGroupEntry, BufferBinding, BindingResource};
+    /// # async fn example(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, buffer: &wgpu::Buffer) {
+    /// let descriptor = BindGroupDescriptor::new(Some("my_bind_group"), layout)
+    ///     .with_entry(BindGroupEntry::new(
+    ///         0,
+    ///         BindingResource::Buffer(BufferBinding::entire(buffer))
+    ///     ));
+    ///
+    /// let bind_group = descriptor.create(&device).unwrap();
+    /// # }
+    /// ```
+    pub fn create(&self, device: &Device) -> Result<BindGroup, BindGroupError> {
+        self.validate()?;
+
+        let wgpu_entries: Vec<wgpu::BindGroupEntry> =
+            self.entries.iter().map(|e| e.to_wgpu()).collect();
+
+        Ok(device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: self.label.as_deref(),
+            layout: self.layout,
+            entries: &wgpu_entries,
+        }))
     }
 }
 

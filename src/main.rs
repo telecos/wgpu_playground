@@ -35,7 +35,9 @@ impl AppState {
             ..Default::default()
         });
 
-        let surface = instance.create_surface(window.clone()).unwrap();
+        let surface = instance
+            .create_surface(window.clone())
+            .expect("Failed to create surface");
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -44,7 +46,7 @@ impl AppState {
                 force_fallback_adapter: false,
             })
             .await
-            .unwrap();
+            .expect("Failed to find a suitable GPU adapter");
 
         let (device, queue) = adapter
             .request_device(
@@ -57,7 +59,7 @@ impl AppState {
                 None,
             )
             .await
-            .unwrap();
+            .expect("Failed to create device");
 
         let surface_caps = surface.get_capabilities(&adapter);
         let surface_format = surface_caps
@@ -230,7 +232,11 @@ impl ApplicationHandler for App {
                 .with_title("WebGPU Playground")
                 .with_inner_size(winit::dpi::LogicalSize::new(1280, 720));
 
-            let window = Arc::new(event_loop.create_window(window_attributes).unwrap());
+            let window = Arc::new(
+                event_loop
+                    .create_window(window_attributes)
+                    .expect("Failed to create window"),
+            );
             self.state = Some(AppState::new(window).block_on());
         }
     }
@@ -254,15 +260,12 @@ impl ApplicationHandler for App {
             WindowEvent::Resized(physical_size) => {
                 state.resize(physical_size);
             }
-            WindowEvent::RedrawRequested => {
-                state.window.request_redraw();
-                match state.render() {
-                    Ok(_) => {}
-                    Err(wgpu::SurfaceError::Lost) => state.resize(state.window.inner_size()),
-                    Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
-                    Err(e) => eprintln!("Surface error: {:?}", e),
-                }
-            }
+            WindowEvent::RedrawRequested => match state.render() {
+                Ok(_) => {}
+                Err(wgpu::SurfaceError::Lost) => state.resize(state.window.inner_size()),
+                Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
+                Err(e) => eprintln!("Surface error: {:?}", e),
+            },
             _ => {}
         }
     }
@@ -277,9 +280,11 @@ impl ApplicationHandler for App {
 fn main() {
     env_logger::init();
 
-    let event_loop = EventLoop::new().unwrap();
+    let event_loop = EventLoop::new().expect("Failed to create event loop");
     event_loop.set_control_flow(ControlFlow::Poll);
 
     let mut app = App { state: None };
-    event_loop.run_app(&mut app).unwrap();
+    event_loop
+        .run_app(&mut app)
+        .expect("Failed to run event loop");
 }

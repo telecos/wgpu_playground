@@ -74,7 +74,7 @@ Add support for loading, creating, and sampling textures in shaders.
 **Tasks:**
 - Image file loading (PNG, JPG)
 - Texture creation (2D, Cube, Array)
-- Sampler configuration UI (filtering, wrapping, mip-mapping)
+- Sampler configuration UI (filtering, wrapping, mipmapping)
 - Texture preview in UI
 - Example shaders that use textures
 - Texture coordinate visualization

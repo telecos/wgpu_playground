@@ -2,6 +2,12 @@ pub struct ComputePanel {
     // Placeholder for compute/ML experiments
 }
 
+impl Default for ComputePanel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ComputePanel {
     pub fn new() -> Self {
         Self {}

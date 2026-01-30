@@ -2,6 +2,12 @@ pub struct RenderingPanel {
     // Placeholder for rendering experiments
 }
 
+impl Default for RenderingPanel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RenderingPanel {
     pub fn new() -> Self {
         Self {}
@@ -42,6 +48,7 @@ impl RenderingPanel {
                 ui.label("• Sampler configuration");
                 ui.label("• Texture views and formats");
                 ui.label("• Render to texture");
+                ui.label("• Mipmapping and filtering");
             });
 
             ui.add_space(10.0);

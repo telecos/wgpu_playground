@@ -66,12 +66,18 @@ This project uses a Cargo workspace structure with the following crates:
   - `src/device_info.rs` - GPU device information display
   - `src/rendering.rs` - Rendering APIs experimentation panel
   - `src/compute.rs` - Compute and ML APIs experimentation panel
+  - `src/assets.rs` - Asset loading infrastructure for shaders, textures, and models
 
 - **wgpu_playground_gui** (`crates/wgpu_playground_gui/`) - GUI application
   - `src/main.rs` - Main application entry point and window management
   - `src/app.rs` - Main UI application structure and tab management
 
 - **wgpu_playground_examples** (`crates/wgpu_playground_examples/`) - Example programs (planned)
+
+- **assets/** - Static assets directory
+  - `shaders/` - WGSL shader files
+  - `textures/` - Texture assets (PNG, JPG, etc.)
+  - `models/` - 3D model files (OBJ, GLTF, etc.)
 
 ## Development Status
 

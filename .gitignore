@@ -6,6 +6,5 @@ Cargo.lock
 # WASM build artifacts
 pkg/
 wasm-pack.log
-/target/**/*.wasm
 .bin/
 dist/

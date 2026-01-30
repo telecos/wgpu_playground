@@ -1,8 +1,8 @@
 use wgpu_playground_core::buffer::{BufferDescriptor, BufferOps, BufferUsages};
 use wgpu_playground_core::query_set::{QuerySetDescriptor, QuerySetOps, QueryType};
 
-// Helper function to create a test device and queue
-async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
+// Helper function to create a test device and queue with timestamp query support
+async fn create_test_device_with_timestamp() -> Option<(wgpu::Device, wgpu::Queue)> {
     let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
@@ -30,11 +30,40 @@ async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
         .ok()
 }
 
+// Helper function to create a test device and queue without special features
+async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+        backends: wgpu::Backends::all(),
+        ..Default::default()
+    });
+
+    let adapter = instance
+        .request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::default(),
+            force_fallback_adapter: false,
+            compatible_surface: None,
+        })
+        .await?;
+
+    adapter
+        .request_device(
+            &wgpu::DeviceDescriptor {
+                required_features: wgpu::Features::empty(),
+                required_limits: wgpu::Limits::default(),
+                label: Some("Test Device"),
+                memory_hints: Default::default(),
+            },
+            None,
+        )
+        .await
+        .ok()
+}
+
 #[test]
 fn test_timestamp_query_set_creation() {
     pollster::block_on(async {
-        let Some((device, _queue)) = create_test_device().await else {
-            eprintln!("Skipping test: No GPU adapter available");
+        let Some((device, _queue)) = create_test_device_with_timestamp().await else {
+            eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
             return;
         };
 
@@ -81,7 +110,7 @@ fn test_query_set_creation_with_zero_count() {
 #[test]
 fn test_timestamp_write() {
     pollster::block_on(async {
-        let Some((device, _queue)) = create_test_device().await else {
+        let Some((device, _queue)) = create_test_device_with_timestamp().await else {
             eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
             return;
         };
@@ -106,7 +135,7 @@ fn test_timestamp_write() {
 #[test]
 fn test_query_set_resolution() {
     pollster::block_on(async {
-        let Some((device, queue)) = create_test_device().await else {
+        let Some((device, queue)) = create_test_device_with_timestamp().await else {
             eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
             return;
         };
@@ -153,7 +182,7 @@ fn test_query_set_resolution() {
 #[test]
 fn test_query_set_multiple_resolutions() {
     pollster::block_on(async {
-        let Some((device, queue)) = create_test_device().await else {
+        let Some((device, queue)) = create_test_device_with_timestamp().await else {
             eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
             return;
         };
@@ -202,7 +231,7 @@ fn test_query_set_multiple_resolutions() {
 #[test]
 fn test_query_set_partial_resolution() {
     pollster::block_on(async {
-        let Some((device, queue)) = create_test_device().await else {
+        let Some((device, queue)) = create_test_device_with_timestamp().await else {
             eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
             return;
         };
@@ -251,7 +280,7 @@ fn test_query_set_partial_resolution() {
 #[test]
 fn test_query_set_buffer_offset() {
     pollster::block_on(async {
-        let Some((device, queue)) = create_test_device().await else {
+        let Some((device, queue)) = create_test_device_with_timestamp().await else {
             eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
             return;
         };

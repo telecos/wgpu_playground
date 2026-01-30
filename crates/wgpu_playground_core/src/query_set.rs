@@ -44,11 +44,16 @@ impl QueryType {
     }
 
     /// Create from wgpu::QueryType
+    ///
+    /// # Panics
+    /// Panics if the query type is PipelineStatistics, which is not currently supported
     pub fn from_wgpu(query_type: wgpu::QueryType) -> Self {
         match query_type {
             wgpu::QueryType::Occlusion => QueryType::Occlusion,
             wgpu::QueryType::Timestamp => QueryType::Timestamp,
-            _ => QueryType::Timestamp, // Default fallback
+            wgpu::QueryType::PipelineStatistics(_) => {
+                panic!("PipelineStatistics query type is not currently supported")
+            }
         }
     }
 }
@@ -184,9 +189,6 @@ impl QuerySetOps {
     /// * `query_range` - Range of queries to resolve (start..end)
     /// * `destination` - Buffer to write results to (must have QUERY_RESOLVE usage)
     /// * `destination_offset` - Offset in bytes in the destination buffer
-    ///
-    /// # Panics
-    /// Panics if the destination buffer doesn't have QUERY_RESOLVE usage
     ///
     /// # Examples
     /// ```no_run

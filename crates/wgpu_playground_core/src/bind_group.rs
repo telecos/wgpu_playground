@@ -444,11 +444,13 @@ impl<'a> BindingResource<'a> {
     /// Convert to wgpu::BindingResource
     pub fn to_wgpu(&self) -> wgpu::BindingResource<'a> {
         match self {
-            BindingResource::Buffer(binding) => wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                buffer: binding.buffer,
-                offset: binding.offset,
-                size: binding.size,
-            }),
+            BindingResource::Buffer(binding) => {
+                wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                    buffer: binding.buffer,
+                    offset: binding.offset,
+                    size: binding.size,
+                })
+            }
             BindingResource::Sampler(sampler) => wgpu::BindingResource::Sampler(sampler),
             BindingResource::TextureView(view) => wgpu::BindingResource::TextureView(view),
         }

@@ -524,11 +524,10 @@ mod bind_group_creation_tests {
         let layout = layout_desc.create_layout(&device).unwrap();
 
         // Create bind group
-        let bind_group_desc = BindGroupDescriptor::new(Some("uniform_bind_group"), &layout)
-            .with_entry(BindGroupEntry::new(
-                0,
-                BindingResource::Buffer(BufferBinding::entire(&buffer)),
-            ));
+        let bind_group_desc =
+            BindGroupDescriptor::new(Some("uniform_bind_group"), &layout).with_entry(
+                BindGroupEntry::new(0, BindingResource::Buffer(BufferBinding::entire(&buffer))),
+            );
 
         let _bind_group = bind_group_desc.create(&device).unwrap();
         // Successfully created bind group - wgpu::BindGroup has no public fields to verify
@@ -564,11 +563,10 @@ mod bind_group_creation_tests {
         let layout = layout_desc.create_layout(&device).unwrap();
 
         // Create bind group
-        let bind_group_desc = BindGroupDescriptor::new(Some("storage_bind_group"), &layout)
-            .with_entry(BindGroupEntry::new(
-                0,
-                BindingResource::Buffer(BufferBinding::entire(&buffer)),
-            ));
+        let bind_group_desc =
+            BindGroupDescriptor::new(Some("storage_bind_group"), &layout).with_entry(
+                BindGroupEntry::new(0, BindingResource::Buffer(BufferBinding::entire(&buffer))),
+            );
 
         let _bind_group = bind_group_desc.create(&device).unwrap();
         // Successfully created bind group - wgpu::BindGroup has no public fields to verify
@@ -591,7 +589,9 @@ mod bind_group_creation_tests {
         let texture_view = texture.create_view(&wgpu::TextureViewDescriptor::default());
 
         // Create a sampler
-        let sampler = SamplerDescriptor::new(None).create_sampler(&device).unwrap();
+        let sampler = SamplerDescriptor::new(None)
+            .create_sampler(&device)
+            .unwrap();
 
         // Create bind group layout
         let layout_desc = BindGroupLayoutDescriptor::new(Some("texture_sampler_layout"))
@@ -800,7 +800,9 @@ mod bind_group_creation_tests {
             .build(&device);
         let texture_view = texture.create_view(&wgpu::TextureViewDescriptor::default());
 
-        let sampler = SamplerDescriptor::new(None).create_sampler(&device).unwrap();
+        let sampler = SamplerDescriptor::new(None)
+            .create_sampler(&device)
+            .unwrap();
 
         // Create bind group layout
         let layout_desc = BindGroupLayoutDescriptor::new(Some("rendering_layout"))

@@ -228,6 +228,10 @@ pub fn get_surface_capabilities(
 /// # Returns
 /// The preferred texture format
 ///
+/// # Panics
+/// Panics if no formats are available in the capabilities (which should never happen
+/// for a valid surface)
+///
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::{get_surface_capabilities, select_preferred_format};
@@ -237,6 +241,10 @@ pub fn get_surface_capabilities(
 /// # }
 /// ```
 pub fn select_preferred_format(capabilities: &wgpu::SurfaceCapabilities) -> TextureFormat {
+    assert!(
+        !capabilities.formats.is_empty(),
+        "Surface capabilities must have at least one format"
+    );
     capabilities
         .formats
         .iter()
@@ -256,6 +264,10 @@ pub fn select_preferred_format(capabilities: &wgpu::SurfaceCapabilities) -> Text
 /// # Returns
 /// The preferred present mode
 ///
+/// # Panics
+/// Panics if no present modes are available in the capabilities (which should never happen
+/// for a valid surface)
+///
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::{get_surface_capabilities, select_preferred_present_mode};
@@ -267,6 +279,10 @@ pub fn select_preferred_format(capabilities: &wgpu::SurfaceCapabilities) -> Text
 pub fn select_preferred_present_mode(
     capabilities: &wgpu::SurfaceCapabilities,
 ) -> PresentMode {
+    assert!(
+        !capabilities.present_modes.is_empty(),
+        "Surface capabilities must have at least one present mode"
+    );
     if capabilities.present_modes.contains(&PresentMode::Mailbox) {
         PresentMode::Mailbox
     } else {

@@ -7,5 +7,9 @@ description = "Core WebGPU functionality for wgpu_playground"
 
 [dependencies]
 wgpu = "22.1"
+wgpu-core = "22.1"
+wgpu-types = "22.0"
+winit = "0.30"
+env_logger = "0.11"
 log = "0.4"
 egui = "0.29"

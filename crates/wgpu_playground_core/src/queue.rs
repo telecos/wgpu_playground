@@ -205,7 +205,7 @@ impl<'a> QueueOps<'a> {
     /// # let src_texture: &wgpu::Texture = todo!();
     /// # let dst_texture: &wgpu::Texture = todo!();
     /// let queue_ops = QueueOps::with_device(queue, device);
-    /// queue_ops.copy_texture_to_texture(
+    /// let submission_index = queue_ops.copy_texture_to_texture(
     ///     wgpu::ImageCopyTexture {
     ///         texture: src_texture,
     ///         mip_level: 0,
@@ -327,7 +327,7 @@ pub fn write_buffer_typed<T: bytemuck::Pod>(
 /// # let queue: &wgpu::Queue = todo!();
 /// # let src_texture: &wgpu::Texture = todo!();
 /// # let dst_texture: &wgpu::Texture = todo!();
-/// copy_texture_to_texture(
+/// let submission_index = copy_texture_to_texture(
 ///     device,
 ///     queue,
 ///     wgpu::ImageCopyTexture {

@@ -29,6 +29,69 @@ async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
         .ok()
 }
 
+// Helper function to create a test texture with specified parameters
+fn create_test_texture(
+    device: &wgpu::Device,
+    label: &str,
+    width: u32,
+    height: u32,
+    depth_or_array_layers: u32,
+    mip_level_count: u32,
+    dimension: wgpu::TextureDimension,
+    format: wgpu::TextureFormat,
+    usage: wgpu::TextureUsages,
+) -> wgpu::Texture {
+    device.create_texture(&wgpu::TextureDescriptor {
+        label: Some(label),
+        size: wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers,
+        },
+        mip_level_count,
+        sample_count: 1,
+        dimension,
+        format,
+        usage,
+        view_formats: &[],
+    })
+}
+
+// Helper function to create a pair of textures for copy testing
+fn create_texture_pair(
+    device: &wgpu::Device,
+    width: u32,
+    height: u32,
+    depth_or_array_layers: u32,
+    mip_level_count: u32,
+    dimension: wgpu::TextureDimension,
+    format: wgpu::TextureFormat,
+) -> (wgpu::Texture, wgpu::Texture) {
+    let src = create_test_texture(
+        device,
+        "Source Texture",
+        width,
+        height,
+        depth_or_array_layers,
+        mip_level_count,
+        dimension,
+        format,
+        wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
+    );
+    let dst = create_test_texture(
+        device,
+        "Destination Texture",
+        width,
+        height,
+        depth_or_array_layers,
+        mip_level_count,
+        dimension,
+        format,
+        wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
+    );
+    (src, dst)
+}
+
 #[test]
 fn test_queue_ops_creation() {
     pollster::block_on(async {
@@ -299,37 +362,15 @@ fn test_copy_texture_to_texture_basic() {
             return;
         };
 
-        // Create source texture with COPY_SRC usage
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source Texture"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-
-        // Create destination texture with COPY_DST usage
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination Texture"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
+        let (src_texture, dst_texture) = create_texture_pair(
+            &device,
+            256,
+            256,
+            1,
+            1,
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
 
         // Test copy operation using helper function
         use wgpu_playground_core::queue::copy_texture_to_texture;
@@ -368,37 +409,15 @@ fn test_copy_texture_to_texture_with_queue_ops() {
             return;
         };
 
-        // Create source texture with COPY_SRC usage
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source Texture"),
-            size: wgpu::Extent3d {
-                width: 128,
-                height: 128,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-
-        // Create destination texture with COPY_DST usage
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination Texture"),
-            size: wgpu::Extent3d {
-                width: 128,
-                height: 128,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
+        let (src_texture, dst_texture) = create_texture_pair(
+            &device,
+            128,
+            128,
+            1,
+            1,
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
 
         // Test copy operation using QueueOps
         let queue_ops = QueueOps::with_device(&queue, &device);
@@ -435,37 +454,15 @@ fn test_copy_texture_with_different_mip_levels() {
             return;
         };
 
-        // Create source texture with multiple mip levels
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source Texture with Mips"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 4, // 256x256, 128x128, 64x64, 32x32
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-
-        // Create destination texture with multiple mip levels
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination Texture with Mips"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 4,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
+        let (src_texture, dst_texture) = create_texture_pair(
+            &device,
+            256,
+            256,
+            1,
+            4, // 256x256, 128x128, 64x64, 32x32
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
 
         let queue_ops = QueueOps::with_device(&queue, &device);
 
@@ -545,37 +542,15 @@ fn test_copy_texture_with_array_layers() {
             return;
         };
 
-        // Create source texture array
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source Texture Array"),
-            size: wgpu::Extent3d {
-                width: 128,
-                height: 128,
-                depth_or_array_layers: 4, // 4 array layers
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-
-        // Create destination texture array
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination Texture Array"),
-            size: wgpu::Extent3d {
-                width: 128,
-                height: 128,
-                depth_or_array_layers: 4,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
+        let (src_texture, dst_texture) = create_texture_pair(
+            &device,
+            128,
+            128,
+            4, // 4 array layers
+            1,
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
 
         let queue_ops = QueueOps::with_device(&queue, &device);
 
@@ -613,37 +588,15 @@ fn test_copy_texture_with_specific_array_layer() {
             return;
         };
 
-        // Create source texture array
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source Texture Array"),
-            size: wgpu::Extent3d {
-                width: 64,
-                height: 64,
-                depth_or_array_layers: 8,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-
-        // Create destination texture array
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination Texture Array"),
-            size: wgpu::Extent3d {
-                width: 64,
-                height: 64,
-                depth_or_array_layers: 8,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
+        let (src_texture, dst_texture) = create_texture_pair(
+            &device,
+            64,
+            64,
+            8,
+            1,
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
 
         let queue_ops = QueueOps::with_device(&queue, &device);
 
@@ -689,41 +642,34 @@ fn test_copy_texture_with_depth_aspect() {
             return;
         };
 
-        // Create source depth texture
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source Depth Texture"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Depth32Float,
-            usage: wgpu::TextureUsages::COPY_SRC
+        // Create depth textures with RENDER_ATTACHMENT usage
+        let src_texture = create_test_texture(
+            &device,
+            "Source Depth Texture",
+            256,
+            256,
+            1,
+            1,
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Depth32Float,
+            wgpu::TextureUsages::COPY_SRC
                 | wgpu::TextureUsages::COPY_DST
                 | wgpu::TextureUsages::RENDER_ATTACHMENT,
-            view_formats: &[],
-        });
+        );
 
-        // Create destination depth texture
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination Depth Texture"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Depth32Float,
-            usage: wgpu::TextureUsages::COPY_DST
+        let dst_texture = create_test_texture(
+            &device,
+            "Destination Depth Texture",
+            256,
+            256,
+            1,
+            1,
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Depth32Float,
+            wgpu::TextureUsages::COPY_DST
                 | wgpu::TextureUsages::COPY_SRC
                 | wgpu::TextureUsages::RENDER_ATTACHMENT,
-            view_formats: &[],
-        });
+        );
 
         let queue_ops = QueueOps::with_device(&queue, &device);
 
@@ -761,37 +707,15 @@ fn test_copy_texture_partial_region() {
             return;
         };
 
-        // Create source texture
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source Texture"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-
-        // Create destination texture
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination Texture"),
-            size: wgpu::Extent3d {
-                width: 256,
-                height: 256,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
+        let (src_texture, dst_texture) = create_texture_pair(
+            &device,
+            256,
+            256,
+            1,
+            1,
+            wgpu::TextureDimension::D2,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
 
         let queue_ops = QueueOps::with_device(&queue, &device);
 
@@ -833,37 +757,15 @@ fn test_copy_texture_3d() {
             return;
         };
 
-        // Create source 3D texture
-        let src_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Source 3D Texture"),
-            size: wgpu::Extent3d {
-                width: 64,
-                height: 64,
-                depth_or_array_layers: 64,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D3,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
-
-        // Create destination 3D texture
-        let dst_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("Destination 3D Texture"),
-            size: wgpu::Extent3d {
-                width: 64,
-                height: 64,
-                depth_or_array_layers: 64,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D3,
-            format: wgpu::TextureFormat::Rgba8Unorm,
-            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
+        let (src_texture, dst_texture) = create_texture_pair(
+            &device,
+            64,
+            64,
+            64,
+            1,
+            wgpu::TextureDimension::D3,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
 
         let queue_ops = QueueOps::with_device(&queue, &device);
 

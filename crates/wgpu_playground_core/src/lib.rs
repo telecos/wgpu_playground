@@ -1,5 +1,6 @@
 pub mod adapter;
 pub mod assets;
+pub mod bind_group;
 pub mod compute;
 pub mod device_info;
 pub mod rendering;

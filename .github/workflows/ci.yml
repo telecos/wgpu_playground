@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Explicitly limit GITHUB_TOKEN permissions for security
+permissions:
+  contents: read
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1

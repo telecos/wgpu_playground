@@ -330,6 +330,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(deprecated)]
     fn test_parse_backend() {
         assert_eq!(parse_backend("vulkan"), Some(Backends::VULKAN));
         assert_eq!(parse_backend("vk"), Some(Backends::VULKAN));

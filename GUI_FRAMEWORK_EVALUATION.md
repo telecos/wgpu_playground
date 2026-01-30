@@ -34,8 +34,8 @@ egui is an immediate mode GUI library written in pure Rust. It's designed to be 
 - ✅ Handles GPU resource management automatically
 
 **WASM Support:**
-- ✅ Excellent - First-class WASM support with `egui-web` backend
-- ✅ No platform-specific code required
+- ✅ Excellent - First-class WASM support through winit's WASM backend
+- ✅ No platform-specific code required - same egui/egui-wgpu/egui-winit stack works on wasm32
 - ✅ Runs efficiently in browser with WebGPU support
 - ✅ Active WASM examples and demos available online
 - ✅ Small binary size (< 1MB gzipped for WASM)
@@ -59,10 +59,11 @@ egui is an immediate mode GUI library written in pure Rust. It's designed to be 
 
 #### Integration Example
 ```rust
-// Minimal setup required
+// Minimal setup required (simplified for illustration)
+// See actual implementation in crates/wgpu_playground_gui/src/main.rs for complete details
 let egui_ctx = egui::Context::default();
-let mut egui_state = egui_winit::State::new(&window);
-let egui_renderer = egui_wgpu::Renderer::new(&device, surface_format, None, 1);
+let mut egui_state = egui_winit::State::new(/* winit context parameters */);
+let egui_renderer = egui_wgpu::Renderer::new(/* wgpu device and configuration */);
 ```
 
 ---
@@ -174,7 +175,7 @@ imgui-rs provides Rust bindings to Dear ImGui, a C++ immediate mode GUI library.
 | Customization | | ✅ Flexible | ✅ Structured | ✅ Flexible |
 | Ecosystem | | ✅ Active | ⚠️ Growing | ✅ Mature |
 | | | | | |
-| **Overall Score** | | **9.1/10** | **6.7/10** | **5.5/10** |
+| **Overall Score** | | **9.35/10** | **6.7/10** | **5.5/10** |
 
 ## Final Decision: egui
 

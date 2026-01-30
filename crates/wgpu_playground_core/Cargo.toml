@@ -13,6 +13,7 @@ winit = "0.30"
 env_logger = "0.11"
 log = "0.4"
 egui = "0.29"
+bytemuck = "1.14"
 
 # WASM dependencies
 [target.'cfg(target_arch = "wasm32")'.dependencies]
@@ -36,6 +37,9 @@ web-sys = { version = "0.3", features = [
     "GpuCanvasContext",
 ] }
 js-sys = "0.3"
+
+[dev-dependencies]
+pollster = "0.3"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

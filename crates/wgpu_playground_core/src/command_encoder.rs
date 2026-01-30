@@ -615,7 +615,7 @@ mod tests {
         assert!(
             offset
                 .checked_add(size)
-                .map_or(false, |end| end <= buffer.size()),
+                .is_some_and(|end| end <= buffer.size()),
             "Valid copy should be within bounds"
         );
 
@@ -625,7 +625,7 @@ mod tests {
         assert!(
             offset
                 .checked_add(size)
-                .map_or(true, |end| end > buffer.size()),
+                .is_none_or(|end| end > buffer.size()),
             "Invalid copy should exceed bounds"
         );
     }

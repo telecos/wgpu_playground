@@ -86,12 +86,10 @@ impl PushConstantRange {
     /// Ok(()) if valid, Err with PipelineLayoutError if invalid
     pub fn validate(&self) -> Result<(), PipelineLayoutError> {
         if self.start >= self.end {
-            return Err(PipelineLayoutError::InvalidPushConstantRange(
-                format!(
-                    "Push constant range start ({}) must be less than end ({})",
-                    self.start, self.end
-                ),
-            ));
+            return Err(PipelineLayoutError::InvalidPushConstantRange(format!(
+                "Push constant range start ({}) must be less than end ({})",
+                self.start, self.end
+            )));
         }
 
         if self.start % 4 != 0 {
@@ -215,8 +213,7 @@ impl<'a> PipelineLayoutDescriptor<'a> {
     /// # Returns
     /// Self for method chaining
     pub fn with_push_constant_ranges(mut self, ranges: &[PushConstantRange]) -> Self {
-        self.push_constant_ranges
-            .extend_from_slice(ranges);
+        self.push_constant_ranges.extend_from_slice(ranges);
         self
     }
 
@@ -310,11 +307,13 @@ impl<'a> PipelineLayoutDescriptor<'a> {
             .map(|r| r.to_wgpu())
             .collect();
 
-        Ok(device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: self.label.as_deref(),
-            bind_group_layouts: &self.bind_group_layouts,
-            push_constant_ranges: &wgpu_push_constant_ranges,
-        }))
+        Ok(
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: self.label.as_deref(),
+                bind_group_layouts: &self.bind_group_layouts,
+                push_constant_ranges: &wgpu_push_constant_ranges,
+            }),
+        )
     }
 }
 
@@ -448,8 +447,7 @@ mod tests {
             PushConstantRange::new(ShaderStages::VERTEX, 32, 96), // Overlaps with first range
         ];
 
-        let descriptor =
-            PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
+        let descriptor = PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
 
         let result = descriptor.validate();
         assert!(result.is_err());
@@ -468,8 +466,7 @@ mod tests {
             PushConstantRange::new(ShaderStages::VERTEX, 64, 128), // Adjacent, not overlapping
         ];
 
-        let descriptor =
-            PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
+        let descriptor = PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
 
         assert!(descriptor.validate().is_ok());
     }
@@ -481,8 +478,7 @@ mod tests {
             PushConstantRange::new(ShaderStages::FRAGMENT, 32, 96), // Overlapping range but different stage
         ];
 
-        let descriptor =
-            PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
+        let descriptor = PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
 
         // This should be OK since ranges are for different stages
         assert!(descriptor.validate().is_ok());
@@ -495,8 +491,7 @@ mod tests {
             PushConstantRange::new(ShaderStages::FRAGMENT, 32, 96), // Overlaps and shares FRAGMENT stage
         ];
 
-        let descriptor =
-            PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
+        let descriptor = PipelineLayoutDescriptor::new(None).with_push_constant_ranges(&ranges);
 
         let result = descriptor.validate();
         assert!(result.is_err());
@@ -517,7 +512,10 @@ mod tests {
         assert_eq!(err.to_string(), "Too many bind group layouts: 5");
 
         let err = PipelineLayoutError::InvalidPushConstantRange("test range error".to_string());
-        assert_eq!(err.to_string(), "Invalid push constant range: test range error");
+        assert_eq!(
+            err.to_string(),
+            "Invalid push constant range: test range error"
+        );
     }
 
     #[test]
@@ -525,7 +523,10 @@ mod tests {
         let range = PushConstantRange::new(ShaderStages::VERTEX | ShaderStages::FRAGMENT, 0, 128);
         let wgpu_range = range.to_wgpu();
 
-        assert_eq!(wgpu_range.stages, ShaderStages::VERTEX | ShaderStages::FRAGMENT);
+        assert_eq!(
+            wgpu_range.stages,
+            ShaderStages::VERTEX | ShaderStages::FRAGMENT
+        );
         assert_eq!(wgpu_range.range.start, 0);
         assert_eq!(wgpu_range.range.end, 128);
     }

@@ -1,6 +1,8 @@
 use std::num::NonZeroU64;
 use wgpu::ShaderStages;
-use wgpu_playground_core::bind_group::{BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType};
+use wgpu_playground_core::bind_group::{
+    BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType,
+};
 use wgpu_playground_core::pipeline_layout::{PipelineLayoutDescriptor, PushConstantRange};
 
 // Helper function to create a test device and queue
@@ -43,8 +45,8 @@ fn test_empty_pipeline_layout() {
 #[test]
 fn test_pipeline_layout_with_push_constants() {
     let range = PushConstantRange::new(ShaderStages::VERTEX, 0, 64);
-    let descriptor = PipelineLayoutDescriptor::new(Some("push_constant_layout"))
-        .with_push_constant_range(range);
+    let descriptor =
+        PipelineLayoutDescriptor::new(Some("push_constant_layout")).with_push_constant_range(range);
 
     assert!(descriptor.validate().is_ok());
     assert_eq!(descriptor.push_constant_ranges().len(), 1);
@@ -77,9 +79,8 @@ fn test_pipeline_layout_vertex_fragment_shared_push_constants() {
 #[test]
 fn test_pipeline_layout_compute_push_constants() {
     let range = PushConstantRange::new(ShaderStages::COMPUTE, 0, 256);
-    let descriptor =
-        PipelineLayoutDescriptor::new(Some("compute_push_constant_layout"))
-            .with_push_constant_range(range);
+    let descriptor = PipelineLayoutDescriptor::new(Some("compute_push_constant_layout"))
+        .with_push_constant_range(range);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -91,9 +92,8 @@ fn test_pipeline_layout_all_stages_push_constants() {
         0,
         64,
     );
-    let descriptor =
-        PipelineLayoutDescriptor::new(Some("all_stages_push_constant_layout"))
-            .with_push_constant_range(range);
+    let descriptor = PipelineLayoutDescriptor::new(Some("all_stages_push_constant_layout"))
+        .with_push_constant_range(range);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -135,34 +135,34 @@ fn test_pipeline_layout_with_single_bind_group() {
             return;
         };
 
-    // Create a bind group layout
-    let bind_group_layout_descriptor = BindGroupLayoutDescriptor::new(Some("test_bind_group"))
-        .with_entry(BindGroupLayoutEntry::new(
-            0,
-            ShaderStages::VERTEX,
-            BindingType::UniformBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: NonZeroU64::new(64),
-            },
-        ));
+        // Create a bind group layout
+        let bind_group_layout_descriptor = BindGroupLayoutDescriptor::new(Some("test_bind_group"))
+            .with_entry(BindGroupLayoutEntry::new(
+                0,
+                ShaderStages::VERTEX,
+                BindingType::UniformBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: NonZeroU64::new(64),
+                },
+            ));
 
-    let bind_group_layout = bind_group_layout_descriptor
-        .create_layout(&device)
-        .expect("Failed to create bind group layout");
+        let bind_group_layout = bind_group_layout_descriptor
+            .create_layout(&device)
+            .expect("Failed to create bind group layout");
 
-    // Create pipeline layout with the bind group layout
-    let pipeline_layout_descriptor =
-        PipelineLayoutDescriptor::new(Some("test_pipeline_layout"))
-            .with_bind_group_layout(&bind_group_layout);
+        // Create pipeline layout with the bind group layout
+        let pipeline_layout_descriptor =
+            PipelineLayoutDescriptor::new(Some("test_pipeline_layout"))
+                .with_bind_group_layout(&bind_group_layout);
 
-    assert!(pipeline_layout_descriptor.validate().is_ok());
+        assert!(pipeline_layout_descriptor.validate().is_ok());
 
-    let pipeline_layout = pipeline_layout_descriptor
-        .create_layout(&device)
-        .expect("Failed to create pipeline layout");
+        let pipeline_layout = pipeline_layout_descriptor
+            .create_layout(&device)
+            .expect("Failed to create pipeline layout");
 
-    // Verify the layout was created (we can't inspect much without unsafe code)
-    drop(pipeline_layout);
+        // Verify the layout was created (we can't inspect much without unsafe code)
+        drop(pipeline_layout);
     });
 }
 
@@ -174,48 +174,50 @@ fn test_pipeline_layout_with_multiple_bind_groups() {
             return;
         };
 
-    // Create multiple bind group layouts
-    let layout1_descriptor = BindGroupLayoutDescriptor::new(Some("bind_group_0"))
-        .with_entry(BindGroupLayoutEntry::new(
-            0,
-            ShaderStages::VERTEX,
-            BindingType::UniformBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: NonZeroU64::new(64),
-            },
-        ));
+        // Create multiple bind group layouts
+        let layout1_descriptor = BindGroupLayoutDescriptor::new(Some("bind_group_0")).with_entry(
+            BindGroupLayoutEntry::new(
+                0,
+                ShaderStages::VERTEX,
+                BindingType::UniformBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: NonZeroU64::new(64),
+                },
+            ),
+        );
 
-    let layout2_descriptor = BindGroupLayoutDescriptor::new(Some("bind_group_1"))
-        .with_entry(BindGroupLayoutEntry::new(
-            0,
-            ShaderStages::FRAGMENT,
-            BindingType::UniformBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: NonZeroU64::new(16),
-            },
-        ));
+        let layout2_descriptor = BindGroupLayoutDescriptor::new(Some("bind_group_1")).with_entry(
+            BindGroupLayoutEntry::new(
+                0,
+                ShaderStages::FRAGMENT,
+                BindingType::UniformBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: NonZeroU64::new(16),
+                },
+            ),
+        );
 
-    let bind_group_layout1 = layout1_descriptor
-        .create_layout(&device)
-        .expect("Failed to create bind group layout 1");
+        let bind_group_layout1 = layout1_descriptor
+            .create_layout(&device)
+            .expect("Failed to create bind group layout 1");
 
-    let bind_group_layout2 = layout2_descriptor
-        .create_layout(&device)
-        .expect("Failed to create bind group layout 2");
+        let bind_group_layout2 = layout2_descriptor
+            .create_layout(&device)
+            .expect("Failed to create bind group layout 2");
 
-    // Create pipeline layout with multiple bind group layouts
-    let pipeline_layout_descriptor =
-        PipelineLayoutDescriptor::new(Some("multi_bind_group_pipeline_layout"))
-            .with_bind_group_layouts(&[&bind_group_layout1, &bind_group_layout2]);
+        // Create pipeline layout with multiple bind group layouts
+        let pipeline_layout_descriptor =
+            PipelineLayoutDescriptor::new(Some("multi_bind_group_pipeline_layout"))
+                .with_bind_group_layouts(&[&bind_group_layout1, &bind_group_layout2]);
 
-    assert!(pipeline_layout_descriptor.validate().is_ok());
-    assert_eq!(pipeline_layout_descriptor.bind_group_layouts().len(), 2);
+        assert!(pipeline_layout_descriptor.validate().is_ok());
+        assert_eq!(pipeline_layout_descriptor.bind_group_layouts().len(), 2);
 
-    let pipeline_layout = pipeline_layout_descriptor
-        .create_layout(&device)
-        .expect("Failed to create pipeline layout");
+        let pipeline_layout = pipeline_layout_descriptor
+            .create_layout(&device)
+            .expect("Failed to create pipeline layout");
 
-    drop(pipeline_layout);
+        drop(pipeline_layout);
     });
 }
 
@@ -227,37 +229,37 @@ fn test_pipeline_layout_with_bind_groups_and_push_constants() {
             return;
         };
 
-    // Create a bind group layout
-    let bind_group_layout_descriptor = BindGroupLayoutDescriptor::new(Some("test_bind_group"))
-        .with_entry(BindGroupLayoutEntry::new(
-            0,
-            ShaderStages::VERTEX | ShaderStages::FRAGMENT,
-            BindingType::UniformBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: NonZeroU64::new(64),
-            },
-        ));
+        // Create a bind group layout
+        let bind_group_layout_descriptor = BindGroupLayoutDescriptor::new(Some("test_bind_group"))
+            .with_entry(BindGroupLayoutEntry::new(
+                0,
+                ShaderStages::VERTEX | ShaderStages::FRAGMENT,
+                BindingType::UniformBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: NonZeroU64::new(64),
+                },
+            ));
 
-    let bind_group_layout = bind_group_layout_descriptor
-        .create_layout(&device)
-        .expect("Failed to create bind group layout");
+        let bind_group_layout = bind_group_layout_descriptor
+            .create_layout(&device)
+            .expect("Failed to create bind group layout");
 
-    // Create push constant range
-    let push_constant_range = PushConstantRange::new(ShaderStages::VERTEX, 0, 64);
+        // Create push constant range
+        let push_constant_range = PushConstantRange::new(ShaderStages::VERTEX, 0, 64);
 
-    // Create pipeline layout with both bind group and push constants
-    let pipeline_layout_descriptor =
-        PipelineLayoutDescriptor::new(Some("combined_pipeline_layout"))
-            .with_bind_group_layout(&bind_group_layout)
-            .with_push_constant_range(push_constant_range);
+        // Create pipeline layout with both bind group and push constants
+        let pipeline_layout_descriptor =
+            PipelineLayoutDescriptor::new(Some("combined_pipeline_layout"))
+                .with_bind_group_layout(&bind_group_layout)
+                .with_push_constant_range(push_constant_range);
 
-    assert!(pipeline_layout_descriptor.validate().is_ok());
+        assert!(pipeline_layout_descriptor.validate().is_ok());
 
-    let pipeline_layout = pipeline_layout_descriptor
-        .create_layout(&device)
-        .expect("Failed to create pipeline layout");
+        let pipeline_layout = pipeline_layout_descriptor
+            .create_layout(&device)
+            .expect("Failed to create pipeline layout");
 
-    drop(pipeline_layout);
+        drop(pipeline_layout);
     });
 }
 
@@ -269,54 +271,55 @@ fn test_complex_pipeline_layout() {
             return;
         };
 
-    // Create multiple bind group layouts representing a realistic rendering scenario
-    
-    // Bind group 0: Global uniforms (camera, time, etc.)
-    let global_layout = BindGroupLayoutDescriptor::new(Some("global_uniforms"))
-        .with_entry(BindGroupLayoutEntry::new(
-            0,
-            ShaderStages::VERTEX | ShaderStages::FRAGMENT,
-            BindingType::UniformBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: NonZeroU64::new(128),
-            },
-        ))
-        .create_layout(&device)
-        .expect("Failed to create global layout");
+        // Create multiple bind group layouts representing a realistic rendering scenario
 
-    // Bind group 1: Material properties
-    let material_layout = BindGroupLayoutDescriptor::new(Some("material_properties"))
-        .with_entry(BindGroupLayoutEntry::new(
-            0,
-            ShaderStages::FRAGMENT,
-            BindingType::UniformBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: NonZeroU64::new(64),
-            },
-        ))
-        .create_layout(&device)
-        .expect("Failed to create material layout");
+        // Bind group 0: Global uniforms (camera, time, etc.)
+        let global_layout = BindGroupLayoutDescriptor::new(Some("global_uniforms"))
+            .with_entry(BindGroupLayoutEntry::new(
+                0,
+                ShaderStages::VERTEX | ShaderStages::FRAGMENT,
+                BindingType::UniformBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: NonZeroU64::new(128),
+                },
+            ))
+            .create_layout(&device)
+            .expect("Failed to create global layout");
 
-    // Push constants for per-draw data
-    let push_ranges = vec![
-        PushConstantRange::new(ShaderStages::VERTEX, 0, 64),
-        PushConstantRange::new(ShaderStages::FRAGMENT, 64, 128),
-    ];
+        // Bind group 1: Material properties
+        let material_layout = BindGroupLayoutDescriptor::new(Some("material_properties"))
+            .with_entry(BindGroupLayoutEntry::new(
+                0,
+                ShaderStages::FRAGMENT,
+                BindingType::UniformBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: NonZeroU64::new(64),
+                },
+            ))
+            .create_layout(&device)
+            .expect("Failed to create material layout");
 
-    // Create comprehensive pipeline layout
-    let pipeline_layout_descriptor = PipelineLayoutDescriptor::new(Some("complex_rendering_layout"))
-        .with_bind_group_layouts(&[&global_layout, &material_layout])
-        .with_push_constant_ranges(&push_ranges);
+        // Push constants for per-draw data
+        let push_ranges = vec![
+            PushConstantRange::new(ShaderStages::VERTEX, 0, 64),
+            PushConstantRange::new(ShaderStages::FRAGMENT, 64, 128),
+        ];
 
-    assert!(pipeline_layout_descriptor.validate().is_ok());
-    assert_eq!(pipeline_layout_descriptor.bind_group_layouts().len(), 2);
-    assert_eq!(pipeline_layout_descriptor.push_constant_ranges().len(), 2);
+        // Create comprehensive pipeline layout
+        let pipeline_layout_descriptor =
+            PipelineLayoutDescriptor::new(Some("complex_rendering_layout"))
+                .with_bind_group_layouts(&[&global_layout, &material_layout])
+                .with_push_constant_ranges(&push_ranges);
 
-    let pipeline_layout = pipeline_layout_descriptor
-        .create_layout(&device)
-        .expect("Failed to create complex pipeline layout");
+        assert!(pipeline_layout_descriptor.validate().is_ok());
+        assert_eq!(pipeline_layout_descriptor.bind_group_layouts().len(), 2);
+        assert_eq!(pipeline_layout_descriptor.push_constant_ranges().len(), 2);
 
-    drop(pipeline_layout);
+        let pipeline_layout = pipeline_layout_descriptor
+            .create_layout(&device)
+            .expect("Failed to create complex pipeline layout");
+
+        drop(pipeline_layout);
     });
 }
 
@@ -328,43 +331,44 @@ fn test_compute_pipeline_layout() {
             return;
         };
 
-    // Compute shader typically uses storage buffers
-    let compute_layout = BindGroupLayoutDescriptor::new(Some("compute_buffers"))
-        .with_entry(BindGroupLayoutEntry::new(
-            0,
-            ShaderStages::COMPUTE,
-            BindingType::StorageBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: None,
-                read_only: true,
-            },
-        ))
-        .with_entry(BindGroupLayoutEntry::new(
-            1,
-            ShaderStages::COMPUTE,
-            BindingType::StorageBuffer {
-                has_dynamic_offset: false,
-                min_binding_size: None,
-                read_only: false,
-            },
-        ))
-        .create_layout(&device)
-        .expect("Failed to create compute layout");
+        // Compute shader typically uses storage buffers
+        let compute_layout = BindGroupLayoutDescriptor::new(Some("compute_buffers"))
+            .with_entry(BindGroupLayoutEntry::new(
+                0,
+                ShaderStages::COMPUTE,
+                BindingType::StorageBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                    read_only: true,
+                },
+            ))
+            .with_entry(BindGroupLayoutEntry::new(
+                1,
+                ShaderStages::COMPUTE,
+                BindingType::StorageBuffer {
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                    read_only: false,
+                },
+            ))
+            .create_layout(&device)
+            .expect("Failed to create compute layout");
 
-    // Push constants for compute parameters
-    let push_range = PushConstantRange::new(ShaderStages::COMPUTE, 0, 16);
+        // Push constants for compute parameters
+        let push_range = PushConstantRange::new(ShaderStages::COMPUTE, 0, 16);
 
-    let pipeline_layout_descriptor = PipelineLayoutDescriptor::new(Some("compute_pipeline_layout"))
-        .with_bind_group_layout(&compute_layout)
-        .with_push_constant_range(push_range);
+        let pipeline_layout_descriptor =
+            PipelineLayoutDescriptor::new(Some("compute_pipeline_layout"))
+                .with_bind_group_layout(&compute_layout)
+                .with_push_constant_range(push_range);
 
-    assert!(pipeline_layout_descriptor.validate().is_ok());
+        assert!(pipeline_layout_descriptor.validate().is_ok());
 
-    let pipeline_layout = pipeline_layout_descriptor
-        .create_layout(&device)
-        .expect("Failed to create compute pipeline layout");
+        let pipeline_layout = pipeline_layout_descriptor
+            .create_layout(&device)
+            .expect("Failed to create compute pipeline layout");
 
-    drop(pipeline_layout);
+        drop(pipeline_layout);
     });
 }
 

@@ -50,9 +50,7 @@ impl CommandEncoderOps {
     /// let encoder = CommandEncoderOps::new(device, Some("My Encoder"));
     /// ```
     pub fn new(device: &Device, label: Option<&str>) -> Self {
-        let encoder = device.create_command_encoder(&CommandEncoderDescriptor {
-            label: label.map(|s| s.into()),
-        });
+        let encoder = device.create_command_encoder(&CommandEncoderDescriptor { label });
         Self { encoder }
     }
 
@@ -84,8 +82,13 @@ impl CommandEncoderOps {
         destination_offset: wgpu::BufferAddress,
         size: wgpu::BufferAddress,
     ) {
-        self.encoder
-            .copy_buffer_to_buffer(source, source_offset, destination, destination_offset, size);
+        self.encoder.copy_buffer_to_buffer(
+            source,
+            source_offset,
+            destination,
+            destination_offset,
+            size,
+        );
     }
 
     /// Copy data from a buffer to a texture

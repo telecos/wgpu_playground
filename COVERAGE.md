@@ -14,6 +14,23 @@ cargo install cargo-llvm-cov
 
 ### Generate Coverage Report
 
+#### Using the Convenience Script
+
+For ease of use, you can use the provided script:
+
+```bash
+# Generate HTML report (default)
+./scripts/coverage.sh
+
+# Generate LCOV report
+./scripts/coverage.sh lcov
+
+# Display summary in terminal
+./scripts/coverage.sh summary
+```
+
+#### Manual Commands
+
 Generate an HTML coverage report:
 
 ```bash

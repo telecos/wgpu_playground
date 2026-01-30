@@ -3,6 +3,7 @@ use wgpu_playground_core::bind_group::{
     StorageTextureAccess, TextureSampleType, TextureViewDimension,
 };
 use wgpu::ShaderStages;
+use std::num::{NonZeroU32, NonZeroU64};
 
 #[test]
 fn test_uniform_buffer_layout() {
@@ -11,7 +12,7 @@ fn test_uniform_buffer_layout() {
         ShaderStages::VERTEX,
         BindingType::UniformBuffer {
             has_dynamic_offset: false,
-            min_binding_size: Some(64),
+            min_binding_size: NonZeroU64::new(64),
         },
     );
 
@@ -97,7 +98,7 @@ fn test_complex_multi_binding_layout() {
             ShaderStages::VERTEX,
             BindingType::UniformBuffer {
                 has_dynamic_offset: false,
-                min_binding_size: Some(64), // mat4x4<f32>
+                min_binding_size: NonZeroU64::new(64), // mat4x4<f32>
             },
         ),
         // Binding 1: Material properties uniform buffer (fragment stage)
@@ -106,7 +107,7 @@ fn test_complex_multi_binding_layout() {
             ShaderStages::FRAGMENT,
             BindingType::UniformBuffer {
                 has_dynamic_offset: false,
-                min_binding_size: Some(16), // vec4<f32>
+                min_binding_size: NonZeroU64::new(16), // vec4<f32>
             },
         ),
         // Binding 2: Diffuse texture (fragment stage)
@@ -178,7 +179,7 @@ fn test_compute_pipeline_layout() {
             ShaderStages::COMPUTE,
             BindingType::UniformBuffer {
                 has_dynamic_offset: false,
-                min_binding_size: Some(16),
+                min_binding_size: NonZeroU64::new(16),
             },
         ),
     ];
@@ -198,7 +199,7 @@ fn test_multi_stage_visibility() {
         ShaderStages::VERTEX | ShaderStages::FRAGMENT,
         BindingType::UniformBuffer {
             has_dynamic_offset: false,
-            min_binding_size: Some(64),
+            min_binding_size: NonZeroU64::new(64),
         },
     );
 
@@ -248,7 +249,7 @@ fn test_dynamic_offset_uniform_buffer() {
         ShaderStages::VERTEX,
         BindingType::UniformBuffer {
             has_dynamic_offset: true,
-            min_binding_size: Some(256),
+            min_binding_size: NonZeroU64::new(256),
         },
     );
 
@@ -287,13 +288,13 @@ fn test_texture_array_binding() {
             multisampled: false,
         },
     )
-    .with_count(8); // Array of 8 textures
+    .with_count(NonZeroU32::new(8).unwrap()); // Array of 8 textures
 
     let descriptor = BindGroupLayoutDescriptor::new(Some("texture_array_layout"))
         .with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
-    assert_eq!(descriptor.entries()[0].count, Some(8));
+    assert_eq!(descriptor.entries()[0].count, NonZeroU32::new(8));
 }
 
 #[test]

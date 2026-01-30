@@ -1,4 +1,5 @@
 use std::fmt;
+use std::num::{NonZeroU32, NonZeroU64};
 use wgpu::{BindGroupLayout, Device, ShaderStages};
 
 /// Errors that can occur during bind group layout operations
@@ -30,15 +31,15 @@ pub enum BindingType {
     UniformBuffer {
         /// Whether this binding has dynamic offsets
         has_dynamic_offset: bool,
-        /// Minimum size of the binding (optional)
-        min_binding_size: Option<u64>,
+        /// Minimum size of the binding (optional, must be non-zero)
+        min_binding_size: Option<NonZeroU64>,
     },
     /// Storage buffer binding
     StorageBuffer {
         /// Whether this binding has dynamic offsets
         has_dynamic_offset: bool,
-        /// Minimum size of the binding (optional)
-        min_binding_size: Option<u64>,
+        /// Minimum size of the binding (optional, must be non-zero)
+        min_binding_size: Option<NonZeroU64>,
         /// Whether the buffer is read-only
         read_only: bool,
     },
@@ -122,8 +123,8 @@ pub struct BindGroupLayoutEntry {
     pub visibility: ShaderStages,
     /// Type of binding
     pub ty: BindingType,
-    /// Optional count for binding arrays (None for non-array bindings)
-    pub count: Option<u32>,
+    /// Optional count for binding arrays (None for non-array bindings, must be non-zero)
+    pub count: Option<NonZeroU32>,
 }
 
 impl BindGroupLayoutEntry {
@@ -158,7 +159,10 @@ impl BindGroupLayoutEntry {
     }
 
     /// Set the count for binding arrays
-    pub fn with_count(mut self, count: u32) -> Self {
+    ///
+    /// # Arguments
+    /// * `count` - The number of array elements (must be non-zero)
+    pub fn with_count(mut self, count: NonZeroU32) -> Self {
         self.count = Some(count);
         self
     }
@@ -169,7 +173,7 @@ impl BindGroupLayoutEntry {
             binding: self.binding,
             visibility: self.visibility,
             ty: self.ty.to_wgpu(),
-            count: self.count.map(|c| std::num::NonZeroU32::new(c).unwrap()),
+            count: self.count,
         }
     }
 }
@@ -184,8 +188,7 @@ impl BindingType {
             } => wgpu::BindingType::Buffer {
                 ty: wgpu::BufferBindingType::Uniform,
                 has_dynamic_offset: *has_dynamic_offset,
-                min_binding_size: min_binding_size
-                    .map(|s| std::num::NonZeroU64::new(s).unwrap()),
+                min_binding_size: *min_binding_size,
             },
             BindingType::StorageBuffer {
                 has_dynamic_offset,
@@ -196,8 +199,7 @@ impl BindingType {
                     read_only: *read_only,
                 },
                 has_dynamic_offset: *has_dynamic_offset,
-                min_binding_size: min_binding_size
-                    .map(|s| std::num::NonZeroU64::new(s).unwrap()),
+                min_binding_size: *min_binding_size,
             },
             BindingType::Texture {
                 sample_type,
@@ -430,6 +432,7 @@ impl Default for BindGroupLayoutDescriptor {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::num::{NonZeroU32, NonZeroU64};
 
     #[test]
     fn test_bind_group_layout_entry_creation() {
@@ -458,17 +461,17 @@ mod tests {
                 multisampled: false,
             },
         )
-        .with_count(4);
+        .with_count(NonZeroU32::new(4).unwrap());
 
         assert_eq!(entry.binding, 1);
-        assert_eq!(entry.count, Some(4));
+        assert_eq!(entry.count, Some(NonZeroU32::new(4).unwrap()));
     }
 
     #[test]
     fn test_binding_type_uniform_buffer() {
         let binding = BindingType::UniformBuffer {
             has_dynamic_offset: false,
-            min_binding_size: Some(64),
+            min_binding_size: NonZeroU64::new(64),
         };
 
         match binding {
@@ -477,7 +480,7 @@ mod tests {
                 min_binding_size,
             } => {
                 assert!(!has_dynamic_offset);
-                assert_eq!(min_binding_size, Some(64));
+                assert_eq!(min_binding_size, NonZeroU64::new(64));
             }
             _ => panic!("Expected uniform buffer"),
         }

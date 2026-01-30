@@ -14,7 +14,9 @@ allow = [
     "BSD-2-Clause",
     "BSD-3-Clause",
     "BSL-1.0",
+    "CC0-1.0",
     "ISC",
+    "OFL-1.1",
     "Unicode-3.0",
     "Unicode-DFS-2016",
     "Zlib",
@@ -24,7 +26,8 @@ allow = [
 confidence-threshold = 0.8
 # Crates that are allowed even if their license is not in the allow list
 exceptions = [
-    # Add crate names and their licenses here if needed
+    # epaint_default_fonts uses UFL-1.0 for Ubuntu font files
+    { allow = ["LicenseRef-UFL-1.0"], crate = "epaint_default_fonts" },
 ]
 
 [bans]
@@ -80,8 +83,17 @@ skip = [
     # thiserror-impl is transitioning from 1.x to 2.x with thiserror
     { crate = "thiserror-impl@1", reason = "Some dependencies still use thiserror-impl 1.x" },
     # Windows crates have multiple versions across the ecosystem
+    { crate = "windows-targets@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows-targets@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_aarch64_msvc@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_aarch64_msvc@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_gnu@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_gnu@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_gnullvm@0.52", reason = "Legacy Windows support crates" },
     { crate = "windows_i686_msvc@0.42", reason = "Legacy Windows support crates" },
     { crate = "windows_i686_msvc@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_msvc@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_msvc@0.52", reason = "Legacy Windows support crates" },
 ]
 # Similarly named crates that are different but allowed
 skip-tree = [

@@ -396,7 +396,11 @@ impl CommandEncoderOps {
         }
 
         // Validate buffer offset alignment (must be multiple of 256)
-        if !source.layout.offset.is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT) {
+        if !source
+            .layout
+            .offset
+            .is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT)
+        {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Buffer offset {} must be a multiple of {}",
                 source.layout.offset, COPY_BYTES_PER_ROW_ALIGNMENT
@@ -431,7 +435,11 @@ impl CommandEncoderOps {
         }
 
         // Validate buffer offset alignment (must be multiple of 256)
-        if !destination.layout.offset.is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT) {
+        if !destination
+            .layout
+            .offset
+            .is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT)
+        {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Buffer offset {} must be a multiple of {}",
                 destination.layout.offset, COPY_BYTES_PER_ROW_ALIGNMENT
@@ -450,7 +458,6 @@ impl CommandEncoderOps {
 
         Ok(())
     }
-
 
     /// Finish encoding and return the command buffer
     ///
@@ -601,12 +608,14 @@ mod tests {
     #[test]
     fn test_validation_bounds_checks() {
         let buffer = MockBuffer::new(100);
-        
+
         // Valid: offset + size within bounds
         let offset = 80u64;
         let size = 20u64;
         assert!(
-            offset.checked_add(size).map_or(false, |end| end <= buffer.size()),
+            offset
+                .checked_add(size)
+                .map_or(false, |end| end <= buffer.size()),
             "Valid copy should be within bounds"
         );
 
@@ -614,25 +623,30 @@ mod tests {
         let offset = 80u64;
         let size = 24u64;
         assert!(
-            offset.checked_add(size).map_or(true, |end| end > buffer.size()),
+            offset
+                .checked_add(size)
+                .map_or(true, |end| end > buffer.size()),
             "Invalid copy should exceed bounds"
         );
     }
 
     #[test]
     fn test_copy_buffer_alignment_constant() {
-        assert_eq!(COPY_BUFFER_ALIGNMENT, 4, "Copy buffer alignment should be 4 bytes");
+        assert_eq!(
+            COPY_BUFFER_ALIGNMENT, 4,
+            "Copy buffer alignment should be 4 bytes"
+        );
     }
 
     #[test]
     fn test_texture_copy_alignment() {
         const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
-        
+
         // Test valid alignments
         assert_eq!(0 % COPY_BYTES_PER_ROW_ALIGNMENT, 0);
         assert_eq!(256 % COPY_BYTES_PER_ROW_ALIGNMENT, 0);
         assert_eq!(512 % COPY_BYTES_PER_ROW_ALIGNMENT, 0);
-        
+
         // Test invalid alignments
         assert_ne!(100 % COPY_BYTES_PER_ROW_ALIGNMENT, 0);
         assert_ne!(255 % COPY_BYTES_PER_ROW_ALIGNMENT, 0);

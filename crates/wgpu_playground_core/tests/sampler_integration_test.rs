@@ -133,8 +133,8 @@ fn test_anisotropic_filtering() {
 
 #[test]
 fn test_comparison_never() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_never"))
-        .with_compare(CompareFunction::Never);
+    let descriptor =
+        SamplerDescriptor::new(Some("comparison_never")).with_compare(CompareFunction::Never);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::Never));
     assert!(descriptor.validate().is_ok());
@@ -142,8 +142,8 @@ fn test_comparison_never() {
 
 #[test]
 fn test_comparison_less() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_less"))
-        .with_compare(CompareFunction::Less);
+    let descriptor =
+        SamplerDescriptor::new(Some("comparison_less")).with_compare(CompareFunction::Less);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::Less));
     assert!(descriptor.validate().is_ok());
@@ -151,8 +151,8 @@ fn test_comparison_less() {
 
 #[test]
 fn test_comparison_equal() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_equal"))
-        .with_compare(CompareFunction::Equal);
+    let descriptor =
+        SamplerDescriptor::new(Some("comparison_equal")).with_compare(CompareFunction::Equal);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::Equal));
     assert!(descriptor.validate().is_ok());
@@ -169,8 +169,8 @@ fn test_comparison_less_equal() {
 
 #[test]
 fn test_comparison_greater() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_greater"))
-        .with_compare(CompareFunction::Greater);
+    let descriptor =
+        SamplerDescriptor::new(Some("comparison_greater")).with_compare(CompareFunction::Greater);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::Greater));
     assert!(descriptor.validate().is_ok());
@@ -196,8 +196,8 @@ fn test_comparison_greater_equal() {
 
 #[test]
 fn test_comparison_always() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_always"))
-        .with_compare(CompareFunction::Always);
+    let descriptor =
+        SamplerDescriptor::new(Some("comparison_always")).with_compare(CompareFunction::Always);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::Always));
     assert!(descriptor.validate().is_ok());

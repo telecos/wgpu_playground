@@ -9,9 +9,6 @@ use winit::{
 };
 
 mod app;
-mod compute;
-mod device_info;
-mod rendering;
 
 use app::PlaygroundApp;
 

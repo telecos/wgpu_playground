@@ -60,11 +60,18 @@ cargo run --release
 
 ## Project Structure
 
-- `src/main.rs` - Main application entry point and window management
-- `src/app.rs` - Main UI application structure and tab management
-- `src/device_info.rs` - GPU device information display
-- `src/rendering.rs` - Rendering APIs experimentation panel
-- `src/compute.rs` - Compute and ML APIs experimentation panel
+This project uses a Cargo workspace structure with the following crates:
+
+- **wgpu_playground_core** (`crates/wgpu_playground_core/`) - Core WebGPU functionality
+  - `src/device_info.rs` - GPU device information display
+  - `src/rendering.rs` - Rendering APIs experimentation panel
+  - `src/compute.rs` - Compute and ML APIs experimentation panel
+
+- **wgpu_playground_gui** (`crates/wgpu_playground_gui/`) - GUI application
+  - `src/main.rs` - Main application entry point and window management
+  - `src/app.rs` - Main UI application structure and tab management
+
+- **wgpu_playground_examples** (`crates/wgpu_playground_examples/`) - Example programs (planned)
 
 ## Development Status
 

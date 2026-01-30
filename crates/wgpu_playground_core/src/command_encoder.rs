@@ -3,35 +3,6 @@ use wgpu::{
     ImageCopyTexture,
 };
 
-/// Error types for command encoder operations
-#[derive(Debug)]
-pub enum CommandEncoderError {
-    /// Failed to create command encoder
-    CreationFailed(String),
-    /// Failed to encode command
-    EncodeFailed(String),
-    /// Invalid copy operation
-    InvalidCopy(String),
-}
-
-impl std::fmt::Display for CommandEncoderError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CommandEncoderError::CreationFailed(msg) => {
-                write!(f, "Command encoder creation failed: {}", msg)
-            }
-            CommandEncoderError::EncodeFailed(msg) => {
-                write!(f, "Command encode operation failed: {}", msg)
-            }
-            CommandEncoderError::InvalidCopy(msg) => {
-                write!(f, "Invalid copy operation: {}", msg)
-            }
-        }
-    }
-}
-
-impl std::error::Error for CommandEncoderError {}
-
 /// Abstraction for GPU command encoder operations
 ///
 /// The CommandEncoderOps wraps a wgpu::CommandEncoder and provides
@@ -364,33 +335,4 @@ pub fn copy_buffer(
     let mut encoder = CommandEncoderOps::new(device, Some("Buffer Copy"));
     encoder.copy_buffer_to_buffer(source, source_offset, destination, destination_offset, size);
     encoder.finish()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_command_encoder_error_display() {
-        let err = CommandEncoderError::CreationFailed("test error".to_string());
-        let msg = format!("{}", err);
-        assert!(msg.contains("Command encoder creation failed"));
-        assert!(msg.contains("test error"));
-
-        let err = CommandEncoderError::EncodeFailed("encode error".to_string());
-        let msg = format!("{}", err);
-        assert!(msg.contains("Command encode operation failed"));
-        assert!(msg.contains("encode error"));
-
-        let err = CommandEncoderError::InvalidCopy("copy error".to_string());
-        let msg = format!("{}", err);
-        assert!(msg.contains("Invalid copy operation"));
-        assert!(msg.contains("copy error"));
-    }
-
-    #[test]
-    fn test_command_encoder_error_is_error() {
-        let err = CommandEncoderError::CreationFailed("test".to_string());
-        let _: &dyn std::error::Error = &err;
-    }
 }

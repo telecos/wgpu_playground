@@ -36,27 +36,41 @@ impl AppState {
             .create_surface(window.clone())
             .expect("Failed to create surface");
 
-        let adapter = instance
-            .request_adapter(&wgpu::RequestAdapterOptions {
-                power_preference: wgpu::PowerPreference::default(),
-                compatible_surface: Some(&surface),
-                force_fallback_adapter: false,
-            })
-            .await
-            .expect("Failed to find a suitable GPU adapter");
+        // Use the adapter module for better error handling and configurability
+        let adapter_options = wgpu_playground_core::adapter::AdapterOptions::default();
+        let adapter = wgpu_playground_core::adapter::request_adapter(
+            &instance,
+            &adapter_options,
+            Some(&surface),
+        )
+        .await
+        .expect("Failed to find a suitable GPU adapter");
 
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
                     required_features: wgpu::Features::empty(),
                     required_limits: wgpu::Limits::default(),
-                    label: None,
+                    label: Some("WebGPU Playground Device"),
                     memory_hints: Default::default(),
                 },
                 None,
             )
             .await
             .expect("Failed to create device");
+
+        // Set up device lost callback to handle GPU device loss events
+        // This can occur due to driver crashes, GPU resets, or intentional device destruction
+        device.set_device_lost_callback(|reason, message| {
+            eprintln!("Device lost! Reason: {:?}", reason);
+            eprintln!("Message: {}", message);
+        });
+
+        // Set up uncaptured error callback to handle validation and out-of-memory errors
+        // that are not caught by explicit error scopes
+        device.on_uncaptured_error(Box::new(|error| {
+            eprintln!("Uncaptured GPU error: {:?}", error);
+        }));
 
         let surface_caps = surface.get_capabilities(&adapter);
         let surface_format = surface_caps

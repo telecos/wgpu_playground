@@ -4,21 +4,15 @@
 # See https://embarkstudios.github.io/cargo-deny/ for more information
 
 [advisories]
-# The lint level for security vulnerabilities
-vulnerability = "deny"
 # The lint level for unmaintained crates
 unmaintained = "warn"
-# The lint level for crates with security notices
-notice = "warn"
 # Ignore specific advisories
 ignore = [
     # Add advisory IDs to ignore here if needed
-    # Example: "RUSTSEC-2020-0001"
+    # Example: "RUSTSEC-0000-0000"
 ]
 
 [licenses]
-# The lint level for crates which do not have a detectable license
-unlicensed = "deny"
 # List of explicitly allowed licenses
 allow = [
     "MIT",

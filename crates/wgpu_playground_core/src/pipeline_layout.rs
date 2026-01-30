@@ -92,14 +92,14 @@ impl PushConstantRange {
             )));
         }
 
-        if self.start % 4 != 0 {
+        if !self.start.is_multiple_of(4) {
             return Err(PipelineLayoutError::InvalidPushConstantRange(format!(
                 "Push constant range start ({}) must be aligned to 4 bytes",
                 self.start
             )));
         }
 
-        if self.end % 4 != 0 {
+        if !self.end.is_multiple_of(4) {
             return Err(PipelineLayoutError::InvalidPushConstantRange(format!(
                 "Push constant range end ({}) must be aligned to 4 bytes",
                 self.end

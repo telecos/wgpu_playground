@@ -27,7 +27,7 @@ struct AppState {
 impl AppState {
     async fn new(window: Arc<Window>) -> Self {
         let size = window.inner_size();
-        
+
         // Check for WGPU_BACKEND environment variable to select backend
         let backends = std::env::var("WGPU_BACKEND")
             .ok()
@@ -48,8 +48,8 @@ impl AppState {
             .expect("Failed to create surface");
 
         // Use the adapter module for better error handling and configurability
-        let adapter_options = wgpu_playground_core::adapter::AdapterOptions::default()
-            .with_backends(backends);
+        let adapter_options =
+            wgpu_playground_core::adapter::AdapterOptions::default().with_backends(backends);
         let adapter = wgpu_playground_core::adapter::request_adapter(
             &instance,
             &adapter_options,

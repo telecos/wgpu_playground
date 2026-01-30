@@ -11,7 +11,7 @@ impl DeviceInfo {
         let info = adapter.get_info();
         let backend = crate::adapter::backend_to_str(&info.backend).to_string();
         let adapter_name = info.name.clone();
-        
+
         let adapter_info = format!(
             "Name: {}\nVendor: {}\nDevice: {}\nDevice Type: {:?}\nDriver: {}\nDriver Info: {}\nBackend: {}",
             info.name, info.vendor, info.device, info.device_type, info.driver, info.driver_info, backend
@@ -103,7 +103,9 @@ impl DeviceInfo {
                 ui.strong(&self.adapter_name);
             });
             ui.add_space(10.0);
-            ui.label("💡 Tip: Set the WGPU_BACKEND environment variable to select a specific backend.");
+            ui.label(
+                "💡 Tip: Set the WGPU_BACKEND environment variable to select a specific backend.",
+            );
             ui.label("   Available: vulkan, metal, dx12, gl, primary, all");
             ui.add_space(20.0);
 

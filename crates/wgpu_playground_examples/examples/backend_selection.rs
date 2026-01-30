@@ -1,5 +1,6 @@
+use wgpu::Backends;
 /// Example demonstrating backend selection and enumeration
-/// 
+///
 /// This example shows how to:
 /// 1. Enumerate available GPU adapters for different backends
 /// 2. Select a specific backend at runtime
@@ -11,9 +12,7 @@
 /// WGPU_BACKEND=metal cargo run --example backend_selection
 /// WGPU_BACKEND=dx12 cargo run --example backend_selection
 /// ```
-
 use wgpu_playground_core::adapter;
-use wgpu::Backends;
 
 fn main() {
     env_logger::init();
@@ -31,7 +30,7 @@ fn main() {
     // Enumerate all available adapters for the selected backends
     println!("--- Available Adapters ---");
     let adapters = adapter::enumerate_adapters(backends);
-    
+
     if adapters.is_empty() {
         println!("❌ No adapters found for the selected backend(s)!");
         println!("\nTry running with a different backend:");

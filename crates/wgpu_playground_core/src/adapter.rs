@@ -1,7 +1,7 @@
 use wgpu::{Adapter, Backends, Features, Instance, Limits, PowerPreference, RequestAdapterOptions};
 
 /// Options for requesting a GPU adapter
-/// 
+///
 /// Note: The `backends` field should be used when creating the Instance via
 /// `create_instance_with_options()` or `create_instance()`. It does not affect
 /// `request_adapter()` - the Instance must be created with the desired backends first.
@@ -170,7 +170,7 @@ pub fn backend_to_str(backend: &wgpu::Backend) -> &'static str {
 }
 
 /// Parse backend names from string to Backends flags
-/// 
+///
 /// Accepts multiple common variations for each backend:
 /// - "vulkan" or "vk" -> Vulkan
 /// - "metal" or "mtl" -> Metal  
@@ -199,11 +199,19 @@ pub fn parse_backend(name: &str) -> Option<Backends> {
 }
 
 /// Get list of available backend names for display purposes
-/// 
+///
 /// Returns human-readable display names. To parse backend strings, use parse_backends().
 /// Accepted input strings: "vulkan", "metal", "dx12", "gl", "primary", "all"
 pub fn available_backends() -> Vec<&'static str> {
-    vec!["Vulkan", "Metal", "DirectX 12", "OpenGL", "Browser WebGPU", "Primary", "All"]
+    vec![
+        "Vulkan",
+        "Metal",
+        "DirectX 12",
+        "OpenGL",
+        "Browser WebGPU",
+        "Primary",
+        "All",
+    ]
 }
 
 /// Get list of accepted backend input strings for parsing
@@ -393,7 +401,10 @@ mod tests {
         assert_eq!(backend_to_str(&wgpu::Backend::Metal), "Metal");
         assert_eq!(backend_to_str(&wgpu::Backend::Dx12), "DirectX 12");
         assert_eq!(backend_to_str(&wgpu::Backend::Gl), "OpenGL");
-        assert_eq!(backend_to_str(&wgpu::Backend::BrowserWebGpu), "Browser WebGPU");
+        assert_eq!(
+            backend_to_str(&wgpu::Backend::BrowserWebGpu),
+            "Browser WebGPU"
+        );
     }
 
     #[test]

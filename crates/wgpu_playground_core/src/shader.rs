@@ -87,9 +87,7 @@ impl ShaderModule {
                 }
                 code
             }
-            ShaderSource::File(filename) => {
-                crate::assets::load_shader(&filename)?
-            }
+            ShaderSource::File(filename) => crate::assets::load_shader(&filename)?,
         };
 
         Ok(Self {
@@ -143,8 +141,6 @@ impl ShaderModule {
         self.label.as_deref()
     }
 
-
-
     /// Create a wgpu shader module from this shader
     ///
     /// This method compiles and validates the shader. If the shader contains
@@ -184,7 +180,7 @@ mod tests {
     fn test_shader_from_inline_source() {
         let source = "@vertex fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(0.0); }";
         let shader = ShaderModule::from_source(source, Some("test_shader"));
-        
+
         assert!(shader.is_ok());
         let shader = shader.unwrap();
         assert_eq!(shader.source(), source);
@@ -195,7 +191,7 @@ mod tests {
     fn test_shader_from_inline_source_no_label() {
         let source = "@fragment fn main() -> @location(0) vec4<f32> { return vec4<f32>(1.0); }";
         let shader = ShaderModule::from_source(source, None);
-        
+
         assert!(shader.is_ok());
         let shader = shader.unwrap();
         assert_eq!(shader.source(), source);
@@ -206,7 +202,7 @@ mod tests {
     fn test_shader_from_empty_source() {
         let shader = ShaderModule::from_source("", Some("empty"));
         assert!(shader.is_err());
-        
+
         let shader = ShaderModule::from_source("   ", Some("whitespace"));
         assert!(shader.is_err());
     }
@@ -215,12 +211,12 @@ mod tests {
     fn test_shader_source_enum() {
         let inline = ShaderSource::Inline("test code".to_string());
         let file = ShaderSource::File("test.wgsl".to_string());
-        
+
         match inline {
             ShaderSource::Inline(code) => assert_eq!(code, "test code"),
             _ => panic!("Expected inline source"),
         }
-        
+
         match file {
             ShaderSource::File(name) => assert_eq!(name, "test.wgsl"),
             _ => panic!("Expected file source"),
@@ -231,7 +227,7 @@ mod tests {
     fn test_shader_error_display() {
         let err = ShaderError::InvalidSource("test error".to_string());
         assert_eq!(err.to_string(), "Invalid shader source: test error");
-        
+
         let io_err = std::io::Error::new(std::io::ErrorKind::NotFound, "file not found");
         let err = ShaderError::LoadError(io_err);
         assert!(err.to_string().contains("Failed to load shader"));

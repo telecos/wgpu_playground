@@ -92,7 +92,7 @@ This project uses `cargo-llvm-cov` for code coverage reporting. See [COVERAGE.md
 - CI integration
 - Viewing coverage reports
 
-Current coverage: ~62% (see CI artifacts for detailed reports)
+Current coverage: 62% (see CI artifacts for detailed reports)
 
 ## License
 

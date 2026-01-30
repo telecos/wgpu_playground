@@ -19,7 +19,7 @@ coverage:
 
 # Comment settings
 comment:
-  layout: "reach,diff,flags,tree,reach"
+  layout: "reach,diff,flags,tree"
   behavior: default
   require_changes: false      # Post comment even if no changes
 

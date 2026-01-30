@@ -1,9 +1,0 @@
-# Code coverage configuration
-# This file is used for local development and CI coverage runs
-
-# Enable instrumentation-based coverage for tests
-[build]
-# Uncomment the following to enable coverage by default
-# rustflags = ["-C", "instrument-coverage"]
-
-# Target configuration can be added here if needed

@@ -51,34 +51,34 @@ pub struct BufferUsages {
 impl BufferUsages {
     /// Empty usage flags
     pub const NONE: Self = Self { bits: 0 };
-    
+
     /// Buffer can be used as a vertex buffer
     pub const VERTEX: Self = Self { bits: 1 << 0 };
-    
+
     /// Buffer can be used as an index buffer
     pub const INDEX: Self = Self { bits: 1 << 1 };
-    
+
     /// Buffer can be used as a uniform buffer
     pub const UNIFORM: Self = Self { bits: 1 << 2 };
-    
+
     /// Buffer can be used as a storage buffer
     pub const STORAGE: Self = Self { bits: 1 << 3 };
-    
+
     /// Buffer can be used as an indirect buffer (for draw indirect commands)
     pub const INDIRECT: Self = Self { bits: 1 << 4 };
-    
+
     /// Buffer can be used as a copy source
     pub const COPY_SRC: Self = Self { bits: 1 << 5 };
-    
+
     /// Buffer can be used as a copy destination
     pub const COPY_DST: Self = Self { bits: 1 << 6 };
-    
+
     /// Buffer can be mapped for reading
     pub const MAP_READ: Self = Self { bits: 1 << 7 };
-    
+
     /// Buffer can be mapped for writing
     pub const MAP_WRITE: Self = Self { bits: 1 << 8 };
-    
+
     /// Buffer can be used to resolve query results
     pub const QUERY_RESOLVE: Self = Self { bits: 1 << 9 };
 
@@ -107,7 +107,7 @@ impl BufferUsages {
     /// Convert to wgpu::BufferUsages
     pub fn to_wgpu(&self) -> wgpu::BufferUsages {
         let mut usage = wgpu::BufferUsages::empty();
-        
+
         if self.contains(Self::VERTEX) {
             usage |= wgpu::BufferUsages::VERTEX;
         }
@@ -138,14 +138,14 @@ impl BufferUsages {
         if self.contains(Self::QUERY_RESOLVE) {
             usage |= wgpu::BufferUsages::QUERY_RESOLVE;
         }
-        
+
         usage
     }
 
     /// Create from wgpu::BufferUsages
     pub fn from_wgpu(usage: wgpu::BufferUsages) -> Self {
         let mut result = Self::empty();
-        
+
         if usage.contains(wgpu::BufferUsages::VERTEX) {
             result = result.union(Self::VERTEX);
         }
@@ -176,7 +176,7 @@ impl BufferUsages {
         if usage.contains(wgpu::BufferUsages::QUERY_RESOLVE) {
             result = result.union(Self::QUERY_RESOLVE);
         }
-        
+
         result
     }
 }
@@ -380,11 +380,11 @@ impl BufferOps {
     /// ```
     pub async fn map_read(buffer: &Buffer) -> Result<(), BufferError> {
         let (sender, receiver) = futures_channel::oneshot::channel();
-        
+
         buffer.slice(..).map_async(MapMode::Read, move |result| {
             let _ = sender.send(result);
         });
-        
+
         receiver.await.unwrap()?;
         Ok(())
     }
@@ -420,11 +420,11 @@ impl BufferOps {
     /// ```
     pub async fn map_write(buffer: &Buffer) -> Result<(), BufferError> {
         let (sender, receiver) = futures_channel::oneshot::channel();
-        
+
         buffer.slice(..).map_async(MapMode::Write, move |result| {
             let _ = sender.send(result);
         });
-        
+
         receiver.await.unwrap()?;
         Ok(())
     }
@@ -573,12 +573,9 @@ mod tests {
 
     #[test]
     fn test_buffer_descriptor_mapped_at_creation() {
-        let descriptor = BufferDescriptor::new(
-            None,
-            256,
-            BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
-        )
-        .with_mapped_at_creation(true);
+        let descriptor =
+            BufferDescriptor::new(None, 256, BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC)
+                .with_mapped_at_creation(true);
 
         assert!(descriptor.mapped_at_creation());
     }
@@ -596,15 +593,11 @@ mod tests {
 
     #[test]
     fn test_buffer_descriptor_validation_zero_size() {
-        let descriptor = BufferDescriptor::new(
-            None,
-            0,
-            BufferUsages::UNIFORM,
-        );
+        let descriptor = BufferDescriptor::new(None, 0, BufferUsages::UNIFORM);
 
         let result = descriptor.validate();
         assert!(result.is_err());
-        
+
         match result {
             Err(BufferError::InvalidSize(msg)) => {
                 assert!(msg.contains("greater than 0"));
@@ -615,15 +608,11 @@ mod tests {
 
     #[test]
     fn test_buffer_descriptor_validation_empty_usage() {
-        let descriptor = BufferDescriptor::new(
-            None,
-            256,
-            BufferUsages::empty(),
-        );
+        let descriptor = BufferDescriptor::new(None, 256, BufferUsages::empty());
 
         let result = descriptor.validate();
         assert!(result.is_err());
-        
+
         match result {
             Err(BufferError::InvalidUsage(msg)) => {
                 assert!(msg.contains("at least one usage flag"));
@@ -634,15 +623,12 @@ mod tests {
 
     #[test]
     fn test_buffer_descriptor_validation_map_read_and_write() {
-        let descriptor = BufferDescriptor::new(
-            None,
-            256,
-            BufferUsages::MAP_READ | BufferUsages::MAP_WRITE,
-        );
+        let descriptor =
+            BufferDescriptor::new(None, 256, BufferUsages::MAP_READ | BufferUsages::MAP_WRITE);
 
         let result = descriptor.validate();
         assert!(result.is_err());
-        
+
         match result {
             Err(BufferError::InvalidUsage(msg)) => {
                 assert!(msg.contains("MAP_READ and MAP_WRITE"));
@@ -670,7 +656,7 @@ mod tests {
     fn test_buffer_usages_bitor_assign() {
         let mut usage = BufferUsages::VERTEX;
         usage |= BufferUsages::INDEX;
-        
+
         assert!(usage.contains(BufferUsages::VERTEX));
         assert!(usage.contains(BufferUsages::INDEX));
     }

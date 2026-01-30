@@ -302,11 +302,7 @@ fn test_buffer_size_validation() {
         };
 
         // Try to create a buffer with size 0
-        let descriptor = BufferDescriptor::new(
-            Some("invalid_buffer"),
-            0,
-            BufferUsages::VERTEX,
-        );
+        let descriptor = BufferDescriptor::new(Some("invalid_buffer"), 0, BufferUsages::VERTEX);
 
         let result = descriptor.create_buffer(&device);
         assert!(result.is_err());
@@ -322,11 +318,7 @@ fn test_buffer_usage_validation() {
         };
 
         // Try to create a buffer with empty usage
-        let descriptor = BufferDescriptor::new(
-            Some("invalid_buffer"),
-            256,
-            BufferUsages::empty(),
-        );
+        let descriptor = BufferDescriptor::new(Some("invalid_buffer"), 256, BufferUsages::empty());
 
         let result = descriptor.create_buffer(&device);
         assert!(result.is_err());
@@ -482,7 +474,7 @@ fn test_buffer_read_back() {
         BufferOps::map_read(&buffer).await.unwrap();
         {
             let view = BufferOps::get_mapped_range(&buffer);
-            
+
             // Verify the data matches what we wrote
             for (i, &byte) in view.iter().enumerate() {
                 assert_eq!(byte, i as u8);

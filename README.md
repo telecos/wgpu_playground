@@ -83,6 +83,17 @@ This project uses a Cargo workspace structure with the following crates:
 
 This is currently a skeleton/framework for the full application. See [PLAN.md](PLAN.md) for planned features and implementation roadmap.
 
+## Code Coverage
+
+This project uses `cargo-llvm-cov` for code coverage reporting. See [COVERAGE.md](COVERAGE.md) for details on:
+
+- Running coverage locally
+- Coverage thresholds and targets
+- CI integration
+- Viewing coverage reports
+
+Current coverage: ~62% (see CI artifacts for detailed reports)
+
 ## License
 
 MIT

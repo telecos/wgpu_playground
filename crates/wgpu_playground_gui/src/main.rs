@@ -50,13 +50,26 @@ impl AppState {
                 &wgpu::DeviceDescriptor {
                     required_features: wgpu::Features::empty(),
                     required_limits: wgpu::Limits::default(),
-                    label: None,
+                    label: Some("WebGPU Playground Device"),
                     memory_hints: Default::default(),
                 },
                 None,
             )
             .await
             .expect("Failed to create device");
+
+        // Set up device lost callback to handle GPU device loss events
+        // This can occur due to driver crashes, GPU resets, or intentional device destruction
+        device.set_device_lost_callback(|reason, message| {
+            eprintln!("Device lost! Reason: {:?}", reason);
+            eprintln!("Message: {}", message);
+        });
+
+        // Set up uncaptured error callback to handle validation and out-of-memory errors
+        // that are not caught by explicit error scopes
+        device.on_uncaptured_error(Box::new(|error| {
+            eprintln!("Uncaptured GPU error: {:?}", error);
+        }));
 
         let surface_caps = surface.get_capabilities(&adapter);
         let surface_format = surface_caps

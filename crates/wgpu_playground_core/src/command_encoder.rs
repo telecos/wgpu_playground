@@ -331,7 +331,7 @@ impl CommandEncoderOps {
         }
 
         // Validate source offset alignment
-        if source_offset % COPY_BUFFER_ALIGNMENT != 0 {
+        if !source_offset.is_multiple_of(COPY_BUFFER_ALIGNMENT) {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Source offset {} must be a multiple of {}",
                 source_offset, COPY_BUFFER_ALIGNMENT
@@ -339,7 +339,7 @@ impl CommandEncoderOps {
         }
 
         // Validate destination offset alignment
-        if destination_offset % COPY_BUFFER_ALIGNMENT != 0 {
+        if !destination_offset.is_multiple_of(COPY_BUFFER_ALIGNMENT) {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Destination offset {} must be a multiple of {}",
                 destination_offset, COPY_BUFFER_ALIGNMENT
@@ -347,7 +347,7 @@ impl CommandEncoderOps {
         }
 
         // Validate size alignment
-        if size % COPY_BUFFER_ALIGNMENT != 0 {
+        if !size.is_multiple_of(COPY_BUFFER_ALIGNMENT) {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Copy size {} must be a multiple of {}",
                 size, COPY_BUFFER_ALIGNMENT
@@ -358,7 +358,7 @@ impl CommandEncoderOps {
         let source_size = source.size();
         if source_offset
             .checked_add(size)
-            .map_or(true, |end| end > source_size)
+            .is_none_or(|end| end > source_size)
         {
             return Err(CommandEncoderError::OutOfBounds(format!(
                 "Source offset {} + size {} exceeds source buffer size {}",
@@ -370,7 +370,7 @@ impl CommandEncoderOps {
         let destination_size = destination.size();
         if destination_offset
             .checked_add(size)
-            .map_or(true, |end| end > destination_size)
+            .is_none_or(|end| end > destination_size)
         {
             return Err(CommandEncoderError::OutOfBounds(format!(
                 "Destination offset {} + size {} exceeds destination buffer size {}",
@@ -396,7 +396,7 @@ impl CommandEncoderOps {
         }
 
         // Validate buffer offset alignment (must be multiple of 256)
-        if source.layout.offset % COPY_BYTES_PER_ROW_ALIGNMENT != 0 {
+        if !source.layout.offset.is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT) {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Buffer offset {} must be a multiple of {}",
                 source.layout.offset, COPY_BYTES_PER_ROW_ALIGNMENT
@@ -405,7 +405,7 @@ impl CommandEncoderOps {
 
         // Validate bytes_per_row alignment if present
         if let Some(bytes_per_row) = source.layout.bytes_per_row {
-            if bytes_per_row % COPY_BYTES_PER_ROW_ALIGNMENT as u32 != 0 {
+            if !bytes_per_row.is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT as u32) {
                 return Err(CommandEncoderError::AlignmentError(format!(
                     "Bytes per row {} must be a multiple of {}",
                     bytes_per_row, COPY_BYTES_PER_ROW_ALIGNMENT
@@ -431,7 +431,7 @@ impl CommandEncoderOps {
         }
 
         // Validate buffer offset alignment (must be multiple of 256)
-        if destination.layout.offset % COPY_BYTES_PER_ROW_ALIGNMENT != 0 {
+        if !destination.layout.offset.is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT) {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Buffer offset {} must be a multiple of {}",
                 destination.layout.offset, COPY_BYTES_PER_ROW_ALIGNMENT
@@ -440,7 +440,7 @@ impl CommandEncoderOps {
 
         // Validate bytes_per_row alignment if present
         if let Some(bytes_per_row) = destination.layout.bytes_per_row {
-            if bytes_per_row % COPY_BYTES_PER_ROW_ALIGNMENT as u32 != 0 {
+            if !bytes_per_row.is_multiple_of(COPY_BYTES_PER_ROW_ALIGNMENT as u32) {
                 return Err(CommandEncoderError::AlignmentError(format!(
                     "Bytes per row {} must be a multiple of {}",
                     bytes_per_row, COPY_BYTES_PER_ROW_ALIGNMENT

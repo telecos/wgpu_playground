@@ -1,9 +1,9 @@
+use std::num::{NonZeroU32, NonZeroU64};
+use wgpu::ShaderStages;
 use wgpu_playground_core::bind_group::{
     BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType, SamplerBindingType,
     StorageTextureAccess, TextureSampleType, TextureViewDimension,
 };
-use wgpu::ShaderStages;
-use std::num::{NonZeroU32, NonZeroU64};
 
 #[test]
 fn test_uniform_buffer_layout() {
@@ -16,8 +16,8 @@ fn test_uniform_buffer_layout() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("uniform_buffer_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("uniform_buffer_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
     assert_eq!(descriptor.entries().len(), 1);
@@ -36,8 +36,8 @@ fn test_storage_buffer_layout() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("storage_buffer_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("storage_buffer_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -82,8 +82,8 @@ fn test_storage_texture_layout() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("storage_texture_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("storage_texture_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -130,8 +130,8 @@ fn test_complex_multi_binding_layout() {
         ),
     ];
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("rendering_layout"))
-        .with_entries(&entries);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("rendering_layout")).with_entries(&entries);
 
     assert!(descriptor.validate().is_ok());
     assert_eq!(descriptor.entries().len(), 4);
@@ -184,8 +184,7 @@ fn test_compute_pipeline_layout() {
         ),
     ];
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("compute_layout"))
-        .with_entries(&entries);
+    let descriptor = BindGroupLayoutDescriptor::new(Some("compute_layout")).with_entries(&entries);
 
     assert!(descriptor.validate().is_ok());
     assert_eq!(descriptor.entries().len(), 3);
@@ -203,8 +202,7 @@ fn test_multi_stage_visibility() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("multi_stage_layout"))
-        .with_entry(entry);
+    let descriptor = BindGroupLayoutDescriptor::new(Some("multi_stage_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
     assert!(descriptor.entries()[0]
@@ -227,8 +225,7 @@ fn test_all_shader_stages_visibility() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("all_stages_layout"))
-        .with_entry(entry);
+    let descriptor = BindGroupLayoutDescriptor::new(Some("all_stages_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
     assert!(descriptor.entries()[0]
@@ -253,8 +250,8 @@ fn test_dynamic_offset_uniform_buffer() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("dynamic_uniform_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("dynamic_uniform_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -271,8 +268,8 @@ fn test_dynamic_offset_storage_buffer() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("dynamic_storage_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("dynamic_storage_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -290,8 +287,7 @@ fn test_texture_array_binding() {
     )
     .with_count(NonZeroU32::new(8).unwrap()); // Array of 8 textures
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("texture_array_layout"))
-        .with_entry(entry);
+    let descriptor = BindGroupLayoutDescriptor::new(Some("texture_array_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
     assert_eq!(descriptor.entries()[0].count, NonZeroU32::new(8));
@@ -309,8 +305,7 @@ fn test_cube_map_texture() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("cubemap_layout"))
-        .with_entry(entry);
+    let descriptor = BindGroupLayoutDescriptor::new(Some("cubemap_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -354,8 +349,7 @@ fn test_multisampled_texture() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("msaa_layout"))
-        .with_entry(entry);
+    let descriptor = BindGroupLayoutDescriptor::new(Some("msaa_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -401,8 +395,7 @@ fn test_3d_texture() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("3d_texture_layout"))
-        .with_entry(entry);
+    let descriptor = BindGroupLayoutDescriptor::new(Some("3d_texture_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -417,8 +410,8 @@ fn test_non_filtering_sampler() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("non_filtering_sampler_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("non_filtering_sampler_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -435,8 +428,8 @@ fn test_read_only_storage_texture() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("readonly_storage_texture_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("readonly_storage_texture_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }
@@ -453,8 +446,8 @@ fn test_read_write_storage_texture() {
         },
     );
 
-    let descriptor = BindGroupLayoutDescriptor::new(Some("readwrite_storage_texture_layout"))
-        .with_entry(entry);
+    let descriptor =
+        BindGroupLayoutDescriptor::new(Some("readwrite_storage_texture_layout")).with_entry(entry);
 
     assert!(descriptor.validate().is_ok());
 }

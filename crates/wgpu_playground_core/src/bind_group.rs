@@ -230,11 +230,9 @@ impl TextureSampleType {
     /// Convert to wgpu::TextureSampleType
     pub fn to_wgpu(&self) -> wgpu::TextureSampleType {
         match self {
-            TextureSampleType::Float { filterable } => {
-                wgpu::TextureSampleType::Float {
-                    filterable: *filterable,
-                }
-            }
+            TextureSampleType::Float { filterable } => wgpu::TextureSampleType::Float {
+                filterable: *filterable,
+            },
             TextureSampleType::Sint => wgpu::TextureSampleType::Sint,
             TextureSampleType::Uint => wgpu::TextureSampleType::Uint,
             TextureSampleType::Depth => wgpu::TextureSampleType::Depth,
@@ -416,10 +414,12 @@ impl BindGroupLayoutDescriptor {
         let wgpu_entries: Vec<wgpu::BindGroupLayoutEntry> =
             self.entries.iter().map(|e| e.to_wgpu()).collect();
 
-        Ok(device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: self.label.as_deref(),
-            entries: &wgpu_entries,
-        }))
+        Ok(
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: self.label.as_deref(),
+                entries: &wgpu_entries,
+            }),
+        )
     }
 }
 
@@ -522,10 +522,7 @@ mod tests {
                 view_dimension,
                 multisampled,
             } => {
-                assert_eq!(
-                    sample_type,
-                    TextureSampleType::Float { filterable: true }
-                );
+                assert_eq!(sample_type, TextureSampleType::Float { filterable: true });
                 assert_eq!(view_dimension, TextureViewDimension::D2);
                 assert!(!multisampled);
             }
@@ -587,8 +584,7 @@ mod tests {
             },
         );
 
-        let descriptor = BindGroupLayoutDescriptor::new(Some("test"))
-            .with_entry(entry.clone());
+        let descriptor = BindGroupLayoutDescriptor::new(Some("test")).with_entry(entry.clone());
 
         assert_eq!(descriptor.entries().len(), 1);
         assert_eq!(descriptor.entries()[0].binding, 0);
@@ -623,8 +619,7 @@ mod tests {
             ),
         ];
 
-        let descriptor = BindGroupLayoutDescriptor::new(Some("multi_entry"))
-            .with_entries(&entries);
+        let descriptor = BindGroupLayoutDescriptor::new(Some("multi_entry")).with_entries(&entries);
 
         assert_eq!(descriptor.entries().len(), 3);
         assert_eq!(descriptor.entries()[0].binding, 0);
@@ -761,10 +756,7 @@ mod tests {
 
     #[test]
     fn test_sampler_binding_types() {
-        assert_eq!(
-            SamplerBindingType::Filtering,
-            SamplerBindingType::Filtering
-        );
+        assert_eq!(SamplerBindingType::Filtering, SamplerBindingType::Filtering);
         assert_eq!(
             SamplerBindingType::NonFiltering,
             SamplerBindingType::NonFiltering

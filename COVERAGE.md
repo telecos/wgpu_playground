@@ -76,7 +76,6 @@ Coverage reports are:
 ## Configuration Files
 
 - `.codecov.yml` - Codecov configuration and thresholds
-- `.cargo/config.toml` - Cargo configuration for coverage
 - `.github/workflows/coverage.yml` - CI workflow for coverage
 
 ## Excluded Paths

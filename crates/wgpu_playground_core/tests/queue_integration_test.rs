@@ -29,10 +29,9 @@ async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
         .ok()
 }
 
-// Helper function to create a test texture with specified parameters
-fn create_test_texture(
-    device: &wgpu::Device,
-    label: &str,
+// Helper struct for creating test textures with fewer function parameters
+struct TestTextureParams {
+    label: &'static str,
     width: u32,
     height: u32,
     depth_or_array_layers: u32,
@@ -40,19 +39,22 @@ fn create_test_texture(
     dimension: wgpu::TextureDimension,
     format: wgpu::TextureFormat,
     usage: wgpu::TextureUsages,
-) -> wgpu::Texture {
+}
+
+// Helper function to create a test texture with specified parameters
+fn create_test_texture(device: &wgpu::Device, params: TestTextureParams) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
-        label: Some(label),
+        label: Some(params.label),
         size: wgpu::Extent3d {
-            width,
-            height,
-            depth_or_array_layers,
+            width: params.width,
+            height: params.height,
+            depth_or_array_layers: params.depth_or_array_layers,
         },
-        mip_level_count,
+        mip_level_count: params.mip_level_count,
         sample_count: 1,
-        dimension,
-        format,
-        usage,
+        dimension: params.dimension,
+        format: params.format,
+        usage: params.usage,
         view_formats: &[],
     })
 }
@@ -69,25 +71,29 @@ fn create_texture_pair(
 ) -> (wgpu::Texture, wgpu::Texture) {
     let src = create_test_texture(
         device,
-        "Source Texture",
-        width,
-        height,
-        depth_or_array_layers,
-        mip_level_count,
-        dimension,
-        format,
-        wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
+        TestTextureParams {
+            label: "Source Texture",
+            width,
+            height,
+            depth_or_array_layers,
+            mip_level_count,
+            dimension,
+            format,
+            usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
+        },
     );
     let dst = create_test_texture(
         device,
-        "Destination Texture",
-        width,
-        height,
-        depth_or_array_layers,
-        mip_level_count,
-        dimension,
-        format,
-        wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
+        TestTextureParams {
+            label: "Destination Texture",
+            width,
+            height,
+            depth_or_array_layers,
+            mip_level_count,
+            dimension,
+            format,
+            usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::COPY_SRC,
+        },
     );
     (src, dst)
 }
@@ -645,30 +651,34 @@ fn test_copy_texture_with_depth_aspect() {
         // Create depth textures with RENDER_ATTACHMENT usage
         let src_texture = create_test_texture(
             &device,
-            "Source Depth Texture",
-            256,
-            256,
-            1,
-            1,
-            wgpu::TextureDimension::D2,
-            wgpu::TextureFormat::Depth32Float,
-            wgpu::TextureUsages::COPY_SRC
-                | wgpu::TextureUsages::COPY_DST
-                | wgpu::TextureUsages::RENDER_ATTACHMENT,
+            TestTextureParams {
+                label: "Source Depth Texture",
+                width: 256,
+                height: 256,
+                depth_or_array_layers: 1,
+                mip_level_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::Depth32Float,
+                usage: wgpu::TextureUsages::COPY_SRC
+                    | wgpu::TextureUsages::COPY_DST
+                    | wgpu::TextureUsages::RENDER_ATTACHMENT,
+            },
         );
 
         let dst_texture = create_test_texture(
             &device,
-            "Destination Depth Texture",
-            256,
-            256,
-            1,
-            1,
-            wgpu::TextureDimension::D2,
-            wgpu::TextureFormat::Depth32Float,
-            wgpu::TextureUsages::COPY_DST
-                | wgpu::TextureUsages::COPY_SRC
-                | wgpu::TextureUsages::RENDER_ATTACHMENT,
+            TestTextureParams {
+                label: "Destination Depth Texture",
+                width: 256,
+                height: 256,
+                depth_or_array_layers: 1,
+                mip_level_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::Depth32Float,
+                usage: wgpu::TextureUsages::COPY_DST
+                    | wgpu::TextureUsages::COPY_SRC
+                    | wgpu::TextureUsages::RENDER_ATTACHMENT,
+            },
         );
 
         let queue_ops = QueueOps::with_device(&queue, &device);

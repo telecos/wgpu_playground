@@ -2,3 +2,10 @@
 Cargo.lock
 **/*.rs.bk
 *.pdb
+
+# WASM build artifacts
+pkg/
+wasm-pack.log
+*.wasm
+.bin/
+dist/

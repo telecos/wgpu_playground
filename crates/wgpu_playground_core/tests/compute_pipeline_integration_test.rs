@@ -33,11 +33,9 @@ async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
 
 #[test]
 fn test_simple_compute_pipeline_descriptor() {
-    let shader = ShaderModule::from_source(
-        "@compute @workgroup_size(1) fn main() {}",
-        Some("compute"),
-    )
-    .unwrap();
+    let shader =
+        ShaderModule::from_source("@compute @workgroup_size(1) fn main() {}", Some("compute"))
+            .unwrap();
 
     let descriptor = ComputePipelineDescriptor::new(Some("test_pipeline"))
         .with_shader(shader)
@@ -56,11 +54,9 @@ fn test_compute_pipeline_descriptor_validation_errors() {
     assert!(descriptor.validate().is_err());
 
     // Test missing entry point
-    let shader = ShaderModule::from_source(
-        "@compute @workgroup_size(1) fn main() {}",
-        Some("compute"),
-    )
-    .unwrap();
+    let shader =
+        ShaderModule::from_source("@compute @workgroup_size(1) fn main() {}", Some("compute"))
+            .unwrap();
     let descriptor = ComputePipelineDescriptor::new(Some("test")).with_shader(shader);
     assert!(descriptor.validate().is_err());
 }
@@ -226,8 +222,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 "#;
 
-    let shader =
-        ShaderModule::from_source(shader_source, Some("multi_buffer_compute")).unwrap();
+    let shader = ShaderModule::from_source(shader_source, Some("multi_buffer_compute")).unwrap();
 
     let descriptor = ComputePipelineDescriptor::new(Some("multi_buffer_pipeline"))
         .with_shader(shader)

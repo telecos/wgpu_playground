@@ -26,10 +26,16 @@ impl fmt::Display for ComputePipelineError {
                 write!(f, "Invalid pipeline configuration: {}", msg)
             }
             ComputePipelineError::MissingShader => {
-                write!(f, "Missing shader module: compute pipeline requires a shader")
+                write!(
+                    f,
+                    "Missing shader module: compute pipeline requires a shader"
+                )
             }
             ComputePipelineError::MissingEntryPoint => {
-                write!(f, "Missing entry point: compute pipeline requires an entry point")
+                write!(
+                    f,
+                    "Missing entry point: compute pipeline requires an entry point"
+                )
             }
         }
     }
@@ -378,22 +384,18 @@ mod tests {
 
     #[test]
     fn test_compute_pipeline_descriptor_with_entry_point() {
-        let descriptor =
-            ComputePipelineDescriptor::new(Some("test")).with_entry_point("main");
+        let descriptor = ComputePipelineDescriptor::new(Some("test")).with_entry_point("main");
 
         assert_eq!(descriptor.entry_point(), Some("main"));
     }
 
     #[test]
     fn test_compute_pipeline_descriptor_with_shader() {
-        let shader = ShaderModule::from_source(
-            "@compute @workgroup_size(1) fn main() {}",
-            Some("compute"),
-        )
-        .unwrap();
+        let shader =
+            ShaderModule::from_source("@compute @workgroup_size(1) fn main() {}", Some("compute"))
+                .unwrap();
 
-        let descriptor =
-            ComputePipelineDescriptor::new(Some("test")).with_shader(shader.clone());
+        let descriptor = ComputePipelineDescriptor::new(Some("test")).with_shader(shader.clone());
 
         assert!(descriptor.shader().is_some());
         assert_eq!(

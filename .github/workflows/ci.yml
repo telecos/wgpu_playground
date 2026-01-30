@@ -80,8 +80,5 @@ jobs:
         with:
           components: rustfmt
 
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-
       - name: Check formatting
         run: cargo fmt --all -- --check

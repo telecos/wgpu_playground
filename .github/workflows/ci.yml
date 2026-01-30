@@ -44,7 +44,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run tests
-        run: cargo test --workspace --all-features
+        run: cargo test --workspace --all-targets --all-features
 
   clippy:
     name: Clippy
@@ -76,6 +76,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
 
       - name: Check formatting
         run: cargo fmt --all -- --check

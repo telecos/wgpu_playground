@@ -14,8 +14,6 @@ pub enum ShaderSource {
 pub enum ShaderError {
     /// Failed to load shader file
     LoadError(std::io::Error),
-    /// Shader compilation/validation failed
-    CompilationError(String),
     /// Invalid shader source
     InvalidSource(String),
 }
@@ -24,7 +22,6 @@ impl fmt::Display for ShaderError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ShaderError::LoadError(err) => write!(f, "Failed to load shader: {}", err),
-            ShaderError::CompilationError(msg) => write!(f, "Shader compilation error: {}", msg),
             ShaderError::InvalidSource(msg) => write!(f, "Invalid shader source: {}", msg),
         }
     }
@@ -146,41 +143,12 @@ impl ShaderModule {
         self.label.as_deref()
     }
 
-    /// Validate the shader by attempting to create a wgpu shader module
-    ///
-    /// # Arguments
-    /// * `device` - The wgpu device to use for validation
-    ///
-    /// # Returns
-    /// Ok(()) if the shader is valid, Err with compilation errors otherwise
-    ///
-    /// # Examples
-    /// ```no_run
-    /// use wgpu_playground_core::shader::ShaderModule;
-    /// # async fn example(device: &wgpu::Device) {
-    /// let shader = ShaderModule::from_source(
-    ///     "@vertex fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(0.0); }",
-    ///     None
-    /// ).unwrap();
-    ///
-    /// shader.validate(device).unwrap();
-    /// # }
-    /// ```
-    pub fn validate(&self, device: &wgpu::Device) -> Result<(), ShaderError> {
-        let descriptor = wgpu::ShaderModuleDescriptor {
-            label: self.label.as_deref(),
-            source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(&self.source)),
-        };
 
-        // Try to create the shader module - this will fail if there are compilation errors
-        // wgpu will panic on shader compilation errors in debug mode, so we need to handle this
-        // For now, we'll create the module and let wgpu handle validation
-        let _module = device.create_shader_module(descriptor);
-
-        Ok(())
-    }
 
     /// Create a wgpu shader module from this shader
+    ///
+    /// This method compiles and validates the shader. If the shader contains
+    /// compilation errors, wgpu will panic in debug mode or log errors in release mode.
     ///
     /// # Arguments
     /// * `device` - The wgpu device to create the module on
@@ -264,8 +232,9 @@ mod tests {
         let err = ShaderError::InvalidSource("test error".to_string());
         assert_eq!(err.to_string(), "Invalid shader source: test error");
         
-        let err = ShaderError::CompilationError("syntax error".to_string());
-        assert_eq!(err.to_string(), "Shader compilation error: syntax error");
+        let io_err = std::io::Error::new(std::io::ErrorKind::NotFound, "file not found");
+        let err = ShaderError::LoadError(io_err);
+        assert!(err.to_string().contains("Failed to load shader"));
     }
 
     #[test]

@@ -5,6 +5,7 @@ pub mod buffer;
 pub mod compute;
 pub mod device_info;
 pub mod pipeline_layout;
+pub mod query_set;
 pub mod queue;
 pub mod render_pipeline;
 pub mod rendering;

@@ -5,6 +5,7 @@ members = [
     "crates/wgpu_playground_gui",
     "crates/wgpu_playground_examples",
 ]
+default-members = ["crates/wgpu_playground_gui"]
 
 [workspace.package]
 version = "0.1.0"
@@ -12,8 +13,4 @@ edition = "2021"
 license = "MIT"
 authors = ["wgpu_playground contributors"]
 repository = "https://github.com/telecos/wgpu_playground"
-
-# Default crate for cargo run
-[workspace.metadata]
-default-members = ["crates/wgpu_playground_gui"]
 

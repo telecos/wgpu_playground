@@ -8,3 +8,11 @@ pkg/
 wasm-pack.log
 .bin/
 dist/
+
+# Code coverage
+*.profraw
+*.profdata
+coverage/
+lcov.info
+cobertura.xml
+html/

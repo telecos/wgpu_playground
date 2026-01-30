@@ -1,0 +1,30 @@
+# Code coverage thresholds and configuration
+# https://docs.codecov.io/docs/codecov-yaml
+
+coverage:
+  status:
+    project:
+      default:
+        target: 70%           # Target coverage percentage
+        threshold: 2%         # Allow 2% drop from target
+        if_ci_failed: error   # Fail if CI fails
+    patch:
+      default:
+        target: 60%           # New code should have at least 60% coverage
+        threshold: 5%         # Allow 5% variation
+
+  precision: 2                # Coverage precision (decimal places)
+  round: down                 # Round coverage down
+  range: 50..100              # Color coding range
+
+# Comment settings
+comment:
+  layout: "reach,diff,flags,tree,reach"
+  behavior: default
+  require_changes: false      # Post comment even if no changes
+
+# Ignore paths in coverage reports
+ignore:
+  - "crates/wgpu_playground_examples/**"  # Example code
+  - "tests/**"                             # Test files themselves
+  - "benches/**"                           # Benchmark files

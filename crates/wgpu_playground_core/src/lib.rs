@@ -6,3 +6,4 @@ pub mod device_info;
 pub mod queue;
 pub mod rendering;
 pub mod shader;
+pub mod texture;

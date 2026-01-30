@@ -58,6 +58,16 @@ skip = [
     { crate = "linux-raw-sys@0.4", reason = "Some dependencies still use linux-raw-sys 0.4" },
     # ndk-sys is transitioning versions
     { crate = "ndk-sys@0.5", reason = "Some dependencies still use ndk-sys 0.5" },
+    # rustc-hash is transitioning from 1.x to 2.x
+    { crate = "rustc-hash@1", reason = "Some dependencies still use rustc-hash 1.x" },
+    # rustix is transitioning from 0.38 to 1.x
+    { crate = "rustix@0.38", reason = "Some dependencies still use rustix 0.38" },
+    # smithay-client-toolkit is transitioning from 0.19 to 0.20
+    { crate = "smithay-client-toolkit@0.19", reason = "Some dependencies still use smithay-client-toolkit 0.19" },
+    # syn is transitioning from 1.x to 2.x
+    { crate = "syn@1", reason = "Some dependencies still use syn 1.x" },
+    # thiserror is transitioning from 1.x to 2.x
+    { crate = "thiserror@1", reason = "Some dependencies still use thiserror 1.x" },
     # Windows crates have multiple versions across the ecosystem
     { crate = "windows_i686_msvc@0.42", reason = "Legacy Windows support crates" },
     { crate = "windows_i686_msvc@0.52", reason = "Legacy Windows support crates" },

@@ -47,7 +47,3 @@ Once the issues are created, you can start contributing:
 4. Ensure cross-platform compatibility (native + WASM)
 5. Write tests as applicable
 6. Submit a pull request
-
-## License
-
-[Add license information here]

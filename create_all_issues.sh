@@ -2,6 +2,12 @@
 # Script to create GitHub issues for all tasks
 set -e
 
+# Repository configuration
+REPO="${GITHUB_REPOSITORY:-telecos/wgpu_playground}"
+
+echo "Creating issues for repository: $REPO"
+echo ""
+
 echo "Creating issue: TASK-023 - Implement Render Pass Encoder"
 gh issue create \
   --title "TASK-023: Implement Render Pass Encoder" \
@@ -23,7 +29,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-024 - Implement Compute Pass Encoder"
 gh issue create \
@@ -46,7 +52,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-025 - Implement Buffer Copy Operations"
 gh issue create \
@@ -69,7 +75,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-026 - Implement Texture Copy Operations"
 gh issue create \
@@ -92,7 +98,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-027 - Implement Query Set Support"
 gh issue create \
@@ -115,7 +121,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-028 - Implement Canvas Context Configuration"
 gh issue create \
@@ -138,7 +144,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-029 - Implement Vertex Buffer Management"
 gh issue create \
@@ -161,7 +167,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-030 - Implement Index Buffer Management"
 gh issue create \
@@ -184,7 +190,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-031 - Implement Render Bundle Support"
 gh issue create \
@@ -207,7 +213,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-032 - Implement Error Handling and Validation"
 gh issue create \
@@ -230,7 +236,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "webgpu-api,core-functionality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-040 - Choose GUI Framework"
 gh issue create \
@@ -253,7 +259,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-041 - Implement Base GUI Window"
 gh issue create \
@@ -276,7 +282,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-042 - Implement Adapter Selection UI"
 gh issue create \
@@ -299,7 +305,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-043 - Implement Device Configuration UI"
 gh issue create \
@@ -322,7 +328,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-044 - Implement Buffer Creation UI"
 gh issue create \
@@ -345,7 +351,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-045 - Implement Texture Creation UI"
 gh issue create \
@@ -368,7 +374,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-046 - Implement Sampler Configuration UI"
 gh issue create \
@@ -391,7 +397,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-047 - Implement Shader Editor UI"
 gh issue create \
@@ -414,7 +420,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-048 - Implement Bind Group Layout UI"
 gh issue create \
@@ -437,7 +443,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-049 - Implement Bind Group Resource UI"
 gh issue create \
@@ -460,7 +466,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-050 - Implement Render Pipeline UI"
 gh issue create \
@@ -483,7 +489,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-051 - Implement Compute Pipeline UI"
 gh issue create \
@@ -506,7 +512,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-052 - Implement Render Pass UI"
 gh issue create \
@@ -529,7 +535,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-053 - Implement Draw Commands UI"
 gh issue create \
@@ -552,7 +558,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-054 - Implement Compute Dispatch UI"
 gh issue create \
@@ -575,7 +581,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-055 - Implement Resource Inspector UI"
 gh issue create \
@@ -598,7 +604,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-056 - Implement Viewport Canvas UI"
 gh issue create \
@@ -621,7 +627,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-057 - Implement Command History UI"
 gh issue create \
@@ -644,7 +650,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-058 - Implement Preset Examples UI"
 gh issue create \
@@ -667,7 +673,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-059 - Implement Performance Monitor UI"
 gh issue create \
@@ -690,7 +696,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-060 - Implement Error Display UI"
 gh issue create \
@@ -713,7 +719,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ui,gui" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-070 - Implement Hello Triangle Example"
 gh issue create \
@@ -736,7 +742,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "examples,documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-071 - Implement Texture Mapping Example"
 gh issue create \
@@ -759,7 +765,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "examples,documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-072 - Implement 3D Cube Example"
 gh issue create \
@@ -782,7 +788,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "examples,documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-073 - Implement Compute Shader Example"
 gh issue create \
@@ -805,7 +811,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "examples,documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-074 - Implement Instancing Example"
 gh issue create \
@@ -828,7 +834,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "examples,documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-075 - Implement Render to Texture Example"
 gh issue create \
@@ -851,7 +857,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "examples,documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-076 - Implement MSAA Example"
 gh issue create \
@@ -874,7 +880,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "examples,documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-080 - Setup Unit Test Framework"
 gh issue create \
@@ -897,7 +903,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-081 - Implement Buffer Tests"
 gh issue create \
@@ -920,7 +926,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-082 - Implement Texture Tests"
 gh issue create \
@@ -943,7 +949,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-083 - Implement Pipeline Tests"
 gh issue create \
@@ -966,7 +972,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-084 - Implement Command Encoder Tests"
 gh issue create \
@@ -989,7 +995,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-085 - Implement Integration Tests"
 gh issue create \
@@ -1012,7 +1018,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-086 - Setup Headless Testing"
 gh issue create \
@@ -1035,7 +1041,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-087 - Implement Visual Regression Tests"
 gh issue create \
@@ -1058,7 +1064,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-088 - Implement GUI Tests"
 gh issue create \
@@ -1081,7 +1087,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-089 - Setup Benchmark Suite"
 gh issue create \
@@ -1104,7 +1110,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-090 - Implement WASM Tests"
 gh issue create \
@@ -1127,7 +1133,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-091 - Setup Test Coverage Reporting"
 gh issue create \
@@ -1150,7 +1156,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-092 - Implement Error Handling Tests"
 gh issue create \
@@ -1173,7 +1179,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "testing,quality" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-100 - Setup GitHub Actions Workflow"
 gh issue create \
@@ -1196,7 +1202,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-101 - Implement Native Build Jobs"
 gh issue create \
@@ -1219,7 +1225,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-102 - Implement WASM Build Jobs"
 gh issue create \
@@ -1242,7 +1248,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-103 - Implement Linting Jobs"
 gh issue create \
@@ -1265,7 +1271,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-104 - Implement Test Jobs"
 gh issue create \
@@ -1288,7 +1294,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-105 - Implement Security Audit Jobs"
 gh issue create \
@@ -1311,7 +1317,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-106 - Implement Documentation Jobs"
 gh issue create \
@@ -1334,7 +1340,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-107 - Implement Benchmark CI"
 gh issue create \
@@ -1357,7 +1363,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-108 - Implement Artifact Publishing"
 gh issue create \
@@ -1380,7 +1386,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-109 - Implement Deploy Pipeline"
 gh issue create \
@@ -1403,7 +1409,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-110 - Setup Dependency Update Automation"
 gh issue create \
@@ -1426,7 +1432,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-111 - Implement PR Validation"
 gh issue create \
@@ -1449,7 +1455,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-112 - Setup Code Coverage CI"
 gh issue create \
@@ -1472,7 +1478,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "ci-cd,devops" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-120 - Write Architecture Documentation"
 gh issue create \
@@ -1495,7 +1501,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-121 - Write API Documentation"
 gh issue create \
@@ -1518,7 +1524,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-122 - Write User Guide"
 gh issue create \
@@ -1541,7 +1547,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-123 - Write Developer Guide"
 gh issue create \
@@ -1564,7 +1570,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-124 - Write WGSL Shader Guide"
 gh issue create \
@@ -1587,7 +1593,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-125 - Write WebGPU Feature Coverage Doc"
 gh issue create \
@@ -1610,7 +1616,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "documentation" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-130 - Implement Shader Hot Reload"
 gh issue create \
@@ -1633,7 +1639,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-131 - Implement State Persistence"
 gh issue create \
@@ -1656,7 +1662,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-132 - Implement Code Export"
 gh issue create \
@@ -1679,7 +1685,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-133 - Implement Dark/Light Theme"
 gh issue create \
@@ -1702,7 +1708,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-134 - Implement Collaborative Features"
 gh issue create \
@@ -1725,7 +1731,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-135 - Implement Texture Import/Export"
 gh issue create \
@@ -1748,7 +1754,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-136 - Implement Model Loading"
 gh issue create \
@@ -1771,7 +1777,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-137 - Implement Debugging Tools"
 gh issue create \
@@ -1794,7 +1800,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-138 - Implement Mobile Support"
 gh issue create \
@@ -1817,7 +1823,7 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "Creating issue: TASK-139 - Implement Accessibility Features"
 gh issue create \
@@ -1840,6 +1846,6 @@ This task may depend on completion of previous tasks in its category. Please che
 - Cross-platform compatibility maintained (native + WASM)
 " \
   --label "enhancement,nice-to-have" \
-  --repo telecos/wgpu_playground
+  --repo "$REPO"
 
 echo "All issues created successfully!"

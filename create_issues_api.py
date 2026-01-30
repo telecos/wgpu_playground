@@ -516,9 +516,9 @@ This task may depend on completion of previous tasks in its category. Please che
 """
 
 
-def create_issues_with_api(token):
+def create_issues_with_api(token, repo='telecos/wgpu_playground'):
     """Create issues using GitHub REST API."""
-    base_url = "https://api.github.com/repos/telecos/wgpu_playground/issues"
+    base_url = f"https://api.github.com/repos/{repo}/issues"
     
     created = []
     failed = []
@@ -534,7 +534,7 @@ def create_issues_with_api(token):
             base_url,
             data=json.dumps(issue_data).encode('utf-8'),
             headers={
-                'Authorization': f'token {token}',
+                'Authorization': f'Bearer {token}',
                 'Accept': 'application/vnd.github.v3+json',
                 'Content-Type': 'application/json',
             },
@@ -588,6 +588,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Create GitHub issues for wgpu_playground tasks')
     parser.add_argument('--token', help='GitHub personal access token')
+    parser.add_argument('--repo', default='telecos/wgpu_playground', help='GitHub repository (owner/name)')
     parser.add_argument('--export', help='Export to JSON file instead of creating issues')
     parser.add_argument('--dry-run', action='store_true', help='Print what would be created without creating')
     
@@ -600,12 +601,12 @@ if __name__ == "__main__":
         for task in TASKS:
             print(f"  - {task['id']}: {task['title']} [{', '.join(task['labels'])}]")
     elif args.token:
-        success = create_issues_with_api(args.token)
+        success = create_issues_with_api(args.token, args.repo)
         sys.exit(0 if success else 1)
     else:
         print("Error: Either provide --token for creating issues or --export for exporting to JSON")
         print("Usage:")
-        print("  python3 create_issues_api.py --token YOUR_GITHUB_TOKEN")
+        print("  python3 create_issues_api.py --token YOUR_GITHUB_TOKEN [--repo owner/name]")
         print("  python3 create_issues_api.py --export issues_data.json")
         print("  python3 create_issues_api.py --dry-run")
         sys.exit(1)

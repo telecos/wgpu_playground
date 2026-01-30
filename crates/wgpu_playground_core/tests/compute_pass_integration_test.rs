@@ -118,7 +118,9 @@ var<storage, read_write> output: array<u32>;
 
 @compute @workgroup_size(1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    output[global_id.x] = global_id.x;
+    if (global_id.x < arrayLength(&output)) {
+        output[global_id.x] = global_id.x;
+    }
 }
 "#;
 
@@ -187,7 +189,9 @@ var<storage, read_write> output: array<u32>;
 
 @compute @workgroup_size(1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    output[global_id.x] = global_id.x;
+    if (global_id.x < arrayLength(&output)) {
+        output[global_id.x] = global_id.x;
+    }
 }
 "#;
 
@@ -269,7 +273,9 @@ var<storage, read_write> data: array<u32>;
 @compute @workgroup_size(8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let index = global_id.x;
-    data[index] = data[index] + 1u;
+    if (index < arrayLength(&data)) {
+        data[index] = data[index] + 1u;
+    }
 }
 "#;
 
@@ -370,7 +376,9 @@ var<storage, read_write> output: array<u32>;
 @compute @workgroup_size(8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let index = global_id.x;
-    output[index] = input[index] * 2u;
+    if (index < arrayLength(&output)) {
+        output[index] = input[index] * 2u;
+    }
 }
 "#;
 

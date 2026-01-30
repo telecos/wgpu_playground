@@ -36,14 +36,15 @@ impl AppState {
             .create_surface(window.clone())
             .expect("Failed to create surface");
 
-        let adapter = instance
-            .request_adapter(&wgpu::RequestAdapterOptions {
-                power_preference: wgpu::PowerPreference::default(),
-                compatible_surface: Some(&surface),
-                force_fallback_adapter: false,
-            })
-            .await
-            .expect("Failed to find a suitable GPU adapter");
+        // Use the adapter module for better error handling and configurability
+        let adapter_options = wgpu_playground_core::adapter::AdapterOptions::default();
+        let adapter = wgpu_playground_core::adapter::request_adapter(
+            &instance,
+            &adapter_options,
+            Some(&surface),
+        )
+        .await
+        .expect("Failed to find a suitable GPU adapter");
 
         let (device, queue) = adapter
             .request_device(

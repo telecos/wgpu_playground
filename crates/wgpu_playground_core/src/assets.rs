@@ -1,5 +1,10 @@
 use std::path::{Path, PathBuf};
 
+/// Asset loading infrastructure for both native and web builds
+///
+/// This module provides utilities for loading static assets like shaders,
+/// textures, and models. It handles path resolution differently for native
+/// and web builds to ensure assets are loaded correctly in both environments.
 /// Validates that a filename doesn't contain path traversal sequences
 ///
 /// # Arguments

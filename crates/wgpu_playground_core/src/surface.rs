@@ -12,7 +12,7 @@ use wgpu::{
 ///
 /// ```no_run
 /// use wgpu_playground_core::surface::SurfaceConfigurationBuilder;
-/// # async fn example(device: &wgpu::Device, surface: &wgpu::Surface) {
+/// # async fn example(device: &wgpu::Device, surface: &wgpu::Surface<'_>) {
 /// // Create a surface configuration
 /// let config = SurfaceConfigurationBuilder::new(800, 600)
 ///     .with_format(wgpu::TextureFormat::Bgra8Unorm)
@@ -154,7 +154,7 @@ impl SurfaceConfigurationBuilder {
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::{configure_surface, SurfaceConfigurationBuilder};
-/// # async fn example(device: &wgpu::Device, surface: &wgpu::Surface) {
+/// # async fn example(device: &wgpu::Device, surface: &wgpu::Surface<'_>) {
 /// let config = SurfaceConfigurationBuilder::new(800, 600).build();
 /// configure_surface(surface, device, &config);
 /// # }
@@ -181,7 +181,7 @@ pub fn configure_surface(surface: &Surface, device: &Device, config: &SurfaceCon
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::get_current_texture;
-/// # async fn example(surface: &wgpu::Surface) -> Result<(), wgpu::SurfaceError> {
+/// # async fn example(surface: &wgpu::Surface<'_>) -> Result<(), wgpu::SurfaceError> {
 /// let texture = get_current_texture(surface)?;
 /// // Use the texture for rendering
 /// texture.present();
@@ -204,7 +204,7 @@ pub fn get_current_texture(surface: &Surface) -> Result<SurfaceTexture, wgpu::Su
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::get_surface_capabilities;
-/// # async fn example(surface: &wgpu::Surface, adapter: &wgpu::Adapter) {
+/// # async fn example(surface: &wgpu::Surface<'_>, adapter: &wgpu::Adapter) {
 /// let capabilities = get_surface_capabilities(surface, adapter);
 /// println!("Supported formats: {:?}", capabilities.formats);
 /// println!("Supported present modes: {:?}", capabilities.present_modes);
@@ -235,7 +235,7 @@ pub fn get_surface_capabilities(
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::{get_surface_capabilities, select_preferred_format};
-/// # async fn example(surface: &wgpu::Surface, adapter: &wgpu::Adapter) {
+/// # async fn example(surface: &wgpu::Surface<'_>, adapter: &wgpu::Adapter) {
 /// let capabilities = get_surface_capabilities(surface, adapter);
 /// let format = select_preferred_format(&capabilities);
 /// # }
@@ -271,7 +271,7 @@ pub fn select_preferred_format(capabilities: &wgpu::SurfaceCapabilities) -> Text
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::{get_surface_capabilities, select_preferred_present_mode};
-/// # async fn example(surface: &wgpu::Surface, adapter: &wgpu::Adapter) {
+/// # async fn example(surface: &wgpu::Surface<'_>, adapter: &wgpu::Adapter) {
 /// let capabilities = get_surface_capabilities(surface, adapter);
 /// let present_mode = select_preferred_present_mode(&capabilities);
 /// # }

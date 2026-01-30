@@ -85,6 +85,7 @@ skip = [
     # Windows crates have multiple versions across the ecosystem
     { crate = "windows-targets@0.42", reason = "Legacy Windows support crates" },
     { crate = "windows-targets@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_aarch64_gnullvm@0.52", reason = "Legacy Windows support crates" },
     { crate = "windows_aarch64_msvc@0.42", reason = "Legacy Windows support crates" },
     { crate = "windows_aarch64_msvc@0.52", reason = "Legacy Windows support crates" },
     { crate = "windows_i686_gnu@0.42", reason = "Legacy Windows support crates" },
@@ -92,6 +93,9 @@ skip = [
     { crate = "windows_i686_gnullvm@0.52", reason = "Legacy Windows support crates" },
     { crate = "windows_i686_msvc@0.42", reason = "Legacy Windows support crates" },
     { crate = "windows_i686_msvc@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_gnu@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_gnu@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_gnullvm@0.52", reason = "Legacy Windows support crates" },
     { crate = "windows_x86_64_msvc@0.42", reason = "Legacy Windows support crates" },
     { crate = "windows_x86_64_msvc@0.52", reason = "Legacy Windows support crates" },
 ]

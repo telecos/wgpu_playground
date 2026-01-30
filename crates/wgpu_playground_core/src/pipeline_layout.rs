@@ -80,7 +80,7 @@ impl PushConstantRange {
     /// Checks for:
     /// - Start must be less than end
     /// - Start and end must be aligned to 4 bytes
-    /// - Range must not be empty
+    /// - Shader stages must not be empty
     ///
     /// # Returns
     /// Ok(()) if valid, Err with PipelineLayoutError if invalid

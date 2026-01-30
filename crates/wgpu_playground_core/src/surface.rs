@@ -276,9 +276,7 @@ pub fn select_preferred_format(capabilities: &wgpu::SurfaceCapabilities) -> Text
 /// let present_mode = select_preferred_present_mode(&capabilities);
 /// # }
 /// ```
-pub fn select_preferred_present_mode(
-    capabilities: &wgpu::SurfaceCapabilities,
-) -> PresentMode {
+pub fn select_preferred_present_mode(capabilities: &wgpu::SurfaceCapabilities) -> PresentMode {
     assert!(
         !capabilities.present_modes.is_empty(),
         "Surface capabilities must have at least one present mode"
@@ -337,8 +335,8 @@ mod tests {
 
     #[test]
     fn test_surface_configuration_builder_with_format() {
-        let builder = SurfaceConfigurationBuilder::new(800, 600)
-            .with_format(TextureFormat::Rgba8Unorm);
+        let builder =
+            SurfaceConfigurationBuilder::new(800, 600).with_format(TextureFormat::Rgba8Unorm);
         let config = builder.build();
 
         assert_eq!(config.format, TextureFormat::Rgba8Unorm);
@@ -355,8 +353,8 @@ mod tests {
 
     #[test]
     fn test_surface_configuration_builder_with_present_mode() {
-        let builder = SurfaceConfigurationBuilder::new(800, 600)
-            .with_present_mode(PresentMode::Immediate);
+        let builder =
+            SurfaceConfigurationBuilder::new(800, 600).with_present_mode(PresentMode::Immediate);
         let config = builder.build();
 
         assert_eq!(config.present_mode, PresentMode::Immediate);
@@ -374,8 +372,7 @@ mod tests {
     #[test]
     fn test_surface_configuration_builder_with_view_formats() {
         let formats = vec![TextureFormat::Bgra8Unorm, TextureFormat::Bgra8UnormSrgb];
-        let builder =
-            SurfaceConfigurationBuilder::new(800, 600).with_view_formats(&formats);
+        let builder = SurfaceConfigurationBuilder::new(800, 600).with_view_formats(&formats);
         let config = builder.build();
 
         assert_eq!(config.view_formats, formats);
@@ -456,7 +453,11 @@ mod tests {
     fn test_select_preferred_present_mode_with_mailbox() {
         let capabilities = wgpu::SurfaceCapabilities {
             formats: vec![TextureFormat::Bgra8Unorm],
-            present_modes: vec![PresentMode::Fifo, PresentMode::Mailbox, PresentMode::Immediate],
+            present_modes: vec![
+                PresentMode::Fifo,
+                PresentMode::Mailbox,
+                PresentMode::Immediate,
+            ],
             alpha_modes: vec![CompositeAlphaMode::Opaque],
             usages: TextureUsages::RENDER_ATTACHMENT,
         };

@@ -223,7 +223,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let indirect_buffer = indirect_buffer_descriptor.create_buffer(&device).unwrap();
 
     // Write dispatch parameters to the indirect buffer
-    queue.write_buffer(&indirect_buffer, 0, bytemuck::cast_slice(&[64u32, 1u32, 1u32]));
+    queue.write_buffer(
+        &indirect_buffer,
+        0,
+        bytemuck::cast_slice(&[64u32, 1u32, 1u32]),
+    );
 
     // Create bind group
     let bind_group_layout = pipeline.get_bind_group_layout(0);
@@ -318,7 +322,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let mut compute_pass = ComputePassEncoder::begin(encoder, &descriptor).unwrap();
         compute_pass.set_pipeline(&pipeline);
         compute_pass.set_bind_group(0, &bind_group, &[]);
-        
+
         // Multiple dispatches in the same pass
         compute_pass.dispatch(8, 1, 1); // Dispatch 8 workgroups (64 threads)
         compute_pass.dispatch(8, 1, 1); // Dispatch again
@@ -392,12 +396,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // Create storage buffers
     let buffer_size = 64 * std::mem::size_of::<u32>() as u64;
-    
-    let input_buffer_descriptor = BufferDescriptor::new(
-        Some("Input Buffer"),
-        buffer_size,
-        BufferUsages::STORAGE,
-    );
+
+    let input_buffer_descriptor =
+        BufferDescriptor::new(Some("Input Buffer"), buffer_size, BufferUsages::STORAGE);
 
     let input_buffer = input_buffer_descriptor.create_buffer(&device).unwrap();
 

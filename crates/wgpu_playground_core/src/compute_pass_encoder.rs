@@ -183,7 +183,8 @@ impl<'a> ComputePassEncoder<'a> {
     /// compute_pass.dispatch(64, 1, 1);
     /// ```
     pub fn dispatch(&mut self, workgroups_x: u32, workgroups_y: u32, workgroups_z: u32) {
-        self.pass.dispatch_workgroups(workgroups_x, workgroups_y, workgroups_z);
+        self.pass
+            .dispatch_workgroups(workgroups_x, workgroups_y, workgroups_z);
     }
 
     /// Dispatch compute work using an indirect buffer
@@ -203,7 +204,8 @@ impl<'a> ComputePassEncoder<'a> {
     /// compute_pass.dispatch_indirect(indirect_buffer, 0);
     /// ```
     pub fn dispatch_indirect(&mut self, indirect_buffer: &'a Buffer, indirect_offset: u64) {
-        self.pass.dispatch_workgroups_indirect(indirect_buffer, indirect_offset);
+        self.pass
+            .dispatch_workgroups_indirect(indirect_buffer, indirect_offset);
     }
 
     /// Insert a debug marker
@@ -271,8 +273,7 @@ mod tests {
 
     #[test]
     fn test_compute_pass_descriptor_with_label() {
-        let descriptor = ComputePassDescriptor::new()
-            .with_label("test_pass");
+        let descriptor = ComputePassDescriptor::new().with_label("test_pass");
         assert_eq!(descriptor.label, Some("test_pass"));
     }
 
@@ -290,8 +291,7 @@ mod tests {
 
     #[test]
     fn test_compute_pass_descriptor_builder() {
-        let descriptor = ComputePassDescriptor::new()
-            .with_label("my_compute_pass");
+        let descriptor = ComputePassDescriptor::new().with_label("my_compute_pass");
         assert_eq!(descriptor.label, Some("my_compute_pass"));
         assert!(descriptor.validate().is_ok());
     }

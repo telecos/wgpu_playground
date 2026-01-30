@@ -7,7 +7,6 @@
 /// - Use dispatch_indirect for indirect dispatch
 ///
 /// Run with: cargo run --example compute_pass
-
 use wgpu_playground_core::buffer::{BufferDescriptor, BufferUsages};
 use wgpu_playground_core::command_encoder::CommandEncoderOps;
 use wgpu_playground_core::compute::ComputePipelineDescriptor;
@@ -97,7 +96,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // Create input data: [1.0, 2.0, 3.0, 4.0, ...]
     let input_data: Vec<f32> = (1..=256).map(|i| i as f32).collect();
-    
+
     // Convert to bytes for buffer write
     let input_bytes: &[u8] = unsafe {
         std::slice::from_raw_parts(

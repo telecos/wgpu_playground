@@ -1,21 +1,12 @@
 use wgpu::{Adapter, Backends, Features, Instance, Limits, PowerPreference, RequestAdapterOptions};
 
 /// Options for requesting a GPU adapter
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct AdapterOptions {
     /// Power preference for adapter selection
     pub power_preference: PowerPreference,
     /// Whether to force the use of a fallback/software adapter
     pub force_fallback_adapter: bool,
-}
-
-impl Default for AdapterOptions {
-    fn default() -> Self {
-        Self {
-            power_preference: PowerPreference::default(),
-            force_fallback_adapter: false,
-        }
-    }
 }
 
 impl AdapterOptions {
@@ -67,7 +58,10 @@ impl std::fmt::Display for AdapterError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AdapterError::NoAdapterFound => {
-                write!(f, "No suitable GPU adapter found with the specified options")
+                write!(
+                    f,
+                    "No suitable GPU adapter found with the specified options"
+                )
             }
         }
     }
@@ -210,7 +204,7 @@ mod tests {
         let options = AdapterOptions::default()
             .with_power_preference(PowerPreference::HighPerformance)
             .with_fallback_adapter(true);
-        
+
         assert_eq!(options.power_preference, PowerPreference::HighPerformance);
         assert!(options.force_fallback_adapter);
     }

@@ -337,11 +337,7 @@ impl TextureViewBuilder {
     /// # Arguments
     /// * `base_array_layer` - The first array layer to include
     /// * `array_layer_count` - Number of array layers to include
-    pub fn with_array_layer_range(
-        mut self,
-        base_array_layer: u32,
-        array_layer_count: u32,
-    ) -> Self {
+    pub fn with_array_layer_range(mut self, base_array_layer: u32, array_layer_count: u32) -> Self {
         self.base_array_layer = base_array_layer;
         self.array_layer_count = Some(array_layer_count);
         self

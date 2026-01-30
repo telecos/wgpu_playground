@@ -515,9 +515,7 @@ fn test_texture_storage_format() {
 
         let texture = TextureBuilder::texture_2d(256, 256)
             .with_format(wgpu::TextureFormat::Rgba8Unorm)
-            .with_usage(
-                wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::TEXTURE_BINDING,
-            )
+            .with_usage(wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::TEXTURE_BINDING)
             .build(&device);
 
         assert_eq!(texture.format(), wgpu::TextureFormat::Rgba8Unorm);
@@ -578,7 +576,9 @@ fn test_complex_texture_builder_chain() {
             .with_mip_levels(6)
             .with_sample_count(1)
             .with_label("complex_texture")
-            .with_usage(wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING)
+            .with_usage(
+                wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+            )
             .build(&device);
 
         assert_eq!(texture.width(), 512);

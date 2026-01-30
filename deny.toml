@@ -4,12 +4,10 @@
 # See https://embarkstudios.github.io/cargo-deny/ for more information
 
 [advisories]
-# The lint level for unmaintained crates
-unmaintained = "warn"
 # Ignore specific advisories
 ignore = [
-    # Add advisory IDs to ignore here if needed
-    # Example: "RUSTSEC-0000-0000"
+    # Ignored due to CVSS 4.0 parsing error in current cargo-deny version
+    "RUSTSEC-2026-0003",
 ]
 
 [licenses]

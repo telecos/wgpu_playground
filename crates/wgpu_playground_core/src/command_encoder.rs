@@ -7,13 +7,14 @@ use wgpu::{
 /// Alignment requirement for buffer copy operations
 const COPY_BUFFER_ALIGNMENT: u64 = 4;
 
+/// Alignment requirement for bytes per row in texture copy operations
+const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
+
 /// Errors that can occur during command encoder operations
 #[derive(Debug)]
 pub enum CommandEncoderError {
     /// Invalid copy size
     InvalidSize(String),
-    /// Invalid offset
-    InvalidOffset(String),
     /// Copy exceeds buffer bounds
     OutOfBounds(String),
     /// Alignment error
@@ -24,7 +25,6 @@ impl fmt::Display for CommandEncoderError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CommandEncoderError::InvalidSize(msg) => write!(f, "Invalid copy size: {}", msg),
-            CommandEncoderError::InvalidOffset(msg) => write!(f, "Invalid offset: {}", msg),
             CommandEncoderError::OutOfBounds(msg) => write!(f, "Copy out of bounds: {}", msg),
             CommandEncoderError::AlignmentError(msg) => write!(f, "Alignment error: {}", msg),
         }
@@ -396,7 +396,6 @@ impl CommandEncoderOps {
         }
 
         // Validate buffer offset alignment (must be multiple of 256)
-        const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
         if source.layout.offset % COPY_BYTES_PER_ROW_ALIGNMENT != 0 {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Buffer offset {} must be a multiple of {}",
@@ -432,7 +431,6 @@ impl CommandEncoderOps {
         }
 
         // Validate buffer offset alignment (must be multiple of 256)
-        const COPY_BYTES_PER_ROW_ALIGNMENT: u64 = 256;
         if destination.layout.offset % COPY_BYTES_PER_ROW_ALIGNMENT != 0 {
             return Err(CommandEncoderError::AlignmentError(format!(
                 "Buffer offset {} must be a multiple of {}",
@@ -645,13 +643,18 @@ mod tests {
         let err = CommandEncoderError::InvalidSize("test".to_string());
         assert!(err.to_string().contains("Invalid copy size"));
 
-        let err = CommandEncoderError::InvalidOffset("test".to_string());
-        assert!(err.to_string().contains("Invalid offset"));
-
         let err = CommandEncoderError::OutOfBounds("test".to_string());
         assert!(err.to_string().contains("Copy out of bounds"));
 
         let err = CommandEncoderError::AlignmentError("test".to_string());
         assert!(err.to_string().contains("Alignment error"));
+    }
+
+    #[test]
+    fn test_bytes_per_row_alignment_constant() {
+        assert_eq!(
+            COPY_BYTES_PER_ROW_ALIGNMENT, 256,
+            "Bytes per row alignment should be 256 bytes"
+        );
     }
 }

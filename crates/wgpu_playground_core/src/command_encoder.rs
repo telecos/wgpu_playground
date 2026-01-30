@@ -124,10 +124,13 @@ impl<'a> CommandEncoderOps<'a> {
         }
 
         // Validate source buffer bounds
-        if source_offset
-            .checked_add(size)
-            .map_or(true, |end| end > source.size())
-        {
+        let source_end = source_offset.checked_add(size);
+        if source_end.is_none() {
+            return Err(CommandEncoderError::InvalidCopySize(
+                "Source copy range causes integer overflow".to_string(),
+            ));
+        }
+        if source_end.unwrap() > source.size() {
             return Err(CommandEncoderError::InvalidCopySize(format!(
                 "Source copy range (offset: {}, size: {}) exceeds buffer size ({})",
                 source_offset,
@@ -137,10 +140,13 @@ impl<'a> CommandEncoderOps<'a> {
         }
 
         // Validate destination buffer bounds
-        if destination_offset
-            .checked_add(size)
-            .map_or(true, |end| end > destination.size())
-        {
+        let destination_end = destination_offset.checked_add(size);
+        if destination_end.is_none() {
+            return Err(CommandEncoderError::InvalidCopySize(
+                "Destination copy range causes integer overflow".to_string(),
+            ));
+        }
+        if destination_end.unwrap() > destination.size() {
             return Err(CommandEncoderError::InvalidCopySize(format!(
                 "Destination copy range (offset: {}, size: {}) exceeds buffer size ({})",
                 destination_offset,

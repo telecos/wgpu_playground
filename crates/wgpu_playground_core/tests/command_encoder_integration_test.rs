@@ -229,6 +229,34 @@ fn test_copy_buffer_to_buffer_validation_unaligned_offset() {
 }
 
 #[test]
+fn test_copy_buffer_to_buffer_validation_overflow() {
+    pollster::block_on(async {
+        let Some((device, _queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("buffer"),
+            size: 256,
+            usage: wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("encoder"),
+        });
+
+        let mut encoder_ops = CommandEncoderOps::new(&mut encoder);
+        // Try to cause overflow with large offset and size
+        let result = encoder_ops.copy_buffer_to_buffer(&buffer, u64::MAX - 100, &buffer, 0, 256);
+
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("overflow"));
+    });
+}
+
+#[test]
 fn test_copy_buffer_to_buffer_validation_out_of_bounds() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device().await else {

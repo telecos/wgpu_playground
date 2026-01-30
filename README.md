@@ -83,6 +83,13 @@ This project uses a Cargo workspace structure with the following crates:
 
 This is currently a skeleton/framework for the full application. See [PLAN.md](PLAN.md) for planned features and implementation roadmap.
 
+## Documentation
+
+- **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu
+- **[PLAN.md](PLAN.md)** - Complete project roadmap with implementation phases
+- **[UI_MOCKUP.md](UI_MOCKUP.md)** - UI design and layout documentation
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development guidelines and contribution instructions
+
 ## License
 
 MIT

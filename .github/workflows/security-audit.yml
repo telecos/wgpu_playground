@@ -26,9 +26,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
       - name: Run cargo audit
         uses: rustsec/audit-check@v1.4.1
         with:

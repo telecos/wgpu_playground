@@ -100,7 +100,7 @@ impl<'a> CommandEncoderOps<'a> {
         }
 
         // Validate size alignment (must be multiple of 4)
-        if size % 4 != 0 {
+        if !size.is_multiple_of(4) {
             return Err(CommandEncoderError::InvalidCopySize(format!(
                 "Copy size must be a multiple of 4, got {}",
                 size
@@ -108,7 +108,7 @@ impl<'a> CommandEncoderOps<'a> {
         }
 
         // Validate source offset alignment
-        if source_offset % 4 != 0 {
+        if !source_offset.is_multiple_of(4) {
             return Err(CommandEncoderError::InvalidOffset(format!(
                 "Source offset must be a multiple of 4, got {}",
                 source_offset
@@ -116,7 +116,7 @@ impl<'a> CommandEncoderOps<'a> {
         }
 
         // Validate destination offset alignment
-        if destination_offset % 4 != 0 {
+        if !destination_offset.is_multiple_of(4) {
             return Err(CommandEncoderError::InvalidOffset(format!(
                 "Destination offset must be a multiple of 4, got {}",
                 destination_offset
@@ -156,8 +156,13 @@ impl<'a> CommandEncoderOps<'a> {
         }
 
         // Perform the copy
-        self.encoder
-            .copy_buffer_to_buffer(source, source_offset, destination, destination_offset, size);
+        self.encoder.copy_buffer_to_buffer(
+            source,
+            source_offset,
+            destination,
+            destination_offset,
+            size,
+        );
 
         Ok(())
     }

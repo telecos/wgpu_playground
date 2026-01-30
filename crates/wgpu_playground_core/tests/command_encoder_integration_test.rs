@@ -72,9 +72,11 @@ fn test_copy_buffer_to_buffer_basic() {
 
         // Verify the data was copied
         let (sender, receiver) = futures_channel::oneshot::channel();
-        dst_buffer.slice(..).map_async(wgpu::MapMode::Read, move |result| {
-            let _ = sender.send(result);
-        });
+        dst_buffer
+            .slice(..)
+            .map_async(wgpu::MapMode::Read, move |result| {
+                let _ = sender.send(result);
+            });
         device.poll(wgpu::Maintain::Wait);
         receiver.await.unwrap().unwrap();
 
@@ -130,9 +132,11 @@ fn test_copy_buffer_to_buffer_with_offset() {
 
         // Verify
         let (sender, receiver) = futures_channel::oneshot::channel();
-        dst_buffer.slice(128..256).map_async(wgpu::MapMode::Read, move |result| {
-            let _ = sender.send(result);
-        });
+        dst_buffer
+            .slice(128..256)
+            .map_async(wgpu::MapMode::Read, move |result| {
+                let _ = sender.send(result);
+            });
         device.poll(wgpu::Maintain::Wait);
         receiver.await.unwrap().unwrap();
 
@@ -287,7 +291,10 @@ fn test_copy_buffer_to_buffer_validation_out_of_bounds() {
         let result = encoder_ops.copy_buffer_to_buffer(&src_buffer, 0, &dst_buffer, 0, 256);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("exceeds buffer size"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("exceeds buffer size"));
     });
 }
 
@@ -420,10 +427,7 @@ fn test_copy_buffer_to_texture_validation_zero_size() {
         );
 
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("greater than 0"));
+        assert!(result.unwrap_err().to_string().contains("greater than 0"));
     });
 }
 
@@ -581,9 +585,11 @@ fn test_copy_texture_to_buffer_basic() {
 
         // Verify data
         let (sender, receiver) = futures_channel::oneshot::channel();
-        buffer.slice(..).map_async(wgpu::MapMode::Read, move |result| {
-            let _ = sender.send(result);
-        });
+        buffer
+            .slice(..)
+            .map_async(wgpu::MapMode::Read, move |result| {
+                let _ = sender.send(result);
+            });
         device.poll(wgpu::Maintain::Wait);
         receiver.await.unwrap().unwrap();
 
@@ -654,10 +660,7 @@ fn test_copy_texture_to_buffer_validation_zero_size() {
         );
 
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("greater than 0"));
+        assert!(result.unwrap_err().to_string().contains("greater than 0"));
     });
 }
 
@@ -765,12 +768,12 @@ fn test_multiple_copy_operations() {
         });
 
         let mut encoder_ops = CommandEncoderOps::new(&mut encoder);
-        
+
         // Copy from buffer1 to buffer2
         encoder_ops
             .copy_buffer_to_buffer(&buffer1, 0, &buffer2, 0, 128)
             .unwrap();
-        
+
         // Copy from buffer2 to buffer3
         encoder_ops
             .copy_buffer_to_buffer(&buffer2, 0, &buffer3, 0, 128)
@@ -781,9 +784,11 @@ fn test_multiple_copy_operations() {
 
         // Verify final buffer has the data
         let (sender, receiver) = futures_channel::oneshot::channel();
-        buffer3.slice(0..128).map_async(wgpu::MapMode::Read, move |result| {
-            let _ = sender.send(result);
-        });
+        buffer3
+            .slice(0..128)
+            .map_async(wgpu::MapMode::Read, move |result| {
+                let _ = sender.send(result);
+            });
         device.poll(wgpu::Maintain::Wait);
         receiver.await.unwrap().unwrap();
 

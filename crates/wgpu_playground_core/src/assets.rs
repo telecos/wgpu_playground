@@ -6,6 +6,33 @@ use std::path::{Path, PathBuf};
 /// textures, and models. It handles path resolution differently for native
 /// and web builds to ensure assets are loaded correctly in both environments.
 
+/// Validates that a filename doesn't contain path traversal sequences
+/// 
+/// # Arguments
+/// * `filename` - The filename to validate
+/// 
+/// # Returns
+/// Ok(()) if the filename is safe, Err otherwise
+fn validate_filename(filename: &str) -> Result<(), std::io::Error> {
+    // Check for path separators and parent directory references
+    if filename.contains("..") || filename.contains('/') || filename.contains('\\') {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Filename must not contain path separators or parent directory references",
+        ));
+    }
+    
+    // Ensure filename is not empty
+    if filename.is_empty() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Filename must not be empty",
+        ));
+    }
+    
+    Ok(())
+}
+
 /// Get the base assets directory path
 /// 
 /// For native builds, this returns the path to the assets directory relative to the workspace root.
@@ -50,8 +77,9 @@ pub fn models_dir() -> PathBuf {
 /// The shader source code as a String
 /// 
 /// # Errors
-/// Returns an error if the file cannot be read
+/// Returns an error if the file cannot be read or if the filename is invalid
 pub fn load_shader(filename: &str) -> Result<String, std::io::Error> {
+    validate_filename(filename)?;
     let path = shaders_dir().join(filename);
     load_string_from_path(&path)
 }
@@ -116,8 +144,9 @@ pub fn load_binary_from_path(_path: &Path) -> Result<Vec<u8>, std::io::Error> {
 /// The texture data as a Vec<u8>
 /// 
 /// # Errors
-/// Returns an error if the file cannot be read
+/// Returns an error if the file cannot be read or if the filename is invalid
 pub fn load_texture(filename: &str) -> Result<Vec<u8>, std::io::Error> {
+    validate_filename(filename)?;
     let path = textures_dir().join(filename);
     load_binary_from_path(&path)
 }
@@ -131,8 +160,9 @@ pub fn load_texture(filename: &str) -> Result<Vec<u8>, std::io::Error> {
 /// The model data as a Vec<u8>
 /// 
 /// # Errors
-/// Returns an error if the file cannot be read
+/// Returns an error if the file cannot be read or if the filename is invalid
 pub fn load_model(filename: &str) -> Result<Vec<u8>, std::io::Error> {
+    validate_filename(filename)?;
     let path = models_dir().join(filename);
     load_binary_from_path(&path)
 }
@@ -163,5 +193,30 @@ mod tests {
     fn test_models_dir() {
         let models = models_dir();
         assert!(models.ends_with("models"));
+    }
+
+    #[test]
+    fn test_validate_filename_valid() {
+        assert!(validate_filename("shader.wgsl").is_ok());
+        assert!(validate_filename("texture.png").is_ok());
+        assert!(validate_filename("model.obj").is_ok());
+    }
+
+    #[test]
+    fn test_validate_filename_path_traversal() {
+        assert!(validate_filename("../etc/passwd").is_err());
+        assert!(validate_filename("..\\windows\\system32").is_err());
+        assert!(validate_filename("subdir/../file.wgsl").is_err());
+    }
+
+    #[test]
+    fn test_validate_filename_path_separators() {
+        assert!(validate_filename("subdir/shader.wgsl").is_err());
+        assert!(validate_filename("subdir\\shader.wgsl").is_err());
+    }
+
+    #[test]
+    fn test_validate_filename_empty() {
+        assert!(validate_filename("").is_err());
     }
 }

@@ -56,7 +56,7 @@ let model_data = assets::load_model("my_model.obj")?;
 The asset loading system automatically handles path resolution for both native and web builds:
 
 - **Native builds**: Assets are loaded from the filesystem relative to the workspace root
-- **Web builds**: Assets are served from the `/assets` path and loaded via the Fetch API
+- **Web builds**: Web support is planned for future implementation. Assets will be served from the `/assets` path and loaded via the Fetch API (requires async implementation)
 
 ## Adding New Assets
 

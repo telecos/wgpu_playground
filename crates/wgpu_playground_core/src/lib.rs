@@ -1,3 +1,4 @@
+pub mod adapter;
 pub mod assets;
 pub mod compute;
 pub mod device_info;

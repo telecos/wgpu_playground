@@ -1,16 +1,15 @@
 use std::path::{Path, PathBuf};
 
 /// Asset loading infrastructure for both native and web builds
-/// 
+///
 /// This module provides utilities for loading static assets like shaders,
 /// textures, and models. It handles path resolution differently for native
 /// and web builds to ensure assets are loaded correctly in both environments.
-
 /// Validates that a filename doesn't contain path traversal sequences
-/// 
+///
 /// # Arguments
 /// * `filename` - The filename to validate
-/// 
+///
 /// # Returns
 /// Ok(()) if the filename is safe, Err otherwise
 fn validate_filename(filename: &str) -> Result<(), std::io::Error> {
@@ -21,7 +20,7 @@ fn validate_filename(filename: &str) -> Result<(), std::io::Error> {
             "Filename must not contain path separators or parent directory references",
         ));
     }
-    
+
     // Ensure filename is not empty
     if filename.is_empty() {
         return Err(std::io::Error::new(
@@ -29,12 +28,12 @@ fn validate_filename(filename: &str) -> Result<(), std::io::Error> {
             "Filename must not be empty",
         ));
     }
-    
+
     Ok(())
 }
 
 /// Get the base assets directory path
-/// 
+///
 /// For native builds, this returns the path to the assets directory relative to the workspace root.
 /// For web builds, this returns a path suitable for web asset loading.
 #[cfg(not(target_arch = "wasm32"))]
@@ -69,13 +68,13 @@ pub fn models_dir() -> PathBuf {
 }
 
 /// Load a shader file from the shaders directory
-/// 
+///
 /// # Arguments
 /// * `filename` - The name of the shader file (e.g., "example.wgsl")
-/// 
+///
 /// # Returns
 /// The shader source code as a String
-/// 
+///
 /// # Errors
 /// Returns an error if the file cannot be read or if the filename is invalid
 pub fn load_shader(filename: &str) -> Result<String, std::io::Error> {
@@ -85,13 +84,13 @@ pub fn load_shader(filename: &str) -> Result<String, std::io::Error> {
 }
 
 /// Load a file as a string from a given path
-/// 
+///
 /// # Arguments
 /// * `path` - The path to the file
-/// 
+///
 /// # Returns
 /// The file contents as a String
-/// 
+///
 /// # Errors
 /// Returns an error if the file cannot be read
 #[cfg(not(target_arch = "wasm32"))]
@@ -111,13 +110,13 @@ pub fn load_string_from_path(path: &Path) -> Result<String, std::io::Error> {
 }
 
 /// Load binary data from a file
-/// 
+///
 /// # Arguments
 /// * `path` - The path to the file
-/// 
+///
 /// # Returns
 /// The file contents as a Vec<u8>
-/// 
+///
 /// # Errors
 /// Returns an error if the file cannot be read
 #[cfg(not(target_arch = "wasm32"))]
@@ -136,13 +135,13 @@ pub fn load_binary_from_path(_path: &Path) -> Result<Vec<u8>, std::io::Error> {
 }
 
 /// Load a texture file from the textures directory
-/// 
+///
 /// # Arguments
 /// * `filename` - The name of the texture file (e.g., "texture.png")
-/// 
+///
 /// # Returns
 /// The texture data as a Vec<u8>
-/// 
+///
 /// # Errors
 /// Returns an error if the file cannot be read or if the filename is invalid
 pub fn load_texture(filename: &str) -> Result<Vec<u8>, std::io::Error> {
@@ -152,13 +151,13 @@ pub fn load_texture(filename: &str) -> Result<Vec<u8>, std::io::Error> {
 }
 
 /// Load a model file from the models directory
-/// 
+///
 /// # Arguments
 /// * `filename` - The name of the model file (e.g., "model.obj")
-/// 
+///
 /// # Returns
 /// The model data as a Vec<u8>
-/// 
+///
 /// # Errors
 /// Returns an error if the file cannot be read or if the filename is invalid
 pub fn load_model(filename: &str) -> Result<Vec<u8>, std::io::Error> {

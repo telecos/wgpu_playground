@@ -9,10 +9,6 @@ pub enum BindGroupError {
     InvalidBinding(String),
     /// Binding number conflict
     DuplicateBinding(u32),
-    /// Missing binding
-    MissingBinding(u32),
-    /// Invalid resource type for binding
-    InvalidResourceType(String),
 }
 
 impl fmt::Display for BindGroupError {
@@ -21,12 +17,6 @@ impl fmt::Display for BindGroupError {
             BindGroupError::InvalidBinding(msg) => write!(f, "Invalid binding: {}", msg),
             BindGroupError::DuplicateBinding(binding) => {
                 write!(f, "Duplicate binding number: {}", binding)
-            }
-            BindGroupError::MissingBinding(binding) => {
-                write!(f, "Missing binding: {}", binding)
-            }
-            BindGroupError::InvalidResourceType(msg) => {
-                write!(f, "Invalid resource type: {}", msg)
             }
         }
     }

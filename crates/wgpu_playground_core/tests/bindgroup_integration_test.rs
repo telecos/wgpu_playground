@@ -454,7 +454,6 @@ fn test_read_write_storage_texture() {
 
 // Integration tests for actual bind group creation with resources
 mod bind_group_creation_tests {
-    use super::*;
     use pollster::FutureExt;
     use std::num::NonZeroU64;
     use wgpu::ShaderStages;
@@ -531,8 +530,8 @@ mod bind_group_creation_tests {
                 BindingResource::Buffer(BufferBinding::entire(&buffer)),
             ));
 
-        let bind_group = bind_group_desc.create(&device).unwrap();
-        assert!(std::ptr::addr_of!(bind_group) as usize != 0);
+        let _bind_group = bind_group_desc.create(&device).unwrap();
+        // Successfully created bind group - wgpu::BindGroup has no public fields to verify
     }
 
     #[test]
@@ -571,8 +570,8 @@ mod bind_group_creation_tests {
                 BindingResource::Buffer(BufferBinding::entire(&buffer)),
             ));
 
-        let bind_group = bind_group_desc.create(&device).unwrap();
-        assert!(std::ptr::addr_of!(bind_group) as usize != 0);
+        let _bind_group = bind_group_desc.create(&device).unwrap();
+        // Successfully created bind group - wgpu::BindGroup has no public fields to verify
     }
 
     #[test]
@@ -622,8 +621,8 @@ mod bind_group_creation_tests {
             ))
             .with_entry(BindGroupEntry::new(1, BindingResource::Sampler(&sampler)));
 
-        let bind_group = bind_group_desc.create(&device).unwrap();
-        assert!(std::ptr::addr_of!(bind_group) as usize != 0);
+        let _bind_group = bind_group_desc.create(&device).unwrap();
+        // Successfully created bind group - wgpu::BindGroup has no public fields to verify
     }
 
     #[test]
@@ -665,8 +664,8 @@ mod bind_group_creation_tests {
                 )),
             ));
 
-        let bind_group = bind_group_desc.create(&device).unwrap();
-        assert!(std::ptr::addr_of!(bind_group) as usize != 0);
+        let _bind_group = bind_group_desc.create(&device).unwrap();
+        // Successfully created bind group - wgpu::BindGroup has no public fields to verify
     }
 
     #[test]
@@ -707,8 +706,8 @@ mod bind_group_creation_tests {
                 )),
             ));
 
-        let bind_group = bind_group_desc.create(&device).unwrap();
-        assert!(std::ptr::addr_of!(bind_group) as usize != 0);
+        let _bind_group = bind_group_desc.create(&device).unwrap();
+        // Successfully created bind group - wgpu::BindGroup has no public fields to verify
     }
 
     #[test]
@@ -767,8 +766,8 @@ mod bind_group_creation_tests {
                 BindingResource::Buffer(BufferBinding::entire(&storage_buffer)),
             ));
 
-        let bind_group = bind_group_desc.create(&device).unwrap();
-        assert!(std::ptr::addr_of!(bind_group) as usize != 0);
+        let _bind_group = bind_group_desc.create(&device).unwrap();
+        // Successfully created bind group - wgpu::BindGroup has no public fields to verify
     }
 
     #[test]
@@ -855,8 +854,8 @@ mod bind_group_creation_tests {
             ))
             .with_entry(BindGroupEntry::new(3, BindingResource::Sampler(&sampler)));
 
-        let bind_group = bind_group_desc.create(&device).unwrap();
-        assert!(std::ptr::addr_of!(bind_group) as usize != 0);
+        let _bind_group = bind_group_desc.create(&device).unwrap();
+        // Successfully created bind group - wgpu::BindGroup has no public fields to verify
     }
 
     #[test]

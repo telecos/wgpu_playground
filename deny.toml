@@ -1,14 +1,9 @@
 # This configuration file is used by cargo-deny to check dependencies
-# for security vulnerabilities, license compliance, and banned crates.
+# for license compliance and security policy enforcement.
 
 # See https://embarkstudios.github.io/cargo-deny/ for more information
 
-[advisories]
-# Ignore specific advisories
-ignore = [
-    # Ignored due to CVSS 4.0 parsing error in current cargo-deny version
-    "RUSTSEC-2026-0003",
-]
+# Note: Advisories are checked by cargo-audit workflow instead
 
 [licenses]
 # List of explicitly allowed licenses

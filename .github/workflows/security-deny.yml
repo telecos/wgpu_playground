@@ -30,3 +30,4 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
         with:
           rust-version: "1.85.0"
+          command-arguments: "licenses bans sources"

@@ -1,0 +1,118 @@
+# This configuration file is used by cargo-deny to check dependencies
+# for license compliance and security policy enforcement.
+
+# See https://embarkstudios.github.io/cargo-deny/ for more information
+
+# Note: Advisories are checked by cargo-audit workflow instead
+
+[licenses]
+# List of explicitly allowed licenses
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "CC0-1.0",
+    "ISC",
+    "OFL-1.1",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "Zlib",
+]
+# The confidence threshold for detecting a license from license text.
+# Between 0.0 and 1.0. The higher the value, the more confident the license must be.
+confidence-threshold = 0.8
+# Crates that are allowed even if their license is not in the allow list
+exceptions = [
+    # epaint_default_fonts uses UFL-1.0 for Ubuntu font files
+    { allow = ["LicenseRef-UFL-1.0"], crate = "epaint_default_fonts" },
+]
+
+[bans]
+# Lint level for when multiple versions of the same crate are detected
+multiple-versions = "warn"
+# Lint level for when a crate version requirement is `*`
+wildcards = "warn"
+# Allow external dependencies to use their default features
+external-default-features = "allow"
+# Do not allow wildcard paths in dependencies
+allow-wildcard-paths = false
+# List of crates that are not allowed to be used
+deny = [
+    # Add banned crates here if needed
+]
+# Certain crates/versions that will be skipped when doing duplicate detection.
+skip = [
+    # bitflags is transitioning from 1.x to 2.x across the ecosystem
+    { crate = "bitflags@1", reason = "Some dependencies still use bitflags 1.x" },
+    # calloop is transitioning from 0.13 to 0.14 across the ecosystem
+    { crate = "calloop@0.13", reason = "Some dependencies still use calloop 0.13" },
+    # calloop-wayland-source is transitioning from 0.3 to 0.4 with calloop
+    { crate = "calloop-wayland-source@0.3", reason = "Some dependencies still use calloop-wayland-source 0.3" },
+    # cfg_aliases is transitioning from 0.1 to 0.2
+    { crate = "cfg_aliases@0.1", reason = "Some dependencies still use cfg_aliases 0.1" },
+    # core-foundation is transitioning from 0.9 to 0.10
+    { crate = "core-foundation@0.9", reason = "Some dependencies still use core-foundation 0.9" },
+    # hashbrown is transitioning from 0.15 to 0.16
+    { crate = "hashbrown@0.15", reason = "Some dependencies still use hashbrown 0.15" },
+    # linux-raw-sys is transitioning from 0.4 to 0.11
+    { crate = "linux-raw-sys@0.4", reason = "Some dependencies still use linux-raw-sys 0.4" },
+    # ndk-sys is transitioning versions
+    { crate = "ndk-sys@0.5", reason = "Some dependencies still use ndk-sys 0.5" },
+    # objc2 is transitioning from 0.5 to 0.6
+    { crate = "objc2@0.5", reason = "Some dependencies still use objc2 0.5" },
+    # objc2-app-kit is transitioning from 0.2 to 0.3
+    { crate = "objc2-app-kit@0.2", reason = "Some dependencies still use objc2-app-kit 0.2" },
+    # objc2-foundation is transitioning from 0.2 to 0.3
+    { crate = "objc2-foundation@0.2", reason = "Some dependencies still use objc2-foundation 0.2" },
+    # redox_syscall has multiple versions across the ecosystem
+    { crate = "redox_syscall@0.4", reason = "Some dependencies still use redox_syscall 0.4" },
+    { crate = "redox_syscall@0.5", reason = "Some dependencies still use redox_syscall 0.5" },
+    # rustc-hash is transitioning from 1.x to 2.x
+    { crate = "rustc-hash@1", reason = "Some dependencies still use rustc-hash 1.x" },
+    # rustix is transitioning from 0.38 to 1.x
+    { crate = "rustix@0.38", reason = "Some dependencies still use rustix 0.38" },
+    # smithay-client-toolkit is transitioning from 0.19 to 0.20
+    { crate = "smithay-client-toolkit@0.19", reason = "Some dependencies still use smithay-client-toolkit 0.19" },
+    # syn is transitioning from 1.x to 2.x
+    { crate = "syn@1", reason = "Some dependencies still use syn 1.x" },
+    # thiserror is transitioning from 1.x to 2.x
+    { crate = "thiserror@1", reason = "Some dependencies still use thiserror 1.x" },
+    # thiserror-impl is transitioning from 1.x to 2.x with thiserror
+    { crate = "thiserror-impl@1", reason = "Some dependencies still use thiserror-impl 1.x" },
+    # Windows crates have multiple versions across the ecosystem
+    { crate = "windows-targets@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows-targets@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_aarch64_gnullvm@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_aarch64_msvc@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_aarch64_msvc@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_gnu@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_gnu@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_gnullvm@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_msvc@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_msvc@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_gnu@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_gnu@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_gnullvm@0.52", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_msvc@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_x86_64_msvc@0.52", reason = "Legacy Windows support crates" },
+]
+# Similarly named crates that are different but allowed
+skip-tree = [
+    # Add crate names and versions to skip here if needed
+]
+
+[sources]
+# Lint level for what to happen when a crate from a crate registry that is not
+# in the allow list is encountered
+unknown-registry = "deny"
+# Lint level for what to happen when a crate from a git repository that is not
+# in the allow list is encountered
+unknown-git = "deny"
+# List of URLs for allowed crate registries. Defaults to the crates.io index
+# if not specified.
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+# List of URLs for allowed Git repositories
+allow-git = []

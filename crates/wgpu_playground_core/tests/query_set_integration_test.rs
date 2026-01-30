@@ -63,11 +63,14 @@ async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
 fn test_timestamp_query_set_creation() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device_with_timestamp().await else {
-            eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
+            eprintln!(
+                "Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported"
+            );
             return;
         };
 
-        let descriptor = QuerySetDescriptor::new(Some("timestamp_queries"), QueryType::Timestamp, 4);
+        let descriptor =
+            QuerySetDescriptor::new(Some("timestamp_queries"), QueryType::Timestamp, 4);
 
         let query_set = descriptor.create_query_set(&device).unwrap();
         // The query set is successfully created
@@ -84,7 +87,8 @@ fn test_occlusion_query_set_creation() {
             return;
         };
 
-        let descriptor = QuerySetDescriptor::new(Some("occlusion_queries"), QueryType::Occlusion, 2);
+        let descriptor =
+            QuerySetDescriptor::new(Some("occlusion_queries"), QueryType::Occlusion, 2);
 
         let query_set = descriptor.create_query_set(&device).unwrap();
         assert_eq!(descriptor.count(), 2);
@@ -111,7 +115,9 @@ fn test_query_set_creation_with_zero_count() {
 fn test_timestamp_write() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device_with_timestamp().await else {
-            eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
+            eprintln!(
+                "Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported"
+            );
             return;
         };
 
@@ -136,7 +142,9 @@ fn test_timestamp_write() {
 fn test_query_set_resolution() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
-            eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
+            eprintln!(
+                "Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported"
+            );
             return;
         };
 
@@ -170,10 +178,10 @@ fn test_query_set_resolution() {
         // Map buffer and verify we can read it
         BufferOps::map_read(&buffer).await.unwrap();
         let view = BufferOps::get_mapped_range(&buffer);
-        
+
         // Verify the buffer has the expected size
         assert_eq!(view.len(), 16);
-        
+
         drop(view);
         BufferOps::unmap(&buffer);
     });
@@ -183,7 +191,9 @@ fn test_query_set_resolution() {
 fn test_query_set_multiple_resolutions() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
-            eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
+            eprintln!(
+                "Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported"
+            );
             return;
         };
 
@@ -219,10 +229,10 @@ fn test_query_set_multiple_resolutions() {
         // Map buffer and verify we can read it
         BufferOps::map_read(&buffer).await.unwrap();
         let view = BufferOps::get_mapped_range(&buffer);
-        
+
         // Verify the buffer has the expected size
         assert_eq!(view.len(), 32);
-        
+
         drop(view);
         BufferOps::unmap(&buffer);
     });
@@ -232,7 +242,9 @@ fn test_query_set_multiple_resolutions() {
 fn test_query_set_partial_resolution() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
-            eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
+            eprintln!(
+                "Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported"
+            );
             return;
         };
 
@@ -268,10 +280,10 @@ fn test_query_set_partial_resolution() {
         // Map buffer and verify we can read it
         BufferOps::map_read(&buffer).await.unwrap();
         let view = BufferOps::get_mapped_range(&buffer);
-        
+
         // Verify the buffer has the expected size
         assert_eq!(view.len(), 16);
-        
+
         drop(view);
         BufferOps::unmap(&buffer);
     });
@@ -281,7 +293,9 @@ fn test_query_set_partial_resolution() {
 fn test_query_set_buffer_offset() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
-            eprintln!("Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported");
+            eprintln!(
+                "Skipping test: No GPU adapter available or TIMESTAMP_QUERY feature not supported"
+            );
             return;
         };
 
@@ -315,10 +329,10 @@ fn test_query_set_buffer_offset() {
         // Map buffer and verify we can read it
         BufferOps::map_read(&buffer).await.unwrap();
         let view = BufferOps::get_mapped_range(&buffer);
-        
+
         // Verify the buffer has the expected size
         assert_eq!(view.len(), 32);
-        
+
         drop(view);
         BufferOps::unmap(&buffer);
     });

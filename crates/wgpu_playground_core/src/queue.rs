@@ -1,4 +1,4 @@
-use wgpu::{CommandBuffer, Extent3d, ImageCopyTexture, ImageDataLayout, Queue};
+use wgpu::{CommandBuffer, Device, Extent3d, ImageCopyTexture, ImageDataLayout, Queue};
 
 /// Error types for queue operations
 ///
@@ -36,12 +36,27 @@ impl std::error::Error for QueueError {}
 /// Abstraction for GPU queue operations
 pub struct QueueOps<'a> {
     queue: &'a Queue,
+    device: Option<&'a Device>,
 }
 
 impl<'a> QueueOps<'a> {
     /// Create a new queue operations wrapper
     pub fn new(queue: &'a Queue) -> Self {
-        Self { queue }
+        Self {
+            queue,
+            device: None,
+        }
+    }
+
+    /// Create a new queue operations wrapper with device access
+    ///
+    /// This allows the queue operations to create command encoders for operations
+    /// like texture copying.
+    pub fn with_device(queue: &'a Queue, device: &'a Device) -> Self {
+        Self {
+            queue,
+            device: Some(device),
+        }
     }
 
     /// Submit command buffers to the queue for execution
@@ -158,6 +173,73 @@ impl<'a> QueueOps<'a> {
     pub fn inner(&self) -> &Queue {
         self.queue
     }
+
+    /// Copy texture to texture
+    ///
+    /// This method creates a command encoder, performs the copy operation,
+    /// and submits it to the queue. Requires that the QueueOps was created
+    /// with `with_device()`.
+    ///
+    /// # Arguments
+    ///
+    /// * `source` - Source texture copy information (texture, mip level, origin, aspect)
+    /// * `destination` - Destination texture copy information (texture, mip level, origin, aspect)
+    /// * `copy_size` - Size of the region to copy
+    ///
+    /// # Returns
+    ///
+    /// Returns a submission index
+    ///
+    /// # Panics
+    ///
+    /// Panics if the QueueOps was not created with a device reference
+    /// Panics if the source texture was not created with COPY_SRC usage flag
+    /// Panics if the destination texture was not created with COPY_DST usage flag
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use wgpu_playground_core::queue::QueueOps;
+    /// # let device: &wgpu::Device = todo!();
+    /// # let queue: &wgpu::Queue = todo!();
+    /// # let src_texture: &wgpu::Texture = todo!();
+    /// # let dst_texture: &wgpu::Texture = todo!();
+    /// let queue_ops = QueueOps::with_device(queue, device);
+    /// queue_ops.copy_texture_to_texture(
+    ///     wgpu::ImageCopyTexture {
+    ///         texture: src_texture,
+    ///         mip_level: 0,
+    ///         origin: wgpu::Origin3d::ZERO,
+    ///         aspect: wgpu::TextureAspect::All,
+    ///     },
+    ///     wgpu::ImageCopyTexture {
+    ///         texture: dst_texture,
+    ///         mip_level: 0,
+    ///         origin: wgpu::Origin3d::ZERO,
+    ///         aspect: wgpu::TextureAspect::All,
+    ///     },
+    ///     wgpu::Extent3d {
+    ///         width: 256,
+    ///         height: 256,
+    ///         depth_or_array_layers: 1,
+    ///     },
+    /// );
+    /// ```
+    pub fn copy_texture_to_texture(
+        &self,
+        source: ImageCopyTexture,
+        destination: ImageCopyTexture,
+        copy_size: Extent3d,
+    ) -> wgpu::SubmissionIndex {
+        let device = self
+            .device
+            .expect("QueueOps must be created with a device to use copy_texture_to_texture");
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Texture Copy Encoder"),
+        });
+        encoder.copy_texture_to_texture(source, destination, copy_size);
+        self.queue.submit(std::iter::once(encoder.finish()))
+    }
 }
 
 /// Helper function to submit a single command buffer
@@ -213,6 +295,72 @@ pub fn write_buffer_typed<T: bytemuck::Pod>(
     data: &[T],
 ) {
     queue.write_buffer(buffer, offset, bytemuck::cast_slice(data));
+}
+
+/// Helper function to copy texture to texture
+///
+/// This function creates a command encoder, performs the copy operation,
+/// and submits it to the queue.
+///
+/// # Arguments
+///
+/// * `device` - The GPU device
+/// * `queue` - The GPU queue
+/// * `source` - Source texture copy information (texture, mip level, origin, aspect)
+/// * `destination` - Destination texture copy information (texture, mip level, origin, aspect)
+/// * `copy_size` - Size of the region to copy
+///
+/// # Returns
+///
+/// Returns a submission index
+///
+/// # Panics
+///
+/// Panics if the source texture was not created with COPY_SRC usage flag
+/// or if the destination texture was not created with COPY_DST usage flag
+///
+/// # Example
+///
+/// ```no_run
+/// # use wgpu_playground_core::queue::copy_texture_to_texture;
+/// # let device: &wgpu::Device = todo!();
+/// # let queue: &wgpu::Queue = todo!();
+/// # let src_texture: &wgpu::Texture = todo!();
+/// # let dst_texture: &wgpu::Texture = todo!();
+/// copy_texture_to_texture(
+///     device,
+///     queue,
+///     wgpu::ImageCopyTexture {
+///         texture: src_texture,
+///         mip_level: 0,
+///         origin: wgpu::Origin3d::ZERO,
+///         aspect: wgpu::TextureAspect::All,
+///     },
+///     wgpu::ImageCopyTexture {
+///         texture: dst_texture,
+///         mip_level: 0,
+///         origin: wgpu::Origin3d::ZERO,
+///         aspect: wgpu::TextureAspect::All,
+///     },
+///     wgpu::Extent3d {
+///         width: 256,
+///         height: 256,
+///         depth_or_array_layers: 1,
+///     },
+/// );
+/// ```
+pub fn copy_texture_to_texture(
+    device: &Device,
+    queue: &Queue,
+    source: ImageCopyTexture,
+    destination: ImageCopyTexture,
+    copy_size: Extent3d,
+) -> wgpu::SubmissionIndex {
+    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+        label: Some("Texture Copy Encoder"),
+    });
+    encoder.copy_texture_to_texture(source, destination, copy_size);
+    queue.submit(std::iter::once(encoder.finish()))
 }
 
 #[cfg(test)]

@@ -325,7 +325,7 @@ impl TextureViewBuilder {
     ///
     /// # Arguments
     /// * `base_mip_level` - The first mip level to include
-    /// * `mip_level_count` - Number of mip levels to include (None for all remaining)
+    /// * `mip_level_count` - Number of mip levels to include
     pub fn with_mip_level_range(mut self, base_mip_level: u32, mip_level_count: u32) -> Self {
         self.base_mip_level = base_mip_level;
         self.mip_level_count = Some(mip_level_count);
@@ -336,7 +336,7 @@ impl TextureViewBuilder {
     ///
     /// # Arguments
     /// * `base_array_layer` - The first array layer to include
-    /// * `array_layer_count` - Number of array layers to include (None for all remaining)
+    /// * `array_layer_count` - Number of array layers to include
     pub fn with_array_layer_range(
         mut self,
         base_array_layer: u32,

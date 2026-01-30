@@ -316,7 +316,7 @@ fn test_render_pass_draw_commands() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test draw command (without pipeline - just checking API)
             render_pass.draw(0..3, 0..1);
         }
@@ -361,7 +361,7 @@ fn test_render_pass_indexed_draw() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test indexed draw command
             render_pass.draw_indexed(0..6, 0, 0..1);
         }
@@ -413,7 +413,7 @@ fn test_render_pass_indirect_draw() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test indirect draw command
             render_pass.draw_indirect(&indirect_buffer, 0);
         }
@@ -465,7 +465,7 @@ fn test_render_pass_indexed_indirect_draw() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test indexed indirect draw command
             render_pass.draw_indexed_indirect(&indirect_buffer, 0);
         }
@@ -520,10 +520,10 @@ fn test_render_pass_viewport_and_scissor() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test viewport
             render_pass.set_viewport(0.0, 0.0, 256.0, 256.0, 0.0, 1.0);
-            
+
             // Test scissor rect
             render_pass.set_scissor_rect(0, 0, 256, 256);
         }
@@ -574,7 +574,7 @@ fn test_render_pass_set_vertex_buffer() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test set_vertex_buffer
             render_pass.set_vertex_buffer(0, &vertex_buffer, 0, None);
         }
@@ -625,7 +625,7 @@ fn test_render_pass_set_index_buffer() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test set_index_buffer
             render_pass.set_index_buffer(&index_buffer, IndexFormat::Uint32, 0, None);
         }
@@ -680,7 +680,7 @@ fn test_render_pass_set_bind_group() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test set_bind_group
             render_pass.set_bind_group(0, &bind_group, &[]);
         }
@@ -723,10 +723,10 @@ fn test_render_pass_stencil_and_blend() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test set_stencil_reference
             render_pass.set_stencil_reference(0xFF);
-            
+
             // Test set_blend_constant
             render_pass.set_blend_constant(Color::WHITE);
         }
@@ -814,7 +814,7 @@ fn test_render_pass_set_pipeline() {
 
         {
             let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
-            
+
             // Test set_pipeline
             render_pass.set_pipeline(&pipeline);
         }

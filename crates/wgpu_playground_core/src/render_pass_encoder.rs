@@ -480,12 +480,7 @@ impl<'a> RenderPassEncoder<'a> {
     /// * `index` - The bind group index
     /// * `bind_group` - The bind group to bind
     /// * `offsets` - Dynamic offsets for dynamic uniform/storage buffers
-    pub fn set_bind_group(
-        &mut self,
-        index: u32,
-        bind_group: &'a wgpu::BindGroup,
-        offsets: &[u32],
-    ) {
+    pub fn set_bind_group(&mut self, index: u32, bind_group: &'a wgpu::BindGroup, offsets: &[u32]) {
         self.pass.set_bind_group(index, bind_group, offsets);
     }
 

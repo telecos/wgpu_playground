@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # Fast format check - runs first and fails fast if formatting is wrong
+  fmt:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+  # Clippy lints - runs in parallel with tests
+  clippy:
+    name: Clippy Lints
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "cargo-deps"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  # Check compilation - fastest check without building
+  check:
+    name: Cargo Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "cargo-deps"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      
+      - name: Check workspace
+        run: cargo check --workspace --all-targets --all-features
+
+  # Run tests
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "cargo-deps"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      
+      - name: Run tests
+        run: cargo test --workspace --all-features
+
+  # Build the project
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [check]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "cargo-deps"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      
+      - name: Build workspace
+        run: cargo build --workspace --all-features --release
+
+  # Combined status check - all jobs must pass
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy, check, test, build]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.fmt.result }}" != "success" ] || \
+             [ "${{ needs.clippy.result }}" != "success" ] || \
+             [ "${{ needs.check.result }}" != "success" ] || \
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            echo "One or more CI jobs failed"
+            exit 1
+          fi
+          echo "All CI jobs passed successfully"

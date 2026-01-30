@@ -88,8 +88,8 @@ fn test_render_pipeline_with_blending() {
     let target = ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb)
         .with_blend(BlendState::alpha_blending());
 
-    let descriptor = RenderPipelineDescriptor::new(Some("blend_pipeline"))
-        .with_fragment_target(target);
+    let descriptor =
+        RenderPipelineDescriptor::new(Some("blend_pipeline")).with_fragment_target(target);
 
     assert!(descriptor.fragment_targets()[0].blend.is_some());
     assert!(descriptor.validate().is_ok());
@@ -217,9 +217,18 @@ fn main() -> @location(0) vec4<f32> {
             .with_fragment_target(ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb));
 
         // Create the pipeline
-        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, Some(&fragment_shader));
+        let result = descriptor.create_pipeline(
+            &device,
+            &pipeline_layout,
+            &vertex_shader,
+            Some(&fragment_shader),
+        );
 
-        assert!(result.is_ok(), "Failed to create render pipeline: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to create render pipeline: {:?}",
+            result.err()
+        );
     });
 }
 
@@ -285,9 +294,18 @@ fn main(@location(0) color: vec4<f32>) -> @location(0) vec4<f32> {
             .with_fragment_target(ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb));
 
         // Create the pipeline
-        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, Some(&fragment_shader));
+        let result = descriptor.create_pipeline(
+            &device,
+            &pipeline_layout,
+            &vertex_shader,
+            Some(&fragment_shader),
+        );
 
-        assert!(result.is_ok(), "Failed to create render pipeline with vertex attributes: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to create render pipeline with vertex attributes: {:?}",
+            result.err()
+        );
     });
 }
 
@@ -338,9 +356,18 @@ fn main() -> @location(0) vec4<f32> {
             .with_depth_stencil(depth_stencil)
             .with_fragment_target(ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb));
 
-        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, Some(&fragment_shader));
+        let result = descriptor.create_pipeline(
+            &device,
+            &pipeline_layout,
+            &vertex_shader,
+            Some(&fragment_shader),
+        );
 
-        assert!(result.is_ok(), "Failed to create render pipeline with depth testing: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to create render pipeline with depth testing: {:?}",
+            result.err()
+        );
     });
 }
 
@@ -428,8 +455,17 @@ fn main(@location(0) normal: vec3<f32>, @location(1) uv: vec2<f32>) -> @location
             .with_multisample(multisample)
             .with_fragment_target(target);
 
-        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, Some(&fragment_shader));
+        let result = descriptor.create_pipeline(
+            &device,
+            &pipeline_layout,
+            &vertex_shader,
+            Some(&fragment_shader),
+        );
 
-        assert!(result.is_ok(), "Failed to create comprehensive render pipeline: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to create comprehensive render pipeline: {:?}",
+            result.err()
+        );
     });
 }

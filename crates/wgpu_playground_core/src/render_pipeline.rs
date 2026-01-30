@@ -227,12 +227,10 @@ impl VertexBufferLayout {
         // Check that offsets don't exceed stride
         for attr in &self.attributes {
             if attr.offset + attr.format.size() > self.array_stride {
-                return Err(RenderPipelineError::InvalidVertexBufferLayout(
-                    format!(
-                        "Attribute at location {} extends beyond array stride",
-                        attr.shader_location
-                    ),
-                ));
+                return Err(RenderPipelineError::InvalidVertexBufferLayout(format!(
+                    "Attribute at location {} extends beyond array stride",
+                    attr.shader_location
+                )));
             }
         }
 
@@ -1426,7 +1424,13 @@ mod tests {
         let all = ColorWrites::ALL;
 
         assert_ne!(writes.bits, 0);
-        assert_eq!(all.bits, ColorWrites::RED.bits | ColorWrites::GREEN.bits | ColorWrites::BLUE.bits | ColorWrites::ALPHA.bits);
+        assert_eq!(
+            all.bits,
+            ColorWrites::RED.bits
+                | ColorWrites::GREEN.bits
+                | ColorWrites::BLUE.bits
+                | ColorWrites::ALPHA.bits
+        );
     }
 
     #[test]

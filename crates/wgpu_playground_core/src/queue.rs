@@ -1,6 +1,10 @@
 use wgpu::{CommandBuffer, ImageCopyTexture, ImageDataLayout, Queue, Extent3d};
 
 /// Error types for queue operations
+///
+/// Note: These error types are reserved for future use when implementing
+/// more advanced queue operations with error handling. Current operations
+/// use panic for errors as per wgpu's API design.
 #[derive(Debug)]
 pub enum QueueError {
     /// Buffer write operation failed
@@ -67,7 +71,10 @@ impl<'a> QueueOps<'a> {
         self.queue.submit(command_buffers)
     }
 
-    /// Write data to a GPU buffer with proper synchronization
+    /// Write data to a GPU buffer
+    ///
+    /// This operation is asynchronous and queued for execution on the GPU.
+    /// Use `device.poll()` or similar mechanisms for explicit synchronization if needed.
     ///
     /// # Arguments
     ///
@@ -93,7 +100,10 @@ impl<'a> QueueOps<'a> {
         self.queue.write_buffer(buffer, offset, data);
     }
 
-    /// Write data to a GPU texture with proper synchronization
+    /// Write data to a GPU texture
+    ///
+    /// This operation is asynchronous and queued for execution on the GPU.
+    /// Use `device.poll()` or similar mechanisms for explicit synchronization if needed.
     ///
     /// # Arguments
     ///

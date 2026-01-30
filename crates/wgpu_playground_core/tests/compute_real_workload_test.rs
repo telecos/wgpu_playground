@@ -215,7 +215,10 @@ fn test_vector_addition_compute_shader() {
             );
         }
 
-        println!("Vector addition test passed! All {} elements computed correctly.", size);
+        println!(
+            "Vector addition test passed! All {} elements computed correctly.",
+            size
+        );
     });
 }
 
@@ -393,9 +396,13 @@ fn test_matrix_multiply_compute_shader() {
             compute_pass.dispatch_workgroups(1, 1, 1); // Single workgroup of 4x4 threads
         }
 
-        encoder
-            .inner_mut()
-            .copy_buffer_to_buffer(&buffer_result, 0, &staging_buffer, 0, buffer_size);
+        encoder.inner_mut().copy_buffer_to_buffer(
+            &buffer_result,
+            0,
+            &staging_buffer,
+            0,
+            buffer_size,
+        );
 
         let command_buffer = encoder.finish();
         let queue_ops = QueueOps::new(&queue);

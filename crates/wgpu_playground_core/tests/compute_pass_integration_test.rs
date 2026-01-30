@@ -171,8 +171,8 @@ fn test_compute_pass_with_bind_group() {
         });
 
         // Create compute pipeline with layout
-        let descriptor = ComputePipelineDescriptor::new(&shader_module, "main")
-            .with_layout(&pipeline_layout);
+        let descriptor =
+            ComputePipelineDescriptor::new(&shader_module, "main").with_layout(&pipeline_layout);
         let pipeline = create_compute_pipeline(&device, &descriptor);
 
         // Create command encoder and compute pass

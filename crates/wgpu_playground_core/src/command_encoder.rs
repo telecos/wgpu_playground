@@ -188,7 +188,11 @@ impl<'a> ComputePassEncoderOps<'a> {
     /// compute_pass.set_pipeline(pipeline);
     /// compute_pass.dispatch_workgroups_indirect(indirect_buffer, 0);
     /// ```
-    pub fn dispatch_workgroups_indirect(&mut self, indirect_buffer: &'a Buffer, indirect_offset: u64) {
+    pub fn dispatch_workgroups_indirect(
+        &mut self,
+        indirect_buffer: &'a Buffer,
+        indirect_offset: u64,
+    ) {
         self.pass
             .dispatch_workgroups_indirect(indirect_buffer, indirect_offset);
     }

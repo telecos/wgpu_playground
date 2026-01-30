@@ -4,6 +4,7 @@ pub mod bind_group;
 pub mod buffer;
 pub mod compute;
 pub mod device_info;
+pub mod pipeline_layout;
 pub mod queue;
 pub mod render_pipeline;
 pub mod rendering;

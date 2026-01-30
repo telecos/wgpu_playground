@@ -58,6 +58,15 @@ skip = [
     { crate = "linux-raw-sys@0.4", reason = "Some dependencies still use linux-raw-sys 0.4" },
     # ndk-sys is transitioning versions
     { crate = "ndk-sys@0.5", reason = "Some dependencies still use ndk-sys 0.5" },
+    # objc2 is transitioning from 0.5 to 0.6
+    { crate = "objc2@0.5", reason = "Some dependencies still use objc2 0.5" },
+    # objc2-app-kit is transitioning from 0.2 to 0.3
+    { crate = "objc2-app-kit@0.2", reason = "Some dependencies still use objc2-app-kit 0.2" },
+    # objc2-foundation is transitioning from 0.2 to 0.3
+    { crate = "objc2-foundation@0.2", reason = "Some dependencies still use objc2-foundation 0.2" },
+    # redox_syscall has multiple versions across the ecosystem
+    { crate = "redox_syscall@0.4", reason = "Some dependencies still use redox_syscall 0.4" },
+    { crate = "redox_syscall@0.5", reason = "Some dependencies still use redox_syscall 0.5" },
     # rustc-hash is transitioning from 1.x to 2.x
     { crate = "rustc-hash@1", reason = "Some dependencies still use rustc-hash 1.x" },
     # rustix is transitioning from 0.38 to 1.x
@@ -68,6 +77,8 @@ skip = [
     { crate = "syn@1", reason = "Some dependencies still use syn 1.x" },
     # thiserror is transitioning from 1.x to 2.x
     { crate = "thiserror@1", reason = "Some dependencies still use thiserror 1.x" },
+    # thiserror-impl is transitioning from 1.x to 2.x with thiserror
+    { crate = "thiserror-impl@1", reason = "Some dependencies still use thiserror-impl 1.x" },
     # Windows crates have multiple versions across the ecosystem
     { crate = "windows_i686_msvc@0.42", reason = "Legacy Windows support crates" },
     { crate = "windows_i686_msvc@0.52", reason = "Legacy Windows support crates" },

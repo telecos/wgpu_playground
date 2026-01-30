@@ -1,12 +1,24 @@
 use wgpu::{Adapter, Backends, Features, Instance, Limits, PowerPreference, RequestAdapterOptions};
 
 /// Options for requesting a GPU adapter
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct AdapterOptions {
     /// Power preference for adapter selection
     pub power_preference: PowerPreference,
     /// Whether to force the use of a fallback/software adapter
     pub force_fallback_adapter: bool,
+    /// Backend(s) to use (Vulkan, Metal, DX12, etc.)
+    pub backends: Backends,
+}
+
+impl Default for AdapterOptions {
+    fn default() -> Self {
+        Self {
+            power_preference: PowerPreference::default(),
+            force_fallback_adapter: false,
+            backends: Backends::all(),
+        }
+    }
 }
 
 impl AdapterOptions {
@@ -15,6 +27,7 @@ impl AdapterOptions {
         Self {
             power_preference: PowerPreference::HighPerformance,
             force_fallback_adapter: false,
+            backends: Backends::all(),
         }
     }
 
@@ -23,6 +36,7 @@ impl AdapterOptions {
         Self {
             power_preference: PowerPreference::LowPower,
             force_fallback_adapter: false,
+            backends: Backends::all(),
         }
     }
 
@@ -31,6 +45,7 @@ impl AdapterOptions {
         Self {
             power_preference: PowerPreference::default(),
             force_fallback_adapter: true,
+            backends: Backends::all(),
         }
     }
 
@@ -44,6 +59,21 @@ impl AdapterOptions {
     pub fn with_fallback_adapter(mut self, force_fallback: bool) -> Self {
         self.force_fallback_adapter = force_fallback;
         self
+    }
+
+    /// Set which backends to use
+    pub fn with_backends(mut self, backends: Backends) -> Self {
+        self.backends = backends;
+        self
+    }
+
+    /// Create adapter options with a specific backend
+    pub fn with_backend(backend: Backends) -> Self {
+        Self {
+            power_preference: PowerPreference::default(),
+            force_fallback_adapter: false,
+            backends: backend,
+        }
     }
 }
 
@@ -115,14 +145,60 @@ impl AdapterInfo {
             self.name, self.vendor, self.device, self.device_type, self.driver, self.driver_info, self.backend
         )
     }
+
+    /// Get backend name as a string
+    pub fn backend_name(&self) -> &'static str {
+        backend_to_str(&self.backend)
+    }
+}
+
+/// Convert a Backend to a human-readable string
+pub fn backend_to_str(backend: &wgpu::Backend) -> &'static str {
+    match backend {
+        wgpu::Backend::Empty => "Empty",
+        wgpu::Backend::Vulkan => "Vulkan",
+        wgpu::Backend::Metal => "Metal",
+        wgpu::Backend::Dx12 => "DirectX 12",
+        wgpu::Backend::Gl => "OpenGL",
+        wgpu::Backend::BrowserWebGpu => "Browser WebGPU",
+    }
+}
+
+/// Parse backend name from string
+pub fn parse_backend(name: &str) -> Option<Backends> {
+    match name.to_lowercase().as_str() {
+        "vulkan" | "vk" => Some(Backends::VULKAN),
+        "metal" | "mtl" => Some(Backends::METAL),
+        "dx12" | "d3d12" | "directx12" | "directx" => Some(Backends::DX12),
+        "gl" | "opengl" => Some(Backends::GL),
+        "webgpu" | "browser" => Some(Backends::BROWSER_WEBGPU),
+        "primary" => Some(Backends::PRIMARY),
+        "all" => Some(Backends::all()),
+        _ => None,
+    }
+}
+
+/// Get list of available backend names
+pub fn available_backends() -> Vec<&'static str> {
+    vec!["Vulkan", "Metal", "DirectX 12", "OpenGL", "Browser WebGPU", "Primary", "All"]
+}
+
+/// Create a wgpu Instance with the specified backends
+pub fn create_instance(backends: Backends) -> Instance {
+    Instance::new(wgpu::InstanceDescriptor {
+        backends,
+        ..Default::default()
+    })
+}
+
+/// Create a wgpu Instance with backends from AdapterOptions
+pub fn create_instance_with_options(options: &AdapterOptions) -> Instance {
+    create_instance(options.backends)
 }
 
 /// Enumerate all available GPU adapters
 pub fn enumerate_adapters(backends: Backends) -> Vec<AdapterInfo> {
-    let instance = Instance::new(wgpu::InstanceDescriptor {
-        backends,
-        ..Default::default()
-    });
+    let instance = create_instance(backends);
 
     instance
         .enumerate_adapters(backends)
@@ -203,10 +279,42 @@ mod tests {
     fn test_adapter_options_builder() {
         let options = AdapterOptions::default()
             .with_power_preference(PowerPreference::HighPerformance)
-            .with_fallback_adapter(true);
+            .with_fallback_adapter(true)
+            .with_backends(Backends::VULKAN);
 
         assert_eq!(options.power_preference, PowerPreference::HighPerformance);
         assert!(options.force_fallback_adapter);
+        assert_eq!(options.backends, Backends::VULKAN);
+    }
+
+    #[test]
+    fn test_adapter_options_with_backend() {
+        let options = AdapterOptions::with_backend(Backends::METAL);
+        assert_eq!(options.backends, Backends::METAL);
+    }
+
+    #[test]
+    fn test_parse_backend() {
+        assert_eq!(parse_backend("vulkan"), Some(Backends::VULKAN));
+        assert_eq!(parse_backend("vk"), Some(Backends::VULKAN));
+        assert_eq!(parse_backend("metal"), Some(Backends::METAL));
+        assert_eq!(parse_backend("mtl"), Some(Backends::METAL));
+        assert_eq!(parse_backend("dx12"), Some(Backends::DX12));
+        assert_eq!(parse_backend("d3d12"), Some(Backends::DX12));
+        assert_eq!(parse_backend("gl"), Some(Backends::GL));
+        assert_eq!(parse_backend("opengl"), Some(Backends::GL));
+        assert_eq!(parse_backend("primary"), Some(Backends::PRIMARY));
+        assert_eq!(parse_backend("all"), Some(Backends::all()));
+        assert_eq!(parse_backend("invalid"), None);
+    }
+
+    #[test]
+    fn test_backend_to_str() {
+        assert_eq!(backend_to_str(&wgpu::Backend::Vulkan), "Vulkan");
+        assert_eq!(backend_to_str(&wgpu::Backend::Metal), "Metal");
+        assert_eq!(backend_to_str(&wgpu::Backend::Dx12), "DirectX 12");
+        assert_eq!(backend_to_str(&wgpu::Backend::Gl), "OpenGL");
+        assert_eq!(backend_to_str(&wgpu::Backend::BrowserWebGpu), "Browser WebGPU");
     }
 
     #[test]

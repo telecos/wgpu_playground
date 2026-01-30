@@ -33,6 +33,7 @@ impl AppState {
             .ok()
             .and_then(|backend_str| {
                 log::info!("WGPU_BACKEND environment variable set to: {}", backend_str);
+                #[allow(deprecated)]
                 wgpu_playground_core::adapter::parse_backend(&backend_str)
             })
             .unwrap_or_else(|| {

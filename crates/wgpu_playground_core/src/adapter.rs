@@ -1,13 +1,18 @@
 use wgpu::{Adapter, Backends, Features, Instance, Limits, PowerPreference, RequestAdapterOptions};
 
 /// Options for requesting a GPU adapter
+/// 
+/// Note: The `backends` field should be used when creating the Instance via
+/// `create_instance_with_options()` or `create_instance()`. It does not affect
+/// `request_adapter()` - the Instance must be created with the desired backends first.
 #[derive(Debug, Clone)]
 pub struct AdapterOptions {
     /// Power preference for adapter selection
     pub power_preference: PowerPreference,
     /// Whether to force the use of a fallback/software adapter
     pub force_fallback_adapter: bool,
-    /// Backend(s) to use (Vulkan, Metal, DX12, etc.)
+    /// Backend(s) to use when creating the Instance (Vulkan, Metal, DX12, etc.)
+    /// Use this with create_instance_with_options() to create an Instance with specific backends.
     pub backends: Backends,
 }
 
@@ -164,8 +169,17 @@ pub fn backend_to_str(backend: &wgpu::Backend) -> &'static str {
     }
 }
 
-/// Parse backend name from string
-pub fn parse_backend(name: &str) -> Option<Backends> {
+/// Parse backend names from string to Backends flags
+/// 
+/// Accepts multiple common variations for each backend:
+/// - "vulkan" or "vk" -> Vulkan
+/// - "metal" or "mtl" -> Metal  
+/// - "dx12", "d3d12", "directx12", "directx" -> DirectX 12
+/// - "gl" or "opengl" -> OpenGL
+/// - "webgpu" or "browser" -> Browser WebGPU
+/// - "primary" -> PRIMARY backends (platform defaults)
+/// - "all" -> All available backends
+pub fn parse_backends(name: &str) -> Option<Backends> {
     match name.to_lowercase().as_str() {
         "vulkan" | "vk" => Some(Backends::VULKAN),
         "metal" | "mtl" => Some(Backends::METAL),
@@ -178,9 +192,23 @@ pub fn parse_backend(name: &str) -> Option<Backends> {
     }
 }
 
-/// Get list of available backend names
+/// Deprecated: Use parse_backends instead
+#[deprecated(since = "0.1.0", note = "Use parse_backends instead for clarity")]
+pub fn parse_backend(name: &str) -> Option<Backends> {
+    parse_backends(name)
+}
+
+/// Get list of available backend names for display purposes
+/// 
+/// Returns human-readable display names. To parse backend strings, use parse_backends().
+/// Accepted input strings: "vulkan", "metal", "dx12", "gl", "primary", "all"
 pub fn available_backends() -> Vec<&'static str> {
     vec!["Vulkan", "Metal", "DirectX 12", "OpenGL", "Browser WebGPU", "Primary", "All"]
+}
+
+/// Get list of accepted backend input strings for parsing
+pub fn backend_input_options() -> Vec<&'static str> {
+    vec!["vulkan", "metal", "dx12", "gl", "webgpu", "primary", "all"]
 }
 
 /// Create a wgpu Instance with the specified backends
@@ -306,6 +334,57 @@ mod tests {
         assert_eq!(parse_backend("primary"), Some(Backends::PRIMARY));
         assert_eq!(parse_backend("all"), Some(Backends::all()));
         assert_eq!(parse_backend("invalid"), None);
+    }
+
+    #[test]
+    fn test_parse_backends() {
+        assert_eq!(parse_backends("vulkan"), Some(Backends::VULKAN));
+        assert_eq!(parse_backends("vk"), Some(Backends::VULKAN));
+        assert_eq!(parse_backends("metal"), Some(Backends::METAL));
+        assert_eq!(parse_backends("mtl"), Some(Backends::METAL));
+        assert_eq!(parse_backends("dx12"), Some(Backends::DX12));
+        assert_eq!(parse_backends("d3d12"), Some(Backends::DX12));
+        assert_eq!(parse_backends("gl"), Some(Backends::GL));
+        assert_eq!(parse_backends("opengl"), Some(Backends::GL));
+        assert_eq!(parse_backends("primary"), Some(Backends::PRIMARY));
+        assert_eq!(parse_backends("all"), Some(Backends::all()));
+        assert_eq!(parse_backends("invalid"), None);
+    }
+
+    #[test]
+    fn test_available_backends() {
+        let backends = available_backends();
+        assert!(!backends.is_empty());
+        assert!(backends.contains(&"Vulkan"));
+        assert!(backends.contains(&"Metal"));
+        assert!(backends.contains(&"DirectX 12"));
+        assert!(backends.contains(&"OpenGL"));
+    }
+
+    #[test]
+    fn test_backend_input_options() {
+        let options = backend_input_options();
+        assert!(!options.is_empty());
+        assert!(options.contains(&"vulkan"));
+        assert!(options.contains(&"metal"));
+        assert!(options.contains(&"dx12"));
+        assert!(options.contains(&"gl"));
+        assert!(options.contains(&"all"));
+    }
+
+    #[test]
+    fn test_create_instance() {
+        let instance = create_instance(Backends::all());
+        // Instance creation should succeed (no panic)
+        drop(instance);
+    }
+
+    #[test]
+    fn test_create_instance_with_options() {
+        let options = AdapterOptions::default().with_backends(Backends::VULKAN);
+        let instance = create_instance_with_options(&options);
+        // Instance creation should succeed (no panic)
+        drop(instance);
     }
 
     #[test]

@@ -437,7 +437,13 @@ impl<'a> RenderPassEncoder<'a> {
     /// * `buffer` - The buffer to bind
     /// * `offset` - Offset in bytes into the buffer
     /// * `size` - Size of the buffer region to bind (None means to the end)
-    pub fn set_vertex_buffer(&mut self, slot: u32, buffer: &'a Buffer, offset: u64, size: Option<u64>) {
+    pub fn set_vertex_buffer(
+        &mut self,
+        slot: u32,
+        buffer: &'a Buffer,
+        offset: u64,
+        size: Option<u64>,
+    ) {
         let buffer_slice = if let Some(s) = size {
             buffer.slice(offset..offset + s)
         } else {

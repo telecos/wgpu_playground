@@ -531,3 +531,294 @@ fn test_render_pass_viewport_and_scissor() {
         queue.submit(std::iter::once(encoder.finish()));
     });
 }
+
+#[test]
+fn test_render_pass_set_vertex_buffer() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Test Texture"),
+            size: wgpu::Extent3d {
+                width: 256,
+                height: 256,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        // Create a vertex buffer
+        let vertex_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Vertex Buffer"),
+            size: 256,
+            usage: wgpu::BufferUsages::VERTEX,
+            mapped_at_creation: false,
+        });
+
+        let descriptor = RenderPassDescriptor::new()
+            .with_color_attachment(RenderPassColorAttachment::clear(&view, Color::BLACK));
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Test Encoder"),
+        });
+
+        {
+            let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
+            
+            // Test set_vertex_buffer
+            render_pass.set_vertex_buffer(0, &vertex_buffer, 0, None);
+        }
+
+        queue.submit(std::iter::once(encoder.finish()));
+    });
+}
+
+#[test]
+fn test_render_pass_set_index_buffer() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Test Texture"),
+            size: wgpu::Extent3d {
+                width: 256,
+                height: 256,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        // Create an index buffer
+        let index_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Index Buffer"),
+            size: 256,
+            usage: wgpu::BufferUsages::INDEX,
+            mapped_at_creation: false,
+        });
+
+        let descriptor = RenderPassDescriptor::new()
+            .with_color_attachment(RenderPassColorAttachment::clear(&view, Color::BLACK));
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Test Encoder"),
+        });
+
+        {
+            let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
+            
+            // Test set_index_buffer
+            render_pass.set_index_buffer(&index_buffer, IndexFormat::Uint32, 0, None);
+        }
+
+        queue.submit(std::iter::once(encoder.finish()));
+    });
+}
+
+#[test]
+fn test_render_pass_set_bind_group() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Test Texture"),
+            size: wgpu::Extent3d {
+                width: 256,
+                height: 256,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        // Create a simple bind group
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("Test Bind Group Layout"),
+            entries: &[],
+        });
+
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Test Bind Group"),
+            layout: &bind_group_layout,
+            entries: &[],
+        });
+
+        let descriptor = RenderPassDescriptor::new()
+            .with_color_attachment(RenderPassColorAttachment::clear(&view, Color::BLACK));
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Test Encoder"),
+        });
+
+        {
+            let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
+            
+            // Test set_bind_group
+            render_pass.set_bind_group(0, &bind_group, &[]);
+        }
+
+        queue.submit(std::iter::once(encoder.finish()));
+    });
+}
+
+#[test]
+fn test_render_pass_stencil_and_blend() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Test Texture"),
+            size: wgpu::Extent3d {
+                width: 256,
+                height: 256,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        let descriptor = RenderPassDescriptor::new()
+            .with_color_attachment(RenderPassColorAttachment::clear(&view, Color::BLACK));
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Test Encoder"),
+        });
+
+        {
+            let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
+            
+            // Test set_stencil_reference
+            render_pass.set_stencil_reference(0xFF);
+            
+            // Test set_blend_constant
+            render_pass.set_blend_constant(Color::WHITE);
+        }
+
+        queue.submit(std::iter::once(encoder.finish()));
+    });
+}
+
+#[test]
+fn test_render_pass_set_pipeline() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Test Texture"),
+            size: wgpu::Extent3d {
+                width: 256,
+                height: 256,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        // Create a simple shader module
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Test Shader"),
+            source: wgpu::ShaderSource::Wgsl(
+                r#"
+                @vertex
+                fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
+                    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                }
+
+                @fragment
+                fn fs_main() -> @location(0) vec4<f32> {
+                    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                }
+                "#.into()
+            ),
+        });
+
+        // Create a render pipeline
+        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("Test Pipeline"),
+            layout: None,
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: "vs_main",
+                buffers: &[],
+                compilation_options: Default::default(),
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: "fs_main",
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: wgpu::TextureFormat::Rgba8UnormSrgb,
+                    blend: None,
+                    write_mask: wgpu::ColorWrites::ALL,
+                })],
+                compilation_options: Default::default(),
+            }),
+            primitive: wgpu::PrimitiveState::default(),
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            multiview: None,
+            cache: None,
+        });
+
+        let descriptor = RenderPassDescriptor::new()
+            .with_color_attachment(RenderPassColorAttachment::clear(&view, Color::BLACK));
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Test Encoder"),
+        });
+
+        {
+            let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
+            
+            // Test set_pipeline
+            render_pass.set_pipeline(&pipeline);
+        }
+
+        queue.submit(std::iter::once(encoder.finish()));
+    });
+}

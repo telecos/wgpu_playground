@@ -43,9 +43,9 @@ exceptions = [
 multiple-versions = "warn"
 # Lint level for when a crate version requirement is `*`
 wildcards = "warn"
-# Lint level for when a dependency is not available on crates.io
+# Allow external dependencies to use their default features
 external-default-features = "allow"
-# Lint level for when a dependency has no license
+# Do not allow wildcard paths in dependencies
 allow-wildcard-paths = false
 # List of crates that are not allowed to be used
 deny = [

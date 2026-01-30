@@ -1,15 +1,16 @@
-[package]
-name = "wgpu_playground"
+[workspace]
+resolver = "2"
+members = [
+    "crates/wgpu_playground_core",
+    "crates/wgpu_playground_gui",
+    "crates/wgpu_playground_examples",
+]
+default-members = ["crates/wgpu_playground_gui"]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+authors = ["wgpu_playground contributors"]
+repository = "https://github.com/telecos/wgpu_playground"
 
-[dependencies]
-wgpu = "22.1"
-winit = "0.30"
-pollster = "0.4"
-env_logger = "0.11"
-log = "0.4"
-bytemuck = { version = "1.19", features = ["derive"] }
-egui = "0.29"
-egui-wgpu = "0.29"
-egui-winit = "0.29"

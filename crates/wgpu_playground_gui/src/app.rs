@@ -1,6 +1,6 @@
-use crate::compute::ComputePanel;
-use crate::device_info::DeviceInfo;
-use crate::rendering::RenderingPanel;
+use wgpu_playground_core::compute::ComputePanel;
+use wgpu_playground_core::device_info::DeviceInfo;
+use wgpu_playground_core::rendering::RenderingPanel;
 
 pub struct PlaygroundApp {
     device_info: DeviceInfo,

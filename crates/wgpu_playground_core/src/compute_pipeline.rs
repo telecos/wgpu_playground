@@ -1,44 +1,16 @@
-use std::fmt;
 use wgpu::{ComputePipeline, Device, PipelineLayout, ShaderModule};
-
-/// Errors that can occur during compute pipeline operations
-#[derive(Debug)]
-pub enum ComputePipelineError {
-    /// Failed to create compute pipeline
-    CreationFailed(String),
-    /// Invalid configuration
-    InvalidConfiguration(String),
-    /// Missing required shader
-    MissingShader(String),
-}
-
-impl fmt::Display for ComputePipelineError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ComputePipelineError::CreationFailed(msg) => {
-                write!(f, "Compute pipeline creation failed: {}", msg)
-            }
-            ComputePipelineError::InvalidConfiguration(msg) => {
-                write!(f, "Invalid pipeline configuration: {}", msg)
-            }
-            ComputePipelineError::MissingShader(msg) => write!(f, "Missing shader: {}", msg),
-        }
-    }
-}
-
-impl std::error::Error for ComputePipelineError {}
 
 /// Descriptor for creating a compute pipeline
 #[derive(Debug, Clone)]
 pub struct ComputePipelineDescriptor<'a> {
     /// Debug label for the pipeline
-    pub label: Option<&'a str>,
+    label: Option<&'a str>,
     /// Pipeline layout for the compute pipeline
-    pub layout: Option<&'a PipelineLayout>,
+    layout: Option<&'a PipelineLayout>,
     /// Shader module containing the compute shader
-    pub module: &'a ShaderModule,
+    module: &'a ShaderModule,
     /// Entry point function name in the shader
-    pub entry_point: &'a str,
+    entry_point: &'a str,
 }
 
 impl<'a> ComputePipelineDescriptor<'a> {
@@ -119,29 +91,5 @@ pub fn create_compute_pipeline(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    #[test]
-    fn test_compute_pipeline_error_display() {
-        let err = ComputePipelineError::CreationFailed("test error".to_string());
-        let msg = format!("{}", err);
-        assert!(msg.contains("Compute pipeline creation failed"));
-        assert!(msg.contains("test error"));
-
-        let err = ComputePipelineError::InvalidConfiguration("config error".to_string());
-        let msg = format!("{}", err);
-        assert!(msg.contains("Invalid pipeline configuration"));
-        assert!(msg.contains("config error"));
-
-        let err = ComputePipelineError::MissingShader("shader error".to_string());
-        let msg = format!("{}", err);
-        assert!(msg.contains("Missing shader"));
-        assert!(msg.contains("shader error"));
-    }
-
-    #[test]
-    fn test_compute_pipeline_error_is_error() {
-        let err = ComputePipelineError::CreationFailed("test".to_string());
-        let _: &dyn std::error::Error = &err;
-    }
+    // Tests for compute pipeline are in integration tests
 }

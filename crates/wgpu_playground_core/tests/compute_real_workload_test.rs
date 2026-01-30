@@ -185,7 +185,7 @@ fn test_vector_addition_compute_shader() {
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
             // Dispatch 4 workgroups (4 * 64 = 256 threads)
-            compute_pass.dispatch(4, 1, 1);
+            compute_pass.dispatch_workgroups(4, 1, 1);
         }
 
         // Copy result to staging buffer
@@ -390,7 +390,7 @@ fn test_matrix_multiply_compute_shader() {
             let mut compute_pass = encoder.begin_compute_pass(Some("Matrix Multiply Pass"));
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
-            compute_pass.dispatch(1, 1, 1); // Single workgroup of 4x4 threads
+            compute_pass.dispatch_workgroups(1, 1, 1); // Single workgroup of 4x4 threads
         }
 
         encoder

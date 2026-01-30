@@ -115,7 +115,7 @@ impl<'a> ComputePassEncoderOps<'a> {
     ///
     /// * `index` - The bind group index (must match pipeline layout)
     /// * `bind_group` - The bind group to bind
-    /// * `offsets` - Optional dynamic offsets for dynamic uniform/storage buffers
+    /// * `offsets` - Dynamic offsets for dynamic uniform/storage buffers (pass empty slice if none)
     ///
     /// # Examples
     ///
@@ -136,7 +136,7 @@ impl<'a> ComputePassEncoderOps<'a> {
         self.pass.set_bind_group(index, bind_group, offsets);
     }
 
-    /// Dispatch compute work
+    /// Dispatch compute workgroups
     ///
     /// Dispatches a grid of workgroups to execute the compute shader.
     ///
@@ -155,9 +155,9 @@ impl<'a> ComputePassEncoderOps<'a> {
     /// let mut encoder = CommandEncoderOps::new(device, None);
     /// let mut compute_pass = encoder.begin_compute_pass(None);
     /// compute_pass.set_pipeline(pipeline);
-    /// compute_pass.dispatch(64, 1, 1); // Dispatch 64 workgroups in X
+    /// compute_pass.dispatch_workgroups(64, 1, 1); // Dispatch 64 workgroups in X
     /// ```
-    pub fn dispatch(
+    pub fn dispatch_workgroups(
         &mut self,
         workgroup_count_x: u32,
         workgroup_count_y: u32,
@@ -167,7 +167,7 @@ impl<'a> ComputePassEncoderOps<'a> {
             .dispatch_workgroups(workgroup_count_x, workgroup_count_y, workgroup_count_z);
     }
 
-    /// Dispatch compute work indirectly
+    /// Dispatch compute workgroups indirectly
     ///
     /// Reads dispatch parameters from a buffer.
     ///
@@ -186,9 +186,9 @@ impl<'a> ComputePassEncoderOps<'a> {
     /// let mut encoder = CommandEncoderOps::new(device, None);
     /// let mut compute_pass = encoder.begin_compute_pass(None);
     /// compute_pass.set_pipeline(pipeline);
-    /// compute_pass.dispatch_indirect(indirect_buffer, 0);
+    /// compute_pass.dispatch_workgroups_indirect(indirect_buffer, 0);
     /// ```
-    pub fn dispatch_indirect(&mut self, indirect_buffer: &'a Buffer, indirect_offset: u64) {
+    pub fn dispatch_workgroups_indirect(&mut self, indirect_buffer: &'a Buffer, indirect_offset: u64) {
         self.pass
             .dispatch_workgroups_indirect(indirect_buffer, indirect_offset);
     }

@@ -92,7 +92,7 @@ fn test_compute_pass_with_dispatch() {
         {
             let mut compute_pass = encoder.begin_compute_pass(Some("Test Compute Pass"));
             compute_pass.set_pipeline(&pipeline);
-            compute_pass.dispatch(1, 1, 1);
+            compute_pass.dispatch_workgroups(1, 1, 1);
         } // Compute pass ends here
 
         // Finish and submit
@@ -181,7 +181,7 @@ fn test_compute_pass_with_bind_group() {
             let mut compute_pass = encoder.begin_compute_pass(Some("Test Compute Pass"));
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
-            compute_pass.dispatch(4, 1, 1); // 4 workgroups of 64 threads = 256 threads
+            compute_pass.dispatch_workgroups(4, 1, 1); // 4 workgroups of 64 threads = 256 threads
         }
 
         // Finish and submit
@@ -195,7 +195,7 @@ fn test_compute_pass_with_bind_group() {
 }
 
 #[test]
-fn test_compute_pass_with_dispatch_indirect() {
+fn test_compute_pass_with_dispatch_workgroups_indirect() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
             eprintln!("Skipping test: No GPU adapter available");
@@ -236,7 +236,7 @@ fn test_compute_pass_with_dispatch_indirect() {
         {
             let mut compute_pass = encoder.begin_compute_pass(Some("Test Compute Pass"));
             compute_pass.set_pipeline(&pipeline);
-            compute_pass.dispatch_indirect(&indirect_buffer, 0);
+            compute_pass.dispatch_workgroups_indirect(&indirect_buffer, 0);
         }
 
         // Finish and submit
@@ -281,14 +281,14 @@ fn test_multiple_compute_passes() {
         {
             let mut compute_pass = encoder.begin_compute_pass(Some("First Compute Pass"));
             compute_pass.set_pipeline(&pipeline);
-            compute_pass.dispatch(1, 1, 1);
+            compute_pass.dispatch_workgroups(1, 1, 1);
         }
 
         // Second compute pass
         {
             let mut compute_pass = encoder.begin_compute_pass(Some("Second Compute Pass"));
             compute_pass.set_pipeline(&pipeline);
-            compute_pass.dispatch(2, 1, 1);
+            compute_pass.dispatch_workgroups(2, 1, 1);
         }
 
         // Finish and submit

@@ -7,8 +7,6 @@ pub struct AdapterOptions {
     pub power_preference: PowerPreference,
     /// Whether to force the use of a fallback/software adapter
     pub force_fallback_adapter: bool,
-    /// Backends to use for adapter enumeration
-    pub backends: Backends,
 }
 
 impl Default for AdapterOptions {
@@ -16,7 +14,6 @@ impl Default for AdapterOptions {
         Self {
             power_preference: PowerPreference::default(),
             force_fallback_adapter: false,
-            backends: Backends::all(),
         }
     }
 }
@@ -27,7 +24,6 @@ impl AdapterOptions {
         Self {
             power_preference: PowerPreference::HighPerformance,
             force_fallback_adapter: false,
-            backends: Backends::all(),
         }
     }
 
@@ -36,7 +32,6 @@ impl AdapterOptions {
         Self {
             power_preference: PowerPreference::LowPower,
             force_fallback_adapter: false,
-            backends: Backends::all(),
         }
     }
 
@@ -45,7 +40,6 @@ impl AdapterOptions {
         Self {
             power_preference: PowerPreference::default(),
             force_fallback_adapter: true,
-            backends: Backends::all(),
         }
     }
 
@@ -60,12 +54,6 @@ impl AdapterOptions {
         self.force_fallback_adapter = force_fallback;
         self
     }
-
-    /// Set backends to use
-    pub fn with_backends(mut self, backends: Backends) -> Self {
-        self.backends = backends;
-        self
-    }
 }
 
 /// Error types for adapter operations
@@ -73,8 +61,6 @@ impl AdapterOptions {
 pub enum AdapterError {
     /// No suitable adapter was found
     NoAdapterFound,
-    /// Instance creation failed
-    InstanceCreationFailed,
 }
 
 impl std::fmt::Display for AdapterError {
@@ -82,9 +68,6 @@ impl std::fmt::Display for AdapterError {
         match self {
             AdapterError::NoAdapterFound => {
                 write!(f, "No suitable GPU adapter found with the specified options")
-            }
-            AdapterError::InstanceCreationFailed => {
-                write!(f, "Failed to create GPU instance")
             }
         }
     }
@@ -200,7 +183,6 @@ mod tests {
     fn test_adapter_options_default() {
         let options = AdapterOptions::default();
         assert!(!options.force_fallback_adapter);
-        assert_eq!(options.backends, Backends::all());
     }
 
     #[test]
@@ -227,12 +209,10 @@ mod tests {
     fn test_adapter_options_builder() {
         let options = AdapterOptions::default()
             .with_power_preference(PowerPreference::HighPerformance)
-            .with_fallback_adapter(true)
-            .with_backends(Backends::VULKAN);
+            .with_fallback_adapter(true);
         
         assert_eq!(options.power_preference, PowerPreference::HighPerformance);
         assert!(options.force_fallback_adapter);
-        assert_eq!(options.backends, Backends::VULKAN);
     }
 
     #[test]
@@ -240,9 +220,5 @@ mod tests {
         let err = AdapterError::NoAdapterFound;
         let msg = format!("{}", err);
         assert!(msg.contains("No suitable GPU adapter found"));
-
-        let err = AdapterError::InstanceCreationFailed;
-        let msg = format!("{}", err);
-        assert!(msg.contains("Failed to create GPU instance"));
     }
 }

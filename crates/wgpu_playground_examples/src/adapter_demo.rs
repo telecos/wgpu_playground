@@ -1,4 +1,7 @@
-use wgpu_playground_core::adapter::{enumerate_adapters, AdapterOptions, request_adapter};
+use wgpu_playground_core::adapter::{
+    enumerate_adapters, format_adapter_features, get_adapter_features, request_adapter,
+    AdapterOptions,
+};
 
 #[tokio::main]
 async fn main() {
@@ -40,9 +43,9 @@ async fn main() {
             println!("  Device Type: {:?}", info.device_type);
             
             // Get features
-            let features = wgpu_playground_core::adapter::get_adapter_features(&adapter);
+            let features = get_adapter_features(&adapter);
             println!("\n  Supported features:");
-            println!("  {}", wgpu_playground_core::adapter::format_adapter_features(&features));
+            println!("  {}", format_adapter_features(&features));
         }
         Err(e) => {
             println!("✗ Failed to request adapter: {}", e);

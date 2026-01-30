@@ -24,7 +24,7 @@ fn main() {
     println!("Backend selection: {}\n", backend_choice);
 
     // Parse the backend
-    let backends = adapter::parse_backend(&backend_choice).unwrap_or(Backends::all());
+    let backends = adapter::parse_backends(&backend_choice).unwrap_or(Backends::all());
     println!("Using backends: {:?}\n", backends);
 
     // Enumerate all available adapters for the selected backends

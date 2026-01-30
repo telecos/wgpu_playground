@@ -8,6 +8,7 @@ pub mod device_info;
 pub mod pipeline_layout;
 pub mod query_set;
 pub mod queue;
+pub mod render_pass_encoder;
 pub mod render_pipeline;
 pub mod rendering;
 pub mod sampler;

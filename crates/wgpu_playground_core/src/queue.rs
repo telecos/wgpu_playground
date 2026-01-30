@@ -1,4 +1,4 @@
-use wgpu::{CommandBuffer, ImageCopyTexture, ImageDataLayout, Queue, Extent3d};
+use wgpu::{CommandBuffer, Extent3d, ImageCopyTexture, ImageDataLayout, Queue};
 
 /// Error types for queue operations
 ///

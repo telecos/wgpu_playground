@@ -48,7 +48,7 @@ fn test_write_buffer_operation() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create a buffer with COPY_DST usage
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Test Buffer"),
@@ -59,10 +59,10 @@ fn test_write_buffer_operation() {
 
         let queue_ops = QueueOps::new(&queue);
         let data = [1.0f32, 2.0, 3.0, 4.0];
-        
+
         // Test write_buffer - this should not panic
         queue_ops.write_buffer(&buffer, 0, bytemuck::cast_slice(&data));
-        
+
         // Poll the device to ensure the operation completes
         device.poll(wgpu::Maintain::Wait);
     });
@@ -75,7 +75,7 @@ fn test_write_buffer_typed_helper() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create a buffer with COPY_DST usage
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Test Buffer"),
@@ -85,10 +85,10 @@ fn test_write_buffer_typed_helper() {
         });
 
         let data = [1.0f32, 2.0, 3.0, 4.0];
-        
+
         // Test typed helper - this should not panic
         write_buffer_typed(&queue, &buffer, 0, &data);
-        
+
         // Poll the device to ensure the operation completes
         device.poll(wgpu::Maintain::Wait);
     });
@@ -101,7 +101,7 @@ fn test_submit_command_buffer() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create a simple command buffer
         let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Test Encoder"),
@@ -109,10 +109,10 @@ fn test_submit_command_buffer() {
         let command_buffer = encoder.finish();
 
         let queue_ops = QueueOps::new(&queue);
-        
+
         // Test submit - this should not panic and should return a submission index
         let _submission_index = queue_ops.submit(std::iter::once(command_buffer));
-        
+
         // Poll the device to ensure the operation completes
         device.poll(wgpu::Maintain::Wait);
     });
@@ -125,7 +125,7 @@ fn test_submit_single_helper() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create a simple command buffer
         let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Test Encoder"),
@@ -134,7 +134,7 @@ fn test_submit_single_helper() {
 
         // Test submit_single helper - this should not panic
         let _submission_index = submit_single(&queue, command_buffer);
-        
+
         // Poll the device to ensure the operation completes
         device.poll(wgpu::Maintain::Wait);
     });
@@ -147,7 +147,7 @@ fn test_write_texture_operation() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create a texture with COPY_DST usage
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Test Texture"),
@@ -165,10 +165,10 @@ fn test_write_texture_operation() {
         });
 
         let queue_ops = QueueOps::new(&queue);
-        
+
         // Create test data (4x4 RGBA texture = 64 bytes)
         let data = vec![255u8; 64];
-        
+
         // Test write_texture - this should not panic
         queue_ops.write_texture(
             wgpu::ImageCopyTexture {
@@ -189,7 +189,7 @@ fn test_write_texture_operation() {
                 depth_or_array_layers: 1,
             },
         );
-        
+
         // Poll the device to ensure the operation completes
         device.poll(wgpu::Maintain::Wait);
     });
@@ -202,7 +202,7 @@ fn test_multiple_buffer_writes() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create multiple buffers
         let buffer1 = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Test Buffer 1"),
@@ -219,14 +219,14 @@ fn test_multiple_buffer_writes() {
         });
 
         let queue_ops = QueueOps::new(&queue);
-        
+
         // Write to multiple buffers
         let data1 = [1.0f32, 2.0, 3.0, 4.0];
         let data2 = [5.0f32, 6.0, 7.0, 8.0];
-        
+
         queue_ops.write_buffer(&buffer1, 0, bytemuck::cast_slice(&data1));
         queue_ops.write_buffer(&buffer2, 0, bytemuck::cast_slice(&data2));
-        
+
         // Poll the device to ensure operations complete
         device.poll(wgpu::Maintain::Wait);
     });
@@ -239,7 +239,7 @@ fn test_submit_multiple_command_buffers() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create multiple command buffers
         let encoder1 = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Test Encoder 1"),
@@ -252,10 +252,10 @@ fn test_submit_multiple_command_buffers() {
         let command_buffer2 = encoder2.finish();
 
         let queue_ops = QueueOps::new(&queue);
-        
+
         // Submit multiple command buffers at once
         let _submission_index = queue_ops.submit([command_buffer1, command_buffer2]);
-        
+
         // Poll the device to ensure operations complete
         device.poll(wgpu::Maintain::Wait);
     });
@@ -268,7 +268,7 @@ fn test_buffer_write_with_offset() {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
-        
+
         // Create a buffer
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Test Buffer"),
@@ -278,14 +278,14 @@ fn test_buffer_write_with_offset() {
         });
 
         let queue_ops = QueueOps::new(&queue);
-        
+
         // Write data at different offsets
         let data1 = [1.0f32, 2.0, 3.0, 4.0];
         let data2 = [5.0f32, 6.0, 7.0, 8.0];
-        
+
         queue_ops.write_buffer(&buffer, 0, bytemuck::cast_slice(&data1));
         queue_ops.write_buffer(&buffer, 64, bytemuck::cast_slice(&data2));
-        
+
         // Poll the device to ensure operations complete
         device.poll(wgpu::Maintain::Wait);
     });

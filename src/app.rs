@@ -1,6 +1,6 @@
+use crate::compute::ComputePanel;
 use crate::device_info::DeviceInfo;
 use crate::rendering::RenderingPanel;
-use crate::compute::ComputePanel;
 
 pub struct PlaygroundApp {
     device_info: DeviceInfo,
@@ -37,12 +37,10 @@ impl PlaygroundApp {
             });
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-            match self.selected_tab {
-                Tab::DeviceInfo => self.device_info.ui(ui),
-                Tab::Rendering => self.rendering_panel.ui(ui),
-                Tab::Compute => self.compute_panel.ui(ui),
-            }
+        egui::CentralPanel::default().show(ctx, |ui| match self.selected_tab {
+            Tab::DeviceInfo => self.device_info.ui(ui),
+            Tab::Rendering => self.rendering_panel.ui(ui),
+            Tab::Compute => self.compute_panel.ui(ui),
         });
     }
 }

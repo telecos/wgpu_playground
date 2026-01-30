@@ -9,9 +9,9 @@ use winit::{
 };
 
 mod app;
-mod rendering;
 mod compute;
 mod device_info;
+mod rendering;
 
 use app::PlaygroundApp;
 
@@ -90,13 +90,7 @@ impl AppState {
             None,
         );
 
-        let egui_renderer = egui_wgpu::Renderer::new(
-            &device,
-            surface_config.format,
-            None,
-            1,
-            true,
-        );
+        let egui_renderer = egui_wgpu::Renderer::new(&device, surface_config.format, None, 1, true);
 
         let playground_app = PlaygroundApp::new(&adapter, &device);
 
@@ -165,7 +159,9 @@ impl AppState {
         self.egui_state
             .handle_platform_output(&self.window, egui_output.platform_output);
 
-        let clipped_primitives = self.egui_ctx.tessellate(egui_output.shapes, egui_output.pixels_per_point);
+        let clipped_primitives = self
+            .egui_ctx
+            .tessellate(egui_output.shapes, egui_output.pixels_per_point);
 
         let screen_descriptor = ScreenDescriptor {
             size_in_pixels: [self.surface_config.width, self.surface_config.height],

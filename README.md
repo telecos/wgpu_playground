@@ -12,6 +12,31 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 
+## User Interface
+
+The application provides a tabbed interface with three main sections:
+
+1. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
+   - Adapter details (name, vendor, backend)
+   - Device limits (texture dimensions, buffer sizes, workgroup limits, etc.)
+   - Supported features
+
+2. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
+   - Render pipeline configuration
+   - Shader editing and testing
+   - Buffer and vertex data management
+   - Texture operations and sampling
+   - Render pass configuration
+   - Advanced rendering techniques (instancing, MSAA, etc.)
+
+3. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
+   - Compute pipeline setup
+   - Storage buffer management
+   - Matrix operations
+   - Convolution and pooling operations
+   - Neural network layer implementations
+   - Performance profiling
+
 ## Building and Running
 
 ### Prerequisites
@@ -30,6 +55,8 @@ cargo build --release
 ```bash
 cargo run --release
 ```
+
+**Note:** This application requires a display/window system to run. On Linux, ensure you have either X11 or Wayland available. On headless systems, the application won't run as it requires GPU rendering capabilities.
 
 ## Project Structure
 

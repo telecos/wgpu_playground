@@ -13,6 +13,7 @@ allow = [
     "Apache-2.0 WITH LLVM-exception",
     "BSD-2-Clause",
     "BSD-3-Clause",
+    "BSL-1.0",
     "ISC",
     "Unicode-3.0",
     "Unicode-DFS-2016",
@@ -47,6 +48,9 @@ skip = [
     { crate = "calloop@0.13", reason = "Some dependencies still use calloop 0.13" },
     # calloop-wayland-source is transitioning from 0.3 to 0.4 with calloop
     { crate = "calloop-wayland-source@0.3", reason = "Some dependencies still use calloop-wayland-source 0.3" },
+    # Windows crates have multiple versions across the ecosystem
+    { crate = "windows_i686_msvc@0.42", reason = "Legacy Windows support crates" },
+    { crate = "windows_i686_msvc@0.52", reason = "Legacy Windows support crates" },
 ]
 # Similarly named crates that are different but allowed
 skip-tree = [

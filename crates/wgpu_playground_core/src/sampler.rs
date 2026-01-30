@@ -133,9 +133,9 @@ pub struct SamplerDescriptor {
     address_mode_v: AddressMode,
     /// Address mode for the W (depth) coordinate
     address_mode_w: AddressMode,
-    /// Magnification filter mode (when texel is smaller than pixel)
+    /// Magnification filter mode (when pixel is smaller than texel, zooming in)
     mag_filter: FilterMode,
-    /// Minification filter mode (when texel is larger than pixel)
+    /// Minification filter mode (when pixel is larger than texel, zooming out)
     min_filter: FilterMode,
     /// Mipmap filter mode for level of detail
     mipmap_filter: MipmapFilterMode,
@@ -407,6 +407,7 @@ impl SamplerDescriptor {
     /// Checks for:
     /// - Valid LOD range (min <= max)
     /// - Valid anisotropy level (1-16)
+    /// - Border color is specified when using ClampToBorder address mode
     ///
     /// # Returns
     /// Ok(()) if valid, Err with SamplerError if invalid
@@ -420,6 +421,17 @@ impl SamplerDescriptor {
         if self.anisotropy_clamp < 1 || self.anisotropy_clamp > 16 {
             return Err(SamplerError::InvalidConfiguration(
                 "anisotropy_clamp must be between 1 and 16".to_string(),
+            ));
+        }
+
+        // Check that border color is specified when using ClampToBorder
+        if (self.address_mode_u == AddressMode::ClampToBorder
+            || self.address_mode_v == AddressMode::ClampToBorder
+            || self.address_mode_w == AddressMode::ClampToBorder)
+            && self.border_color.is_none()
+        {
+            return Err(SamplerError::InvalidConfiguration(
+                "border_color must be specified when using ClampToBorder address mode".to_string(),
             ));
         }
 
@@ -655,6 +667,29 @@ mod tests {
             }
             _ => panic!("Expected InvalidConfiguration error"),
         }
+    }
+
+    #[test]
+    fn test_sampler_validation_clamp_to_border_without_color() {
+        let descriptor = SamplerDescriptor::new(None).with_address_mode(AddressMode::ClampToBorder);
+
+        let result = descriptor.validate();
+        assert!(result.is_err());
+        match result {
+            Err(SamplerError::InvalidConfiguration(msg)) => {
+                assert!(msg.contains("border_color"));
+            }
+            _ => panic!("Expected InvalidConfiguration error"),
+        }
+    }
+
+    #[test]
+    fn test_sampler_validation_clamp_to_border_with_color() {
+        let descriptor = SamplerDescriptor::new(None)
+            .with_address_mode(AddressMode::ClampToBorder)
+            .with_border_color(wgpu::SamplerBorderColor::TransparentBlack);
+
+        assert!(descriptor.validate().is_ok());
     }
 
     #[test]

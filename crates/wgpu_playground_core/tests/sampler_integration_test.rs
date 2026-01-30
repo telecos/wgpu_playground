@@ -160,7 +160,7 @@ fn test_comparison_equal() {
 
 #[test]
 fn test_comparison_less_equal() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_lessequal"))
+    let descriptor = SamplerDescriptor::new(Some("comparison_less_equal"))
         .with_compare(CompareFunction::LessEqual);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::LessEqual));
@@ -178,7 +178,7 @@ fn test_comparison_greater() {
 
 #[test]
 fn test_comparison_not_equal() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_notequal"))
+    let descriptor = SamplerDescriptor::new(Some("comparison_not_equal"))
         .with_compare(CompareFunction::NotEqual);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::NotEqual));
@@ -187,7 +187,7 @@ fn test_comparison_not_equal() {
 
 #[test]
 fn test_comparison_greater_equal() {
-    let descriptor = SamplerDescriptor::new(Some("comparison_greaterequal"))
+    let descriptor = SamplerDescriptor::new(Some("comparison_greater_equal"))
         .with_compare(CompareFunction::GreaterEqual);
 
     assert_eq!(descriptor.compare(), Some(CompareFunction::GreaterEqual));
@@ -291,8 +291,11 @@ fn test_all_address_modes() {
     let mirror = SamplerDescriptor::new(None).with_address_mode(AddressMode::MirrorRepeat);
     assert_eq!(mirror.address_mode_u(), AddressMode::MirrorRepeat);
 
-    let clamp_border = SamplerDescriptor::new(None).with_address_mode(AddressMode::ClampToBorder);
+    let clamp_border = SamplerDescriptor::new(None)
+        .with_address_mode(AddressMode::ClampToBorder)
+        .with_border_color(wgpu::SamplerBorderColor::TransparentBlack);
     assert_eq!(clamp_border.address_mode_u(), AddressMode::ClampToBorder);
+    assert!(clamp_border.validate().is_ok());
 }
 
 #[test]

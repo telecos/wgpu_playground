@@ -559,6 +559,18 @@ impl DepthStencilState {
         self
     }
 
+    /// Set the stencil state for front faces
+    pub fn with_stencil_front(mut self, stencil_front: StencilFaceState) -> Self {
+        self.stencil_front = stencil_front;
+        self
+    }
+
+    /// Set the stencil state for back faces
+    pub fn with_stencil_back(mut self, stencil_back: StencilFaceState) -> Self {
+        self.stencil_back = stencil_back;
+        self
+    }
+
     /// Convert to wgpu::DepthStencilState
     pub fn to_wgpu(&self) -> wgpu::DepthStencilState {
         wgpu::DepthStencilState {
@@ -959,6 +971,10 @@ pub struct RenderPipelineDescriptor {
     multisample: MultisampleState,
     /// Fragment targets
     fragment_targets: Vec<ColorTargetState>,
+    /// Vertex shader entry point
+    vertex_entry_point: String,
+    /// Fragment shader entry point
+    fragment_entry_point: String,
 }
 
 impl RenderPipelineDescriptor {
@@ -981,6 +997,8 @@ impl RenderPipelineDescriptor {
             depth_stencil: None,
             multisample: MultisampleState::default(),
             fragment_targets: Vec::new(),
+            vertex_entry_point: "main".to_string(),
+            fragment_entry_point: "main".to_string(),
         }
     }
 
@@ -1026,6 +1044,46 @@ impl RenderPipelineDescriptor {
         self
     }
 
+    /// Set the vertex shader entry point
+    ///
+    /// # Arguments
+    /// * `entry_point` - The name of the vertex shader entry point function
+    ///
+    /// # Returns
+    /// Self for method chaining
+    ///
+    /// # Examples
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::RenderPipelineDescriptor;
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("my_pipeline"))
+    ///     .with_vertex_entry_point("vs_main");
+    /// ```
+    pub fn with_vertex_entry_point(mut self, entry_point: &str) -> Self {
+        self.vertex_entry_point = entry_point.to_string();
+        self
+    }
+
+    /// Set the fragment shader entry point
+    ///
+    /// # Arguments
+    /// * `entry_point` - The name of the fragment shader entry point function
+    ///
+    /// # Returns
+    /// Self for method chaining
+    ///
+    /// # Examples
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::RenderPipelineDescriptor;
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("my_pipeline"))
+    ///     .with_fragment_entry_point("fs_main");
+    /// ```
+    pub fn with_fragment_entry_point(mut self, entry_point: &str) -> Self {
+        self.fragment_entry_point = entry_point.to_string();
+        self
+    }
+
     /// Get the label
     pub fn label(&self) -> Option<&str> {
         self.label.as_deref()
@@ -1064,6 +1122,11 @@ impl RenderPipelineDescriptor {
         }
 
         // Validate multisample count
+        if self.multisample.count == 0 {
+            return Err(RenderPipelineError::InvalidConfiguration(
+                "Multisample count cannot be 0".to_string(),
+            ));
+        }
         if ![1, 2, 4, 8].contains(&self.multisample.count) {
             return Err(RenderPipelineError::InvalidConfiguration(
                 "Multisample count must be 1, 2, 4, or 8".to_string(),
@@ -1155,7 +1218,7 @@ impl RenderPipelineDescriptor {
             layout: Some(layout),
             vertex: wgpu::VertexState {
                 module: &vertex_module,
-                entry_point: "main",
+                entry_point: &self.vertex_entry_point,
                 compilation_options: Default::default(),
                 buffers: &vertex_buffer_layouts,
             },
@@ -1164,7 +1227,7 @@ impl RenderPipelineDescriptor {
             multisample: self.multisample.to_wgpu(),
             fragment: fragment_module.as_ref().map(|module| wgpu::FragmentState {
                 module,
-                entry_point: "main",
+                entry_point: &self.fragment_entry_point,
                 compilation_options: Default::default(),
                 targets: &fragment_targets,
             }),
@@ -1392,6 +1455,14 @@ mod tests {
     fn test_render_pipeline_descriptor_validation_invalid_multisample() {
         let descriptor = RenderPipelineDescriptor::new(Some("test"))
             .with_multisample(MultisampleState::new().with_count(3)); // Invalid count
+
+        assert!(descriptor.validate().is_err());
+    }
+
+    #[test]
+    fn test_render_pipeline_descriptor_validation_zero_multisample() {
+        let descriptor = RenderPipelineDescriptor::new(Some("test"))
+            .with_multisample(MultisampleState::new().with_count(0)); // Zero count
 
         assert!(descriptor.validate().is_err());
     }

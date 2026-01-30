@@ -41,7 +41,8 @@ deny = [
 ]
 # Certain crates/versions that will be skipped when doing duplicate detection.
 skip = [
-    # Add crate names and versions to skip here if needed
+    # bitflags is transitioning from 1.x to 2.x across the ecosystem
+    { crate = "bitflags@1.3.2", reason = "Some dependencies still use bitflags 1.x" },
 ]
 # Similarly named crates that are different but allowed
 skip-tree = [

@@ -1,4 +1,5 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
+use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
@@ -16,6 +17,7 @@ pub struct PlaygroundApp {
     buffer_panel: BufferPanel,
     sampler_panel: SamplerPanel,
     texture_panel: TexturePanel,
+    bind_group_layout_panel: BindGroupLayoutPanel,
     selected_tab: Tab,
 }
 
@@ -28,6 +30,7 @@ enum Tab {
     BufferConfig,
     SamplerConfig,
     TextureConfig,
+    BindGroupLayoutConfig,
     Compute,
 }
 
@@ -42,6 +45,7 @@ impl PlaygroundApp {
             buffer_panel: BufferPanel::new(),
             sampler_panel: SamplerPanel::new(),
             texture_panel: TexturePanel::new(),
+            bind_group_layout_panel: BindGroupLayoutPanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -84,6 +88,11 @@ impl PlaygroundApp {
                 Tab::TextureConfig,
                 "🖼️ Texture Config",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::BindGroupLayoutConfig,
+                "🔗 Bind Group Layout",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 
@@ -96,6 +105,7 @@ impl PlaygroundApp {
             Tab::BufferConfig => self.buffer_panel.ui(ui),
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
             Tab::TextureConfig => self.texture_panel.ui(ui),
+            Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
         });
     }

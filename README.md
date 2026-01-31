@@ -35,13 +35,20 @@ The application provides a tabbed interface with six main sections:
    - Device limits (texture dimensions, buffer sizes, workgroup limits, etc.)
    - Supported features
 
-4. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
-   - Render pipeline configuration
-   - Shader editing and testing
-   - Buffer and vertex data management
-   - Texture operations and sampling
-   - Render pass configuration
-   - Advanced rendering techniques (instancing, MSAA, etc.)
+4. **Rendering Tab**: Provides tools for experimenting with rendering APIs:
+   - **Example Gallery**: Browse and explore WebGPU shader examples with descriptions and source code
+   - **WGSL Shader Editor**: Interactive shader editor with:
+     - Syntax highlighting for WGSL keywords, types, and functions
+     - Line numbers for easier code navigation
+     - File loading from assets/shaders directory
+     - Inline editing and validation
+     - Real-time compilation with error reporting
+     - Load example shaders or write your own
+   - Render pipeline configuration (planned)
+   - Buffer and vertex data management (planned)
+   - Texture operations and sampling (planned)
+   - Render pass configuration (planned)
+   - Advanced rendering techniques (planned)
 
 5. **Buffer Config Tab**: Create and configure GPU buffers:
    - Set buffer size with validation
@@ -244,6 +251,7 @@ See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
 
 ## Documentation
 
+- **[SHADER_EDITOR.md](docs/SHADER_EDITOR.md)** - Complete guide to the WGSL Shader Editor including usage examples, tips, and API reference
 - **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them
 - **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu
 - **[PLAN.md](PLAN.md)** - Complete project roadmap with implementation phases

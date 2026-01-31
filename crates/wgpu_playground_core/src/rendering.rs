@@ -1,4 +1,5 @@
 use crate::examples::{get_all_examples, Example, ExampleCategory};
+use crate::shader_editor::ShaderEditor;
 use wgpu::{Device, Queue};
 
 /// Rendering state for executable examples
@@ -64,6 +65,8 @@ pub struct RenderingPanel {
     render_texture_view: Option<wgpu::TextureView>,
     render_texture_id: Option<egui::TextureId>,
     is_example_running: bool,
+    shader_editor: ShaderEditor,
+    show_shader_editor: bool,
 }
 
 impl Default for RenderingPanel {
@@ -90,6 +93,8 @@ impl RenderingPanel {
             render_texture_view: None,
             render_texture_id: None,
             is_example_running: false,
+            shader_editor: ShaderEditor::new(),
+            show_shader_editor: false,
         }
     }
 
@@ -534,43 +539,86 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             ui.add_space(10.0);
 
             // Category filter
+            // Top-level tabs: Gallery vs Shader Editor
             ui.horizontal(|ui| {
-                ui.label("Filter by category:");
-                if ui
-                    .selectable_label(self.category_filter.is_none(), "All")
-                    .clicked()
-                {
-                    self.category_filter = None;
-                }
-                if ui
-                    .selectable_label(
-                        self.category_filter == Some(ExampleCategory::Rendering),
-                        "Rendering",
-                    )
-                    .clicked()
-                {
-                    self.category_filter = Some(ExampleCategory::Rendering);
-                }
-                if ui
-                    .selectable_label(
-                        self.category_filter == Some(ExampleCategory::Compute),
-                        "Compute",
-                    )
-                    .clicked()
-                {
-                    self.category_filter = Some(ExampleCategory::Compute);
-                }
+                ui.selectable_value(&mut self.show_shader_editor, false, "📚 Example Gallery");
+                ui.selectable_value(&mut self.show_shader_editor, true, "📝 Shader Editor");
             });
 
             ui.add_space(10.0);
             ui.separator();
 
-            // Two-column layout: examples list on left, preview on right
-            ui.columns(2, |columns| {
-                // Left column: Example list
-                columns[0].vertical(|ui| {
-                    ui.heading("Examples");
-                    ui.separator();
+            if self.show_shader_editor {
+                // Show the shader editor
+                // TODO(shader_editor): Pass device when available for compilation support
+                // Currently compilation is disabled without a device
+                // See issue: Need to make device available to RenderingPanel
+                self.shader_editor.ui(ui, None);
+            } else {
+                // Show the example gallery (existing code)
+                self.render_example_gallery(ui);
+            }
+        });
+    }
+
+    fn render_example_gallery(&mut self, ui: &mut egui::Ui) {
+        ui.heading("🎨 Example Gallery");
+        ui.separator();
+        ui.label("Browse and explore WebGPU examples with descriptions and source code.");
+        ui.add_space(10.0);
+
+        // Category filter
+        ui.horizontal(|ui| {
+            ui.label("Filter by category:");
+            if ui
+                .selectable_label(self.category_filter.is_none(), "All")
+                .clicked()
+            {
+                self.category_filter = None;
+            }
+            if ui
+                .selectable_label(
+                    self.category_filter == Some(ExampleCategory::Rendering),
+                    "Rendering",
+                )
+                .clicked()
+            {
+                self.category_filter = Some(ExampleCategory::Rendering);
+            }
+            if ui
+                .selectable_label(
+                    self.category_filter == Some(ExampleCategory::Compute),
+                    "Compute",
+                )
+                .clicked()
+            {
+                self.category_filter = Some(ExampleCategory::Compute);
+            }
+        });
+
+        ui.add_space(10.0);
+        ui.separator();
+
+        // Example list
+        let filtered_examples: Vec<(usize, &Example)> = self
+            .examples
+            .iter()
+            .enumerate()
+            .filter(|(_, ex)| {
+                self.category_filter.is_none()
+                    || self.category_filter.as_ref() == Some(&ex.category)
+            })
+            .collect();
+
+        if filtered_examples.is_empty() {
+            ui.label("No examples found for this category.");
+        } else {
+            ui.label(format!("Found {} example(s):", filtered_examples.len()));
+            ui.add_space(10.0);
+
+            for (idx, example) in filtered_examples {
+                ui.group(|ui| {
+                        let is_selected = self.selected_example == Some(idx);
 
                     let filtered_examples: Vec<(usize, &Example)> = self
                         .examples
@@ -790,27 +838,16 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                                 });
                         }
 
-                        // Copy source code button
-                        ui.add_space(5.0);
-                        if ui.button("📋 Copy Source Code").clicked() {
-                            ui.output_mut(|o| o.copied_text = example_source_code.to_string());
-                        }
-                    } else {
-                        ui.colored_label(
-                            egui::Color32::GRAY,
-                            "← Select an example from the list to get started",
-                        );
-                    }
-                });
-            });
+                ui.add_space(10.0);
+            }
+        }
 
-            ui.add_space(20.0);
-            ui.separator();
-            ui.colored_label(
-                egui::Color32::from_rgb(100, 150, 255),
-                "💡 Tip: Select a rendering example and click 'Run Example' to see it in action!",
-            );
-        });
+        ui.add_space(20.0);
+        ui.separator();
+        ui.colored_label(
+            egui::Color32::from_rgb(100, 150, 255),
+            "💡 Tip: Select an example to view its description and source code",
+        );
     }
 }
 
@@ -826,6 +863,7 @@ mod tests {
         assert!(!panel.show_source_code);
         assert_eq!(panel.category_filter, None);
         assert!(!panel.is_example_running);
+        assert!(!panel.show_shader_editor);
     }
 
     #[test]

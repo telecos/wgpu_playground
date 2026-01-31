@@ -41,7 +41,10 @@ impl RenderingPanel {
 
             if self.show_shader_editor {
                 // Show the shader editor
-                self.shader_editor.ui(ui, None); // TODO: Pass device when available
+                // TODO(shader_editor): Pass device when available for compilation support
+                // Currently compilation is disabled without a device
+                // See issue: Need to make device available to RenderingPanel
+                self.shader_editor.ui(ui, None);
             } else {
                 // Show the example gallery (existing code)
                 self.render_example_gallery(ui);

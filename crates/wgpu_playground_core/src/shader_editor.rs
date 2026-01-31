@@ -275,6 +275,14 @@ fn fs_main() -> @location(0) vec4<f32> {
     }
 
     /// Apply syntax highlighting to the code (basic implementation)
+    /// 
+    /// NOTE: This method is currently unused but prepared for future enhanced
+    /// syntax highlighting feature. It will be integrated when we implement
+    /// colored text rendering in the editor.
+    /// 
+    /// TODO(future): Integrate this into the editor's rendering to display
+    /// colored syntax highlighting instead of plain monospace text.
+    #[allow(dead_code)]
     fn highlight_wgsl(&self, text: &str) -> Vec<(String, egui::Color32)> {
         // WGSL keywords
         let keywords = [

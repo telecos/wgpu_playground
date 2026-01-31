@@ -55,15 +55,14 @@ impl WebGPUImplementation {
 
     /// Get all available implementations
     pub fn available_implementations() -> Vec<Self> {
-        let impls = vec![Self::Wgpu];
         #[cfg(feature = "dawn")]
         {
-            let mut impls = impls;
-            impls.push(Self::Dawn);
-            return impls;
+            vec![Self::Wgpu, Self::Dawn]
         }
         #[cfg(not(feature = "dawn"))]
-        impls
+        {
+            vec![Self::Wgpu]
+        }
     }
 }
 
@@ -98,7 +97,8 @@ mod tests {
     #[test]
     fn test_implementation_url() {
         let url = WebGPUImplementation::Wgpu.url();
-        assert!(url.contains("github.com") || url.contains("googlesource.com"));
+        assert!(url.contains("github.com"));
+        assert!(url.contains("gfx-rs/wgpu"));
     }
 
     #[test]

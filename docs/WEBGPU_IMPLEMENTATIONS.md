@@ -142,25 +142,49 @@ let instance = WebGPUInstance::new(impl_type);
 
 ## Using Different Implementations
 
-### Current Usage (wgpu only)
+### Current Usage
+
+The playground now supports runtime switching between implementations using environment variables:
 
 ```bash
-# Default: uses wgpu
+# Default: uses wgpu implementation
 cargo run --release
+
+# Explicitly select wgpu
+WEBGPU_IMPL=wgpu cargo run --release
+
+# Select Dawn placeholder mode (requires compilation with --features dawn)
+cargo run --release --features dawn
+WEBGPU_IMPL=dawn cargo run --release --features dawn
 
 # Select specific backend within wgpu
 WGPU_BACKEND=vulkan cargo run --release
 WGPU_BACKEND=metal cargo run --release
 WGPU_BACKEND=dx12 cargo run --release
+
+# Combine implementation and backend selection
+WEBGPU_IMPL=wgpu WGPU_BACKEND=vulkan cargo run --release
 ```
 
-### Future Usage (with Dawn support)
+### Implementation Status
+
+Currently, the Dawn implementation is a **placeholder** that uses the wgpu backend underneath. This allows the infrastructure for switching implementations to be tested and used, while full Dawn integration is still in progress.
+
+When you enable the Dawn feature flag:
+- The UI will show "Dawn" as the active implementation
+- A warning message indicates it's using wgpu underneath
+- All the switching infrastructure is in place and functional
+- This allows testing the implementation selection mechanism
+
+### Future: Full Dawn Integration
+
+When full Dawn support is implemented (via FFI bindings to Dawn's C API), the usage will remain the same:
 
 ```bash
 # Use wgpu implementation (default)
 cargo run --release
 
-# Use Dawn implementation (when available)
+# Use Dawn implementation (native, when integrated)
 cargo run --release --features dawn
 WEBGPU_IMPL=dawn cargo run --release --features dawn
 
@@ -172,7 +196,7 @@ WEBGPU_IMPL=dawn WGPU_BACKEND=vulkan cargo run --release --features dawn
 
 The active WebGPU implementation is displayed in two places:
 
-1. **Device Info Tab**: Shows the implementation name, description, and source URL
+1. **Device Info Tab**: Shows the implementation name, description, source URL, and status (native or placeholder)
 2. **Adapter Selection Tab**: Lists available implementations and indicates which is active
 
 This information helps users understand which implementation they're using and what features are available.

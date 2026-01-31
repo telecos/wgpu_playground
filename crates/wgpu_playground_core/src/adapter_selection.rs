@@ -229,6 +229,15 @@ impl AdapterSelectionPanel {
             ui.label(current_impl.description());
             ui.add_space(5.0);
 
+            // Show implementation status
+            let status = current_impl.status_message();
+            if current_impl.is_native() {
+                ui.colored_label(egui::Color32::from_rgb(100, 200, 100), status);
+            } else {
+                ui.colored_label(egui::Color32::from_rgb(255, 165, 0), status);
+            }
+            ui.add_space(5.0);
+
             // List available implementations
             ui.label("Available implementations:");
             for impl_type in WebGPUImplementation::available_implementations() {
@@ -254,6 +263,13 @@ impl AdapterSelectionPanel {
                 ui.add_space(5.0);
                 ui.label("ℹ️ To enable Dawn support, compile with: cargo build --features dawn");
             }
+
+            ui.add_space(5.0);
+            ui.label("💡 Tip: Set WEBGPU_IMPL environment variable to switch implementations.");
+            ui.label(format!(
+                "   Available: {}",
+                WebGPUImplementation::available_implementations_list()
+            ));
 
             ui.add_space(20.0);
             ui.separator();

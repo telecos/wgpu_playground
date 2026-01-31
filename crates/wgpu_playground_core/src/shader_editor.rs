@@ -77,7 +77,8 @@ fn fs_main() -> @location(0) vec4<f32> {
                 self.compilation_result = CompilationResult::NotCompiled;
             }
             Err(e) => {
-                self.compilation_result = CompilationResult::Error(format!("Failed to load file: {}", e));
+                self.compilation_result =
+                    CompilationResult::Error(format!("Failed to load file: {}", e));
             }
         }
     }
@@ -145,11 +146,10 @@ fn fs_main() -> @location(0) vec4<f32> {
             ui.label("File:");
             ui.text_edit_singleline(&mut self.file_path);
 
-            if ui.button("📁 Load").clicked()
-                && !self.file_path.is_empty() {
-                    let path = self.file_path.clone();
-                    self.load_from_file(&path);
-                }
+            if ui.button("📁 Load").clicked() && !self.file_path.is_empty() {
+                let path = self.file_path.clone();
+                self.load_from_file(&path);
+            }
 
             // Load example button
             if ui.button("📚 Load Example").clicked() {
@@ -206,7 +206,7 @@ fn fs_main() -> @location(0) vec4<f32> {
 
         // Shader code editor
         ui.label("Shader Code:");
-        
+
         egui::ScrollArea::vertical()
             .max_height(500.0)
             .show(ui, |ui| {
@@ -242,17 +242,17 @@ fn fs_main() -> @location(0) vec4<f32> {
             ui.vertical(|ui| {
                 ui.set_width(line_number_width);
                 ui.style_mut().override_text_style = Some(egui::TextStyle::Monospace);
-                
+
                 let mut line_numbers_text = String::new();
                 for i in 1..=line_count {
                     line_numbers_text.push_str(&format!("{}\n", i));
                 }
-                
+
                 ui.add(
                     egui::TextEdit::multiline(&mut line_numbers_text)
                         .code_editor()
                         .interactive(false)
-                        .desired_width(line_number_width)
+                        .desired_width(line_number_width),
                 );
             });
 
@@ -269,34 +269,88 @@ fn fs_main() -> @location(0) vec4<f32> {
     }
 
     /// Apply syntax highlighting to the code (basic implementation)
-    /// 
+    ///
     /// NOTE: This method is currently unused but prepared for future enhanced
     /// syntax highlighting feature. It will be integrated when we implement
     /// colored text rendering in the editor.
-    /// 
+    ///
     /// TODO(future): Integrate this into the editor's rendering to display
     /// colored syntax highlighting instead of plain monospace text.
     #[allow(dead_code)]
     fn highlight_wgsl(&self, text: &str) -> Vec<(String, egui::Color32)> {
         // WGSL keywords
         let keywords = [
-            "fn", "struct", "var", "let", "const", "return", "if", "else", "for", "while",
-            "break", "continue", "switch", "case", "default", "loop", "continuing",
-            "@vertex", "@fragment", "@compute", "@group", "@binding", "@location",
-            "@builtin", "@workgroup_size", "@stage", "@align", "@size", "@interpolate",
+            "fn",
+            "struct",
+            "var",
+            "let",
+            "const",
+            "return",
+            "if",
+            "else",
+            "for",
+            "while",
+            "break",
+            "continue",
+            "switch",
+            "case",
+            "default",
+            "loop",
+            "continuing",
+            "@vertex",
+            "@fragment",
+            "@compute",
+            "@group",
+            "@binding",
+            "@location",
+            "@builtin",
+            "@workgroup_size",
+            "@stage",
+            "@align",
+            "@size",
+            "@interpolate",
         ];
 
         // WGSL types
         let types = [
-            "bool", "i32", "u32", "f32", "f16",
-            "vec2", "vec3", "vec4",
-            "mat2x2", "mat2x3", "mat2x4", "mat3x2", "mat3x3", "mat3x4", "mat4x2", "mat4x3", "mat4x4",
-            "array", "ptr", "atomic",
-            "texture_1d", "texture_2d", "texture_2d_array", "texture_3d", "texture_cube", "texture_cube_array",
-            "texture_multisampled_2d", "texture_depth_2d", "texture_depth_2d_array", "texture_depth_cube",
-            "texture_depth_cube_array", "texture_depth_multisampled_2d",
-            "texture_storage_1d", "texture_storage_2d", "texture_storage_2d_array", "texture_storage_3d",
-            "sampler", "sampler_comparison",
+            "bool",
+            "i32",
+            "u32",
+            "f32",
+            "f16",
+            "vec2",
+            "vec3",
+            "vec4",
+            "mat2x2",
+            "mat2x3",
+            "mat2x4",
+            "mat3x2",
+            "mat3x3",
+            "mat3x4",
+            "mat4x2",
+            "mat4x3",
+            "mat4x4",
+            "array",
+            "ptr",
+            "atomic",
+            "texture_1d",
+            "texture_2d",
+            "texture_2d_array",
+            "texture_3d",
+            "texture_cube",
+            "texture_cube_array",
+            "texture_multisampled_2d",
+            "texture_depth_2d",
+            "texture_depth_2d_array",
+            "texture_depth_cube",
+            "texture_depth_cube_array",
+            "texture_depth_multisampled_2d",
+            "texture_storage_1d",
+            "texture_storage_2d",
+            "texture_storage_2d_array",
+            "texture_storage_3d",
+            "sampler",
+            "sampler_comparison",
         ];
 
         let mut result = Vec::new();
@@ -323,7 +377,14 @@ fn fs_main() -> @location(0) vec4<f32> {
                 current_word.clear();
                 in_comment = false;
                 current_word.push(ch);
-            } else if ch.is_whitespace() || ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == ';' || ch == ',' {
+            } else if ch.is_whitespace()
+                || ch == '('
+                || ch == ')'
+                || ch == '{'
+                || ch == '}'
+                || ch == ';'
+                || ch == ','
+            {
                 if !current_word.is_empty() {
                     let color = if in_comment {
                         egui::Color32::GRAY
@@ -371,7 +432,10 @@ mod tests {
         let editor = ShaderEditor::new();
         assert!(!editor.source_code.is_empty());
         assert_eq!(editor.label, "shader_editor");
-        assert!(matches!(editor.compilation_result, CompilationResult::NotCompiled));
+        assert!(matches!(
+            editor.compilation_result,
+            CompilationResult::NotCompiled
+        ));
         assert!(editor.show_line_numbers);
     }
 
@@ -387,13 +451,19 @@ mod tests {
         let test_code = "@vertex fn test() {}";
         editor.set_source_code(test_code.to_string());
         assert_eq!(editor.source_code(), test_code);
-        assert!(matches!(editor.compilation_result, CompilationResult::NotCompiled));
+        assert!(matches!(
+            editor.compilation_result,
+            CompilationResult::NotCompiled
+        ));
     }
 
     #[test]
     fn test_validate_valid_shader() {
         let mut editor = ShaderEditor::new();
-        editor.set_source_code("@vertex fn vs_main() -> @builtin(position) vec4<f32> { return vec4<f32>(0.0); }".to_string());
+        editor.set_source_code(
+            "@vertex fn vs_main() -> @builtin(position) vec4<f32> { return vec4<f32>(0.0); }"
+                .to_string(),
+        );
         assert!(editor.validate());
     }
 
@@ -402,7 +472,10 @@ mod tests {
         let mut editor = ShaderEditor::new();
         editor.set_source_code("".to_string());
         assert!(!editor.validate());
-        assert!(matches!(editor.compilation_result, CompilationResult::Error(_)));
+        assert!(matches!(
+            editor.compilation_result,
+            CompilationResult::Error(_)
+        ));
     }
 
     #[test]
@@ -424,10 +497,10 @@ mod tests {
     fn test_highlight_wgsl_keywords() {
         let editor = ShaderEditor::new();
         let highlighted = editor.highlight_wgsl("fn main() {}");
-        
+
         // Should have "fn", " ", "main", "(", ")", " ", "{", "}"
         assert!(!highlighted.is_empty());
-        
+
         // "fn" should be highlighted as a keyword
         let fn_token = highlighted.iter().find(|(text, _)| text == "fn");
         assert!(fn_token.is_some());
@@ -437,10 +510,10 @@ mod tests {
     fn test_highlight_wgsl_types() {
         let editor = ShaderEditor::new();
         let highlighted = editor.highlight_wgsl("var x: vec4<f32>;");
-        
+
         // Check that we get some tokens back
         assert!(!highlighted.is_empty());
-        
+
         // The tokens should include our code
         let all_text: String = highlighted.iter().map(|(text, _)| text.as_str()).collect();
         assert!(all_text.contains("vec4"));

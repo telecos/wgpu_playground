@@ -58,57 +58,57 @@ impl RenderingPanel {
         ui.label("Browse and explore WebGPU examples with descriptions and source code.");
         ui.add_space(10.0);
 
-            // Category filter
-            ui.horizontal(|ui| {
-                ui.label("Filter by category:");
-                if ui
-                    .selectable_label(self.category_filter.is_none(), "All")
-                    .clicked()
-                {
-                    self.category_filter = None;
-                }
-                if ui
-                    .selectable_label(
-                        self.category_filter == Some(ExampleCategory::Rendering),
-                        "Rendering",
-                    )
-                    .clicked()
-                {
-                    self.category_filter = Some(ExampleCategory::Rendering);
-                }
-                if ui
-                    .selectable_label(
-                        self.category_filter == Some(ExampleCategory::Compute),
-                        "Compute",
-                    )
-                    .clicked()
-                {
-                    self.category_filter = Some(ExampleCategory::Compute);
-                }
-            });
+        // Category filter
+        ui.horizontal(|ui| {
+            ui.label("Filter by category:");
+            if ui
+                .selectable_label(self.category_filter.is_none(), "All")
+                .clicked()
+            {
+                self.category_filter = None;
+            }
+            if ui
+                .selectable_label(
+                    self.category_filter == Some(ExampleCategory::Rendering),
+                    "Rendering",
+                )
+                .clicked()
+            {
+                self.category_filter = Some(ExampleCategory::Rendering);
+            }
+            if ui
+                .selectable_label(
+                    self.category_filter == Some(ExampleCategory::Compute),
+                    "Compute",
+                )
+                .clicked()
+            {
+                self.category_filter = Some(ExampleCategory::Compute);
+            }
+        });
 
+        ui.add_space(10.0);
+        ui.separator();
+
+        // Example list
+        let filtered_examples: Vec<(usize, &Example)> = self
+            .examples
+            .iter()
+            .enumerate()
+            .filter(|(_, ex)| {
+                self.category_filter.is_none()
+                    || self.category_filter.as_ref() == Some(&ex.category)
+            })
+            .collect();
+
+        if filtered_examples.is_empty() {
+            ui.label("No examples found for this category.");
+        } else {
+            ui.label(format!("Found {} example(s):", filtered_examples.len()));
             ui.add_space(10.0);
-            ui.separator();
 
-            // Example list
-            let filtered_examples: Vec<(usize, &Example)> = self
-                .examples
-                .iter()
-                .enumerate()
-                .filter(|(_, ex)| {
-                    self.category_filter.is_none()
-                        || self.category_filter.as_ref() == Some(&ex.category)
-                })
-                .collect();
-
-            if filtered_examples.is_empty() {
-                ui.label("No examples found for this category.");
-            } else {
-                ui.label(format!("Found {} example(s):", filtered_examples.len()));
-                ui.add_space(10.0);
-
-                for (idx, example) in filtered_examples {
-                    ui.group(|ui| {
+            for (idx, example) in filtered_examples {
+                ui.group(|ui| {
                         let is_selected = self.selected_example == Some(idx);
 
                         // Example header
@@ -189,16 +189,16 @@ impl RenderingPanel {
                         }
                     });
 
-                    ui.add_space(10.0);
-                }
+                ui.add_space(10.0);
             }
+        }
 
-            ui.add_space(20.0);
-            ui.separator();
-            ui.colored_label(
-                egui::Color32::from_rgb(100, 150, 255),
-                "💡 Tip: Select an example to view its description and source code",
-            );
+        ui.add_space(20.0);
+        ui.separator();
+        ui.colored_label(
+            egui::Color32::from_rgb(100, 150, 255),
+            "💡 Tip: Select an example to view its description and source code",
+        );
     }
 }
 

@@ -7,10 +7,10 @@ mod common;
 #[test]
 fn test_shader_editor_create_and_validate() {
     let mut editor = ShaderEditor::new();
-    
+
     // Editor should have default shader code
     assert!(!editor.source_code().is_empty());
-    
+
     // Should be able to validate the default shader
     assert!(editor.validate());
 }
@@ -18,16 +18,16 @@ fn test_shader_editor_create_and_validate() {
 #[test]
 fn test_shader_editor_set_invalid_shader() {
     let mut editor = ShaderEditor::new();
-    
+
     // Set invalid shader code (empty)
     editor.set_source_code("".to_string());
-    
+
     // Validation should fail
     assert!(!editor.validate());
-    
+
     // Compilation result should be error
     match editor.compilation_result() {
-        CompilationResult::Error(_) => {},
+        CompilationResult::Error(_) => {}
         _ => panic!("Expected compilation error for empty shader"),
     }
 }
@@ -35,7 +35,7 @@ fn test_shader_editor_set_invalid_shader() {
 #[test]
 fn test_shader_editor_set_valid_shader() {
     let mut editor = ShaderEditor::new();
-    
+
     // Set valid shader code
     let valid_shader = r#"
         @vertex
@@ -48,9 +48,9 @@ fn test_shader_editor_set_valid_shader() {
             return vec4<f32>(1.0, 1.0, 1.0, 1.0);
         }
     "#;
-    
+
     editor.set_source_code(valid_shader.to_string());
-    
+
     // Validation should succeed
     assert!(editor.validate());
 }
@@ -96,14 +96,16 @@ fn test_shader_editor_compile_with_device() {
         };
 
         let mut editor = ShaderEditor::new();
-        
+
         // Compile the default shader
         editor.compile(&device);
-        
+
         // Compilation should succeed
         match editor.compilation_result() {
-            CompilationResult::Success => {},
-            CompilationResult::Error(msg) => panic!("Expected successful compilation, got error: {}", msg),
+            CompilationResult::Success => {}
+            CompilationResult::Error(msg) => {
+                panic!("Expected successful compilation, got error: {}", msg)
+            }
             CompilationResult::NotCompiled => panic!("Expected compilation to occur"),
         }
     });
@@ -112,10 +114,10 @@ fn test_shader_editor_compile_with_device() {
 #[test]
 fn test_shader_editor_load_example() {
     let mut editor = ShaderEditor::new();
-    
+
     // Try to load example shader
     editor.load_from_file("example.wgsl");
-    
+
     // The file should load successfully
     assert!(!editor.source_code().is_empty());
     assert!(editor.source_code().contains("@vertex"));
@@ -125,15 +127,15 @@ fn test_shader_editor_load_example() {
 #[test]
 fn test_shader_editor_load_nonexistent_file() {
     let mut editor = ShaderEditor::new();
-    
+
     // Try to load a file that doesn't exist
     editor.load_from_file("nonexistent.wgsl");
-    
+
     // Should have an error in compilation result
     match editor.compilation_result() {
         CompilationResult::Error(msg) => {
             assert!(msg.contains("Failed to load file"));
-        },
+        }
         _ => panic!("Expected error when loading nonexistent file"),
     }
 }
@@ -141,14 +143,14 @@ fn test_shader_editor_load_nonexistent_file() {
 #[test]
 fn test_shader_editor_reset_clears_error() {
     let mut editor = ShaderEditor::new();
-    
+
     // Set invalid code
     editor.set_source_code("".to_string());
     assert!(!editor.validate());
-    
+
     // Reset should clear the error and restore default code
     editor.set_source_code(ShaderEditor::new().source_code().to_string());
-    
+
     // Should be valid again
     assert!(editor.validate());
 }

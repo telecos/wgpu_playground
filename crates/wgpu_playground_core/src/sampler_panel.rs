@@ -289,7 +289,7 @@ impl SamplerPanel {
             // Anisotropic Filtering
             ui.group(|ui| {
                 ui.heading("Anisotropic Filtering");
-                ui.label("Improve texture quality at oblique angles (1 = disabled, 16 = max):");
+                ui.label("Improve texture quality at oblique angles (1 = disabled, 16 = maximum quality):");
                 ui.add_space(5.0);
 
                 ui.horizontal(|ui| {

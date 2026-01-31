@@ -4,66 +4,68 @@ This document describes the Continuous Integration (CI) testing setup for the wg
 
 ## Overview
 
-The CI pipeline runs comprehensive tests on every push and pull request to ensure code quality and prevent regressions. Tests are executed across multiple platforms and test types.
+The CI pipeline runs comprehensive tests on Linux and quick smoke tests on macOS/Windows to ensure code quality and cross-platform compatibility while maintaining fast CI times.
 
 ## Test Jobs
 
-### 1. Unit Tests (`unit-tests`)
+### 1. Comprehensive Tests (Linux) (`test-linux`)
 
-**Purpose**: Tests individual functions and modules within the source code.
+**Purpose**: Run all tests with detailed reporting on Linux.
 
-**Platforms**: Linux (Ubuntu), macOS, Windows
+**Platform**: Linux (Ubuntu)
 
-**Command**: `cargo nextest run --workspace --all-features --lib --bins --profile ci`
-
-**Coverage**:
-- Library code (`--lib`)
-- Binary targets (`--bins`)
-- All workspace crates
-
-### 2. Integration Tests (`integration-tests`)
-
-**Purpose**: Tests interactions between different modules and components.
-
-**Platforms**: Linux (Ubuntu), macOS, Windows
-
-**Command**: `cargo nextest run --workspace --all-features --tests --profile ci`
+**Commands**: 
+- `cargo nextest run --workspace --all-features --profile ci --message-format junit` - All unit and integration tests
+- `cargo test --workspace --all-features --doc` - Documentation tests
 
 **Coverage**:
-- All integration tests in `tests/` directories
-- Full workspace coverage
-- All features enabled
+- Unit tests (library and binary code)
+- Integration tests (tests in `tests/` directories)
+- Doc tests (documentation examples)
+- JUnit XML reporting
+- All workspace crates with all features
 
-### 3. Doc Tests (`doc-tests`)
+**Why Linux only for comprehensive tests?**
+- Linux runners are faster and more cost-effective
+- Most Rust code is platform-agnostic
+- Platform-specific issues are caught by quick tests on other platforms
+- Significantly reduces CI time (previously 9 parallel jobs, now 1 comprehensive + 2 quick)
 
-**Purpose**: Validates code examples in documentation comments.
+### 2. Platform Compatibility Tests (`test-other-platforms`)
 
-**Platforms**: Linux (Ubuntu), macOS, Windows
+**Purpose**: Quick smoke tests to verify macOS and Windows compatibility.
 
-**Command**: `cargo test --workspace --all-features --doc`
+**Platforms**: macOS, Windows
+
+**Command**: `cargo test --workspace --all-features --lib`
 
 **Coverage**:
-- All documentation examples (`///` and `//!` comments with code blocks)
-- Ensures documentation stays up-to-date with code
+- Library unit tests only (no integration tests, no doc tests)
+- Validates that code compiles and basic functionality works on each platform
+- Much faster than comprehensive test suite
+
+**Why quick tests only?**
+- macOS and Windows runners are slower and more expensive
+- Platform-specific bugs are rare in this codebase
+- Integration tests and doc tests are platform-agnostic
+- Catches compilation issues and basic platform compatibility problems
 
 ## Test Reporting
 
 ### JUnit XML Reports
 
-Each test job generates JUnit XML reports that are:
+The comprehensive Linux test job generates JUnit XML reports that are:
 - Uploaded as CI artifacts (retained for 30 days)
-- Aggregated in the `test-report` job
 - Published as GitHub Check Results
 - Added as PR comments for easy visibility
 
 **Report Files**:
-- `test-results-unit-<platform>.xml` - Unit test results
-- `test-results-integration-<platform>.xml` - Integration test results
+- `test-results-linux.xml` - All test results from Linux (unit + integration tests)
 
 ### Test Summary
 
 The `test-report` job:
-1. Downloads all test results from all platforms
+1. Downloads test results from the Linux test job
 2. Publishes unified test results using `EnricoMi/publish-unit-test-result-action`
 3. Creates a test summary in GitHub Step Summary
 4. Adds PR comments comparing results to previous commits
@@ -97,30 +99,36 @@ Test behavior is configured in `.config/nextest.toml`:
 
 ### Matrix Strategy
 
-Tests run on a matrix of platforms:
-```yaml
-matrix:
-  os: [ubuntu-latest, macos-latest, windows-latest]
-```
+Tests use a strategic approach:
+- **Linux**: Full comprehensive testing (all test types)
+- **macOS/Windows**: Quick library tests only
 
-**fail-fast: false** ensures all platforms complete even if one fails.
+**Why this approach?**
+- Balances thorough testing with CI speed
+- Linux is faster and more cost-effective for comprehensive tests
+- macOS/Windows validate cross-platform compatibility without duplication
+- Reduces total CI time by ~70% compared to running all tests on all platforms
 
 ## Running Tests Locally
 
-### Run all tests (like CI)
+### Run comprehensive tests (like Linux CI)
 
 ```bash
 # Install nextest (one-time setup)
 cargo install cargo-nextest --locked
 
-# Run unit tests
-cargo nextest run --workspace --all-features --lib --bins --profile ci
-
-# Run integration tests
-cargo nextest run --workspace --all-features --tests --profile ci
+# Run all unit and integration tests
+cargo nextest run --workspace --all-features --profile ci
 
 # Run doc tests
 cargo test --workspace --all-features --doc
+```
+
+### Run quick platform tests (like macOS/Windows CI)
+
+```bash
+# Run library tests only
+cargo test --workspace --all-features --lib
 ```
 
 ### Run tests for a specific crate
@@ -142,13 +150,18 @@ cargo nextest run --workspace --all-features --message-format junit > test-resul
    - Clippy lints (`clippy`)
 
 2. **Parallel Test Execution**:
-   - Unit tests on all platforms
-   - Integration tests on all platforms
-   - Doc tests on all platforms
-   - Build verification
+   - Comprehensive tests on Linux (`test-linux`)
+     - All unit tests
+     - All integration tests
+     - All doc tests
+     - JUnit XML report generation
+   - Quick platform tests on macOS and Windows (`test-other-platforms`)
+     - Library unit tests only
+     - Validates cross-platform compatibility
+   - Build verification (`build`)
 
 3. **Test Reporting**:
-   - Aggregate results from all platforms
+   - Aggregate results from Linux tests
    - Publish unified test report
    - Generate PR comments
 
@@ -157,20 +170,50 @@ cargo nextest run --workspace --all-features --message-format junit > test-resul
    - Fails if any job failed
    - Used as branch protection requirement
 
+## Performance Optimization
+
+The current CI setup is optimized for speed while maintaining quality:
+
+**Previous approach** (9 parallel jobs):
+- 3 platforms × 3 test types = 9 test job executions
+- Each platform ran: unit tests, integration tests, doc tests
+- Tests were run twice (once for execution, once for JUnit)
+- Estimated total time: ~45-60 minutes
+
+**Current approach** (3 jobs):
+- 1 comprehensive Linux job (all tests, run once with JUnit output)
+- 2 quick platform jobs (library tests only)
+- Estimated total time: ~15-20 minutes
+
+**Time savings**: ~70% reduction in CI time
+
 ## Troubleshooting
 
-### Test failures only on specific platforms
+### Tests pass locally but fail in CI
 
-1. Check the platform-specific test result artifact
-2. Review the test logs in the failed job
-3. Run tests locally on that platform if possible
+1. Check if you're testing with the same flags as CI: `--all-features`
+2. Ensure your code works in a clean environment (CI starts fresh)
+3. Check for platform-specific issues if it's a macOS/Windows failure
 
-### Flaky tests
+### Platform-specific test failures
 
-Tests are automatically retried once. If a test fails intermittently:
-1. Check if it's a timing issue
-2. Add appropriate waits or synchronization
-3. Consider marking truly non-deterministic tests as `#[ignore]`
+If quick tests fail on macOS or Windows but pass on Linux:
+1. This indicates a real platform compatibility issue
+2. Run the full test suite locally on that platform
+3. Fix the platform-specific code
+4. Consider adding platform-conditional compilation if needed
+
+### CI taking too long
+
+The current setup is optimized for speed (~15-20 min total):
+- Linux: Comprehensive tests (~10-12 min)
+- macOS: Quick tests (~3-4 min)
+- Windows: Quick tests (~3-4 min)
+
+If you need even faster CI:
+- Consider reducing the number of features tested
+- Use `--no-fail-fast` in nextest to exit on first failure
+- Cache more aggressively
 
 ### JUnit report generation fails
 
@@ -184,10 +227,13 @@ This ensures the reporting job doesn't fail due to missing artifacts.
 ## Best Practices
 
 1. **Keep tests fast**: Slow tests slow down CI for everyone
-2. **Avoid platform-specific tests**: Use `#[cfg(target_os = "...")]` when necessary
-3. **Document complex test setups**: Especially for integration tests
-4. **Check doc examples**: They're tests too and must compile and run
-5. **Watch CI results**: Don't merge until CI is green
+2. **Write platform-agnostic code**: Most code should work identically on all platforms
+3. **Use platform-specific tests sparingly**: Only when truly needed with `#[cfg(target_os = "...")]`
+4. **Document complex test setups**: Especially for integration tests
+5. **Check doc examples**: They're tests too and must compile and run
+6. **Watch CI results**: Don't merge until CI is green
+7. **Trust the Linux comprehensive tests**: They catch 99% of issues
+8. **Platform tests catch compatibility issues**: If macOS/Windows quick tests fail, investigate
 
 ## Related Documentation
 

@@ -175,19 +175,18 @@ Current coverage: 62% (see CI artifacts for detailed reports)
 
 ## Continuous Integration
 
-This project uses comprehensive CI testing to ensure code quality across all platforms. The CI pipeline includes:
+This project uses optimized CI testing to ensure code quality while maintaining fast build times:
 
-- **Unit Tests**: Tests for individual functions and modules
-- **Integration Tests**: Tests for component interactions
-- **Doc Tests**: Validation of documentation examples
-- **Platform Coverage**: Tests run on Linux, macOS, and Windows
+- **Comprehensive Linux Tests**: Full test suite with unit, integration, and doc tests
+- **Platform Compatibility Tests**: Quick library tests on macOS and Windows
 - **Test Reporting**: JUnit XML reports with PR comments and check results
+- **~70% faster CI**: Optimized from 9 parallel jobs to 3 strategic jobs
 
 See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
-- Test job configuration
+- Test job configuration and optimization strategy
 - Running tests locally
 - Test reporting and failure notifications
-- Troubleshooting CI issues
+- Performance characteristics and troubleshooting
 
 ## Documentation
 

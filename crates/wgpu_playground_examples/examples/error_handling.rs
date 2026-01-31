@@ -58,7 +58,7 @@ fn main() {
 
     // This would cause a validation error if actually executed on GPU
     // (simulated here for demonstration)
-    let valid_buffer = BufferDescriptor::new(
+    let _valid_buffer = BufferDescriptor::new(
         Some("test_buffer"),
         256,
         BufferUsages::UNIFORM | BufferUsages::COPY_DST,
@@ -85,7 +85,7 @@ fn main() {
     }
 
     // Valid shader source
-    let valid_shader = ShaderModule::from_source(
+    let _valid_shader = ShaderModule::from_source(
         r#"
         @vertex
         fn vs_main(@builtin(vertex_index) vertex_index: u32) -> @builtin(position) vec4<f32> {
@@ -154,12 +154,4 @@ fn main() {
     println!();
 
     println!("=== All error handling examples completed successfully! ===");
-
-    // Clean up
-    drop(valid_shader);
-    drop(valid_buffer);
-    drop(map_buffer);
-    drop(queue_ops);
-    drop(device);
-    drop(adapter);
 }

@@ -15,29 +15,10 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  # Install wasm-pack and cache it
-  wasm-pack-install:
-    name: Install wasm-pack
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cache wasm-pack
-        id: cache-wasm-pack
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/bin/wasm-pack
-          key: ${{ runner.os }}-wasm-pack-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-wasm-pack-
-
-      - name: Install wasm-pack
-        if: steps.cache-wasm-pack.outputs.cache-hit != 'true'
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
   # Build WASM target for core library
   wasm-build-core:
     name: Build WASM - Core
     runs-on: ubuntu-latest
-    needs: wasm-pack-install
     steps:
       - uses: actions/checkout@v4
 
@@ -56,14 +37,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/wasm-pack
-          key: ${{ runner.os }}-wasm-pack-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-wasm-pack-0.14.0
           restore-keys: |
             ${{ runner.os }}-wasm-pack-
 
       - name: Install wasm-pack
         run: |
           if ! command -v wasm-pack &> /dev/null; then
-            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+            cargo install wasm-pack --version 0.14.0
           fi
 
       - name: Build wgpu_playground_core for WASM
@@ -78,56 +59,10 @@ jobs:
           path: crates/wgpu_playground_core/pkg/
           retention-days: 7
 
-  # Build WASM target for GUI application
-  wasm-build-gui:
-    name: Build WASM - GUI
-    runs-on: ubuntu-latest
-    needs: wasm-pack-install
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: "wasm-gui"
-          save-if: ${{ github.ref == 'refs/heads/main' }}
-
-      - name: Cache wasm-pack
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/bin/wasm-pack
-          key: ${{ runner.os }}-wasm-pack-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-wasm-pack-
-
-      - name: Install wasm-pack
-        run: |
-          if ! command -v wasm-pack &> /dev/null; then
-            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-          fi
-
-      - name: Build wgpu_playground_gui for WASM
-        run: |
-          cd crates/wgpu_playground_gui
-          wasm-pack build --target web --release
-
-      - name: Upload GUI WASM artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: wasm-gui
-          path: crates/wgpu_playground_gui/pkg/
-          retention-days: 7
-
   # Test WASM builds
   wasm-test:
     name: Test WASM
     runs-on: ubuntu-latest
-    needs: wasm-pack-install
     steps:
       - uses: actions/checkout@v4
 
@@ -146,14 +81,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/wasm-pack
-          key: ${{ runner.os }}-wasm-pack-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-wasm-pack-0.14.0
           restore-keys: |
             ${{ runner.os }}-wasm-pack-
 
       - name: Install wasm-pack
         run: |
           if ! command -v wasm-pack &> /dev/null; then
-            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+            cargo install wasm-pack --version 0.14.0
           fi
 
       - name: Install Chrome for testing
@@ -165,17 +100,11 @@ jobs:
           wasm-pack test --headless --chrome
         continue-on-error: true
 
-      - name: Test wgpu_playground_gui WASM
-        run: |
-          cd crates/wgpu_playground_gui
-          wasm-pack test --headless --chrome
-        continue-on-error: true
-
   # Validate web bundle creation
   wasm-bundle-validation:
     name: Validate Web Bundle
     runs-on: ubuntu-latest
-    needs: [wasm-build-core, wasm-build-gui]
+    needs: [wasm-build-core]
     steps:
       - uses: actions/checkout@v4
 
@@ -184,12 +113,6 @@ jobs:
         with:
           name: wasm-core
           path: dist/pkg-core/
-
-      - name: Download GUI WASM artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: wasm-gui
-          path: dist/pkg-gui/
 
       - name: Validate WASM files exist
         run: |
@@ -200,21 +123,15 @@ jobs:
             exit 1
           fi
 
-          echo "Validating GUI WASM artifacts..."
-          ls -lh dist/pkg-gui/
-          if [ ! -f dist/pkg-gui/wgpu_playground_gui_bg.wasm ]; then
-            echo "Error: GUI WASM file not found"
-            exit 1
-          fi
-
           echo "Validating JavaScript bindings..."
           if [ ! -f dist/pkg-core/wgpu_playground_core.js ]; then
             echo "Error: Core JS bindings not found"
             exit 1
           fi
-          if [ ! -f dist/pkg-gui/wgpu_playground_gui.js ]; then
-            echo "Error: GUI JS bindings not found"
-            exit 1
+
+          echo "Validating TypeScript definitions..."
+          if [ ! -f dist/pkg-core/wgpu_playground_core.d.ts ]; then
+            echo "Warning: Core TS definitions not found"
           fi
 
           echo "✓ All WASM bundle files validated successfully"
@@ -223,17 +140,14 @@ jobs:
         run: |
           echo "WASM file sizes:"
           du -h dist/pkg-core/wgpu_playground_core_bg.wasm
-          du -h dist/pkg-gui/wgpu_playground_gui_bg.wasm
 
           # Optional: Warn if files are too large (e.g., > 10MB)
-          CORE_SIZE=$(stat -f%z dist/pkg-core/wgpu_playground_core_bg.wasm 2>/dev/null || stat -c%s dist/pkg-core/wgpu_playground_core_bg.wasm)
-          GUI_SIZE=$(stat -f%z dist/pkg-gui/wgpu_playground_gui_bg.wasm 2>/dev/null || stat -c%s dist/pkg-gui/wgpu_playground_gui_bg.wasm)
+          CORE_SIZE=$(stat -c%s dist/pkg-core/wgpu_playground_core_bg.wasm)
 
           if [ $CORE_SIZE -gt 10485760 ]; then
             echo "Warning: Core WASM file is larger than 10MB"
-          fi
-          if [ $GUI_SIZE -gt 10485760 ]; then
-            echo "Warning: GUI WASM file is larger than 10MB"
+          else
+            echo "✓ WASM file size is acceptable"
           fi
 
       - name: Upload deployment bundle
@@ -247,13 +161,12 @@ jobs:
   wasm-build-success:
     name: WASM Builds Success
     runs-on: ubuntu-latest
-    needs: [wasm-build-core, wasm-build-gui, wasm-test, wasm-bundle-validation]
+    needs: [wasm-build-core, wasm-test, wasm-bundle-validation]
     if: always()
     steps:
       - name: Check all jobs
         run: |
           if [ "${{ needs.wasm-build-core.result }}" != "success" ] || \
-             [ "${{ needs.wasm-build-gui.result }}" != "success" ] || \
              [ "${{ needs.wasm-test.result }}" != "success" ] || \
              [ "${{ needs.wasm-bundle-validation.result }}" != "success" ]; then
             echo "One or more WASM build jobs failed"

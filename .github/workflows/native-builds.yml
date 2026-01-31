@@ -1,0 +1,62 @@
+name: Native Builds
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Explicitly limit GITHUB_TOKEN permissions for security
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  native-build:
+    name: Native Build - ${{ matrix.os }} (${{ matrix.rust }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        rust: [stable, beta]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "native-${{ matrix.os }}-${{ matrix.rust }}"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      
+      - name: Build workspace (debug)
+        run: cargo build --workspace --all-features
+      
+      - name: Build workspace (release)
+        run: cargo build --workspace --all-features --release
+      
+      - name: Run tests
+        run: cargo test --workspace --all-features
+  
+  native-build-success:
+    name: Native Builds Success
+    runs-on: ubuntu-latest
+    needs: [native-build]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.native-build.result }}" != "success" ]; then
+            echo "Native build jobs failed"
+            exit 1
+          fi
+          echo "All native build jobs passed successfully"

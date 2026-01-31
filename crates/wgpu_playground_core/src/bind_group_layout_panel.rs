@@ -420,32 +420,47 @@ impl BindGroupLayoutPanel {
         egui::ComboBox::from_id_salt(format!("resource_type_{}", index))
             .selected_text(current_type)
             .show_ui(ui, |ui| {
-                if ui.selectable_label(current_type == "Uniform Buffer", "Uniform Buffer").clicked() {
+                if ui
+                    .selectable_label(current_type == "Uniform Buffer", "Uniform Buffer")
+                    .clicked()
+                {
                     entry.resource_type = ResourceTypeConfig::UniformBuffer {
                         has_dynamic_offset: false,
                         min_binding_size: String::new(),
                     };
                 }
-                if ui.selectable_label(current_type == "Storage Buffer", "Storage Buffer").clicked() {
+                if ui
+                    .selectable_label(current_type == "Storage Buffer", "Storage Buffer")
+                    .clicked()
+                {
                     entry.resource_type = ResourceTypeConfig::StorageBuffer {
                         has_dynamic_offset: false,
                         min_binding_size: String::new(),
                         read_only: false,
                     };
                 }
-                if ui.selectable_label(current_type == "Texture", "Texture").clicked() {
+                if ui
+                    .selectable_label(current_type == "Texture", "Texture")
+                    .clicked()
+                {
                     entry.resource_type = ResourceTypeConfig::Texture {
                         sample_type: TextureSampleTypeConfig::FloatFilterable,
                         view_dimension: TextureViewDimension::D2,
                         multisampled: false,
                     };
                 }
-                if ui.selectable_label(current_type == "Sampler", "Sampler").clicked() {
+                if ui
+                    .selectable_label(current_type == "Sampler", "Sampler")
+                    .clicked()
+                {
                     entry.resource_type = ResourceTypeConfig::Sampler {
                         sampler_type: SamplerBindingType::Filtering,
                     };
                 }
-                if ui.selectable_label(current_type == "Storage Texture", "Storage Texture").clicked() {
+                if ui
+                    .selectable_label(current_type == "Storage Texture", "Storage Texture")
+                    .clicked()
+                {
                     entry.resource_type = ResourceTypeConfig::StorageTexture {
                         access: StorageTextureAccess::WriteOnly,
                         format: wgpu::TextureFormat::Rgba8Unorm,
@@ -507,7 +522,11 @@ impl BindGroupLayoutPanel {
                             );
                             ui.selectable_value(sample_type, TextureSampleTypeConfig::Sint, "Sint");
                             ui.selectable_value(sample_type, TextureSampleTypeConfig::Uint, "Uint");
-                            ui.selectable_value(sample_type, TextureSampleTypeConfig::Depth, "Depth");
+                            ui.selectable_value(
+                                sample_type,
+                                TextureSampleTypeConfig::Depth,
+                                "Depth",
+                            );
                         });
                 });
                 ui.horizontal(|ui| {
@@ -517,9 +536,17 @@ impl BindGroupLayoutPanel {
                         .show_ui(ui, |ui| {
                             ui.selectable_value(view_dimension, TextureViewDimension::D1, "1D");
                             ui.selectable_value(view_dimension, TextureViewDimension::D2, "2D");
-                            ui.selectable_value(view_dimension, TextureViewDimension::D2Array, "2D Array");
+                            ui.selectable_value(
+                                view_dimension,
+                                TextureViewDimension::D2Array,
+                                "2D Array",
+                            );
                             ui.selectable_value(view_dimension, TextureViewDimension::Cube, "Cube");
-                            ui.selectable_value(view_dimension, TextureViewDimension::CubeArray, "Cube Array");
+                            ui.selectable_value(
+                                view_dimension,
+                                TextureViewDimension::CubeArray,
+                                "Cube Array",
+                            );
                             ui.selectable_value(view_dimension, TextureViewDimension::D3, "3D");
                         });
                 });
@@ -582,9 +609,21 @@ impl BindGroupLayoutPanel {
                     egui::ComboBox::from_id_salt(format!("format_{}", index))
                         .selected_text(format!("{:?}", format))
                         .show_ui(ui, |ui| {
-                            ui.selectable_value(format, wgpu::TextureFormat::Rgba8Unorm, "Rgba8Unorm");
-                            ui.selectable_value(format, wgpu::TextureFormat::Rgba16Float, "Rgba16Float");
-                            ui.selectable_value(format, wgpu::TextureFormat::Rgba32Float, "Rgba32Float");
+                            ui.selectable_value(
+                                format,
+                                wgpu::TextureFormat::Rgba8Unorm,
+                                "Rgba8Unorm",
+                            );
+                            ui.selectable_value(
+                                format,
+                                wgpu::TextureFormat::Rgba16Float,
+                                "Rgba16Float",
+                            );
+                            ui.selectable_value(
+                                format,
+                                wgpu::TextureFormat::Rgba32Float,
+                                "Rgba32Float",
+                            );
                             ui.selectable_value(format, wgpu::TextureFormat::R32Float, "R32Float");
                             ui.selectable_value(format, wgpu::TextureFormat::R32Uint, "R32Uint");
                             ui.selectable_value(format, wgpu::TextureFormat::R32Sint, "R32Sint");
@@ -597,9 +636,17 @@ impl BindGroupLayoutPanel {
                         .show_ui(ui, |ui| {
                             ui.selectable_value(view_dimension, TextureViewDimension::D1, "1D");
                             ui.selectable_value(view_dimension, TextureViewDimension::D2, "2D");
-                            ui.selectable_value(view_dimension, TextureViewDimension::D2Array, "2D Array");
+                            ui.selectable_value(
+                                view_dimension,
+                                TextureViewDimension::D2Array,
+                                "2D Array",
+                            );
                             ui.selectable_value(view_dimension, TextureViewDimension::Cube, "Cube");
-                            ui.selectable_value(view_dimension, TextureViewDimension::CubeArray, "Cube Array");
+                            ui.selectable_value(
+                                view_dimension,
+                                TextureViewDimension::CubeArray,
+                                "Cube Array",
+                            );
                             ui.selectable_value(view_dimension, TextureViewDimension::D3, "3D");
                         });
                 });
@@ -757,9 +804,7 @@ mod tests {
 
         let result = entry.to_bind_group_layout_entry();
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("At least one visibility flag"));
+        assert!(result.unwrap_err().contains("At least one visibility flag"));
     }
 
     #[test]

@@ -119,8 +119,7 @@ impl TexturePanel {
         // Validate dimension constraints
         if self.selected_dimension == TextureDimension::D1 {
             if height != 1 {
-                self.validation_error =
-                    Some("1D textures must have height = 1".to_string());
+                self.validation_error = Some("1D textures must have height = 1".to_string());
                 self.success_message = None;
                 return false;
             }
@@ -147,15 +146,13 @@ impl TexturePanel {
         // Validate multisampling
         if sample_count > 1 {
             if mip_levels > 1 {
-                self.validation_error = Some(
-                    "Multisampled textures cannot have mip levels > 1".to_string(),
-                );
+                self.validation_error =
+                    Some("Multisampled textures cannot have mip levels > 1".to_string());
                 self.success_message = None;
                 return false;
             }
             if self.selected_dimension != TextureDimension::D2 {
-                self.validation_error =
-                    Some("Only 2D textures can be multisampled".to_string());
+                self.validation_error = Some("Only 2D textures can be multisampled".to_string());
                 self.success_message = None;
                 return false;
             }

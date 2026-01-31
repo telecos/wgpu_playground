@@ -65,6 +65,7 @@ pub async fn create_test_device() -> Option<(Device, Queue)> {
 ///
 /// Returns `Some((Device, Queue))` if successful and the adapter supports
 /// the requested features, or `None` otherwise.
+#[allow(dead_code)]
 pub async fn create_test_device_with_features(features: wgpu::Features) -> Option<(Device, Queue)> {
     let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
@@ -108,6 +109,7 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
 ///
 /// Returns `Some((Device, Queue))` if successful and the adapter supports
 /// the requested limits, or `None` otherwise.
+#[allow(dead_code)]
 pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Device, Queue)> {
     let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
@@ -142,6 +144,7 @@ pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Dev
 ///
 /// Returns `Some((Instance, Adapter))` if successful, or `None` if no GPU
 /// adapter is available.
+#[allow(dead_code)]
 pub async fn create_test_instance_and_adapter() -> Option<(Instance, Adapter)> {
     let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),

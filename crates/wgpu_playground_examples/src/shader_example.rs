@@ -184,9 +184,8 @@ fn fs_main() -> @location(0) vec4<f32> {
     #[test]
     fn test_shader_source_enum() {
         // Test using ShaderSource::Inline variant
-        let inline_source = ShaderSource::Inline(
-            "@compute @workgroup_size(1) fn main() {}".to_string(),
-        );
+        let inline_source =
+            ShaderSource::Inline("@compute @workgroup_size(1) fn main() {}".to_string());
         let shader = ShaderModule::new(inline_source, Some("enum_shader"));
         assert!(shader.is_ok());
 

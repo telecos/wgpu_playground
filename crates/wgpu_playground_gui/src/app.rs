@@ -41,7 +41,11 @@ impl PlaygroundApp {
             ui.heading("Navigation");
             ui.separator();
 
-            ui.selectable_value(&mut self.selected_tab, Tab::AdapterSelection, "⚙️ Adapter Selection");
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::AdapterSelection,
+                "⚙️ Adapter Selection",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::DeviceInfo, "📊 Device Info");
             ui.selectable_value(&mut self.selected_tab, Tab::Rendering, "🎨 Rendering");
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");

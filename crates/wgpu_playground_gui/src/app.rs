@@ -5,6 +5,7 @@ use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::rendering::RenderingPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
+use wgpu_playground_core::texture_panel::TexturePanel;
 
 pub struct PlaygroundApp {
     device_info: DeviceInfo,
@@ -14,6 +15,7 @@ pub struct PlaygroundApp {
     compute_panel: ComputePanel,
     buffer_panel: BufferPanel,
     sampler_panel: SamplerPanel,
+    texture_panel: TexturePanel,
     selected_tab: Tab,
 }
 
@@ -25,6 +27,7 @@ enum Tab {
     Rendering,
     BufferConfig,
     SamplerConfig,
+    TextureConfig,
     Compute,
 }
 
@@ -38,6 +41,7 @@ impl PlaygroundApp {
             compute_panel: ComputePanel::new(),
             buffer_panel: BufferPanel::new(),
             sampler_panel: SamplerPanel::new(),
+            texture_panel: TexturePanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -75,6 +79,11 @@ impl PlaygroundApp {
                 Tab::SamplerConfig,
                 "🎨 Sampler Config",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::TextureConfig,
+                "🖼️ Texture Config",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 
@@ -86,6 +95,7 @@ impl PlaygroundApp {
             Tab::Rendering => self.rendering_panel.ui(ui),
             Tab::BufferConfig => self.buffer_panel.ui(ui),
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
+            Tab::TextureConfig => self.texture_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
         });
     }

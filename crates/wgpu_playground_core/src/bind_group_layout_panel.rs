@@ -104,7 +104,7 @@ impl EntryConfig {
                             .parse::<u64>()
                             .map_err(|_| "Min binding size must be a valid number")?
                             .try_into()
-                            .map_err(|_| "Min binding size must be greater than 0")?,
+                            .map_err(|_| "Min binding size must be non-zero")?,
                     )
                 };
                 BindingType::UniformBuffer {
@@ -125,7 +125,7 @@ impl EntryConfig {
                             .parse::<u64>()
                             .map_err(|_| "Min binding size must be a valid number")?
                             .try_into()
-                            .map_err(|_| "Min binding size must be greater than 0")?,
+                            .map_err(|_| "Min binding size must be non-zero")?,
                     )
                 };
                 BindingType::StorageBuffer {

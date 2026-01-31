@@ -249,11 +249,13 @@ mod tests {
         match result {
             Ok(_instance) => {
                 // If Dawn is fully integrated, this would succeed
-                panic!("Unexpected success - Dawn is not fully integrated yet");
+                assert!(false, "Dawn should not be fully integrated yet - runtime FFI not connected");
             }
             Err(e) => {
                 // Expected - Dawn FFI stubs are not yet connected
-                assert!(e.to_string().contains("not"));
+                let error_msg = e.to_string();
+                assert!(error_msg.contains("not yet connected") || error_msg.contains("NotFullyImplemented"), 
+                    "Expected FFI integration error, got: {}", error_msg);
             }
         }
     }

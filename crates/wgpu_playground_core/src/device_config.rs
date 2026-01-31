@@ -155,75 +155,75 @@ impl DeviceConfigPanel {
             .striped(true)
             .show(ui, |ui| {
                 // Texture limits
-                Self::render_limit_u32_static(ui, "Max Texture Dimension 1D", 
+                Self::render_limit_u32(ui, "Max Texture Dimension 1D", 
                     &mut config_limits.max_texture_dimension_1d, 
                     adapter_limits.max_texture_dimension_1d, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Texture Dimension 2D", 
+                Self::render_limit_u32(ui, "Max Texture Dimension 2D", 
                     &mut config_limits.max_texture_dimension_2d, 
                     adapter_limits.max_texture_dimension_2d, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Texture Dimension 3D", 
+                Self::render_limit_u32(ui, "Max Texture Dimension 3D", 
                     &mut config_limits.max_texture_dimension_3d, 
                     adapter_limits.max_texture_dimension_3d, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Texture Array Layers", 
+                Self::render_limit_u32(ui, "Max Texture Array Layers", 
                     &mut config_limits.max_texture_array_layers, 
                     adapter_limits.max_texture_array_layers, 1);
 
                 // Bind group limits
-                Self::render_limit_u32_static(ui, "Max Bind Groups", 
+                Self::render_limit_u32(ui, "Max Bind Groups", 
                     &mut config_limits.max_bind_groups, 
                     adapter_limits.max_bind_groups, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Bindings Per Bind Group", 
+                Self::render_limit_u32(ui, "Max Bindings Per Bind Group", 
                     &mut config_limits.max_bindings_per_bind_group, 
                     adapter_limits.max_bindings_per_bind_group, 1);
 
                 // Buffer limits
-                Self::render_limit_u32_static(ui, "Max Uniform Buffer Binding Size", 
+                Self::render_limit_u32(ui, "Max Uniform Buffer Binding Size", 
                     &mut config_limits.max_uniform_buffer_binding_size, 
                     adapter_limits.max_uniform_buffer_binding_size, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Storage Buffer Binding Size", 
+                Self::render_limit_u32(ui, "Max Storage Buffer Binding Size", 
                     &mut config_limits.max_storage_buffer_binding_size, 
                     adapter_limits.max_storage_buffer_binding_size, 1);
                 
-                Self::render_limit_u64_static(ui, "Max Buffer Size", 
+                Self::render_limit_u64(ui, "Max Buffer Size", 
                     &mut config_limits.max_buffer_size, 
                     adapter_limits.max_buffer_size, 1);
 
                 // Vertex limits
-                Self::render_limit_u32_static(ui, "Max Vertex Buffers", 
+                Self::render_limit_u32(ui, "Max Vertex Buffers", 
                     &mut config_limits.max_vertex_buffers, 
                     adapter_limits.max_vertex_buffers, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Vertex Attributes", 
+                Self::render_limit_u32(ui, "Max Vertex Attributes", 
                     &mut config_limits.max_vertex_attributes, 
                     adapter_limits.max_vertex_attributes, 1);
 
                 // Compute limits
-                Self::render_limit_u32_static(ui, "Max Compute Workgroup Size X", 
+                Self::render_limit_u32(ui, "Max Compute Workgroup Size X", 
                     &mut config_limits.max_compute_workgroup_size_x, 
                     adapter_limits.max_compute_workgroup_size_x, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Compute Workgroup Size Y", 
+                Self::render_limit_u32(ui, "Max Compute Workgroup Size Y", 
                     &mut config_limits.max_compute_workgroup_size_y, 
                     adapter_limits.max_compute_workgroup_size_y, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Compute Workgroup Size Z", 
+                Self::render_limit_u32(ui, "Max Compute Workgroup Size Z", 
                     &mut config_limits.max_compute_workgroup_size_z, 
                     adapter_limits.max_compute_workgroup_size_z, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Compute Invocations Per Workgroup", 
+                Self::render_limit_u32(ui, "Max Compute Invocations Per Workgroup", 
                     &mut config_limits.max_compute_invocations_per_workgroup, 
                     adapter_limits.max_compute_invocations_per_workgroup, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Compute Workgroup Storage Size", 
+                Self::render_limit_u32(ui, "Max Compute Workgroup Storage Size", 
                     &mut config_limits.max_compute_workgroup_storage_size, 
                     adapter_limits.max_compute_workgroup_storage_size, 1);
                 
-                Self::render_limit_u32_static(ui, "Max Compute Workgroups Per Dimension", 
+                Self::render_limit_u32(ui, "Max Compute Workgroups Per Dimension", 
                     &mut config_limits.max_compute_workgroups_per_dimension, 
                     adapter_limits.max_compute_workgroups_per_dimension, 1);
             });
@@ -239,7 +239,7 @@ impl DeviceConfigPanel {
         });
     }
 
-    fn render_limit_u32_static(ui: &mut egui::Ui, label: &str, value: &mut u32, max: u32, min: u32) {
+    fn render_limit_u32(ui: &mut egui::Ui, label: &str, value: &mut u32, max: u32, min: u32) {
         ui.label(label);
         let mut temp_value = *value;
         if ui.add(egui::DragValue::new(&mut temp_value).range(min..=max)).changed() {
@@ -248,7 +248,7 @@ impl DeviceConfigPanel {
         ui.end_row();
     }
 
-    fn render_limit_u64_static(ui: &mut egui::Ui, label: &str, value: &mut u64, max: u64, min: u64) {
+    fn render_limit_u64(ui: &mut egui::Ui, label: &str, value: &mut u64, max: u64, min: u64) {
         ui.label(label);
         let mut temp_value = *value;
         if ui.add(egui::DragValue::new(&mut temp_value).range(min..=max)).changed() {

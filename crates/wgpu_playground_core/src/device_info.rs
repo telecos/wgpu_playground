@@ -108,12 +108,12 @@ impl DeviceInfo {
                 ui.hyperlink(self.implementation.url());
             });
             ui.add_space(10.0);
-            
+
             // Show if Dawn is available
             if WebGPUImplementation::is_dawn_available() {
                 ui.colored_label(
                     egui::Color32::from_rgb(100, 200, 100),
-                    "✓ Dawn support compiled in"
+                    "✓ Dawn support compiled in",
                 );
             } else {
                 ui.label("ℹ️ Dawn support not compiled in (use --features dawn to enable)");

@@ -228,7 +228,7 @@ impl AdapterSelectionPanel {
             });
             ui.label(current_impl.description());
             ui.add_space(5.0);
-            
+
             // List available implementations
             ui.label("Available implementations:");
             for impl_type in WebGPUImplementation::available_implementations() {
@@ -239,15 +239,22 @@ impl AdapterSelectionPanel {
                         ui.label("  ○");
                     }
                     ui.label(impl_type.name());
-                    ui.label(format!("({})", if impl_type == current_impl { "active" } else { "inactive" }));
+                    ui.label(format!(
+                        "({})",
+                        if impl_type == current_impl {
+                            "active"
+                        } else {
+                            "inactive"
+                        }
+                    ));
                 });
             }
-            
+
             if !WebGPUImplementation::is_dawn_available() {
                 ui.add_space(5.0);
                 ui.label("ℹ️ To enable Dawn support, compile with: cargo build --features dawn");
             }
-            
+
             ui.add_space(20.0);
             ui.separator();
             ui.add_space(10.0);

@@ -79,6 +79,9 @@ mod tests {
     #[test]
     fn test_current_implementation() {
         let impl_type = WebGPUImplementation::current();
+        #[cfg(feature = "dawn")]
+        assert_eq!(impl_type, WebGPUImplementation::Dawn);
+        #[cfg(not(feature = "dawn"))]
         assert_eq!(impl_type, WebGPUImplementation::Wgpu);
     }
 
@@ -103,7 +106,9 @@ mod tests {
 
     #[test]
     fn test_is_dawn_available() {
-        // Dawn is not available by default (feature not enabled)
+        #[cfg(feature = "dawn")]
+        assert!(WebGPUImplementation::is_dawn_available());
+        #[cfg(not(feature = "dawn"))]
         assert!(!WebGPUImplementation::is_dawn_available());
     }
 

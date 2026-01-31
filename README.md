@@ -8,20 +8,27 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 
 ## Features
 
+- **GPU Adapter Selection**: Choose from available GPU adapters with detailed properties and configure power preferences
 - **Device Information**: View detailed information about your GPU, including adapter info, device limits, and supported features
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 
 ## User Interface
 
-The application provides a tabbed interface with three main sections:
+The application provides a tabbed interface with four main sections:
 
-1. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
+1. **Adapter Selection Tab**: Choose and configure GPU adapters:
+   - View all available GPU adapters with detailed properties
+   - Select adapter by name, vendor, device type, and backend
+   - Configure power preference (None, Low Power, High Performance)
+   - Filter adapters by backend (Vulkan, Metal, DX12, OpenGL, etc.)
+
+2. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
    - Adapter details (name, vendor, backend)
    - Device limits (texture dimensions, buffer sizes, workgroup limits, etc.)
    - Supported features
 
-2. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
+3. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
    - Render pipeline configuration
    - Shader editing and testing
    - Buffer and vertex data management
@@ -29,7 +36,7 @@ The application provides a tabbed interface with three main sections:
    - Render pass configuration
    - Advanced rendering techniques (instancing, MSAA, etc.)
 
-3. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
+4. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
    - Compute pipeline setup
    - Storage buffer management
    - Matrix operations

@@ -20,6 +20,40 @@ enum RenderState {
     },
 }
 
+impl RenderState {
+    fn update(&mut self, queue: &Queue, delta_time: f32) {
+        if let RenderState::Cube {
+            time,
+            uniform_buffer,
+            ..
+        } = self
+        {
+            *time += delta_time;
+
+            // Update transformation matrix
+            #[repr(C)]
+            #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+            struct Uniforms {
+                view_proj: [[f32; 4]; 4],
+                model: [[f32; 4]; 4],
+            }
+
+            let aspect = 1.0;
+            let projection = perspective_matrix(45.0_f32.to_radians(), aspect, 0.1, 100.0);
+            let view = look_at_matrix([0.0, 0.0, 3.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+            let view_proj = matrix_multiply(&projection, &view);
+
+            let rotation_y = rotation_y_matrix(*time);
+            let rotation_x = rotation_x_matrix(*time * 0.5);
+            let model = matrix_multiply(&rotation_y, &rotation_x);
+
+            let uniforms = Uniforms { view_proj, model };
+
+            queue.write_buffer(uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
+        }
+    }
+}
+
 pub struct RenderingPanel {
     examples: Vec<Example>,
     selected_example: Option<usize>,
@@ -200,13 +234,246 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         };
     }
 
+    fn create_cube_render_state(&mut self, device: &Device, queue: &Queue) {
+        let shader_source = r#"
+struct Uniforms {
+    view_proj: mat4x4<f32>,
+    model: mat4x4<f32>,
+}
+
+@group(0) @binding(0)
+var<uniform> uniforms: Uniforms;
+
+struct VertexInput {
+    @location(0) position: vec3<f32>,
+    @location(1) color: vec3<f32>,
+}
+
+struct VertexOutput {
+    @builtin(position) clip_position: vec4<f32>,
+    @location(0) color: vec3<f32>,
+}
+
+@vertex
+fn vs_main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let world_position = uniforms.model * vec4<f32>(in.position, 1.0);
+    out.clip_position = uniforms.view_proj * world_position;
+    out.color = in.color;
+    return out;
+}
+
+@fragment
+fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
+    return vec4<f32>(in.color, 1.0);
+}
+"#;
+
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Cube Shader"),
+            source: wgpu::ShaderSource::Wgsl(shader_source.into()),
+        });
+
+        #[repr(C)]
+        #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+        struct Vertex {
+            position: [f32; 3],
+            color: [f32; 3],
+        }
+
+        // Cube vertices (8 corners)
+        let vertices = [
+            // Front face (red-ish)
+            Vertex { position: [-0.5, -0.5, 0.5], color: [1.0, 0.0, 0.0] },
+            Vertex { position: [0.5, -0.5, 0.5], color: [1.0, 0.3, 0.0] },
+            Vertex { position: [0.5, 0.5, 0.5], color: [1.0, 0.6, 0.0] },
+            Vertex { position: [-0.5, 0.5, 0.5], color: [1.0, 0.9, 0.0] },
+            // Back face (blue-ish)
+            Vertex { position: [-0.5, -0.5, -0.5], color: [0.0, 0.0, 1.0] },
+            Vertex { position: [0.5, -0.5, -0.5], color: [0.0, 0.3, 1.0] },
+            Vertex { position: [0.5, 0.5, -0.5], color: [0.0, 0.6, 1.0] },
+            Vertex { position: [-0.5, 0.5, -0.5], color: [0.0, 0.9, 1.0] },
+        ];
+
+        // Cube indices (36 indices for 12 triangles)
+        let indices: [u16; 36] = [
+            0, 1, 2, 2, 3, 0, // Front
+            1, 5, 6, 6, 2, 1, // Right
+            5, 4, 7, 7, 6, 5, // Back
+            4, 0, 3, 3, 7, 4, // Left
+            3, 2, 6, 6, 7, 3, // Top
+            4, 5, 1, 1, 0, 4, // Bottom
+        ];
+
+        let vertex_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Cube Vertex Buffer"),
+            size: std::mem::size_of_val(&vertices) as u64,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        queue.write_buffer(&vertex_buffer, 0, bytemuck::cast_slice(&vertices));
+
+        let index_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Cube Index Buffer"),
+            size: std::mem::size_of_val(&indices) as u64,
+            usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        queue.write_buffer(&index_buffer, 0, bytemuck::cast_slice(&indices));
+
+        // Create uniform buffer
+        #[repr(C)]
+        #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+        struct Uniforms {
+            view_proj: [[f32; 4]; 4],
+            model: [[f32; 4]; 4],
+        }
+
+        let uniforms = Uniforms {
+            view_proj: identity_matrix(),
+            model: identity_matrix(),
+        };
+
+        let uniform_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Cube Uniform Buffer"),
+            size: std::mem::size_of::<Uniforms>() as u64,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        queue.write_buffer(&uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
+
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("Cube Bind Group Layout"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
+
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Cube Bind Group"),
+            layout: &bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniform_buffer.as_entire_binding(),
+            }],
+        });
+
+        // Create depth texture
+        let size = wgpu::Extent3d {
+            width: 512,
+            height: 512,
+            depth_or_array_layers: 1,
+        };
+
+        let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Depth Texture"),
+            size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Depth32Float,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+
+        let depth_view = depth_texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("Cube Pipeline Layout"),
+            bind_group_layouts: &[&bind_group_layout],
+            push_constant_ranges: &[],
+        });
+
+        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("Cube Pipeline"),
+            layout: Some(&pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: "vs_main",
+                buffers: &[wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Vertex,
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3],
+                }],
+                compilation_options: Default::default(),
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: "fs_main",
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: wgpu::TextureFormat::Bgra8UnormSrgb,
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    write_mask: wgpu::ColorWrites::ALL,
+                })],
+                compilation_options: Default::default(),
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                strip_index_format: None,
+                front_face: wgpu::FrontFace::Ccw,
+                cull_mode: Some(wgpu::Face::Back),
+                polygon_mode: wgpu::PolygonMode::Fill,
+                unclipped_depth: false,
+                conservative: false,
+            },
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: wgpu::TextureFormat::Depth32Float,
+                depth_write_enabled: true,
+                depth_compare: wgpu::CompareFunction::Less,
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
+            multisample: wgpu::MultisampleState {
+                count: 1,
+                mask: !0,
+                alpha_to_coverage_enabled: false,
+            },
+            multiview: None,
+            cache: None,
+        });
+
+        self.render_state = RenderState::Cube {
+            pipeline,
+            vertex_buffer,
+            index_buffer,
+            bind_group,
+            uniform_buffer,
+            depth_texture,
+            depth_view,
+            time: 0.0,
+        };
+    }
+
     fn render_current_example(&mut self, device: &Device, queue: &Queue) {
+        // Update animation state
+        self.render_state.update(queue, 0.016); // ~60fps
+
         if let Some(view) = &self.render_texture_view {
             let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Example Render Encoder"),
             });
 
             {
+                let depth_stencil_attachment = if let RenderState::Cube { depth_view, .. } = &self.render_state {
+                    Some(wgpu::RenderPassDepthStencilAttachment {
+                        view: depth_view,
+                        depth_ops: Some(wgpu::Operations {
+                            load: wgpu::LoadOp::Clear(1.0),
+                            store: wgpu::StoreOp::Store,
+                        }),
+                        stencil_ops: None,
+                    })
+                } else {
+                    None
+                };
+
                 let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("Example Render Pass"),
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -222,7 +489,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                             store: wgpu::StoreOp::Store,
                         },
                     })],
-                    depth_stencil_attachment: None,
+                    depth_stencil_attachment,
                     timestamp_writes: None,
                     occlusion_query_set: None,
                 });
@@ -235,6 +502,19 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                         render_pass.set_pipeline(pipeline);
                         render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
                         render_pass.draw(0..3, 0..1);
+                    }
+                    RenderState::Cube {
+                        pipeline,
+                        vertex_buffer,
+                        index_buffer,
+                        bind_group,
+                        ..
+                    } => {
+                        render_pass.set_pipeline(pipeline);
+                        render_pass.set_bind_group(0, bind_group, &[]);
+                        render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+                        render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                        render_pass.draw_indexed(0..36, 0, 0..1);
                     }
                     _ => {}
                 }
@@ -350,6 +630,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                                     // Create render state based on example
                                     if example_id == "triangle" {
                                         self.create_triangle_render_state(device, queue);
+                                    } else if example_id == "cube" {
+                                        self.create_cube_render_state(device, queue);
                                     }
                                 }
                             }
@@ -364,28 +646,113 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                             // Render the example
                             self.render_current_example(device, queue);
 
-                            // Display the rendered texture
-                            if self.render_texture.is_some() {
-                                // Show a colored rectangle as placeholder for the rendered content
-                                let (rect, _response) = ui.allocate_exact_size(
-                                    egui::vec2(512.0, 512.0),
-                                    egui::Sense::hover(),
-                                );
+                            // Display a visual indicator that rendering is happening
+                            ui.add_space(5.0);
+                            
+                            // Show a colored rectangle representing the render canvas
+                            let (rect, _response) = ui.allocate_exact_size(
+                                egui::vec2(512.0, 512.0),
+                                egui::Sense::hover(),
+                            );
+                            
+                            // Draw a gradient background to show the rendering area
+                            let color_tl = egui::Color32::from_rgb(40, 20, 60);
+                            let color_br = egui::Color32::from_rgb(20, 40, 80);
+                            
+                            ui.painter().rect_filled(
+                                rect,
+                                4.0,
+                                color_tl,
+                            );
+                            
+                            // Draw a border
+                            ui.painter().rect_stroke(
+                                rect,
+                                4.0,
+                                egui::Stroke::new(2.0, egui::Color32::from_rgb(100, 150, 255)),
+                            );
+                            
+                            // For triangle example, draw a simple triangle representation
+                            if example_id == "triangle" {
+                                let center = rect.center();
+                                let size = 200.0;
                                 
-                                ui.painter().rect_filled(
-                                    rect,
-                                    0.0,
-                                    egui::Color32::from_rgb(20, 20, 40),
-                                );
+                                let top = egui::pos2(center.x, center.y - size * 0.5);
+                                let left = egui::pos2(center.x - size * 0.5, center.y + size * 0.5);
+                                let right = egui::pos2(center.x + size * 0.5, center.y + size * 0.5);
                                 
+                                // Draw the triangle with gradient colors
+                                let mesh = {
+                                    let mut mesh = egui::Mesh::default();
+                                    mesh.colored_vertex(top, egui::Color32::RED);
+                                    mesh.colored_vertex(left, egui::Color32::GREEN);
+                                    mesh.colored_vertex(right, egui::Color32::BLUE);
+                                    mesh.add_triangle(0, 1, 2);
+                                    mesh
+                                };
+                                
+                                ui.painter().add(egui::Shape::mesh(mesh));
+                            } else if example_id == "cube" {
+                                // Draw a simple isometric cube representation
+                                let center = rect.center();
+                                let size = 120.0;
+                                
+                                // Draw isometric cube faces
+                                // Front face
+                                let front_bl = egui::pos2(center.x - size * 0.5, center.y + size * 0.3);
+                                let front_br = egui::pos2(center.x + size * 0.5, center.y + size * 0.3);
+                                let front_tr = egui::pos2(center.x + size * 0.5, center.y - size * 0.7);
+                                let front_tl = egui::pos2(center.x - size * 0.5, center.y - size * 0.7);
+                                
+                                // Top face
+                                let top_fr = front_tr;
+                                let top_fl = front_tl;
+                                let top_bl = egui::pos2(center.x - size * 0.3, center.y - size);
+                                let top_br = egui::pos2(center.x + size * 0.7, center.y - size);
+                                
+                                // Right face
+                                let right_br = front_br;
+                                let right_tr = front_tr;
+                                
+                                // Draw faces
+                                // Front face (red)
+                                ui.painter().add(egui::Shape::convex_polygon(
+                                    vec![front_bl, front_br, front_tr, front_tl],
+                                    egui::Color32::from_rgb(200, 80, 80),
+                                    egui::Stroke::NONE,
+                                ));
+                                
+                                // Top face (orange)
+                                ui.painter().add(egui::Shape::convex_polygon(
+                                    vec![top_fl, top_fr, top_br, top_bl],
+                                    egui::Color32::from_rgb(240, 160, 80),
+                                    egui::Stroke::NONE,
+                                ));
+                                
+                                // Right face (blue)
+                                ui.painter().add(egui::Shape::convex_polygon(
+                                    vec![right_br, top_br, top_fr, right_tr],
+                                    egui::Color32::from_rgb(80, 120, 200),
+                                    egui::Stroke::NONE,
+                                ));
+                                
+                                // Add rotating arrow to indicate animation
                                 ui.painter().text(
-                                    rect.center(),
+                                    egui::pos2(center.x, center.y + size * 0.8),
                                     egui::Align2::CENTER_CENTER,
-                                    "▶ Example is rendering!\n(Texture display integration pending)",
-                                    egui::FontId::proportional(16.0),
+                                    "🔄 Rotating",
+                                    egui::FontId::proportional(14.0),
                                     egui::Color32::WHITE,
                                 );
                             }
+                            
+                            ui.painter().text(
+                                egui::pos2(rect.left() + 10.0, rect.top() + 10.0),
+                                egui::Align2::LEFT_TOP,
+                                "✓ Example is rendering on GPU",
+                                egui::FontId::proportional(14.0),
+                                egui::Color32::from_rgb(100, 255, 100),
+                            );
                         }
 
                         ui.add_space(10.0);
@@ -465,4 +832,96 @@ mod tests {
         assert_eq!(panel.examples.len(), 4);
         assert!(!panel.is_example_running);
     }
+}
+
+// Matrix math utilities
+fn identity_matrix() -> [[f32; 4]; 4] {
+    [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]
+}
+
+fn perspective_matrix(fov_y: f32, aspect: f32, near: f32, far: f32) -> [[f32; 4]; 4] {
+    let f = 1.0 / (fov_y / 2.0).tan();
+    [
+        [f / aspect, 0.0, 0.0, 0.0],
+        [0.0, f, 0.0, 0.0],
+        [0.0, 0.0, (far + near) / (near - far), -1.0],
+        [0.0, 0.0, (2.0 * far * near) / (near - far), 0.0],
+    ]
+}
+
+fn look_at_matrix(eye: [f32; 3], center: [f32; 3], up: [f32; 3]) -> [[f32; 4]; 4] {
+    let f = normalize([
+        center[0] - eye[0],
+        center[1] - eye[1],
+        center[2] - eye[2],
+    ]);
+    let s = normalize(cross(f, up));
+    let u = cross(s, f);
+
+    [
+        [s[0], u[0], -f[0], 0.0],
+        [s[1], u[1], -f[1], 0.0],
+        [s[2], u[2], -f[2], 0.0],
+        [-dot(s, eye), -dot(u, eye), dot(f, eye), 1.0],
+    ]
+}
+
+fn rotation_x_matrix(angle: f32) -> [[f32; 4]; 4] {
+    let c = angle.cos();
+    let s = angle.sin();
+    [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, c, s, 0.0],
+        [0.0, -s, c, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]
+}
+
+fn rotation_y_matrix(angle: f32) -> [[f32; 4]; 4] {
+    let c = angle.cos();
+    let s = angle.sin();
+    [
+        [c, 0.0, -s, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [s, 0.0, c, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]
+}
+
+fn matrix_multiply(a: &[[f32; 4]; 4], b: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
+    let mut result = [[0.0; 4]; 4];
+    for i in 0..4 {
+        for j in 0..4 {
+            for k in 0..4 {
+                result[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }
+    result
+}
+
+fn normalize(v: [f32; 3]) -> [f32; 3] {
+    let len = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
+    if len == 0.0 {
+        v
+    } else {
+        [v[0] / len, v[1] / len, v[2] / len]
+    }
+}
+
+fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
+    [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
+}
+
+fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
+    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }

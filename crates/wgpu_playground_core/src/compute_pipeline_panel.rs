@@ -6,21 +6,21 @@ pub struct ComputePipelinePanel {
     /// Current pipeline descriptor being configured
     descriptor: ComputePipelineDescriptor,
     /// Label input text
-    label_input: String,
+    pub label_input: String,
     /// Shader source code input
-    shader_source: String,
+    pub shader_source: String,
     /// Shader label input
-    shader_label: String,
+    pub shader_label: String,
     /// Entry point input text
-    entry_point_input: String,
+    pub entry_point_input: String,
     /// Whether to use auto-generated pipeline layout
-    use_auto_layout: bool,
+    pub use_auto_layout: bool,
     /// Validation error message
-    validation_error: Option<String>,
+    pub validation_error: Option<String>,
     /// Success message
-    success_message: Option<String>,
+    pub success_message: Option<String>,
     /// Compiled shader module (cached)
-    cached_shader: Option<ShaderModule>,
+    pub cached_shader: Option<ShaderModule>,
 }
 
 impl Default for ComputePipelinePanel {
@@ -104,7 +104,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     /// Validate the current configuration
-    fn validate(&mut self) -> bool {
+    pub fn validate(&mut self) -> bool {
         match self.update_descriptor() {
             Ok(_) => match self.descriptor.validate() {
                 Ok(_) => {
@@ -317,7 +317,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     /// Get storage buffer shader template
-    fn storage_buffer_shader() -> String {
+    pub fn storage_buffer_shader() -> String {
         r#"// Compute shader with storage buffer
 @group(0) @binding(0)
 var<storage, read_write> data: array<f32>;
@@ -332,7 +332,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     /// Get matrix multiply shader template
-    fn matrix_multiply_shader() -> String {
+    pub fn matrix_multiply_shader() -> String {
         r#"// Matrix multiplication compute shader
 @group(0) @binding(0)
 var<storage, read> matrix_a: array<f32>;

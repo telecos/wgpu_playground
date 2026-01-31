@@ -99,6 +99,42 @@ WGPU_BACKEND=all cargo run --release
 
 The active backend is displayed prominently in the **Device Info** tab of the application.
 
+## Troubleshooting
+
+### DirectX 12 Resource State Errors on AMD GPUs (Windows)
+
+If you see console error messages like:
+
+```
+[ERROR wgpu_hal::auxil::dxgi::exception] ID3D12CommandQueue1::ExecuteCommandLists: 
+Resource state (0x4: D3D12_RESOURCE_STATE_RENDER_TARGET) of resource is invalid for use as a PRESENT_SOURCE.
+Expected State Bits (all): 0x0: D3D12_RESOURCE_STATE_[COMMON|PRESENT]
+INVALID_SUBRESOURCE_STATE
+```
+
+This is a known issue with the wgpu DirectX 12 backend on AMD GPUs (and occasionally other GPUs). These errors are validation warnings from the DirectX 12 debug layer and do not affect visual rendering in most cases. They occur due to missing or incorrect resource state transitions in the wgpu-hal DirectX 12 backend.
+
+**Solution: Use the Vulkan Backend**
+
+The most effective workaround is to use the Vulkan backend instead of DirectX 12:
+
+```bash
+# Windows Command Prompt
+set WGPU_BACKEND=vulkan
+cargo run --release
+
+# Windows PowerShell
+$env:WGPU_BACKEND="vulkan"
+cargo run --release
+
+# Or run directly
+WGPU_BACKEND=vulkan cargo run --release
+```
+
+The application will automatically prefer the Vulkan backend on Windows when no explicit backend is specified, but you can force DirectX 12 with `WGPU_BACKEND=dx12` if needed.
+
+**Note:** This issue is being tracked upstream in the wgpu project. The errors are cosmetic and typically don't cause rendering issues, but they can spam the console log. Using Vulkan avoids the issue entirely.
+
 ## Project Structure
 
 This project uses a Cargo workspace structure with the following crates:

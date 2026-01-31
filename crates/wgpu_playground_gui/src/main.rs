@@ -37,8 +37,20 @@ impl AppState {
                 wgpu_playground_core::adapter::parse_backend(&backend_str)
             })
             .unwrap_or_else(|| {
-                log::info!("Using all available backends");
-                wgpu::Backends::all()
+                // On Windows, prefer Vulkan to avoid DirectX 12 resource state validation errors
+                // that are common on AMD GPUs. These errors are cosmetic but spam the console.
+                // See: https://github.com/gfx-rs/wgpu/issues/3959, https://github.com/gfx-rs/wgpu/issues/4247
+                #[cfg(target_os = "windows")]
+                {
+                    log::info!("No WGPU_BACKEND specified. On Windows, preferring Vulkan to avoid DX12 validation errors.");
+                    log::info!("Set WGPU_BACKEND=dx12 to force DirectX 12 if needed.");
+                    wgpu::Backends::VULKAN | wgpu::Backends::DX12
+                }
+                #[cfg(not(target_os = "windows"))]
+                {
+                    log::info!("Using all available backends");
+                    wgpu::Backends::all()
+                }
             });
 
         let instance = wgpu_playground_core::adapter::create_instance(backends);

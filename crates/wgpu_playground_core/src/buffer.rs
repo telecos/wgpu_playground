@@ -394,9 +394,9 @@ impl BufferOps {
             let _ = sender.send(result);
         });
 
-        let result = receiver.await.unwrap()?;
+        receiver.await.unwrap()?;
         log::trace!("Buffer mapped for reading successfully");
-        Ok(result)
+        Ok(())
     }
 
     /// Map a buffer for writing
@@ -436,9 +436,9 @@ impl BufferOps {
             let _ = sender.send(result);
         });
 
-        let result = receiver.await.unwrap()?;
+        receiver.await.unwrap()?;
         log::trace!("Buffer mapped for writing successfully");
-        Ok(result)
+        Ok(())
     }
 
     /// Unmap a previously mapped buffer

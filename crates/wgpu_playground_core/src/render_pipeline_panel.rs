@@ -957,3 +957,280 @@ impl PipelinePreset {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_render_pipeline_panel_creation() {
+        let panel = RenderPipelinePanel::new();
+        assert_eq!(panel.label_input, "");
+        assert_eq!(panel.vertex_entry_point, "vs_main");
+        assert_eq!(panel.fragment_entry_point, "fs_main");
+        assert_eq!(panel.topology, PrimitiveTopology::TriangleList);
+        assert_eq!(panel.cull_mode, CullMode::None);
+        assert_eq!(panel.front_face, FrontFace::Ccw);
+        assert!(!panel.enable_depth_stencil);
+        assert_eq!(panel.sample_count, 1);
+        assert!(!panel.alpha_to_coverage_enabled);
+        assert!(!panel.blend_enabled);
+        assert!(panel.write_red);
+        assert!(panel.write_green);
+        assert!(panel.write_blue);
+        assert!(panel.write_alpha);
+    }
+
+    #[test]
+    fn test_render_pipeline_panel_default() {
+        let panel = RenderPipelinePanel::default();
+        assert_eq!(panel.vertex_entry_point, "vs_main");
+        assert_eq!(panel.fragment_entry_point, "fs_main");
+    }
+
+    #[test]
+    fn test_update_descriptor() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.label_input = "test_pipeline".to_string();
+        panel.topology = PrimitiveTopology::TriangleStrip;
+        panel.cull_mode = CullMode::Back;
+
+        panel.update_descriptor();
+
+        assert_eq!(panel.descriptor.label(), Some("test_pipeline"));
+    }
+
+    #[test]
+    fn test_preset_basic_triangle() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.apply_preset(PipelinePreset::BasicTriangle);
+
+        assert_eq!(panel.topology, PrimitiveTopology::TriangleList);
+        assert_eq!(panel.cull_mode, CullMode::None);
+        assert_eq!(panel.front_face, FrontFace::Ccw);
+        assert!(!panel.enable_depth_stencil);
+        assert!(!panel.blend_enabled);
+        assert_eq!(panel.sample_count, 1);
+        assert!(panel.success_message.is_some());
+    }
+
+    #[test]
+    fn test_preset_depth_tested() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.apply_preset(PipelinePreset::DepthTested);
+
+        assert_eq!(panel.topology, PrimitiveTopology::TriangleList);
+        assert_eq!(panel.cull_mode, CullMode::Back);
+        assert_eq!(panel.front_face, FrontFace::Ccw);
+        assert!(panel.enable_depth_stencil);
+        assert!(panel.depth_write_enabled);
+        assert_eq!(panel.depth_compare, CompareFunction::Less);
+        assert!(!panel.blend_enabled);
+        assert_eq!(panel.sample_count, 1);
+    }
+
+    #[test]
+    fn test_preset_alpha_blended() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.apply_preset(PipelinePreset::AlphaBlended);
+
+        assert_eq!(panel.topology, PrimitiveTopology::TriangleList);
+        assert_eq!(panel.cull_mode, CullMode::None);
+        assert!(!panel.enable_depth_stencil);
+        assert!(panel.blend_enabled);
+        assert_eq!(panel.color_blend_src, BlendFactor::One);
+        assert_eq!(panel.color_blend_dst, BlendFactor::OneMinusSrcAlpha);
+        assert_eq!(panel.color_blend_op, BlendOperation::Add);
+        assert_eq!(panel.alpha_blend_src, BlendFactor::One);
+        assert_eq!(panel.alpha_blend_dst, BlendFactor::OneMinusSrcAlpha);
+    }
+
+    #[test]
+    fn test_preset_wireframe() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.apply_preset(PipelinePreset::Wireframe);
+
+        assert_eq!(panel.topology, PrimitiveTopology::LineList);
+        assert_eq!(panel.cull_mode, CullMode::None);
+        assert!(panel.enable_depth_stencil);
+        assert!(!panel.blend_enabled);
+    }
+
+    #[test]
+    fn test_preset_multisample_4x() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.apply_preset(PipelinePreset::Multisample4x);
+
+        assert_eq!(panel.topology, PrimitiveTopology::TriangleList);
+        assert_eq!(panel.cull_mode, CullMode::Back);
+        assert!(panel.enable_depth_stencil);
+        assert_eq!(panel.sample_count, 4);
+        assert!(!panel.alpha_to_coverage_enabled);
+    }
+
+    #[test]
+    fn test_depth_format_conversion() {
+        assert_eq!(
+            DepthFormat::Depth24Plus.to_wgpu(),
+            wgpu::TextureFormat::Depth24Plus
+        );
+        assert_eq!(
+            DepthFormat::Depth32Float.to_wgpu(),
+            wgpu::TextureFormat::Depth32Float
+        );
+    }
+
+    #[test]
+    fn test_target_format_conversion() {
+        assert_eq!(
+            TargetFormat::Bgra8UnormSrgb.to_wgpu(),
+            wgpu::TextureFormat::Bgra8UnormSrgb
+        );
+        assert_eq!(
+            TargetFormat::Rgba8UnormSrgb.to_wgpu(),
+            wgpu::TextureFormat::Rgba8UnormSrgb
+        );
+    }
+
+    #[test]
+    fn test_topology_name() {
+        assert_eq!(
+            RenderPipelinePanel::topology_name(PrimitiveTopology::TriangleList),
+            "Triangle List"
+        );
+        assert_eq!(
+            RenderPipelinePanel::topology_name(PrimitiveTopology::LineList),
+            "Line List"
+        );
+    }
+
+    #[test]
+    fn test_cull_mode_name() {
+        assert_eq!(
+            RenderPipelinePanel::cull_mode_name(CullMode::None),
+            "None"
+        );
+        assert_eq!(
+            RenderPipelinePanel::cull_mode_name(CullMode::Back),
+            "Back"
+        );
+    }
+
+    #[test]
+    fn test_front_face_name() {
+        assert_eq!(
+            RenderPipelinePanel::front_face_name(FrontFace::Ccw),
+            "Counter-Clockwise"
+        );
+        assert_eq!(
+            RenderPipelinePanel::front_face_name(FrontFace::Cw),
+            "Clockwise"
+        );
+    }
+
+    #[test]
+    fn test_compare_function_name() {
+        assert_eq!(
+            RenderPipelinePanel::compare_function_name(CompareFunction::Less),
+            "Less"
+        );
+        assert_eq!(
+            RenderPipelinePanel::compare_function_name(CompareFunction::Always),
+            "Always"
+        );
+    }
+
+    #[test]
+    fn test_blend_factor_name() {
+        assert_eq!(
+            RenderPipelinePanel::blend_factor_name(BlendFactor::One),
+            "One"
+        );
+        assert_eq!(
+            RenderPipelinePanel::blend_factor_name(BlendFactor::SrcAlpha),
+            "Source Alpha"
+        );
+    }
+
+    #[test]
+    fn test_blend_operation_name() {
+        assert_eq!(
+            RenderPipelinePanel::blend_operation_name(BlendOperation::Add),
+            "Add"
+        );
+        assert_eq!(
+            RenderPipelinePanel::blend_operation_name(BlendOperation::Subtract),
+            "Subtract"
+        );
+    }
+
+    #[test]
+    fn test_stencil_operation_name() {
+        assert_eq!(
+            RenderPipelinePanel::stencil_operation_name(StencilOperation::Keep),
+            "Keep"
+        );
+        assert_eq!(
+            RenderPipelinePanel::stencil_operation_name(StencilOperation::Replace),
+            "Replace"
+        );
+    }
+
+    #[test]
+    fn test_preset_all() {
+        let presets = PipelinePreset::all();
+        assert_eq!(presets.len(), 6);
+        assert!(presets.contains(&PipelinePreset::Default));
+        assert!(presets.contains(&PipelinePreset::BasicTriangle));
+        assert!(presets.contains(&PipelinePreset::DepthTested));
+        assert!(presets.contains(&PipelinePreset::AlphaBlended));
+        assert!(presets.contains(&PipelinePreset::Wireframe));
+        assert!(presets.contains(&PipelinePreset::Multisample4x));
+    }
+
+    #[test]
+    fn test_preset_names() {
+        assert_eq!(PipelinePreset::Default.name(), "Default");
+        assert_eq!(PipelinePreset::BasicTriangle.name(), "Basic Triangle");
+        assert_eq!(PipelinePreset::DepthTested.name(), "Depth Tested");
+        assert_eq!(PipelinePreset::AlphaBlended.name(), "Alpha Blended");
+        assert_eq!(PipelinePreset::Wireframe.name(), "Wireframe");
+        assert_eq!(PipelinePreset::Multisample4x.name(), "4x MSAA");
+    }
+
+    #[test]
+    fn test_color_write_mask() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.write_red = true;
+        panel.write_green = true;
+        panel.write_blue = false;
+        panel.write_alpha = false;
+
+        panel.update_descriptor();
+        // The test just verifies that update_descriptor doesn't panic
+        // Actual color writes validation would require accessing descriptor internals
+    }
+
+    #[test]
+    fn test_depth_stencil_enabled() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.enable_depth_stencil = true;
+        panel.depth_write_enabled = true;
+        panel.depth_compare = CompareFunction::LessEqual;
+
+        panel.update_descriptor();
+        // The test just verifies that update_descriptor doesn't panic with depth-stencil enabled
+    }
+
+    #[test]
+    fn test_blend_configuration() {
+        let mut panel = RenderPipelinePanel::new();
+        panel.blend_enabled = true;
+        panel.color_blend_src = BlendFactor::SrcAlpha;
+        panel.color_blend_dst = BlendFactor::OneMinusSrcAlpha;
+        panel.color_blend_op = BlendOperation::Add;
+
+        panel.update_descriptor();
+        // The test just verifies that update_descriptor doesn't panic with blending enabled
+    }
+}

@@ -30,8 +30,8 @@ fn test_adapter_selection_panel_creation() {
         // Verify panel was created successfully
         assert!(panel.selected_adapter().is_some());
         
-        // Default power preference should be None
-        assert_eq!(panel.power_preference(), PowerPreference::None);
+        // Power preference should be the default value
+        assert_eq!(panel.power_preference(), PowerPreference::default());
     });
 }
 

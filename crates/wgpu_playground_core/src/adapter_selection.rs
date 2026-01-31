@@ -33,6 +33,7 @@ impl AdapterSelectionPanel {
         Self {
             available_adapters,
             selected_adapter_index,
+            // PowerPreference::default() is PowerPreference::None
             power_preference: PowerPreference::default(),
             selected_backends: backends,
         }

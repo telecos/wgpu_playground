@@ -159,6 +159,7 @@ Current coverage: 62% (see CI artifacts for detailed reports)
 
 ## Documentation
 
+- **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them
 - **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu
 - **[PLAN.md](PLAN.md)** - Complete project roadmap with implementation phases
 - **[UI_MOCKUP.md](UI_MOCKUP.md)** - UI design and layout documentation

@@ -24,7 +24,7 @@ success-output = "never"
 # Retry failed tests once
 retries = 1
 
-# Fail fast in CI - stop on first failure
+# Don't fail fast in CI - run all tests even after failures
 fail-fast = false
 
 # Set timeout for individual tests (10 minutes)

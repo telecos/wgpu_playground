@@ -191,6 +191,6 @@ This ensures the reporting job doesn't fail due to missing artifacts.
 
 ## Related Documentation
 
-- [COVERAGE.md](../COVERAGE.md) - Code coverage setup and reports
-- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
+- [../COVERAGE.md](../COVERAGE.md) - Code coverage setup and reports
+- [../CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
 - [Cargo Nextest Documentation](https://nexte.st/) - Learn more about nextest

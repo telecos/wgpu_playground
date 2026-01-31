@@ -32,6 +32,61 @@ async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
         .ok()
 }
 
+// Helper function to create a test shader module
+fn create_test_shader(device: &wgpu::Device) -> wgpu::ShaderModule {
+    device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        label: Some("Test Shader"),
+        source: wgpu::ShaderSource::Wgsl(
+            r#"
+            @vertex
+            fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
+                let x = f32(i32(in_vertex_index) - 1);
+                let y = f32(i32(in_vertex_index & 1u) * 2 - 1);
+                return vec4<f32>(x, y, 0.0, 1.0);
+            }
+
+            @fragment
+            fn fs_main() -> @location(0) vec4<f32> {
+                return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            }
+            "#
+            .into(),
+        ),
+    })
+}
+
+// Helper function to create a test render pipeline
+fn create_test_pipeline(
+    device: &wgpu::Device,
+    shader: &wgpu::ShaderModule,
+) -> wgpu::RenderPipeline {
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("Test Pipeline"),
+        layout: None,
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: "vs_main",
+            buffers: &[],
+            compilation_options: Default::default(),
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: "fs_main",
+            targets: &[Some(wgpu::ColorTargetState {
+                format: wgpu::TextureFormat::Bgra8UnormSrgb,
+                blend: Some(wgpu::BlendState::REPLACE),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
+            compilation_options: Default::default(),
+        }),
+        primitive: wgpu::PrimitiveState::default(),
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+        multiview: None,
+        cache: None,
+    })
+}
+
 #[test]
 fn test_render_bundle_creation() {
     pollster::block_on(async {
@@ -79,53 +134,8 @@ fn test_render_bundle_recording() {
             return;
         };
 
-        // Create a simple shader module
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("Test Shader"),
-            source: wgpu::ShaderSource::Wgsl(
-                r#"
-                @vertex
-                fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
-                    let x = f32(i32(in_vertex_index) - 1);
-                    let y = f32(i32(in_vertex_index & 1u) * 2 - 1);
-                    return vec4<f32>(x, y, 0.0, 1.0);
-                }
-
-                @fragment
-                fn fs_main() -> @location(0) vec4<f32> {
-                    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
-                }
-                "#
-                .into(),
-            ),
-        });
-
-        // Create a render pipeline
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Test Pipeline"),
-            layout: None,
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: "vs_main",
-                buffers: &[],
-                compilation_options: Default::default(),
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: "fs_main",
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: wgpu::TextureFormat::Bgra8UnormSrgb,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-                compilation_options: Default::default(),
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-            cache: None,
-        });
+        let shader = create_test_shader(&device);
+        let pipeline = create_test_pipeline(&device, &shader);
 
         // Create a render bundle
         let bundle_descriptor = RenderBundleDescriptor::new()
@@ -152,53 +162,8 @@ fn test_render_bundle_execution() {
             return;
         };
 
-        // Create a simple shader module
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("Test Shader"),
-            source: wgpu::ShaderSource::Wgsl(
-                r#"
-                @vertex
-                fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
-                    let x = f32(i32(in_vertex_index) - 1);
-                    let y = f32(i32(in_vertex_index & 1u) * 2 - 1);
-                    return vec4<f32>(x, y, 0.0, 1.0);
-                }
-
-                @fragment
-                fn fs_main() -> @location(0) vec4<f32> {
-                    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
-                }
-                "#
-                .into(),
-            ),
-        });
-
-        // Create a render pipeline
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Test Pipeline"),
-            layout: None,
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: "vs_main",
-                buffers: &[],
-                compilation_options: Default::default(),
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: "fs_main",
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: wgpu::TextureFormat::Bgra8UnormSrgb,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-                compilation_options: Default::default(),
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-            cache: None,
-        });
+        let shader = create_test_shader(&device);
+        let pipeline = create_test_pipeline(&device, &shader);
 
         // Create a render bundle
         let bundle_descriptor = RenderBundleDescriptor::new()
@@ -265,53 +230,8 @@ fn test_render_bundle_multiple_execution() {
             return;
         };
 
-        // Create a simple shader module
-        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("Test Shader"),
-            source: wgpu::ShaderSource::Wgsl(
-                r#"
-                @vertex
-                fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
-                    let x = f32(i32(in_vertex_index) - 1);
-                    let y = f32(i32(in_vertex_index & 1u) * 2 - 1);
-                    return vec4<f32>(x, y, 0.0, 1.0);
-                }
-
-                @fragment
-                fn fs_main() -> @location(0) vec4<f32> {
-                    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
-                }
-                "#
-                .into(),
-            ),
-        });
-
-        // Create a render pipeline
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Test Pipeline"),
-            layout: None,
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: "vs_main",
-                buffers: &[],
-                compilation_options: Default::default(),
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: "fs_main",
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: wgpu::TextureFormat::Bgra8UnormSrgb,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-                compilation_options: Default::default(),
-            }),
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-            cache: None,
-        });
+        let shader = create_test_shader(&device);
+        let pipeline = create_test_pipeline(&device, &shader);
 
         // Create two render bundles
         let bundle_descriptor = RenderBundleDescriptor::new()

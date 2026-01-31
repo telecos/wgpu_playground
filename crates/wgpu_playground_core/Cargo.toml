@@ -5,6 +5,12 @@ edition = "2021"
 license = "MIT"
 description = "Core WebGPU functionality for wgpu_playground"
 
+[features]
+# Dawn WebGPU implementation support (experimental)
+# Note: This is a placeholder for future Dawn FFI integration
+# Currently, only wgpu implementation is fully supported
+dawn = []
+
 [dependencies]
 wgpu = "22.1"
 wgpu-core = "22.1"

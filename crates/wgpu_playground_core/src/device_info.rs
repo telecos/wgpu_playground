@@ -1,9 +1,12 @@
+use crate::implementation::WebGPUImplementation;
+
 pub struct DeviceInfo {
     adapter_name: String,
     backend: String,
     adapter_info: String,
     device_limits: String,
     device_features: String,
+    implementation: WebGPUImplementation,
 }
 
 impl DeviceInfo {
@@ -86,11 +89,37 @@ impl DeviceInfo {
             adapter_info,
             device_limits,
             device_features,
+            implementation: WebGPUImplementation::current(),
         }
     }
 
     pub fn ui(&self, ui: &mut egui::Ui) {
         egui::ScrollArea::vertical().show(ui, |ui| {
+            // WebGPU Implementation section
+            ui.heading("🔧 WebGPU Implementation");
+            ui.separator();
+            ui.horizontal(|ui| {
+                ui.label("Implementation:");
+                ui.strong(self.implementation.name());
+            });
+            ui.label(self.implementation.description());
+            ui.horizontal(|ui| {
+                ui.label("Source:");
+                ui.hyperlink(self.implementation.url());
+            });
+            ui.add_space(10.0);
+
+            // Show if Dawn is available
+            if WebGPUImplementation::is_dawn_available() {
+                ui.colored_label(
+                    egui::Color32::from_rgb(100, 200, 100),
+                    "✓ Dawn support compiled in",
+                );
+            } else {
+                ui.label("ℹ️ Dawn support not compiled in (use --features dawn to enable)");
+            }
+            ui.add_space(20.0);
+
             // Highlight the backend being used
             ui.heading("🖥️ Active WebGPU Backend");
             ui.separator();

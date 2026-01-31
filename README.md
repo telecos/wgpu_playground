@@ -65,9 +65,31 @@ cargo run --release
 
 **Note:** This application requires a display/window system to run. On Linux, ensure you have either X11 or Wayland available. On headless systems, the application won't run as it requires GPU rendering capabilities.
 
+### WebGPU Implementation
+
+The playground supports different WebGPU implementations:
+
+- **wgpu** (default): Pure Rust implementation used by Firefox
+  - Fast, safe, and cross-platform
+  - Actively maintained by the gfx-rs team
+  - https://github.com/gfx-rs/wgpu
+
+- **Dawn** (optional): C++ implementation used by Chromium
+  - Google's reference implementation
+  - Can be enabled with the `dawn` feature flag (experimental)
+  - https://dawn.googlesource.com/dawn
+
+By default, the application uses the **wgpu** implementation. To enable Dawn support (experimental), compile with:
+
+```bash
+cargo build --release --features dawn
+```
+
+The active WebGPU implementation is displayed in the **Device Info** and **Adapter Selection** tabs.
+
 ### Backend Selection
 
-The application supports multiple WebGPU backend implementations (similar to Chromium's Dawn). You can select which backend to use via the `WGPU_BACKEND` environment variable:
+Within a WebGPU implementation, you can select which graphics API backend to use via the `WGPU_BACKEND` environment variable:
 
 ```bash
 # Use Vulkan backend
@@ -175,6 +197,7 @@ Current coverage: 62% (see CI artifacts for detailed reports)
 
 ## Documentation
 
+- **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them
 - **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu
 - **[PLAN.md](PLAN.md)** - Complete project roadmap with implementation phases
 - **[UI_MOCKUP.md](UI_MOCKUP.md)** - UI design and layout documentation

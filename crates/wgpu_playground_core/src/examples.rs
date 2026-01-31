@@ -18,7 +18,7 @@ pub struct Example {
 }
 
 impl Example {
-    pub const fn new(
+    pub fn new(
         id: &'static str,
         name: &'static str,
         category: ExampleCategory,

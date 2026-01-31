@@ -138,8 +138,9 @@ impl RenderingPanel {
                                 egui::ScrollArea::vertical()
                                     .max_height(400.0)
                                     .show(ui, |ui| {
+                                        let mut source_code = example.source_code.to_string();
                                         ui.add(
-                                            egui::TextEdit::multiline(&mut example.source_code.to_string())
+                                            egui::TextEdit::multiline(&mut source_code)
                                                 .code_editor()
                                                 .desired_width(f32::INFINITY)
                                                 .interactive(false),

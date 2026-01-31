@@ -9,6 +9,7 @@ pub mod compute_pass_encoder;
 pub mod device_config;
 pub mod device_info;
 pub mod error;
+pub mod examples;
 pub mod pipeline_layout;
 pub mod query_set;
 pub mod queue;

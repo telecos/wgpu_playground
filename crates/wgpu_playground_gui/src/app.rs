@@ -1,6 +1,6 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
-use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
+use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;

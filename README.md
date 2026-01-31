@@ -112,7 +112,9 @@ Expected State Bits (all): 0x0: D3D12_RESOURCE_STATE_[COMMON|PRESENT]
 INVALID_SUBRESOURCE_STATE
 ```
 
-This is a known issue with the wgpu DirectX 12 backend on AMD GPUs (and occasionally other GPUs). These errors are validation warnings from the DirectX 12 debug layer and do not affect visual rendering in most cases. They occur due to missing or incorrect resource state transitions in the wgpu-hal DirectX 12 backend.
+This is a known issue with the wgpu DirectX 12 backend on AMD GPUs (and occasionally other GPUs). These errors are validation warnings from the DirectX 12 debug layer (typically seen when running debug builds or with GPU validation enabled) and do not affect visual rendering in most cases. They occur due to missing or incorrect resource state transitions in the wgpu-hal DirectX 12 backend.
+
+**Note:** These errors may not appear in release builds without debug layers, but are common during development.
 
 **Solution: Use the Vulkan Backend**
 

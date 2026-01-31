@@ -42,7 +42,7 @@ impl AppState {
                 // See: https://github.com/gfx-rs/wgpu/issues/3959, https://github.com/gfx-rs/wgpu/issues/4247
                 #[cfg(target_os = "windows")]
                 {
-                    log::info!("No WGPU_BACKEND specified. On Windows, preferring Vulkan to avoid DX12 validation errors.");
+                    log::info!("No WGPU_BACKEND specified. On Windows, preferring Vulkan to avoid DirectX 12 validation errors.");
                     log::info!("Set WGPU_BACKEND=dx12 to force DirectX 12 if needed.");
                     wgpu::Backends::VULKAN | wgpu::Backends::DX12
                 }

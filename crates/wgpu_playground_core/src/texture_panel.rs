@@ -358,19 +358,15 @@ impl TexturePanel {
 
             // Validation and Creation
             ui.horizontal(|ui| {
-                if ui.button("🔍 Validate").clicked() {
-                    if self.validate() {
-                        self.success_message = Some("✓ Configuration is valid".to_string());
-                    }
+                if ui.button("🔍 Validate").clicked() && self.validate() {
+                    self.success_message = Some("✓ Configuration is valid".to_string());
                 }
 
-                if ui.button("✨ Create Texture").clicked() {
-                    if self.validate() {
-                        self.success_message = Some(
-                            "✓ Configuration is valid. In a full implementation, the texture would be created here."
-                                .to_string(),
-                        );
-                    }
+                if ui.button("✨ Create Texture").clicked() && self.validate() {
+                    self.success_message = Some(
+                        "✓ Configuration is valid. In a full implementation, the texture would be created here."
+                            .to_string(),
+                    );
                 }
 
                 if ui.button("🔄 Reset").clicked() {

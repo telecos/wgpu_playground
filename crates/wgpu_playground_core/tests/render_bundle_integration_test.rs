@@ -1,36 +1,10 @@
+mod common;
+
+use common::create_test_device;
 use wgpu_playground_core::render_bundle_encoder::{RenderBundleDescriptor, RenderBundleEncoderOps};
 use wgpu_playground_core::render_pass_encoder::{
     Color, RenderPassColorAttachment, RenderPassDescriptor, RenderPassEncoder,
 };
-
-// Helper function to create a test device and queue
-async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
-        ..Default::default()
-    });
-
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            compatible_surface: None,
-            force_fallback_adapter: false,
-        })
-        .await?;
-
-    adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                label: Some("Test Device"),
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
-        .await
-        .ok()
-}
 
 // Helper function to create a test shader module
 fn create_test_shader(device: &wgpu::Device) -> wgpu::ShaderModule {

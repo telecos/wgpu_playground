@@ -1,62 +1,12 @@
+mod common;
+
+use common::{create_test_device, create_test_device_with_features};
 use wgpu_playground_core::buffer::{BufferDescriptor, BufferOps, BufferUsages};
 use wgpu_playground_core::query_set::{QuerySetDescriptor, QuerySetOps, QueryType};
 
 // Helper function to create a test device and queue with timestamp query support
 async fn create_test_device_with_timestamp() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
-        ..Default::default()
-    });
-
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
-            compatible_surface: None,
-        })
-        .await?;
-
-    adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::TIMESTAMP_QUERY,
-                required_limits: wgpu::Limits::default(),
-                label: Some("Test Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
-        .await
-        .ok()
-}
-
-// Helper function to create a test device and queue without special features
-async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
-        ..Default::default()
-    });
-
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
-            compatible_surface: None,
-        })
-        .await?;
-
-    adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: Some("Test Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
-        .await
-        .ok()
+    create_test_device_with_features(wgpu::Features::TIMESTAMP_QUERY).await
 }
 
 #[test]

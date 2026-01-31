@@ -10,12 +10,14 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 
 - **GPU Adapter Selection**: Choose from available GPU adapters with detailed properties and configure power preferences
 - **Device Information**: View detailed information about your GPU, including adapter info, device limits, and supported features
+- **Device Configuration**: Configure device features and limits before device creation
+- **Buffer Configuration**: Create and configure GPU buffers with custom parameters including size, usage flags, and mapping options
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 
 ## User Interface
 
-The application provides a tabbed interface with four main sections:
+The application provides a tabbed interface with six main sections:
 
 1. **Adapter Selection Tab**: Choose and configure GPU adapters:
    - View all available GPU adapters with detailed properties
@@ -23,12 +25,17 @@ The application provides a tabbed interface with four main sections:
    - Configure power preference (None, Low Power, High Performance)
    - Filter adapters by backend (Vulkan, Metal, DX12, OpenGL, etc.)
 
-2. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
+2. **Device Config Tab**: Configure device settings:
+   - Enable/disable WebGPU features (texture compression, shader features, etc.)
+   - Adjust device limits to your needs
+   - View adapter capabilities and constraints
+
+3. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
    - Adapter details (name, vendor, backend)
    - Device limits (texture dimensions, buffer sizes, workgroup limits, etc.)
    - Supported features
 
-3. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
+4. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
    - Render pipeline configuration
    - Shader editing and testing
    - Buffer and vertex data management
@@ -36,7 +43,15 @@ The application provides a tabbed interface with four main sections:
    - Render pass configuration
    - Advanced rendering techniques (instancing, MSAA, etc.)
 
-4. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
+5. **Buffer Config Tab**: Create and configure GPU buffers:
+   - Set buffer size with validation
+   - Select usage flags via checkboxes (VERTEX, INDEX, UNIFORM, STORAGE, INDIRECT, COPY_SRC, COPY_DST, MAP_READ, MAP_WRITE, QUERY_RESOLVE)
+   - Optional label for debugging
+   - Mapped-at-creation option
+   - Real-time validation with error messages
+   - Configuration summary display
+
+6. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
    - Compute pipeline setup
    - Storage buffer management
    - Matrix operations

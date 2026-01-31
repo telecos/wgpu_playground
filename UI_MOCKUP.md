@@ -6,7 +6,7 @@ Since the application requires a display to run, here's a textual description of
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 🎮 WebGPU Playground                                                │
 ├─────────────────────────────────────────────────────────────────────┤
-│ [⚙️ Adapter Selection] [📊 Device Info] [🎨 Rendering] [🧮 Compute/ML] │
+│ [⚙️ Adapter Selection] [📊 Device Info] [🎨 Rendering] [📐 Buffer Config] [🧮 Compute/ML] │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
 │ When "Adapter Selection" tab is selected:                           │
@@ -74,6 +74,55 @@ When "Rendering" tab is selected:
   - Render Passes
   - Advanced Rendering
 
+When "Buffer Config" tab is selected:
+  Shows buffer configuration interface:
+  
+  ┌─────────────────────────────────────────────────────────────────┐
+  │ 📐 Buffer Configuration                                         │
+  │ Configure and create GPU buffers with custom parameters.        │
+  │                                                                  │
+  │ Buffer Properties                                                │
+  │ ──────────────────                                               │
+  │ Label:    [text input field]                                     │
+  │ Size (bytes): [256]                                              │
+  │                                                                  │
+  │ Usage Flags                                                      │
+  │ ────────────                                                     │
+  │ Select how the buffer will be used (multiple flags can be        │
+  │ selected):                                                        │
+  │                                                                  │
+  │ [ ] VERTEX         Buffer can be used as a vertex buffer        │
+  │ [ ] INDEX          Buffer can be used as an index buffer        │
+  │ [ ] UNIFORM        Buffer can be used as a uniform buffer       │
+  │ [ ] STORAGE        Buffer can be used as a storage buffer       │
+  │ [ ] INDIRECT       Buffer can be used for indirect draw commands│
+  │ [ ] COPY_SRC       Buffer can be used as a copy source          │
+  │ [✓] COPY_DST       Buffer can be used as a copy destination     │
+  │ [ ] MAP_READ       Buffer can be mapped for reading             │
+  │ [ ] MAP_WRITE      Buffer can be mapped for writing             │
+  │ [ ] QUERY_RESOLVE  Buffer can be used to resolve query results  │
+  │                                                                  │
+  │ 💡 Note: MAP_READ and MAP_WRITE cannot be used together         │
+  │                                                                  │
+  │ Additional Options                                               │
+  │ ───────────────────                                              │
+  │ [ ] Mapped at creation                                           │
+  │     Whether the buffer should be mapped immediately after        │
+  │     creation                                                     │
+  │                                                                  │
+  │ [🔍 Validate] [✨ Create Buffer] [🔄 Reset]                      │
+  │                                                                  │
+  │ Configuration Summary                                            │
+  │ ──────────────────────                                           │
+  │ Label: <none>                                                    │
+  │ Size: 256 bytes                                                  │
+  │ Mapped at creation: false                                        │
+  │                                                                  │
+  │ Usage flags:                                                     │
+  │   • COPY_DST                                                     │
+  │                                                                  │
+  └─────────────────────────────────────────────────────────────────┘
+
 When "Compute/ML" tab is selected:
   Shows placeholder text describing planned compute features:
   - Compute Pipelines
@@ -91,8 +140,16 @@ The application currently provides:
 2. **WebGPU initialization** with wgpu
 3. **Adapter selection panel** for choosing GPU adapters with detailed properties and power preferences
 4. **Device information display** showing all GPU capabilities
-5. **Tabbed interface** for organizing features
-6. **Placeholder panels** for future rendering and compute features
+5. **Device configuration panel** for setting device features and limits
+6. **Buffer configuration panel** for creating GPU buffers with custom parameters:
+   - Size configuration with validation
+   - All buffer usage flags as checkboxes (VERTEX, INDEX, UNIFORM, STORAGE, INDIRECT, COPY_SRC, COPY_DST, MAP_READ, MAP_WRITE, QUERY_RESOLVE)
+   - Label input for debugging
+   - Mapped-at-creation option
+   - Real-time validation with error messages
+   - Configuration summary display
+7. **Tabbed interface** for organizing features
+8. **Placeholder panels** for future rendering and compute features
 
 ## Next Steps
 

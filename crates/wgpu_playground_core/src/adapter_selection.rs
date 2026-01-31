@@ -266,7 +266,10 @@ impl AdapterSelectionPanel {
 
             ui.add_space(5.0);
             ui.label("💡 Tip: Set WEBGPU_IMPL environment variable to switch implementations.");
-            ui.label("   Available: wgpu, dawn (if compiled in)");
+            ui.label(format!(
+                "   Available: {}",
+                WebGPUImplementation::available_implementations_list()
+            ));
 
             ui.add_space(20.0);
             ui.separator();

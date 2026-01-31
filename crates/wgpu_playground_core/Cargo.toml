@@ -47,6 +47,7 @@ js-sys = "0.3"
 
 [dev-dependencies]
 pollster = "0.3"
+serial_test = "3.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

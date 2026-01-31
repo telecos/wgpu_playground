@@ -128,6 +128,15 @@ impl WebGPUImplementation {
             Self::Dawn => "⚠️ Placeholder mode: Using wgpu backend (Dawn FFI not yet integrated)",
         }
     }
+
+    /// Get a comma-separated list of available implementation names
+    pub fn available_implementations_list() -> String {
+        Self::available_implementations()
+            .iter()
+            .map(|impl_type| impl_type.name())
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
 }
 
 impl std::fmt::Display for WebGPUImplementation {
@@ -139,9 +148,13 @@ impl std::fmt::Display for WebGPUImplementation {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serial_test::serial;
 
     #[test]
+    #[serial]
     fn test_current_implementation() {
+        // Clear any environment variable first
+        std::env::remove_var("WEBGPU_IMPL");
         let impl_type = WebGPUImplementation::current();
         #[cfg(feature = "dawn")]
         assert_eq!(impl_type, WebGPUImplementation::Dawn);
@@ -208,6 +221,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_environment_variable_override() {
         // Test wgpu selection
         std::env::set_var("WEBGPU_IMPL", "wgpu");
@@ -217,6 +231,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     #[cfg(feature = "dawn")]
     fn test_environment_variable_dawn() {
         std::env::set_var("WEBGPU_IMPL", "dawn");
@@ -226,6 +241,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_environment_variable_invalid() {
         std::env::set_var("WEBGPU_IMPL", "invalid");
         let impl_type = WebGPUImplementation::current();
@@ -249,5 +265,20 @@ mod tests {
         let impls = WebGPUImplementation::available_implementations();
         assert!(impls.contains(&WebGPUImplementation::Dawn));
         assert_eq!(impls.len(), 2);
+    }
+
+    #[test]
+    fn test_available_implementations_list() {
+        let list = WebGPUImplementation::available_implementations_list();
+        assert!(list.contains("wgpu"));
+        #[cfg(feature = "dawn")]
+        {
+            assert!(list.contains("Dawn"));
+            assert!(list.contains(", "));
+        }
+        #[cfg(not(feature = "dawn"))]
+        {
+            assert_eq!(list, "wgpu");
+        }
     }
 }

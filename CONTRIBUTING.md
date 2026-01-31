@@ -116,7 +116,90 @@ When extending the UI:
 
 ## Testing
 
-- Add unit tests for compute operations
+The project uses Rust's built-in testing framework with a focus on modularity and reusability.
+
+### Test Organization
+
+Tests are organized following Rust best practices:
+
+1. **Unit Tests**: Located in each source file within a `#[cfg(test)]` module
+   - Test individual functions and methods
+   - Keep tests close to the code they test
+   - Example: See `crates/wgpu_playground_core/src/buffer.rs`
+
+2. **Integration Tests**: Located in `tests/` directories
+   - Test interactions between modules
+   - Use GPU resources for end-to-end testing
+   - Example: See `crates/wgpu_playground_core/tests/`
+
+3. **Common Test Utilities**: Shared helpers in `tests/common/mod.rs`
+   - Reusable test setup functions
+   - GPU device creation helpers
+   - Test shader sources
+   - Reduces code duplication across integration tests
+
+### Writing Tests
+
+When adding new tests:
+
+1. **Unit Tests** - Add to the same file as the code:
+   ```rust
+   #[cfg(test)]
+   mod tests {
+       use super::*;
+
+       #[test]
+       fn test_feature() {
+           // Test code here
+       }
+   }
+   ```
+
+2. **Integration Tests** - Use common utilities:
+   ```rust
+   mod common;
+   use common::create_test_device;
+
+   #[test]
+   fn test_integration() {
+       pollster::block_on(async {
+           let Some((device, queue)) = create_test_device().await else {
+               eprintln!("Skipping test: No GPU adapter available");
+               return;
+           };
+           // Test code here
+       });
+   }
+   ```
+
+3. **GPU Tests** - Handle missing GPU gracefully:
+   - Tests should skip (not fail) when no GPU is available
+   - Use the `create_test_device()` helper from `common` module
+   - Always check for `None` and skip the test in headless environments
+
+### Running Tests
+
+```bash
+# Run all tests
+cargo test --workspace
+
+# Run only unit tests
+cargo test --workspace --lib
+
+# Run only integration tests
+cargo test --workspace --test '*'
+
+# Run tests for a specific crate
+cargo test -p wgpu_playground_core
+
+# Run a specific test
+cargo test test_buffer_creation
+```
+
+### Test Coverage
+
+- Add unit tests for new functionality
+- Add integration tests for GPU operations
 - Verify visual output for rendering features
 - Test on different platforms (Windows, macOS, Linux)
 - Test with different GPU vendors (NVIDIA, AMD, Intel, Apple)

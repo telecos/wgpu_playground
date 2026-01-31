@@ -135,97 +135,117 @@ impl DeviceConfigPanel {
     }
 
     fn render_limits_ui(&mut self, ui: &mut egui::Ui) {
-        ui.label("💡 Tip: Lower values may improve compatibility but reduce capabilities.");
+        ui.label("💡 Tip: Adjust limits as needed. Values are clamped to adapter maximum.");
         ui.add_space(5.0);
 
+        let adapter_limits = &self.adapter_limits;
+        let config_limits = &mut self.config.limits;
+
         egui::Grid::new("limits_grid")
-            .num_columns(3)
+            .num_columns(2)
             .spacing([10.0, 4.0])
             .striped(true)
             .show(ui, |ui| {
-                ui.label("Limit");
-                ui.label("Current Value");
-                ui.label("Max Available");
-                ui.end_row();
-
                 // Texture limits
-                ui.label("Max Texture Dimension 1D");
-                ui.label(self.config.limits.max_texture_dimension_1d.to_string());
-                ui.label(self.adapter_limits.max_texture_dimension_1d.to_string());
-                ui.end_row();
-
-                ui.label("Max Texture Dimension 2D");
-                ui.label(self.config.limits.max_texture_dimension_2d.to_string());
-                ui.label(self.adapter_limits.max_texture_dimension_2d.to_string());
-                ui.end_row();
-
-                ui.label("Max Texture Dimension 3D");
-                ui.label(self.config.limits.max_texture_dimension_3d.to_string());
-                ui.label(self.adapter_limits.max_texture_dimension_3d.to_string());
-                ui.end_row();
-
-                ui.label("Max Texture Array Layers");
-                ui.label(self.config.limits.max_texture_array_layers.to_string());
-                ui.label(self.adapter_limits.max_texture_array_layers.to_string());
-                ui.end_row();
+                Self::render_limit_u32_static(ui, "Max Texture Dimension 1D", 
+                    &mut config_limits.max_texture_dimension_1d, 
+                    adapter_limits.max_texture_dimension_1d, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Texture Dimension 2D", 
+                    &mut config_limits.max_texture_dimension_2d, 
+                    adapter_limits.max_texture_dimension_2d, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Texture Dimension 3D", 
+                    &mut config_limits.max_texture_dimension_3d, 
+                    adapter_limits.max_texture_dimension_3d, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Texture Array Layers", 
+                    &mut config_limits.max_texture_array_layers, 
+                    adapter_limits.max_texture_array_layers, 1);
 
                 // Bind group limits
-                ui.label("Max Bind Groups");
-                ui.label(self.config.limits.max_bind_groups.to_string());
-                ui.label(self.adapter_limits.max_bind_groups.to_string());
-                ui.end_row();
-
-                ui.label("Max Bindings Per Bind Group");
-                ui.label(self.config.limits.max_bindings_per_bind_group.to_string());
-                ui.label(self.adapter_limits.max_bindings_per_bind_group.to_string());
-                ui.end_row();
+                Self::render_limit_u32_static(ui, "Max Bind Groups", 
+                    &mut config_limits.max_bind_groups, 
+                    adapter_limits.max_bind_groups, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Bindings Per Bind Group", 
+                    &mut config_limits.max_bindings_per_bind_group, 
+                    adapter_limits.max_bindings_per_bind_group, 1);
 
                 // Buffer limits
-                ui.label("Max Uniform Buffer Binding Size");
-                ui.label(self.config.limits.max_uniform_buffer_binding_size.to_string());
-                ui.label(self.adapter_limits.max_uniform_buffer_binding_size.to_string());
-                ui.end_row();
+                Self::render_limit_u32_static(ui, "Max Uniform Buffer Binding Size", 
+                    &mut config_limits.max_uniform_buffer_binding_size, 
+                    adapter_limits.max_uniform_buffer_binding_size, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Storage Buffer Binding Size", 
+                    &mut config_limits.max_storage_buffer_binding_size, 
+                    adapter_limits.max_storage_buffer_binding_size, 1);
+                
+                Self::render_limit_u64_static(ui, "Max Buffer Size", 
+                    &mut config_limits.max_buffer_size, 
+                    adapter_limits.max_buffer_size, 1);
 
-                ui.label("Max Storage Buffer Binding Size");
-                ui.label(self.config.limits.max_storage_buffer_binding_size.to_string());
-                ui.label(self.adapter_limits.max_storage_buffer_binding_size.to_string());
-                ui.end_row();
-
-                ui.label("Max Buffer Size");
-                ui.label(self.config.limits.max_buffer_size.to_string());
-                ui.label(self.adapter_limits.max_buffer_size.to_string());
-                ui.end_row();
+                // Vertex limits
+                Self::render_limit_u32_static(ui, "Max Vertex Buffers", 
+                    &mut config_limits.max_vertex_buffers, 
+                    adapter_limits.max_vertex_buffers, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Vertex Attributes", 
+                    &mut config_limits.max_vertex_attributes, 
+                    adapter_limits.max_vertex_attributes, 1);
 
                 // Compute limits
-                ui.label("Max Compute Workgroup Size X");
-                ui.label(self.config.limits.max_compute_workgroup_size_x.to_string());
-                ui.label(self.adapter_limits.max_compute_workgroup_size_x.to_string());
-                ui.end_row();
-
-                ui.label("Max Compute Workgroup Size Y");
-                ui.label(self.config.limits.max_compute_workgroup_size_y.to_string());
-                ui.label(self.adapter_limits.max_compute_workgroup_size_y.to_string());
-                ui.end_row();
-
-                ui.label("Max Compute Workgroup Size Z");
-                ui.label(self.config.limits.max_compute_workgroup_size_z.to_string());
-                ui.label(self.adapter_limits.max_compute_workgroup_size_z.to_string());
-                ui.end_row();
-
-                ui.label("Max Compute Invocations Per Workgroup");
-                ui.label(self.config.limits.max_compute_invocations_per_workgroup.to_string());
-                ui.label(self.adapter_limits.max_compute_invocations_per_workgroup.to_string());
-                ui.end_row();
-
-                ui.label("Max Compute Workgroup Storage Size");
-                ui.label(self.config.limits.max_compute_workgroup_storage_size.to_string());
-                ui.label(self.adapter_limits.max_compute_workgroup_storage_size.to_string());
-                ui.end_row();
-
-                ui.label("Max Compute Workgroups Per Dimension");
-                ui.label(self.config.limits.max_compute_workgroups_per_dimension.to_string());
-                ui.label(self.adapter_limits.max_compute_workgroups_per_dimension.to_string());
-                ui.end_row();
+                Self::render_limit_u32_static(ui, "Max Compute Workgroup Size X", 
+                    &mut config_limits.max_compute_workgroup_size_x, 
+                    adapter_limits.max_compute_workgroup_size_x, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Compute Workgroup Size Y", 
+                    &mut config_limits.max_compute_workgroup_size_y, 
+                    adapter_limits.max_compute_workgroup_size_y, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Compute Workgroup Size Z", 
+                    &mut config_limits.max_compute_workgroup_size_z, 
+                    adapter_limits.max_compute_workgroup_size_z, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Compute Invocations Per Workgroup", 
+                    &mut config_limits.max_compute_invocations_per_workgroup, 
+                    adapter_limits.max_compute_invocations_per_workgroup, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Compute Workgroup Storage Size", 
+                    &mut config_limits.max_compute_workgroup_storage_size, 
+                    adapter_limits.max_compute_workgroup_storage_size, 1);
+                
+                Self::render_limit_u32_static(ui, "Max Compute Workgroups Per Dimension", 
+                    &mut config_limits.max_compute_workgroups_per_dimension, 
+                    adapter_limits.max_compute_workgroups_per_dimension, 1);
             });
+
+        ui.add_space(10.0);
+        ui.horizontal(|ui| {
+            if ui.button("Reset to Default").clicked() {
+                self.config.limits = Limits::default();
+            }
+            if ui.button("Use Maximum Available").clicked() {
+                self.config.limits = self.adapter_limits.clone();
+            }
+        });
+    }
+
+    fn render_limit_u32_static(ui: &mut egui::Ui, label: &str, value: &mut u32, max: u32, min: u32) {
+        ui.label(label);
+        let mut temp_value = *value;
+        if ui.add(egui::DragValue::new(&mut temp_value).range(min..=max)).changed() {
+            *value = temp_value;
+        }
+        ui.end_row();
+    }
+
+    fn render_limit_u64_static(ui: &mut egui::Ui, label: &str, value: &mut u64, max: u64, min: u64) {
+        ui.label(label);
+        let mut temp_value = *value;
+        if ui.add(egui::DragValue::new(&mut temp_value).range(min..=max)).changed() {
+            *value = temp_value;
+        }
+        ui.end_row();
     }
 }

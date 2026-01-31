@@ -1,4 +1,5 @@
 use crate::adapter::{enumerate_adapters, AdapterInfo};
+use crate::implementation::WebGPUImplementation;
 use wgpu::{Backends, PowerPreference};
 
 /// UI panel for selecting GPU adapters and configuring power preferences
@@ -214,6 +215,39 @@ impl AdapterSelectionPanel {
                 }
             }
 
+            ui.add_space(20.0);
+            ui.separator();
+            ui.add_space(10.0);
+
+            // WebGPU Implementation information
+            ui.heading("🔧 WebGPU Implementation");
+            let current_impl = WebGPUImplementation::current();
+            ui.horizontal(|ui| {
+                ui.label("Active Implementation:");
+                ui.strong(current_impl.name());
+            });
+            ui.label(current_impl.description());
+            ui.add_space(5.0);
+            
+            // List available implementations
+            ui.label("Available implementations:");
+            for impl_type in WebGPUImplementation::available_implementations() {
+                ui.horizontal(|ui| {
+                    if impl_type == current_impl {
+                        ui.label("  ✓");
+                    } else {
+                        ui.label("  ○");
+                    }
+                    ui.label(impl_type.name());
+                    ui.label(format!("({})", if impl_type == current_impl { "active" } else { "inactive" }));
+                });
+            }
+            
+            if !WebGPUImplementation::is_dawn_available() {
+                ui.add_space(5.0);
+                ui.label("ℹ️ To enable Dawn support, compile with: cargo build --features dawn");
+            }
+            
             ui.add_space(20.0);
             ui.separator();
             ui.add_space(10.0);

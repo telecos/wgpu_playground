@@ -142,7 +142,8 @@ pub static TEXTURE_MAPPING_EXAMPLE: Example = Example {
     id: "texture_mapping",
     name: "Texture Mapping",
     category: ExampleCategory::Rendering,
-    description: "Demonstrates texture sampling and UV coordinate mapping. Renders a textured quad \
+    description:
+        "Demonstrates texture sampling and UV coordinate mapping. Renders a textured quad \
                   showing how to load textures, create samplers, and apply textures in shaders.",
     source_code: r#"// Texture Mapping Example
 // This example demonstrates texture sampling

@@ -198,7 +198,7 @@ mod tests {
     fn test_rendering_panel_has_all_examples() {
         let panel = RenderingPanel::new();
         let example_names: Vec<&str> = panel.examples.iter().map(|e| e.name).collect();
-        
+
         assert!(example_names.contains(&"Basic Triangle"));
         assert!(example_names.contains(&"Rotating Cube"));
         assert!(example_names.contains(&"Texture Mapping"));

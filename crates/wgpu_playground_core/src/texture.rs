@@ -950,10 +950,7 @@ mod tests {
     #[test]
     fn test_texture_view_formats_multiple() {
         // Test with multiple compatible view formats
-        let formats = vec![
-            TextureFormat::Rgba8Unorm,
-            TextureFormat::Rgba8UnormSrgb,
-        ];
+        let formats = vec![TextureFormat::Rgba8Unorm, TextureFormat::Rgba8UnormSrgb];
         let builder = TextureBuilder::new().with_view_formats(&formats);
         assert_eq!(builder.view_formats, formats);
     }
@@ -1039,15 +1036,24 @@ mod tests {
         // Test Default trait for TextureBuilder
         let default_texture_builder = TextureBuilder::default();
         let new_texture_builder = TextureBuilder::new();
-        assert_eq!(default_texture_builder.size.width, new_texture_builder.size.width);
-        assert_eq!(default_texture_builder.size.height, new_texture_builder.size.height);
+        assert_eq!(
+            default_texture_builder.size.width,
+            new_texture_builder.size.width
+        );
+        assert_eq!(
+            default_texture_builder.size.height,
+            new_texture_builder.size.height
+        );
         assert_eq!(default_texture_builder.format, new_texture_builder.format);
 
         // Test Default trait for TextureViewBuilder
         let default_view_builder = TextureViewBuilder::default();
         let new_view_builder = TextureViewBuilder::new();
         assert_eq!(default_view_builder.aspect, new_view_builder.aspect);
-        assert_eq!(default_view_builder.base_mip_level, new_view_builder.base_mip_level);
+        assert_eq!(
+            default_view_builder.base_mip_level,
+            new_view_builder.base_mip_level
+        );
     }
 
     #[test]

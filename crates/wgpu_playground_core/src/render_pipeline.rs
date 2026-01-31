@@ -1179,12 +1179,23 @@ impl RenderPipelineDescriptor {
         vertex_shader: &crate::shader::ShaderModule,
         fragment_shader: Option<&crate::shader::ShaderModule>,
     ) -> Result<RenderPipeline, RenderPipelineError> {
+        log::debug!(
+            "Creating render pipeline: label={:?}, vertex_entry={}, fragment_entry={}",
+            self.label,
+            self.vertex_entry_point,
+            self.fragment_entry_point
+        );
+
         // Validate the descriptor
         self.validate()?;
 
         // Create shader modules
+        log::trace!("Creating vertex shader module");
         let vertex_module = vertex_shader.create_module(device);
-        let fragment_module = fragment_shader.map(|shader| shader.create_module(device));
+        let fragment_module = fragment_shader.map(|shader| {
+            log::trace!("Creating fragment shader module");
+            shader.create_module(device)
+        });
 
         // Convert vertex buffer layouts with their attributes
         let vertex_buffer_attrs: Vec<Vec<wgpu::VertexAttribute>> = self
@@ -1203,12 +1214,16 @@ impl RenderPipelineDescriptor {
             })
             .collect();
 
+        log::trace!("Configured {} vertex buffer layouts", vertex_buffer_layouts.len());
+
         // Convert fragment targets
         let fragment_targets: Vec<Option<wgpu::ColorTargetState>> = self
             .fragment_targets
             .iter()
             .map(|target| Some(target.to_wgpu()))
             .collect();
+
+        log::trace!("Configured {} fragment targets", fragment_targets.len());
 
         // Build the pipeline descriptor
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -1233,6 +1248,7 @@ impl RenderPipelineDescriptor {
             cache: None,
         });
 
+        log::info!("Render pipeline created successfully: label={:?}", self.label);
         Ok(pipeline)
     }
 }

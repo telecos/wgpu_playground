@@ -80,7 +80,9 @@ impl CommandEncoderOps {
     /// let encoder = CommandEncoderOps::new(device, Some("My Encoder"));
     /// ```
     pub fn new(device: &Device, label: Option<&str>) -> Self {
+        log::debug!("Creating command encoder: label={:?}", label);
         let encoder = device.create_command_encoder(&CommandEncoderDescriptor { label });
+        log::trace!("Command encoder created");
         Self { encoder }
     }
 
@@ -126,6 +128,13 @@ impl CommandEncoderOps {
         destination_offset: wgpu::BufferAddress,
         size: wgpu::BufferAddress,
     ) {
+        log::trace!(
+            "Recording buffer-to-buffer copy: size={} bytes, src_offset={}, dst_offset={}",
+            size,
+            source_offset,
+            destination_offset
+        );
+
         self.validate_buffer_to_buffer_copy(
             source,
             source_offset,
@@ -480,7 +489,10 @@ impl CommandEncoderOps {
     /// queue.submit(std::iter::once(command_buffer));
     /// ```
     pub fn finish(self) -> CommandBuffer {
-        self.encoder.finish()
+        log::debug!("Finishing command encoder");
+        let buffer = self.encoder.finish();
+        log::trace!("Command buffer created");
+        buffer
     }
 
     /// Get a mutable reference to the underlying encoder

@@ -154,7 +154,19 @@ impl TextureBuilder {
     /// # Returns
     /// A new GPU texture
     pub fn build(&self, device: &Device) -> Texture {
-        device.create_texture(&wgpu::TextureDescriptor {
+        log::debug!(
+            "Creating texture: label={:?}, size={}x{}x{}, format={:?}, dimension={:?}, mip_levels={}, samples={}",
+            self.label,
+            self.size.width,
+            self.size.height,
+            self.size.depth_or_array_layers,
+            self.format,
+            self.dimension,
+            self.mip_level_count,
+            self.sample_count
+        );
+
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: self.label.as_deref(),
             size: self.size,
             mip_level_count: self.mip_level_count,
@@ -163,7 +175,10 @@ impl TextureBuilder {
             format: self.format,
             usage: self.usage,
             view_formats: &self.view_formats,
-        })
+        });
+
+        log::trace!("Texture created successfully");
+        texture
     }
 
     /// Helper method to create a 1D texture
@@ -351,7 +366,14 @@ impl TextureViewBuilder {
     /// # Returns
     /// A new texture view
     pub fn build(&self, texture: &Texture) -> TextureView {
-        texture.create_view(&TextureViewDescriptor {
+        log::debug!(
+            "Creating texture view: label={:?}, format={:?}, dimension={:?}",
+            self.label,
+            self.format,
+            self.dimension
+        );
+
+        let view = texture.create_view(&TextureViewDescriptor {
             label: self.label.as_deref(),
             format: self.format,
             dimension: self.dimension,
@@ -360,7 +382,10 @@ impl TextureViewBuilder {
             mip_level_count: self.mip_level_count,
             base_array_layer: self.base_array_layer,
             array_layer_count: self.array_layer_count,
-        })
+        });
+
+        log::trace!("Texture view created successfully");
+        view
     }
 
     /// Helper method to create a depth-only view

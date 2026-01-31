@@ -107,6 +107,15 @@ impl DeviceInfo {
                 ui.label("Source:");
                 ui.hyperlink(self.implementation.url());
             });
+            ui.add_space(5.0);
+
+            // Show implementation status
+            let status = self.implementation.status_message();
+            if self.implementation.is_native() {
+                ui.colored_label(egui::Color32::from_rgb(100, 200, 100), status);
+            } else {
+                ui.colored_label(egui::Color32::from_rgb(255, 165, 0), status);
+            }
             ui.add_space(10.0);
 
             // Show if Dawn is available
@@ -118,6 +127,11 @@ impl DeviceInfo {
             } else {
                 ui.label("ℹ️ Dawn support not compiled in (use --features dawn to enable)");
             }
+            ui.add_space(5.0);
+
+            // Show environment variable instructions
+            ui.label("💡 Tip: Set WEBGPU_IMPL environment variable to switch implementations.");
+            ui.label("   Available: wgpu, dawn (if compiled in)");
             ui.add_space(20.0);
 
             // Highlight the backend being used

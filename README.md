@@ -74,18 +74,35 @@ The playground supports different WebGPU implementations:
   - Actively maintained by the gfx-rs team
   - https://github.com/gfx-rs/wgpu
 
-- **Dawn** (optional): C++ implementation used by Chromium
+- **Dawn** (experimental): C++ implementation used by Chromium
   - Google's reference implementation
-  - Can be enabled with the `dawn` feature flag (experimental)
+  - Can be enabled with the `dawn` feature flag
+  - **Note**: Currently a placeholder - uses wgpu backend until full Dawn FFI integration
   - https://dawn.googlesource.com/dawn
 
-By default, the application uses the **wgpu** implementation. To enable Dawn support (experimental), compile with:
+#### Selecting Implementation
 
+By default, the application uses the **wgpu** implementation. You can select the implementation in two ways:
+
+**1. Compile-time (feature flags):**
 ```bash
+# Default: wgpu implementation
+cargo build --release
+
+# Enable Dawn placeholder mode
 cargo build --release --features dawn
 ```
 
-The active WebGPU implementation is displayed in the **Device Info** and **Adapter Selection** tabs.
+**2. Runtime (environment variable):**
+```bash
+# Use wgpu implementation (default)
+WEBGPU_IMPL=wgpu cargo run --release
+
+# Use Dawn implementation (requires --features dawn)
+WEBGPU_IMPL=dawn cargo run --release --features dawn
+```
+
+The active WebGPU implementation and its status is displayed in the **Device Info** and **Adapter Selection** tabs. When Dawn mode is active, a warning is shown indicating it's using the wgpu backend underneath until full Dawn integration is complete.
 
 ### Backend Selection
 

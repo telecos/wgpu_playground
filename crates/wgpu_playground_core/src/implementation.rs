@@ -10,13 +10,56 @@ pub enum WebGPUImplementation {
 
 impl WebGPUImplementation {
     /// Get the current implementation being used
+    ///
+    /// This checks the WEBGPU_IMPL environment variable first, then falls back to
+    /// the compile-time default based on feature flags.
+    ///
+    /// # Environment Variable
+    /// Set `WEBGPU_IMPL=dawn` or `WEBGPU_IMPL=wgpu` to override the default.
+    /// The environment variable is only respected if the requested implementation
+    /// was compiled in via feature flags.
     pub fn current() -> Self {
+        // Check environment variable for runtime override
+        if let Ok(impl_str) = std::env::var("WEBGPU_IMPL") {
+            let impl_str = impl_str.to_lowercase();
+            match impl_str.as_str() {
+                "dawn" => {
+                    #[cfg(feature = "dawn")]
+                    {
+                        log::info!("WEBGPU_IMPL=dawn: Using Dawn implementation");
+                        return Self::Dawn;
+                    }
+                    #[cfg(not(feature = "dawn"))]
+                    {
+                        log::warn!(
+                            "WEBGPU_IMPL=dawn requested but Dawn feature not compiled in. \
+                            Compile with --features dawn to enable. Falling back to wgpu."
+                        );
+                    }
+                }
+                "wgpu" => {
+                    log::info!("WEBGPU_IMPL=wgpu: Using wgpu implementation");
+                    return Self::Wgpu;
+                }
+                _ => {
+                    log::warn!(
+                        "Unknown WEBGPU_IMPL value: '{}'. Valid values are 'dawn' or 'wgpu'. \
+                        Using default.",
+                        impl_str
+                    );
+                }
+            }
+        }
+
+        // Fall back to compile-time default
         #[cfg(feature = "dawn")]
         {
+            log::info!("Using Dawn implementation (compile-time default)");
             Self::Dawn
         }
         #[cfg(not(feature = "dawn"))]
         {
+            log::info!("Using wgpu implementation (compile-time default)");
             Self::Wgpu
         }
     }
@@ -62,6 +105,27 @@ impl WebGPUImplementation {
         #[cfg(not(feature = "dawn"))]
         {
             vec![Self::Wgpu]
+        }
+    }
+
+    /// Check if this implementation is fully integrated or a placeholder
+    ///
+    /// Returns true if the implementation has native integration.
+    /// Returns false if it's a placeholder that uses wgpu underneath.
+    pub fn is_native(&self) -> bool {
+        match self {
+            Self::Wgpu => true,
+            #[cfg(feature = "dawn")]
+            Self::Dawn => false, // Dawn is currently a placeholder
+        }
+    }
+
+    /// Get a status message about the implementation
+    pub fn status_message(&self) -> &'static str {
+        match self {
+            Self::Wgpu => "Native wgpu implementation",
+            #[cfg(feature = "dawn")]
+            Self::Dawn => "⚠️ Placeholder mode: Using wgpu backend (Dawn FFI not yet integrated)",
         }
     }
 }
@@ -123,5 +187,67 @@ mod tests {
     fn test_display_implementation() {
         let impl_type = WebGPUImplementation::Wgpu;
         assert_eq!(format!("{}", impl_type), "wgpu");
+    }
+
+    #[test]
+    fn test_is_native() {
+        assert!(WebGPUImplementation::Wgpu.is_native());
+        #[cfg(feature = "dawn")]
+        assert!(!WebGPUImplementation::Dawn.is_native());
+    }
+
+    #[test]
+    fn test_status_message() {
+        let status = WebGPUImplementation::Wgpu.status_message();
+        assert!(status.contains("Native"));
+        #[cfg(feature = "dawn")]
+        {
+            let status = WebGPUImplementation::Dawn.status_message();
+            assert!(status.contains("Placeholder"));
+        }
+    }
+
+    #[test]
+    fn test_environment_variable_override() {
+        // Test wgpu selection
+        std::env::set_var("WEBGPU_IMPL", "wgpu");
+        let impl_type = WebGPUImplementation::current();
+        assert_eq!(impl_type, WebGPUImplementation::Wgpu);
+        std::env::remove_var("WEBGPU_IMPL");
+    }
+
+    #[test]
+    #[cfg(feature = "dawn")]
+    fn test_environment_variable_dawn() {
+        std::env::set_var("WEBGPU_IMPL", "dawn");
+        let impl_type = WebGPUImplementation::current();
+        assert_eq!(impl_type, WebGPUImplementation::Dawn);
+        std::env::remove_var("WEBGPU_IMPL");
+    }
+
+    #[test]
+    fn test_environment_variable_invalid() {
+        std::env::set_var("WEBGPU_IMPL", "invalid");
+        let impl_type = WebGPUImplementation::current();
+        // Should fall back to default
+        #[cfg(feature = "dawn")]
+        assert_eq!(impl_type, WebGPUImplementation::Dawn);
+        #[cfg(not(feature = "dawn"))]
+        assert_eq!(impl_type, WebGPUImplementation::Wgpu);
+        std::env::remove_var("WEBGPU_IMPL");
+    }
+
+    #[test]
+    fn test_available_implementations_contains_wgpu() {
+        let impls = WebGPUImplementation::available_implementations();
+        assert!(impls.contains(&WebGPUImplementation::Wgpu));
+    }
+
+    #[test]
+    #[cfg(feature = "dawn")]
+    fn test_available_implementations_contains_dawn() {
+        let impls = WebGPUImplementation::available_implementations();
+        assert!(impls.contains(&WebGPUImplementation::Dawn));
+        assert_eq!(impls.len(), 2);
     }
 }

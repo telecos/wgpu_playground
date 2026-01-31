@@ -372,7 +372,11 @@ impl RenderPipelinePanel {
                     self.color_blend_dst,
                     self.color_blend_op,
                 ),
-                BlendComponent::new(self.alpha_blend_src, self.alpha_blend_dst, self.alpha_blend_op),
+                BlendComponent::new(
+                    self.alpha_blend_src,
+                    self.alpha_blend_dst,
+                    self.alpha_blend_op,
+                ),
             ))
         } else {
             None

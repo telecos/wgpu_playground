@@ -27,16 +27,22 @@ impl PlaygroundApp {
     }
 
     pub fn ui(&mut self, ctx: &egui::Context) {
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+        // Menu bar at the top
+        egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.heading("🎮 WebGPU Playground");
-            ui.separator();
-            ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.selected_tab, Tab::DeviceInfo, "📊 Device Info");
-                ui.selectable_value(&mut self.selected_tab, Tab::Rendering, "🎨 Rendering");
-                ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
-            });
         });
 
+        // Sidebar on the left
+        egui::SidePanel::left("sidebar").show(ctx, |ui| {
+            ui.heading("Navigation");
+            ui.separator();
+
+            ui.selectable_value(&mut self.selected_tab, Tab::DeviceInfo, "📊 Device Info");
+            ui.selectable_value(&mut self.selected_tab, Tab::Rendering, "🎨 Rendering");
+            ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
+        });
+
+        // Main canvas area
         egui::CentralPanel::default().show(ctx, |ui| match self.selected_tab {
             Tab::DeviceInfo => self.device_info.ui(ui),
             Tab::Rendering => self.rendering_panel.ui(ui),

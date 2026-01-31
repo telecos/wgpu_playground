@@ -56,7 +56,7 @@ struct ShaderStagesConfig {
 }
 
 impl ShaderStagesConfig {
-    fn to_wgpu(&self) -> ShaderStages {
+    fn to_wgpu(self) -> ShaderStages {
         let mut stages = ShaderStages::empty();
         if self.vertex {
             stages |= ShaderStages::VERTEX;
@@ -166,7 +166,7 @@ struct MockSampler {
 /// Resource assignment for binding
 #[derive(Debug, Clone)]
 enum ResourceAssignment {
-    Buffer(usize), // Index into mock_buffers
+    Buffer(usize),  // Index into mock_buffers
     Texture(usize), // Index into mock_textures
     Sampler(usize), // Index into mock_samplers
 }
@@ -268,7 +268,8 @@ impl BindGroupPanel {
     /// Validate the bind group layout
     fn validate_layout(&mut self) -> bool {
         if self.layout_entries.is_empty() {
-            self.validation_error = Some("Bind group layout must have at least one entry".to_string());
+            self.validation_error =
+                Some("Bind group layout must have at least one entry".to_string());
             self.success_message = None;
             return false;
         }
@@ -294,14 +295,17 @@ impl BindGroupPanel {
     /// Validate the bind group bindings
     fn validate_bindings(&mut self) -> bool {
         if self.layout_entries.is_empty() {
-            self.validation_error = Some("Create a layout first before binding resources".to_string());
+            self.validation_error =
+                Some("Create a layout first before binding resources".to_string());
             self.success_message = None;
             return false;
         }
 
         // Check that all bindings are assigned
         for entry in &self.layout_entries {
-            let has_assignment = self.binding_assignments.iter()
+            let has_assignment = self
+                .binding_assignments
+                .iter()
                 .any(|(b, _)| *b == entry.binding);
             if !has_assignment {
                 self.validation_error = Some(format!(
@@ -328,7 +332,11 @@ impl BindGroupPanel {
             // Mode selector
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.ui_mode, UiMode::CreateLayout, "1️⃣ Create Layout");
-                ui.selectable_value(&mut self.ui_mode, UiMode::BindResources, "2️⃣ Bind Resources");
+                ui.selectable_value(
+                    &mut self.ui_mode,
+                    UiMode::BindResources,
+                    "2️⃣ Bind Resources",
+                );
             });
 
             ui.add_space(10.0);
@@ -395,7 +403,7 @@ impl BindGroupPanel {
                         for (idx, entry) in self.layout_entries.iter_mut().enumerate() {
                             ui.label(format!("{}", entry.binding));
                             ui.label(entry.binding_type.name());
-                            
+
                             ui.checkbox(&mut entry.visibility.vertex, "");
                             ui.checkbox(&mut entry.visibility.fragment, "");
                             ui.checkbox(&mut entry.visibility.compute, "");
@@ -450,7 +458,7 @@ impl BindGroupPanel {
         if self.layout_entries.is_empty() {
             ui.colored_label(
                 egui::Color32::from_rgb(200, 150, 50),
-                "⚠ Create a bind group layout first in the 'Create Layout' tab"
+                "⚠ Create a bind group layout first in the 'Create Layout' tab",
             );
             return;
         }
@@ -471,11 +479,12 @@ impl BindGroupPanel {
         // Display layout summary
         ui.group(|ui| {
             ui.heading("Layout Summary");
-            ui.label(format!("Layout: {}", 
-                if self.layout_label_input.is_empty() { 
-                    "<unnamed>" 
-                } else { 
-                    &self.layout_label_input 
+            ui.label(format!(
+                "Layout: {}",
+                if self.layout_label_input.is_empty() {
+                    "<unnamed>"
+                } else {
+                    &self.layout_label_input
                 }
             ));
             ui.label(format!("Bindings: {}", self.layout_entries.len()));
@@ -490,7 +499,9 @@ impl BindGroupPanel {
             ui.add_space(5.0);
 
             // Clone entries data to avoid borrow checker issues
-            let entries: Vec<(u32, BindingTypeConfig)> = self.layout_entries.iter()
+            let entries: Vec<(u32, BindingTypeConfig)> = self
+                .layout_entries
+                .iter()
                 .map(|e| (e.binding, e.binding_type.clone()))
                 .collect();
 
@@ -502,7 +513,9 @@ impl BindGroupPanel {
                     });
 
                     // Find current assignment
-                    let current_assignment = self.binding_assignments.iter()
+                    let current_assignment = self
+                        .binding_assignments
+                        .iter()
                         .find(|(b, _)| *b == binding)
                         .map(|(_, r)| r);
 
@@ -524,13 +537,17 @@ impl BindGroupPanel {
                             }
                         }
                         None => {
-                            ui.colored_label(egui::Color32::from_rgb(200, 150, 50), "⚠ Not assigned");
+                            ui.colored_label(
+                                egui::Color32::from_rgb(200, 150, 50),
+                                "⚠ Not assigned",
+                            );
                         }
                     }
 
                     // Resource selection based on binding type
                     match &binding_type {
-                        BindingTypeConfig::UniformBuffer | BindingTypeConfig::StorageBuffer { .. } => {
+                        BindingTypeConfig::UniformBuffer
+                        | BindingTypeConfig::StorageBuffer { .. } => {
                             self.render_buffer_selector(ui, binding);
                         }
                         BindingTypeConfig::Texture | BindingTypeConfig::StorageTexture => {
@@ -553,13 +570,11 @@ impl BindGroupPanel {
                 self.validate_bindings();
             }
 
-            if ui.button("✨ Create Bind Group").clicked() {
-                if self.validate_bindings() {
-                    self.success_message = Some(
-                        "✓ Configuration is valid. In a full implementation, the bind group would be created here."
-                            .to_string(),
-                    );
-                }
+            if ui.button("✨ Create Bind Group").clicked() && self.validate_bindings() {
+                self.success_message = Some(
+                    "✓ Configuration is valid. In a full implementation, the bind group would be created here."
+                        .to_string(),
+                );
             }
         });
     }
@@ -572,7 +587,8 @@ impl BindGroupPanel {
                 // Remove any existing assignment for this binding
                 self.binding_assignments.retain(|(b, _)| *b != binding);
                 // Add new assignment
-                self.binding_assignments.push((binding, ResourceAssignment::Buffer(idx)));
+                self.binding_assignments
+                    .push((binding, ResourceAssignment::Buffer(idx)));
                 self.validation_error = None;
                 self.success_message = None;
             }
@@ -588,7 +604,8 @@ impl BindGroupPanel {
                 // Remove any existing assignment for this binding
                 self.binding_assignments.retain(|(b, _)| *b != binding);
                 // Add new assignment
-                self.binding_assignments.push((binding, ResourceAssignment::Texture(idx)));
+                self.binding_assignments
+                    .push((binding, ResourceAssignment::Texture(idx)));
                 self.validation_error = None;
                 self.success_message = None;
             }
@@ -604,7 +621,8 @@ impl BindGroupPanel {
                 // Remove any existing assignment for this binding
                 self.binding_assignments.retain(|(b, _)| *b != binding);
                 // Add new assignment
-                self.binding_assignments.push((binding, ResourceAssignment::Sampler(idx)));
+                self.binding_assignments
+                    .push((binding, ResourceAssignment::Sampler(idx)));
                 self.validation_error = None;
                 self.success_message = None;
             }
@@ -666,10 +684,13 @@ mod tests {
         panel.add_binding_entry(BindingTypeConfig::UniformBuffer);
         panel.add_binding_entry(BindingTypeConfig::Texture);
         assert_eq!(panel.layout_entries.len(), 2);
-        
+
         panel.remove_binding_entry(0);
         assert_eq!(panel.layout_entries.len(), 1);
-        assert_eq!(panel.layout_entries[0].binding_type, BindingTypeConfig::Texture);
+        assert_eq!(
+            panel.layout_entries[0].binding_type,
+            BindingTypeConfig::Texture
+        );
     }
 
     #[test]
@@ -704,7 +725,10 @@ mod tests {
     #[test]
     fn test_binding_type_config_names() {
         assert_eq!(BindingTypeConfig::UniformBuffer.name(), "Uniform Buffer");
-        assert_eq!(BindingTypeConfig::StorageBuffer { read_only: true }.name(), "Storage Buffer (Read-Only)");
+        assert_eq!(
+            BindingTypeConfig::StorageBuffer { read_only: true }.name(),
+            "Storage Buffer (Read-Only)"
+        );
         assert_eq!(BindingTypeConfig::Texture.name(), "Texture");
         assert_eq!(BindingTypeConfig::Sampler.name(), "Sampler");
     }
@@ -720,7 +744,7 @@ mod tests {
         let mut panel = BindGroupPanel::new();
         panel.layout_label_input = "test_layout".to_string();
         panel.add_binding_entry(BindingTypeConfig::UniformBuffer);
-        
+
         let descriptor = panel.get_layout_descriptor();
         assert!(descriptor.is_some());
         let descriptor = descriptor.unwrap();
@@ -739,10 +763,12 @@ mod tests {
     fn test_resource_assignment() {
         let mut panel = BindGroupPanel::new();
         panel.add_binding_entry(BindingTypeConfig::UniformBuffer);
-        
+
         // Assign a buffer to binding 0
-        panel.binding_assignments.push((0, ResourceAssignment::Buffer(0)));
-        
+        panel
+            .binding_assignments
+            .push((0, ResourceAssignment::Buffer(0)));
+
         assert_eq!(panel.binding_assignments.len(), 1);
         assert!(panel.validate_bindings());
     }
@@ -751,7 +777,7 @@ mod tests {
     fn test_ui_mode_switching() {
         let mut panel = BindGroupPanel::new();
         assert_eq!(panel.ui_mode, UiMode::CreateLayout);
-        
+
         panel.ui_mode = UiMode::BindResources;
         assert_eq!(panel.ui_mode, UiMode::BindResources);
     }

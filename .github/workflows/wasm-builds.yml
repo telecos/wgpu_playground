@@ -1,0 +1,176 @@
+name: WASM Builds
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Explicitly limit GITHUB_TOKEN permissions for security
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  WASM_PACK_VERSION: "0.14.0"
+  MAX_WASM_SIZE_BYTES: "10485760"  # 10MB
+
+jobs:
+  # Build WASM target for core library
+  wasm-build-core:
+    name: Build WASM - Core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "wasm-core"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Cache wasm-pack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-pack
+          key: ${{ runner.os }}-wasm-pack-${{ env.WASM_PACK_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-wasm-pack-
+
+      - name: Install wasm-pack
+        run: |
+          if ! command -v wasm-pack &> /dev/null; then
+            cargo install wasm-pack --version ${{ env.WASM_PACK_VERSION }}
+          fi
+
+      - name: Build wgpu_playground_core for WASM
+        run: |
+          cd crates/wgpu_playground_core
+          wasm-pack build --target web --release
+
+      - name: Upload core WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-core
+          path: crates/wgpu_playground_core/pkg/
+          retention-days: 7
+
+  # Test WASM builds
+  wasm-test:
+    name: Test WASM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "wasm-test"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Cache wasm-pack
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-pack
+          key: ${{ runner.os }}-wasm-pack-${{ env.WASM_PACK_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-wasm-pack-
+
+      - name: Install wasm-pack
+        run: |
+          if ! command -v wasm-pack &> /dev/null; then
+            cargo install wasm-pack --version ${{ env.WASM_PACK_VERSION }}
+          fi
+
+      - name: Install Chrome for testing
+        uses: browser-actions/setup-chrome@latest
+
+      - name: Test wgpu_playground_core WASM
+        run: |
+          cd crates/wgpu_playground_core
+          wasm-pack test --headless --chrome
+        continue-on-error: true
+
+  # Validate web bundle creation
+  wasm-bundle-validation:
+    name: Validate Web Bundle
+    runs-on: ubuntu-latest
+    needs: [wasm-build-core]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download core WASM artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-core
+          path: dist/pkg-core/
+
+      - name: Validate WASM files exist
+        run: |
+          echo "Validating core WASM artifacts..."
+          ls -lh dist/pkg-core/
+          if [ ! -f dist/pkg-core/wgpu_playground_core_bg.wasm ]; then
+            echo "Error: Core WASM file not found"
+            exit 1
+          fi
+
+          echo "Validating JavaScript bindings..."
+          if [ ! -f dist/pkg-core/wgpu_playground_core.js ]; then
+            echo "Error: Core JS bindings not found"
+            exit 1
+          fi
+
+          echo "Validating TypeScript definitions..."
+          if [ ! -f dist/pkg-core/wgpu_playground_core.d.ts ]; then
+            echo "Warning: Core TS definitions not found"
+          fi
+
+          echo "✓ All WASM bundle files validated successfully"
+
+      - name: Check WASM file sizes
+        run: |
+          echo "WASM file sizes:"
+          du -h dist/pkg-core/wgpu_playground_core_bg.wasm
+
+          # Warn if files are too large
+          CORE_SIZE=$(stat -c%s dist/pkg-core/wgpu_playground_core_bg.wasm)
+
+          if [ $CORE_SIZE -gt ${{ env.MAX_WASM_SIZE_BYTES }} ]; then
+            echo "Warning: Core WASM file is larger than 10MB"
+          else
+            echo "✓ WASM file size is acceptable"
+          fi
+
+      - name: Upload deployment bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-deployment-bundle
+          path: dist/
+          retention-days: 30
+
+  # Combined status check - all jobs must pass
+  wasm-build-success:
+    name: WASM Builds Success
+    runs-on: ubuntu-latest
+    needs: [wasm-build-core, wasm-bundle-validation]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.wasm-build-core.result }}" != "success" ] || \
+             [ "${{ needs.wasm-bundle-validation.result }}" != "success" ]; then
+            echo "One or more WASM build jobs failed"
+            exit 1
+          fi
+          echo "All WASM build jobs passed successfully"

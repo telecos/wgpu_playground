@@ -173,6 +173,22 @@ This project uses `cargo-llvm-cov` for code coverage reporting. See [COVERAGE.md
 
 Current coverage: 62% (see CI artifacts for detailed reports)
 
+## Continuous Integration
+
+This project uses comprehensive CI testing to ensure code quality across all platforms. The CI pipeline includes:
+
+- **Unit Tests**: Tests for individual functions and modules
+- **Integration Tests**: Tests for component interactions
+- **Doc Tests**: Validation of documentation examples
+- **Platform Coverage**: Tests run on Linux, macOS, and Windows
+- **Test Reporting**: JUnit XML reports with PR comments and check results
+
+See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
+- Test job configuration
+- Running tests locally
+- Test reporting and failure notifications
+- Troubleshooting CI issues
+
 ## Documentation
 
 - **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu

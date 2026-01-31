@@ -3,6 +3,7 @@ pub mod adapter_selection;
 pub mod assets;
 pub mod bind_group;
 pub mod buffer;
+pub mod buffer_panel;
 pub mod command_encoder;
 pub mod compute;
 pub mod compute_pass_encoder;

@@ -1,4 +1,5 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
+use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
@@ -10,6 +11,7 @@ pub struct PlaygroundApp {
     adapter_selection: AdapterSelectionPanel,
     rendering_panel: RenderingPanel,
     compute_panel: ComputePanel,
+    buffer_panel: BufferPanel,
     selected_tab: Tab,
 }
 
@@ -19,6 +21,7 @@ enum Tab {
     DeviceConfig,
     DeviceInfo,
     Rendering,
+    BufferConfig,
     Compute,
 }
 
@@ -30,6 +33,7 @@ impl PlaygroundApp {
             adapter_selection: AdapterSelectionPanel::new(adapter),
             rendering_panel: RenderingPanel::new(),
             compute_panel: ComputePanel::new(),
+            buffer_panel: BufferPanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -57,6 +61,7 @@ impl PlaygroundApp {
             );
             ui.selectable_value(&mut self.selected_tab, Tab::DeviceInfo, "📊 Device Info");
             ui.selectable_value(&mut self.selected_tab, Tab::Rendering, "🎨 Rendering");
+            ui.selectable_value(&mut self.selected_tab, Tab::BufferConfig, "📐 Buffer Config");
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 
@@ -66,6 +71,7 @@ impl PlaygroundApp {
             Tab::DeviceConfig => self.device_config.ui(ui),
             Tab::DeviceInfo => self.device_info.ui(ui),
             Tab::Rendering => self.rendering_panel.ui(ui),
+            Tab::BufferConfig => self.buffer_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
         });
     }

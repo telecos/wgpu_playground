@@ -1,5 +1,5 @@
 use std::fmt;
-use wgpu::{Buffer, CommandEncoder, RenderPass, RenderPipeline, TextureView};
+use wgpu::{Buffer, CommandEncoder, RenderBundle, RenderPass, RenderPipeline, TextureView};
 
 /// Errors that can occur during render pass operations
 #[derive(Debug)]
@@ -606,6 +606,44 @@ impl<'a> RenderPassEncoder<'a> {
     /// * `color` - The blend constant color
     pub fn set_blend_constant(&mut self, color: Color) {
         self.pass.set_blend_constant(color.to_wgpu());
+    }
+
+    /// Execute a pre-recorded render bundle
+    ///
+    /// Executes all the commands in the given render bundle. This is more
+    /// efficient than re-recording the same commands each frame.
+    ///
+    /// # Arguments
+    /// * `bundle` - The render bundle to execute
+    ///
+    /// # Examples
+    /// ```no_run
+    /// # use wgpu_playground_core::render_pass_encoder::RenderPassEncoder;
+    /// # let mut render_pass: RenderPassEncoder = todo!();
+    /// # let bundle: &wgpu::RenderBundle = todo!();
+    /// render_pass.execute_bundle(bundle);
+    /// ```
+    pub fn execute_bundle(&mut self, bundle: &'a RenderBundle) {
+        self.pass.execute_bundles(std::iter::once(bundle));
+    }
+
+    /// Execute multiple pre-recorded render bundles
+    ///
+    /// Executes all the commands in the given render bundles in order.
+    /// This is more efficient than re-recording the same commands each frame.
+    ///
+    /// # Arguments
+    /// * `bundles` - The render bundles to execute
+    ///
+    /// # Examples
+    /// ```no_run
+    /// # use wgpu_playground_core::render_pass_encoder::RenderPassEncoder;
+    /// # let mut render_pass: RenderPassEncoder = todo!();
+    /// # let bundles: &[&wgpu::RenderBundle] = todo!();
+    /// render_pass.execute_bundles(bundles);
+    /// ```
+    pub fn execute_bundles(&mut self, bundles: &[&'a RenderBundle]) {
+        self.pass.execute_bundles(bundles.iter().copied());
     }
 }
 

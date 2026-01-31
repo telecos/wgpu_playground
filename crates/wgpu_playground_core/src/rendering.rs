@@ -1,10 +1,13 @@
 use crate::examples::{get_all_examples, Example, ExampleCategory};
+use crate::shader_editor::ShaderEditor;
 
 pub struct RenderingPanel {
     examples: Vec<Example>,
     selected_example: Option<usize>,
     show_source_code: bool,
     category_filter: Option<ExampleCategory>,
+    shader_editor: ShaderEditor,
+    show_shader_editor: bool,
 }
 
 impl Default for RenderingPanel {
@@ -20,15 +23,37 @@ impl RenderingPanel {
             selected_example: None,
             show_source_code: false,
             category_filter: None,
+            shader_editor: ShaderEditor::new(),
+            show_shader_editor: false,
         }
     }
 
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         egui::ScrollArea::vertical().show(ui, |ui| {
-            ui.heading("🎨 Example Gallery");
-            ui.separator();
-            ui.label("Browse and explore WebGPU examples with descriptions and source code.");
+            // Top-level tabs: Gallery vs Shader Editor
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.show_shader_editor, false, "📚 Example Gallery");
+                ui.selectable_value(&mut self.show_shader_editor, true, "📝 Shader Editor");
+            });
+
             ui.add_space(10.0);
+            ui.separator();
+
+            if self.show_shader_editor {
+                // Show the shader editor
+                self.shader_editor.ui(ui, None); // TODO: Pass device when available
+            } else {
+                // Show the example gallery (existing code)
+                self.render_example_gallery(ui);
+            }
+        });
+    }
+
+    fn render_example_gallery(&mut self, ui: &mut egui::Ui) {
+        ui.heading("🎨 Example Gallery");
+        ui.separator();
+        ui.label("Browse and explore WebGPU examples with descriptions and source code.");
+        ui.add_space(10.0);
 
             // Category filter
             ui.horizontal(|ui| {
@@ -171,7 +196,6 @@ impl RenderingPanel {
                 egui::Color32::from_rgb(100, 150, 255),
                 "💡 Tip: Select an example to view its description and source code",
             );
-        });
     }
 }
 
@@ -186,6 +210,7 @@ mod tests {
         assert_eq!(panel.selected_example, None);
         assert!(!panel.show_source_code);
         assert_eq!(panel.category_filter, None);
+        assert!(!panel.show_shader_editor);
     }
 
     #[test]

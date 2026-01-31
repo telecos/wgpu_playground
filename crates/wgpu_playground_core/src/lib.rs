@@ -21,5 +21,6 @@ pub mod render_pipeline;
 pub mod rendering;
 pub mod sampler;
 pub mod shader;
+pub mod shader_editor;
 pub mod surface;
 pub mod texture;

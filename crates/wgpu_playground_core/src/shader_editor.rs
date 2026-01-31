@@ -2,20 +2,15 @@
 use crate::shader::ShaderModule;
 
 /// Represents a shader compilation result
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub enum CompilationResult {
     /// Shader compiled successfully
     Success,
     /// Shader compilation failed with error message
     Error(String),
     /// No compilation attempted yet
+    #[default]
     NotCompiled,
-}
-
-impl Default for CompilationResult {
-    fn default() -> Self {
-        Self::NotCompiled
-    }
 }
 
 /// WGSL Shader Editor component
@@ -150,12 +145,11 @@ fn fs_main() -> @location(0) vec4<f32> {
             ui.label("File:");
             ui.text_edit_singleline(&mut self.file_path);
 
-            if ui.button("📁 Load").clicked() {
-                if !self.file_path.is_empty() {
+            if ui.button("📁 Load").clicked()
+                && !self.file_path.is_empty() {
                     let path = self.file_path.clone();
                     self.load_from_file(&path);
                 }
-            }
 
             // Load example button
             if ui.button("📚 Load Example").clicked() {

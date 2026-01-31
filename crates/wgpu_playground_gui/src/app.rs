@@ -2,6 +2,7 @@ use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
 use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
+use wgpu_playground_core::compute_pipeline_panel::ComputePipelinePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::rendering::RenderingPanel;
@@ -14,6 +15,7 @@ pub struct PlaygroundApp {
     adapter_selection: AdapterSelectionPanel,
     rendering_panel: RenderingPanel,
     compute_panel: ComputePanel,
+    compute_pipeline_panel: ComputePipelinePanel,
     buffer_panel: BufferPanel,
     sampler_panel: SamplerPanel,
     texture_panel: TexturePanel,
@@ -31,6 +33,7 @@ enum Tab {
     SamplerConfig,
     TextureConfig,
     BindGroupLayoutConfig,
+    ComputePipelineConfig,
     Compute,
 }
 
@@ -42,6 +45,7 @@ impl PlaygroundApp {
             adapter_selection: AdapterSelectionPanel::new(adapter),
             rendering_panel: RenderingPanel::new(),
             compute_panel: ComputePanel::new(),
+            compute_pipeline_panel: ComputePipelinePanel::new(),
             buffer_panel: BufferPanel::new(),
             sampler_panel: SamplerPanel::new(),
             texture_panel: TexturePanel::new(),
@@ -93,6 +97,11 @@ impl PlaygroundApp {
                 Tab::BindGroupLayoutConfig,
                 "🔗 Bind Group Layout",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::ComputePipelineConfig,
+                "⚙️ Compute Pipeline",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 
@@ -106,6 +115,7 @@ impl PlaygroundApp {
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
             Tab::TextureConfig => self.texture_panel.ui(ui),
             Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
+            Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
         });
     }

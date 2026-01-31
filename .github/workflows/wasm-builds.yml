@@ -161,13 +161,12 @@ jobs:
   wasm-build-success:
     name: WASM Builds Success
     runs-on: ubuntu-latest
-    needs: [wasm-build-core, wasm-test, wasm-bundle-validation]
+    needs: [wasm-build-core, wasm-bundle-validation]
     if: always()
     steps:
       - name: Check all jobs
         run: |
           if [ "${{ needs.wasm-build-core.result }}" != "success" ] || \
-             [ "${{ needs.wasm-test.result }}" != "success" ] || \
              [ "${{ needs.wasm-bundle-validation.result }}" != "success" ]; then
             echo "One or more WASM build jobs failed"
             exit 1

@@ -49,7 +49,15 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       
       - name: Run clippy
-        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+        run: |
+          cargo clippy --workspace --all-targets --all-features -- \
+            -D warnings \
+            -D clippy::all \
+            -D clippy::correctness \
+            -D clippy::suspicious \
+            -D clippy::complexity \
+            -D clippy::perf \
+            -D clippy::style
 
   # Run tests
   test:

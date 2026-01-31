@@ -1,0 +1,26 @@
+# Clippy configuration for strict linting rules
+# This enables additional lint groups beyond the default set
+
+# Cognitive complexity threshold - flag functions that are too complex
+cognitive-complexity-threshold = 15
+
+# Disallow wildcard imports (use explicit imports instead)
+disallowed-names = ["foo", "bar", "baz"]
+
+# Type complexity threshold
+type-complexity-threshold = 100
+
+# Array size threshold for passing arrays by value
+array-size-threshold = 512000
+
+# Vec size threshold for triggering lint
+vec-box-size-threshold = 4096
+
+# Single char pattern threshold
+single-char-binding-names-threshold = 4
+
+# Too many arguments threshold
+too-many-arguments-threshold = 7
+
+# Too many lines threshold
+too-many-lines-threshold = 100

@@ -83,7 +83,10 @@ impl<'a> QueueOps<'a> {
     where
         I: IntoIterator<Item = CommandBuffer>,
     {
-        self.queue.submit(command_buffers)
+        log::debug!("Submitting command buffers to queue");
+        let index = self.queue.submit(command_buffers);
+        log::trace!("Command buffers submitted, index: {:?}", index);
+        index
     }
 
     /// Write data to a GPU buffer
@@ -112,7 +115,9 @@ impl<'a> QueueOps<'a> {
     /// queue_ops.write_buffer(buffer, 0, bytemuck::cast_slice(&data));
     /// ```
     pub fn write_buffer(&self, buffer: &wgpu::Buffer, offset: wgpu::BufferAddress, data: &[u8]) {
+        log::debug!("Writing {} bytes to buffer at offset {}", data.len(), offset);
         self.queue.write_buffer(buffer, offset, data);
+        log::trace!("Buffer write queued");
     }
 
     /// Write data to a GPU texture

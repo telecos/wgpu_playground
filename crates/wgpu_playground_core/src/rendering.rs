@@ -173,3 +173,34 @@ impl RenderingPanel {
         });
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_rendering_panel_new() {
+        let panel = RenderingPanel::new();
+        assert_eq!(panel.examples.len(), 4);
+        assert_eq!(panel.selected_example, None);
+        assert!(!panel.show_source_code);
+        assert_eq!(panel.category_filter, None);
+    }
+
+    #[test]
+    fn test_rendering_panel_default() {
+        let panel = RenderingPanel::default();
+        assert_eq!(panel.examples.len(), 4);
+    }
+
+    #[test]
+    fn test_rendering_panel_has_all_examples() {
+        let panel = RenderingPanel::new();
+        let example_names: Vec<&str> = panel.examples.iter().map(|e| e.name).collect();
+        
+        assert!(example_names.contains(&"Basic Triangle"));
+        assert!(example_names.contains(&"Rotating Cube"));
+        assert!(example_names.contains(&"Texture Mapping"));
+        assert!(example_names.contains(&"Compute Shader"));
+    }
+}

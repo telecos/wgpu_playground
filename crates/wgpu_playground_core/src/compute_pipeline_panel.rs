@@ -136,14 +136,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             Ok(pipeline) => {
                 self.success_message = Some(format!(
                     "✓ Compute pipeline created successfully: '{}'",
-                    self.label_input
-                        .as_str()
-                        .to_string()
-                        .as_str()
-                        .trim()
-                        .is_empty()
-                        .then(|| "unlabeled")
-                        .unwrap_or(self.label_input.as_str())
+                    if self.label_input.trim().is_empty() {
+                        "unlabeled"
+                    } else {
+                        self.label_input.as_str()
+                    }
                 ));
                 self.validation_error = None;
                 Some(pipeline)

@@ -16,10 +16,17 @@ This repository now contains a complete skeleton/framework for a WebGPU experime
 - Event loop and rendering pipeline
 - Proper error handling with descriptive messages
 
-#### src/app.rs (46 lines)
+#### src/app.rs (53 lines)
 - Main application structure
-- Three-tab interface (Device Info, Rendering, Compute/ML)
+- Four-tab interface (Adapter Selection, Device Info, Rendering, Compute/ML)
 - Tab management and UI coordination
+
+#### src/adapter_selection.rs (172 lines)
+- GPU adapter selection interface
+- Display of all available adapters with properties
+- Power preference configuration (None, Low Power, High Performance)
+- Backend filtering (Vulkan, Metal, DX12, OpenGL, etc.)
+- Real-time adapter enumeration
 
 #### src/device_info.rs (102 lines)
 - GPU adapter information display
@@ -154,9 +161,10 @@ The application currently provides:
 
 1. **Window Management**: Creates a 1280x720 window with proper event handling
 2. **WebGPU Initialization**: Sets up GPU context with adapter detection
-3. **Device Information Display**: Shows comprehensive GPU capabilities
-4. **Tabbed Interface**: Three organized sections for different features
-5. **UI Framework**: Ready for adding interactive experiments
+3. **Adapter Selection**: Interactive UI for choosing GPU adapters and configuring power preferences
+4. **Device Information Display**: Shows comprehensive GPU capabilities
+5. **Tabbed Interface**: Four organized sections for different features
+6. **UI Framework**: Ready for adding interactive experiments
 
 ## What's Ready for Next Steps
 

@@ -1,4 +1,5 @@
 pub mod adapter;
+pub mod adapter_selection;
 pub mod assets;
 pub mod bind_group;
 pub mod buffer;

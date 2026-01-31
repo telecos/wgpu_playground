@@ -6,8 +6,39 @@ Since the application requires a display to run, here's a textual description of
 ┌─────────────────────────────────────────────────────────────────────┐
 │ 🎮 WebGPU Playground                                                │
 ├─────────────────────────────────────────────────────────────────────┤
-│ [📊 Device Info] [🎨 Rendering] [🧮 Compute/ML]                     │
+│ [⚙️ Adapter Selection] [📊 Device Info] [🎨 Rendering] [🧮 Compute/ML] │
 ├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│ When "Adapter Selection" tab is selected:                           │
+│                                                                      │
+│  🎮 GPU Adapter Selection                                           │
+│  ─────────────────────────                                          │
+│  Backend Filter                                                      │
+│  [All] [Primary] [Vulkan] [Metal] [DX12] [OpenGL]                  │
+│                                                                      │
+│  Power Preference                                                    │
+│  [None] [Low Power] [High Performance]                              │
+│                                                                      │
+│  Available Adapters                                                  │
+│  Found 2 adapter(s)                                                  │
+│                                                                      │
+│  ┌─────────────────────────────────────────────┐                   │
+│  │ ● NVIDIA GeForce RTX 3080                   │ (selected)         │
+│  │   Backend: Vulkan                            │                   │
+│  │   Device Type: DiscreteGpu                   │                   │
+│  │   Vendor ID: 0x10DE                          │                   │
+│  │   Device ID: 0x2206                          │                   │
+│  │   Driver: NVIDIA 525.60.11                   │                   │
+│  └─────────────────────────────────────────────┘                   │
+│                                                                      │
+│  ┌─────────────────────────────────────────────┐                   │
+│  │ Intel(R) UHD Graphics 630                    │                   │
+│  └─────────────────────────────────────────────┘                   │
+│                                                                      │
+│  ℹ️ Information                                                     │
+│  ⚠️ Note: Changing the adapter requires restarting the application.│
+│  Set the WGPU_BACKEND environment variable and restart:             │
+│  WGPU_BACKEND=vulkan cargo run --release                            │
 │                                                                      │
 │ When "Device Info" tab is selected:                                 │
 │                                                                      │
@@ -58,9 +89,10 @@ When "Compute/ML" tab is selected:
 The application currently provides:
 1. **Functional window and UI framework** using egui
 2. **WebGPU initialization** with wgpu
-3. **Device information display** showing all GPU capabilities
-4. **Tabbed interface** for organizing features
-5. **Placeholder panels** for future rendering and compute features
+3. **Adapter selection panel** for choosing GPU adapters with detailed properties and power preferences
+4. **Device information display** showing all GPU capabilities
+5. **Tabbed interface** for organizing features
+6. **Placeholder panels** for future rendering and compute features
 
 ## Next Steps
 

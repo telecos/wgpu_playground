@@ -211,15 +211,15 @@ mod tests {
 
     #[test]
     fn test_create_test_device_returns_some_or_none() {
-        // This test just ensures the function compiles and can be called
+        // This test ensures the function compiles and can be called
         pollster::block_on(async {
             let result = create_test_device().await;
-            // We don't assert on the result since it depends on the environment
-            // but we can check that it returns the expected type
             match result {
                 Some((device, _queue)) => {
-                    // Device should be valid
-                    assert!(device.features().is_empty() || !device.features().is_empty());
+                    // Verify device is valid by checking limits
+                    let limits = device.limits();
+                    // All devices should have at least some max texture dimension
+                    assert!(limits.max_texture_dimension_2d > 0);
                 }
                 None => {
                     // No GPU available - this is fine in some test environments

@@ -74,19 +74,15 @@ mod tests {
     }
 
     #[test]
-    fn test_tab_clone() {
-        let tab = Tab::DeviceInfo;
-        let cloned = tab;
-        assert_eq!(tab, cloned);
-    }
-
-    #[test]
-    fn test_tab_copy() {
+    fn test_tab_copy_trait() {
+        // Test that Tab implements Copy trait
         let tab = Tab::Rendering;
         let copied = tab;
-        // Verify both can be used independently
+        // Both can be used independently after copy
         assert_eq!(tab, Tab::Rendering);
         assert_eq!(copied, Tab::Rendering);
+        // Demonstrate independent use
+        let _ = (tab, copied);
     }
 
     #[test]

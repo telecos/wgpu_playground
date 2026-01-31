@@ -325,9 +325,9 @@ mod tests {
         let panel = BufferPanel::new();
         assert_eq!(panel.size_input, "256");
         assert_eq!(panel.label_input, "");
-        assert_eq!(panel.usage_copy_dst, true);
-        assert_eq!(panel.usage_vertex, false);
-        assert_eq!(panel.mapped_at_creation, false);
+        assert!(panel.usage_copy_dst);
+        assert!(!panel.usage_vertex);
+        assert!(!panel.mapped_at_creation);
     }
 
     #[test]

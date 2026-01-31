@@ -50,7 +50,7 @@ enum BorderColorChoice {
 }
 
 impl BorderColorChoice {
-    fn to_wgpu(&self) -> wgpu::SamplerBorderColor {
+    fn to_wgpu(self) -> wgpu::SamplerBorderColor {
         match self {
             BorderColorChoice::TransparentBlack => wgpu::SamplerBorderColor::TransparentBlack,
             BorderColorChoice::OpaqueBlack => wgpu::SamplerBorderColor::OpaqueBlack,
@@ -335,17 +335,16 @@ impl SamplerPanel {
                 }
 
                 // Auto-enable border color if using ClampToBorder
-                if self.address_mode_u == AddressMode::ClampToBorder
+                if (self.address_mode_u == AddressMode::ClampToBorder
                     || self.address_mode_v == AddressMode::ClampToBorder
-                    || self.address_mode_w == AddressMode::ClampToBorder
+                    || self.address_mode_w == AddressMode::ClampToBorder)
+                    && !self.enable_border_color
                 {
-                    if !self.enable_border_color {
-                        ui.add_space(5.0);
-                        ui.colored_label(
-                            egui::Color32::from_rgb(200, 200, 100),
-                            "⚠ Border color should be enabled when using ClampToBorder"
-                        );
-                    }
+                    ui.add_space(5.0);
+                    ui.colored_label(
+                        egui::Color32::from_rgb(200, 200, 100),
+                        "⚠ Border color should be enabled when using ClampToBorder"
+                    );
                 }
             });
 

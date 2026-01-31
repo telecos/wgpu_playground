@@ -99,7 +99,7 @@ pub fn load_string_from_path(path: &Path) -> Result<String, std::io::Error> {
 }
 
 #[cfg(target_arch = "wasm32")]
-pub fn load_string_from_path(path: &Path) -> Result<String, std::io::Error> {
+pub fn load_string_from_path(_path: &Path) -> Result<String, std::io::Error> {
     // For web builds, we would use fetch API
     // This is a placeholder implementation
     // In a real implementation, this would need to be async and use web_sys

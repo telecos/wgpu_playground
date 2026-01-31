@@ -236,6 +236,7 @@ pub fn create_instance_with_options(options: &AdapterOptions) -> Instance {
 }
 
 /// Enumerate all available GPU adapters
+#[cfg(not(target_arch = "wasm32"))]
 pub fn enumerate_adapters(backends: Backends) -> Vec<AdapterInfo> {
     let instance = create_instance(backends);
 
@@ -244,6 +245,13 @@ pub fn enumerate_adapters(backends: Backends) -> Vec<AdapterInfo> {
         .into_iter()
         .map(|adapter| AdapterInfo::from_adapter(&adapter))
         .collect()
+}
+
+/// Enumerate all available GPU adapters (WASM stub)
+/// Note: enumerate_adapters is not available on WASM. Use request_adapter instead.
+#[cfg(target_arch = "wasm32")]
+pub fn enumerate_adapters(_backends: Backends) -> Vec<AdapterInfo> {
+    vec![]
 }
 
 /// Request a GPU adapter with the specified options

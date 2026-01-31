@@ -896,10 +896,7 @@ fn test_buffer_all_individual_usage_flags() {
             ("indirect", BufferUsages::INDIRECT | BufferUsages::COPY_DST),
             ("copy_src", BufferUsages::COPY_SRC | BufferUsages::COPY_DST),
             ("copy_dst", BufferUsages::COPY_DST),
-            (
-                "map_read",
-                BufferUsages::MAP_READ | BufferUsages::COPY_DST,
-            ),
+            ("map_read", BufferUsages::MAP_READ | BufferUsages::COPY_DST),
             (
                 "map_write",
                 BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
@@ -943,4 +940,3 @@ fn test_buffer_name_preservation() {
         let _buffer = descriptor.create_buffer(&device).unwrap();
     });
 }
-

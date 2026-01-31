@@ -1152,10 +1152,8 @@ mod tests {
         assert_eq!(wgpu_descriptor.label, Some("test_buffer"));
         assert_eq!(wgpu_descriptor.size, 1024);
         assert!(wgpu_descriptor.usage.contains(wgpu::BufferUsages::VERTEX));
-        assert!(wgpu_descriptor
-            .usage
-            .contains(wgpu::BufferUsages::COPY_DST));
-        assert_eq!(wgpu_descriptor.mapped_at_creation, true);
+        assert!(wgpu_descriptor.usage.contains(wgpu::BufferUsages::COPY_DST));
+        assert!(wgpu_descriptor.mapped_at_creation);
     }
 
     // Edge case tests
@@ -1196,10 +1194,7 @@ mod tests {
         assert_eq!(original.label(), cloned.label());
         assert_eq!(original.size(), cloned.size());
         assert_eq!(original.usage(), cloned.usage());
-        assert_eq!(
-            original.mapped_at_creation(),
-            cloned.mapped_at_creation()
-        );
+        assert_eq!(original.mapped_at_creation(), cloned.mapped_at_creation());
     }
 
     #[test]

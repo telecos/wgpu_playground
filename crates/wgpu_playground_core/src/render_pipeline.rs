@@ -3,6 +3,13 @@ use std::fmt;
 use std::sync::{Arc, Mutex};
 use wgpu::{Device, RenderPipeline};
 
+/// Type alias for the pipeline cache map
+///
+/// Maps pipeline names (String) to compiled render pipeline instances wrapped in Arc.
+/// Uses Arc<Mutex<...>> for thread-safe access and sharing of the cache across multiple
+/// parts of the application. The inner Arc allows multiple references to the same pipeline.
+type PipelineCacheMap = Arc<Mutex<HashMap<String, Arc<RenderPipeline>>>>;
+
 /// Errors that can occur during render pipeline operations
 #[derive(Debug)]
 pub enum RenderPipelineError {
@@ -1261,7 +1268,7 @@ impl RenderPipelineDescriptor {
 
 /// Pipeline cache for storing compiled pipelines
 pub struct PipelineCache {
-    cache: Arc<Mutex<HashMap<String, Arc<RenderPipeline>>>>,
+    cache: PipelineCacheMap,
 }
 
 impl PipelineCache {

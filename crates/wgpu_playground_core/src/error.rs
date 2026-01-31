@@ -5,6 +5,13 @@
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
+/// Type alias for a WGPU error callback
+///
+/// This callback is designed for use with `device.on_uncaptured_error()` to handle
+/// GPU errors that occur outside of error scopes. The `Send + Sync` bounds allow
+/// the callback to be safely shared across threads, which is required by wgpu's API.
+type WgpuErrorCallback = Box<dyn Fn(wgpu::Error) + Send + Sync>;
+
 /// Types of WebGPU errors that can occur
 #[derive(Debug, Clone, PartialEq)]
 pub enum ErrorType {
@@ -241,7 +248,7 @@ impl ErrorHandler {
     /// Create a wgpu error callback that forwards to this handler
     ///
     /// Returns a boxed closure suitable for use with `device.on_uncaptured_error()`
-    pub fn create_wgpu_callback(&self) -> Box<dyn Fn(wgpu::Error) + Send + Sync> {
+    pub fn create_wgpu_callback(&self) -> WgpuErrorCallback {
         let callbacks = Arc::clone(&self.callbacks);
         Box::new(move |wgpu_error| {
             let error = Error::from(wgpu_error);

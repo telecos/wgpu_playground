@@ -210,6 +210,21 @@ This project uses `cargo-llvm-cov` for code coverage reporting. See [COVERAGE.md
 
 Current coverage: 62% (see CI artifacts for detailed reports)
 
+## Continuous Integration
+
+This project uses optimized CI testing to ensure code quality while maintaining fast build times:
+
+- **Comprehensive Linux Tests**: Full test suite with unit, integration, and doc tests
+- **Platform Compatibility Tests**: Quick library tests on macOS and Windows
+- **Test Reporting**: JUnit XML reports with PR comments and check results
+- **~70% faster CI**: Optimized from 9 parallel jobs to 3 strategic jobs
+
+See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
+- Test job configuration and optimization strategy
+- Running tests locally
+- Test reporting and failure notifications
+- Performance characteristics and troubleshooting
+
 ## Documentation
 
 - **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them

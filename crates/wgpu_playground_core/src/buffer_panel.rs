@@ -59,10 +59,7 @@ impl BufferPanel {
     /// Update the internal descriptor based on current UI state
     fn update_descriptor(&mut self) {
         // Parse size
-        let size = self
-            .size_input
-            .parse::<u64>()
-            .unwrap_or(0);
+        let size = self.size_input.parse::<u64>().unwrap_or(0);
 
         // Build usage flags
         let mut usage = BufferUsages::empty();
@@ -111,7 +108,7 @@ impl BufferPanel {
     /// Validate the current configuration
     fn validate(&mut self) -> bool {
         self.update_descriptor();
-        
+
         match self.descriptor.validate() {
             Ok(_) => {
                 self.validation_error = None;
@@ -313,12 +310,7 @@ impl BufferPanel {
         });
     }
 
-    fn render_usage_checkbox(
-        ui: &mut egui::Ui,
-        label: &str,
-        value: &mut bool,
-        tooltip: &str,
-    ) {
+    fn render_usage_checkbox(ui: &mut egui::Ui, label: &str, value: &mut bool, tooltip: &str) {
         ui.checkbox(value, label).on_hover_text(tooltip);
         ui.end_row();
     }

@@ -61,7 +61,11 @@ impl PlaygroundApp {
             );
             ui.selectable_value(&mut self.selected_tab, Tab::DeviceInfo, "📊 Device Info");
             ui.selectable_value(&mut self.selected_tab, Tab::Rendering, "🎨 Rendering");
-            ui.selectable_value(&mut self.selected_tab, Tab::BufferConfig, "📐 Buffer Config");
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::BufferConfig,
+                "📐 Buffer Config",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 

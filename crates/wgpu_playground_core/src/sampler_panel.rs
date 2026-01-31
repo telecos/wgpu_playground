@@ -407,7 +407,7 @@ impl SamplerPanel {
                     self.descriptor.lod_max_clamp()
                 ));
                 ui.monospace(format!("Anisotropy: {}", self.descriptor.anisotropy_clamp()));
-                
+
                 if let Some(compare) = self.descriptor.compare() {
                     ui.monospace(format!("Compare: {:?}", compare));
                 } else {
@@ -733,7 +733,10 @@ mod tests {
 
     #[test]
     fn test_border_color_choice_names() {
-        assert_eq!(BorderColorChoice::TransparentBlack.name(), "Transparent Black");
+        assert_eq!(
+            BorderColorChoice::TransparentBlack.name(),
+            "Transparent Black"
+        );
         assert_eq!(BorderColorChoice::OpaqueBlack.name(), "Opaque Black");
         assert_eq!(BorderColorChoice::OpaqueWhite.name(), "Opaque White");
         assert_eq!(BorderColorChoice::Zero.name(), "Zero");

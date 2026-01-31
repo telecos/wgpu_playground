@@ -6,6 +6,7 @@ pub mod buffer;
 pub mod command_encoder;
 pub mod compute;
 pub mod compute_pass_encoder;
+pub mod device_config;
 pub mod device_info;
 pub mod error;
 pub mod pipeline_layout;

@@ -212,7 +212,7 @@ The current setup is optimized for speed (~15-20 min total):
 
 If you need even faster CI:
 - Consider reducing the number of features tested
-- Use `--no-fail-fast` in nextest to exit on first failure
+- Enable fail-fast mode in nextest config to exit on first failure
 - Cache more aggressively
 
 ### JUnit report generation fails

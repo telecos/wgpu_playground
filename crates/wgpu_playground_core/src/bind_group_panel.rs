@@ -664,9 +664,9 @@ mod tests {
         let panel = BindGroupPanel::new();
         assert_eq!(panel.layout_entries.len(), 0);
         assert_eq!(panel.next_binding, 0);
-        assert!(panel.mock_buffers.len() > 0);
-        assert!(panel.mock_textures.len() > 0);
-        assert!(panel.mock_samplers.len() > 0);
+        assert!(!panel.mock_buffers.is_empty());
+        assert!(!panel.mock_textures.is_empty());
+        assert!(!panel.mock_samplers.is_empty());
     }
 
     #[test]

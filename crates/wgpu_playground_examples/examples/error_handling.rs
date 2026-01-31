@@ -76,7 +76,7 @@ fn main() {
 
     // Example 3: Testing shader validation
     println!("3. Testing shader error handling:");
-    
+
     // Empty shader source - should fail validation
     let empty_shader_result = ShaderModule::from_source("", Some("empty"));
     match empty_shader_result {
@@ -100,7 +100,7 @@ fn main() {
 
     // Example 4: Buffer mapping with error handling
     println!("4. Testing buffer operations:");
-    
+
     // Create a mappable buffer
     use wgpu_playground_core::buffer::BufferOps;
     let map_buffer = BufferDescriptor::new(

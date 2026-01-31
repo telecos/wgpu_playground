@@ -2,7 +2,6 @@
 ///
 /// This module provides error types, error scopes, and utilities for handling
 /// validation errors, out-of-memory errors, and internal errors.
-
 use std::fmt;
 use std::sync::{Arc, Mutex};
 
@@ -108,12 +107,12 @@ pub enum ErrorFilter {
 impl ErrorFilter {
     /// Check if this filter matches an error type
     pub fn matches(&self, error_type: &ErrorType) -> bool {
-        match (self, error_type) {
-            (ErrorFilter::Validation, ErrorType::Validation) => true,
-            (ErrorFilter::OutOfMemory, ErrorType::OutOfMemory) => true,
-            (ErrorFilter::Internal, ErrorType::Internal) => true,
-            _ => false,
-        }
+        matches!(
+            (self, error_type),
+            (ErrorFilter::Validation, ErrorType::Validation)
+                | (ErrorFilter::OutOfMemory, ErrorType::OutOfMemory)
+                | (ErrorFilter::Internal, ErrorType::Internal)
+        )
     }
 
     /// Convert to wgpu::ErrorFilter
@@ -406,7 +405,10 @@ mod tests {
     fn test_device_lost_reason_display() {
         assert_eq!(DeviceLostReason::Destroyed.to_string(), "Destroyed");
         assert_eq!(DeviceLostReason::Dropped.to_string(), "Dropped");
-        assert_eq!(DeviceLostReason::ReplacedCallback.to_string(), "ReplacedCallback");
+        assert_eq!(
+            DeviceLostReason::ReplacedCallback.to_string(),
+            "ReplacedCallback"
+        );
         assert_eq!(DeviceLostReason::DeviceInvalid.to_string(), "DeviceInvalid");
         assert_eq!(DeviceLostReason::Unknown.to_string(), "Unknown");
     }

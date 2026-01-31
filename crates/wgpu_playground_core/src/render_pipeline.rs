@@ -1214,7 +1214,10 @@ impl RenderPipelineDescriptor {
             })
             .collect();
 
-        log::trace!("Configured {} vertex buffer layouts", vertex_buffer_layouts.len());
+        log::trace!(
+            "Configured {} vertex buffer layouts",
+            vertex_buffer_layouts.len()
+        );
 
         // Convert fragment targets
         let fragment_targets: Vec<Option<wgpu::ColorTargetState>> = self
@@ -1248,7 +1251,10 @@ impl RenderPipelineDescriptor {
             cache: None,
         });
 
-        log::info!("Render pipeline created successfully: label={:?}", self.label);
+        log::info!(
+            "Render pipeline created successfully: label={:?}",
+            self.label
+        );
         Ok(pipeline)
     }
 }

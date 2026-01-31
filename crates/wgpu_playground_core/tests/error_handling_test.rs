@@ -124,10 +124,7 @@ mod error_handling_tests {
             (BufferUsages::VERTEX, "vertex"),
             (BufferUsages::INDEX, "index"),
             (BufferUsages::UNIFORM | BufferUsages::COPY_DST, "uniform"),
-            (
-                BufferUsages::STORAGE | BufferUsages::COPY_SRC,
-                "storage",
-            ),
+            (BufferUsages::STORAGE | BufferUsages::COPY_SRC, "storage"),
             (BufferUsages::MAP_READ | BufferUsages::COPY_DST, "map_read"),
             (
                 BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,

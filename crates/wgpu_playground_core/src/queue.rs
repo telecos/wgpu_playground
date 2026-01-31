@@ -115,7 +115,11 @@ impl<'a> QueueOps<'a> {
     /// queue_ops.write_buffer(buffer, 0, bytemuck::cast_slice(&data));
     /// ```
     pub fn write_buffer(&self, buffer: &wgpu::Buffer, offset: wgpu::BufferAddress, data: &[u8]) {
-        log::debug!("Writing {} bytes to buffer at offset {}", data.len(), offset);
+        log::debug!(
+            "Writing {} bytes to buffer at offset {}",
+            data.len(),
+            offset
+        );
         self.queue.write_buffer(buffer, offset, data);
         log::trace!("Buffer write queued");
     }

@@ -2,6 +2,7 @@ pub mod adapter;
 pub mod adapter_selection;
 pub mod assets;
 pub mod bind_group;
+pub mod bind_group_layout_panel;
 pub mod buffer;
 pub mod buffer_panel;
 pub mod command_encoder;

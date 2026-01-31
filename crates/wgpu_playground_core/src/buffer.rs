@@ -691,4 +691,523 @@ mod tests {
         assert_eq!(descriptor.size(), 64);
         assert!(descriptor.usage().contains(BufferUsages::COPY_DST));
     }
+
+    // Additional comprehensive tests for buffer usages
+
+    #[test]
+    fn test_buffer_usages_vertex_combinations() {
+        // VERTEX can be combined with COPY_DST for data upload
+        let usage = BufferUsages::VERTEX | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::VERTEX));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+
+        // VERTEX can be combined with COPY_SRC for reading back
+        let usage = BufferUsages::VERTEX | BufferUsages::COPY_SRC;
+        assert!(usage.contains(BufferUsages::VERTEX));
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+
+        // VERTEX with both COPY flags
+        let usage = BufferUsages::VERTEX | BufferUsages::COPY_DST | BufferUsages::COPY_SRC;
+        assert!(usage.contains(BufferUsages::VERTEX));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+    }
+
+    #[test]
+    fn test_buffer_usages_index_combinations() {
+        let usage = BufferUsages::INDEX | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::INDEX));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+    }
+
+    #[test]
+    fn test_buffer_usages_uniform_combinations() {
+        let usage = BufferUsages::UNIFORM | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::UNIFORM));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+
+        // UNIFORM can be combined with COPY_SRC
+        let usage = BufferUsages::UNIFORM | BufferUsages::COPY_SRC | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::UNIFORM));
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+    }
+
+    #[test]
+    fn test_buffer_usages_storage_combinations() {
+        // STORAGE often needs both COPY flags for read/write
+        let usage = BufferUsages::STORAGE | BufferUsages::COPY_DST | BufferUsages::COPY_SRC;
+        assert!(usage.contains(BufferUsages::STORAGE));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+    }
+
+    #[test]
+    fn test_buffer_usages_indirect_combinations() {
+        let usage = BufferUsages::INDIRECT | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::INDIRECT));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+
+        // INDIRECT with STORAGE for compute-generated indirect commands
+        let usage = BufferUsages::INDIRECT | BufferUsages::STORAGE | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::INDIRECT));
+        assert!(usage.contains(BufferUsages::STORAGE));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+    }
+
+    #[test]
+    fn test_buffer_usages_query_resolve_combinations() {
+        let usage = BufferUsages::QUERY_RESOLVE | BufferUsages::COPY_SRC;
+        assert!(usage.contains(BufferUsages::QUERY_RESOLVE));
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+    }
+
+    #[test]
+    fn test_buffer_usages_map_read_combinations() {
+        // MAP_READ is typically combined with COPY_DST
+        let usage = BufferUsages::MAP_READ | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::MAP_READ));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+        assert!(!usage.contains(BufferUsages::MAP_WRITE));
+    }
+
+    #[test]
+    fn test_buffer_usages_map_write_combinations() {
+        // MAP_WRITE is typically combined with COPY_SRC
+        let usage = BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC;
+        assert!(usage.contains(BufferUsages::MAP_WRITE));
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+        assert!(!usage.contains(BufferUsages::MAP_READ));
+    }
+
+    #[test]
+    fn test_buffer_usages_copy_only() {
+        // Buffer used only for copying
+        let usage = BufferUsages::COPY_SRC | BufferUsages::COPY_DST;
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+        assert!(!usage.contains(BufferUsages::VERTEX));
+        assert!(!usage.contains(BufferUsages::UNIFORM));
+    }
+
+    #[test]
+    fn test_buffer_usages_all_gpu_usages() {
+        // All GPU-side usage flags (no MAP flags)
+        let usage = BufferUsages::VERTEX
+            | BufferUsages::INDEX
+            | BufferUsages::UNIFORM
+            | BufferUsages::STORAGE
+            | BufferUsages::INDIRECT
+            | BufferUsages::COPY_SRC
+            | BufferUsages::COPY_DST
+            | BufferUsages::QUERY_RESOLVE;
+
+        assert!(usage.contains(BufferUsages::VERTEX));
+        assert!(usage.contains(BufferUsages::INDEX));
+        assert!(usage.contains(BufferUsages::UNIFORM));
+        assert!(usage.contains(BufferUsages::STORAGE));
+        assert!(usage.contains(BufferUsages::INDIRECT));
+        assert!(usage.contains(BufferUsages::COPY_SRC));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+        assert!(usage.contains(BufferUsages::QUERY_RESOLVE));
+        assert!(!usage.contains(BufferUsages::MAP_READ));
+        assert!(!usage.contains(BufferUsages::MAP_WRITE));
+    }
+
+    #[test]
+    fn test_buffer_usages_contains_empty() {
+        let usage = BufferUsages::VERTEX;
+        assert!(usage.contains(BufferUsages::empty()));
+    }
+
+    #[test]
+    fn test_buffer_usages_multiple_union() {
+        let usage1 = BufferUsages::VERTEX;
+        let usage2 = BufferUsages::INDEX;
+        let usage3 = BufferUsages::UNIFORM;
+
+        let combined = usage1.union(usage2).union(usage3);
+        assert!(combined.contains(BufferUsages::VERTEX));
+        assert!(combined.contains(BufferUsages::INDEX));
+        assert!(combined.contains(BufferUsages::UNIFORM));
+    }
+
+    #[test]
+    fn test_buffer_usages_bitor_multiple() {
+        let usage = BufferUsages::VERTEX | BufferUsages::INDEX | BufferUsages::UNIFORM;
+        assert!(usage.contains(BufferUsages::VERTEX));
+        assert!(usage.contains(BufferUsages::INDEX));
+        assert!(usage.contains(BufferUsages::UNIFORM));
+    }
+
+    #[test]
+    fn test_buffer_usages_none_constant() {
+        assert_eq!(BufferUsages::NONE.bits, 0);
+        assert!(BufferUsages::NONE.is_empty());
+        assert_eq!(BufferUsages::NONE, BufferUsages::empty());
+    }
+
+    // BufferDescriptor tests
+
+    #[test]
+    fn test_buffer_descriptor_no_label() {
+        let descriptor = BufferDescriptor::new(None, 512, BufferUsages::VERTEX);
+        assert_eq!(descriptor.label(), None);
+        assert_eq!(descriptor.size(), 512);
+    }
+
+    #[test]
+    fn test_buffer_descriptor_with_label() {
+        let descriptor = BufferDescriptor::new(Some("test"), 512, BufferUsages::VERTEX);
+        assert_eq!(descriptor.label(), Some("test"));
+    }
+
+    #[test]
+    fn test_buffer_descriptor_large_size() {
+        let large_size = 1024 * 1024 * 100; // 100 MB
+        let descriptor = BufferDescriptor::new(Some("large"), large_size, BufferUsages::STORAGE);
+        assert_eq!(descriptor.size(), large_size);
+    }
+
+    #[test]
+    fn test_buffer_descriptor_small_size() {
+        let descriptor = BufferDescriptor::new(Some("small"), 16, BufferUsages::UNIFORM);
+        assert_eq!(descriptor.size(), 16);
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_mapped_at_creation_default() {
+        let descriptor = BufferDescriptor::new(Some("test"), 256, BufferUsages::VERTEX);
+        assert!(!descriptor.mapped_at_creation());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_chaining() {
+        let descriptor = BufferDescriptor::new(Some("test"), 256, BufferUsages::VERTEX)
+            .with_mapped_at_creation(true);
+
+        assert_eq!(descriptor.label(), Some("test"));
+        assert_eq!(descriptor.size(), 256);
+        assert!(descriptor.usage().contains(BufferUsages::VERTEX));
+        assert!(descriptor.mapped_at_creation());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_vertex_buffer() {
+        let descriptor = BufferDescriptor::new(
+            Some("vertex"),
+            1024,
+            BufferUsages::VERTEX | BufferUsages::COPY_DST,
+        );
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_index_buffer() {
+        let descriptor = BufferDescriptor::new(
+            Some("index"),
+            512,
+            BufferUsages::INDEX | BufferUsages::COPY_DST,
+        );
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_uniform_buffer() {
+        let descriptor = BufferDescriptor::new(
+            Some("uniform"),
+            256,
+            BufferUsages::UNIFORM | BufferUsages::COPY_DST,
+        );
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_storage_buffer() {
+        let descriptor = BufferDescriptor::new(
+            Some("storage"),
+            2048,
+            BufferUsages::STORAGE | BufferUsages::COPY_DST | BufferUsages::COPY_SRC,
+        );
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_map_read_valid() {
+        let descriptor = BufferDescriptor::new(
+            Some("read"),
+            256,
+            BufferUsages::MAP_READ | BufferUsages::COPY_DST,
+        );
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_map_write_valid() {
+        let descriptor = BufferDescriptor::new(
+            Some("write"),
+            256,
+            BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
+        );
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_staging_buffer() {
+        // Staging buffer for uploading data
+        let descriptor = BufferDescriptor::new(
+            Some("staging_upload"),
+            1024,
+            BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
+        );
+        assert!(descriptor.validate().is_ok());
+
+        // Staging buffer for downloading data
+        let descriptor = BufferDescriptor::new(
+            Some("staging_download"),
+            1024,
+            BufferUsages::MAP_READ | BufferUsages::COPY_DST,
+        );
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_validation_all_valid_combinations() {
+        // Test many valid combinations
+        let valid_combinations = vec![
+            BufferUsages::VERTEX | BufferUsages::COPY_DST,
+            BufferUsages::INDEX | BufferUsages::COPY_DST,
+            BufferUsages::UNIFORM | BufferUsages::COPY_DST,
+            BufferUsages::STORAGE | BufferUsages::COPY_DST,
+            BufferUsages::INDIRECT | BufferUsages::COPY_DST,
+            BufferUsages::QUERY_RESOLVE | BufferUsages::COPY_SRC,
+            BufferUsages::MAP_READ | BufferUsages::COPY_DST,
+            BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
+            BufferUsages::COPY_SRC | BufferUsages::COPY_DST,
+            BufferUsages::VERTEX | BufferUsages::INDEX,
+            BufferUsages::STORAGE | BufferUsages::INDIRECT,
+        ];
+
+        for usage in valid_combinations {
+            let descriptor = BufferDescriptor::new(Some("test"), 256, usage);
+            assert!(
+                descriptor.validate().is_ok(),
+                "Expected usage {:?} to be valid",
+                usage
+            );
+        }
+    }
+
+    // Error condition tests
+
+    #[test]
+    fn test_buffer_error_invalid_size_message() {
+        let descriptor = BufferDescriptor::new(Some("invalid"), 0, BufferUsages::VERTEX);
+        match descriptor.validate() {
+            Err(BufferError::InvalidSize(msg)) => {
+                assert!(msg.contains("greater than 0"));
+            }
+            _ => panic!("Expected InvalidSize error"),
+        }
+    }
+
+    #[test]
+    fn test_buffer_error_invalid_usage_message() {
+        let descriptor = BufferDescriptor::new(Some("invalid"), 256, BufferUsages::empty());
+        match descriptor.validate() {
+            Err(BufferError::InvalidUsage(msg)) => {
+                assert!(msg.contains("at least one usage flag"));
+            }
+            _ => panic!("Expected InvalidUsage error"),
+        }
+    }
+
+    #[test]
+    fn test_buffer_error_map_read_write_conflict() {
+        let descriptor = BufferDescriptor::new(
+            Some("invalid"),
+            256,
+            BufferUsages::MAP_READ | BufferUsages::MAP_WRITE,
+        );
+        match descriptor.validate() {
+            Err(BufferError::InvalidUsage(msg)) => {
+                assert!(msg.contains("MAP_READ and MAP_WRITE"));
+            }
+            _ => panic!("Expected InvalidUsage error"),
+        }
+    }
+
+    #[test]
+    fn test_buffer_error_display_all_variants() {
+        let errors = vec![
+            (
+                BufferError::CreationFailed("creation".to_string()),
+                "Buffer creation failed: creation",
+            ),
+            (
+                BufferError::MapFailed("mapping".to_string()),
+                "Buffer mapping failed: mapping",
+            ),
+            (BufferError::AlreadyMapped, "Buffer is already mapped"),
+            (BufferError::NotMapped, "Buffer is not mapped"),
+            (
+                BufferError::InvalidSize("size error".to_string()),
+                "Invalid buffer size: size error",
+            ),
+            (
+                BufferError::InvalidUsage("usage error".to_string()),
+                "Invalid buffer usage: usage error",
+            ),
+        ];
+
+        for (error, expected) in errors {
+            assert_eq!(error.to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn test_buffer_error_is_error_trait() {
+        // Verify BufferError implements std::error::Error
+        let err: Box<dyn std::error::Error> =
+            Box::new(BufferError::CreationFailed("test".to_string()));
+        assert!(err.to_string().contains("Buffer creation failed"));
+    }
+
+    // BufferUsages conversion tests
+
+    #[test]
+    fn test_buffer_usages_to_wgpu_conversion() {
+        let usage = BufferUsages::VERTEX | BufferUsages::COPY_DST;
+        let wgpu_usage = usage.to_wgpu();
+        assert!(wgpu_usage.contains(wgpu::BufferUsages::VERTEX));
+        assert!(wgpu_usage.contains(wgpu::BufferUsages::COPY_DST));
+    }
+
+    #[test]
+    fn test_buffer_usages_from_wgpu_conversion() {
+        let wgpu_usage = wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST;
+        let usage = BufferUsages::from_wgpu(wgpu_usage);
+        assert!(usage.contains(BufferUsages::VERTEX));
+        assert!(usage.contains(BufferUsages::COPY_DST));
+    }
+
+    #[test]
+    fn test_buffer_usages_round_trip_conversion() {
+        let original = BufferUsages::STORAGE | BufferUsages::COPY_DST | BufferUsages::COPY_SRC;
+        let wgpu_usage = original.to_wgpu();
+        let converted = BufferUsages::from_wgpu(wgpu_usage);
+
+        assert_eq!(original, converted);
+    }
+
+    #[test]
+    fn test_buffer_usages_all_flags_conversion() {
+        let usage = BufferUsages::VERTEX
+            | BufferUsages::INDEX
+            | BufferUsages::UNIFORM
+            | BufferUsages::STORAGE
+            | BufferUsages::INDIRECT
+            | BufferUsages::COPY_SRC
+            | BufferUsages::COPY_DST
+            | BufferUsages::MAP_READ
+            | BufferUsages::QUERY_RESOLVE;
+
+        let wgpu_usage = usage.to_wgpu();
+        let converted = BufferUsages::from_wgpu(wgpu_usage);
+
+        // Verify all flags are preserved (except MAP_WRITE which wasn't in original)
+        assert!(converted.contains(BufferUsages::VERTEX));
+        assert!(converted.contains(BufferUsages::INDEX));
+        assert!(converted.contains(BufferUsages::UNIFORM));
+        assert!(converted.contains(BufferUsages::STORAGE));
+        assert!(converted.contains(BufferUsages::INDIRECT));
+        assert!(converted.contains(BufferUsages::COPY_SRC));
+        assert!(converted.contains(BufferUsages::COPY_DST));
+        assert!(converted.contains(BufferUsages::MAP_READ));
+        assert!(converted.contains(BufferUsages::QUERY_RESOLVE));
+    }
+
+    #[test]
+    fn test_buffer_usages_empty_conversion() {
+        let usage = BufferUsages::empty();
+        let wgpu_usage = usage.to_wgpu();
+        assert!(wgpu_usage.is_empty());
+
+        let converted = BufferUsages::from_wgpu(wgpu_usage);
+        assert!(converted.is_empty());
+    }
+
+    #[test]
+    fn test_buffer_descriptor_to_wgpu_descriptor() {
+        let descriptor = BufferDescriptor::new(
+            Some("test_buffer"),
+            1024,
+            BufferUsages::VERTEX | BufferUsages::COPY_DST,
+        )
+        .with_mapped_at_creation(true);
+
+        let wgpu_descriptor = descriptor.to_wgpu();
+
+        assert_eq!(wgpu_descriptor.label, Some("test_buffer"));
+        assert_eq!(wgpu_descriptor.size, 1024);
+        assert!(wgpu_descriptor.usage.contains(wgpu::BufferUsages::VERTEX));
+        assert!(wgpu_descriptor.usage.contains(wgpu::BufferUsages::COPY_DST));
+        assert!(wgpu_descriptor.mapped_at_creation);
+    }
+
+    // Edge case tests
+
+    #[test]
+    fn test_buffer_descriptor_minimum_valid_size() {
+        let descriptor = BufferDescriptor::new(Some("min"), 1, BufferUsages::VERTEX);
+        assert!(descriptor.validate().is_ok());
+        assert_eq!(descriptor.size(), 1);
+    }
+
+    #[test]
+    fn test_buffer_descriptor_maximum_u64_size() {
+        // While this might not be allocatable, it should validate
+        let descriptor = BufferDescriptor::new(Some("max"), u64::MAX, BufferUsages::VERTEX);
+        assert!(descriptor.validate().is_ok());
+    }
+
+    #[test]
+    fn test_buffer_usages_equality() {
+        let usage1 = BufferUsages::VERTEX | BufferUsages::COPY_DST;
+        let usage2 = BufferUsages::VERTEX | BufferUsages::COPY_DST;
+        let usage3 = BufferUsages::VERTEX;
+
+        assert_eq!(usage1, usage2);
+        assert_ne!(usage1, usage3);
+    }
+
+    #[test]
+    fn test_buffer_descriptor_clone() {
+        let original = BufferDescriptor::new(
+            Some("original"),
+            512,
+            BufferUsages::UNIFORM | BufferUsages::COPY_DST,
+        );
+
+        let cloned = original.clone();
+        assert_eq!(original.label(), cloned.label());
+        assert_eq!(original.size(), cloned.size());
+        assert_eq!(original.usage(), cloned.usage());
+        assert_eq!(original.mapped_at_creation(), cloned.mapped_at_creation());
+    }
+
+    #[test]
+    fn test_buffer_usages_debug_format() {
+        let usage = BufferUsages::VERTEX;
+        let debug_str = format!("{:?}", usage);
+        assert!(debug_str.contains("BufferUsages"));
+    }
+
+    #[test]
+    fn test_buffer_descriptor_debug_format() {
+        let descriptor = BufferDescriptor::new(Some("test"), 256, BufferUsages::VERTEX);
+        let debug_str = format!("{:?}", descriptor);
+        assert!(debug_str.contains("BufferDescriptor"));
+    }
 }

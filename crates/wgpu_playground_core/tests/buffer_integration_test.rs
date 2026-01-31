@@ -457,3 +457,486 @@ fn test_buffer_read_back() {
         BufferOps::unmap(&buffer);
     });
 }
+
+#[test]
+fn test_buffer_write_then_read_back() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        // Create a buffer we can write to and read from
+        let buffer = BufferDescriptor::new(
+            Some("rw_buffer"),
+            1024,
+            BufferUsages::COPY_DST | BufferUsages::COPY_SRC,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Create a staging buffer for reading back
+        let staging = BufferDescriptor::new(
+            Some("staging"),
+            1024,
+            BufferUsages::MAP_READ | BufferUsages::COPY_DST,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Write pattern to buffer
+        let pattern: Vec<u32> = (0..256).map(|i| i * 2).collect();
+        let bytes = bytemuck::cast_slice(&pattern);
+        queue.write_buffer(&buffer, 0, bytes);
+
+        // Copy to staging buffer
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("copy_encoder"),
+        });
+        encoder.copy_buffer_to_buffer(&buffer, 0, &staging, 0, 1024);
+        queue.submit(std::iter::once(encoder.finish()));
+
+        device.poll(wgpu::Maintain::Wait);
+
+        // Read back and verify
+        BufferOps::map_read(&staging).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&staging);
+            let read_data: &[u32] = bytemuck::cast_slice(&view);
+            for (i, &value) in read_data.iter().enumerate() {
+                assert_eq!(value, (i * 2) as u32);
+            }
+        }
+        BufferOps::unmap(&staging);
+    });
+}
+
+#[test]
+fn test_buffer_partial_write() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let buffer = BufferDescriptor::new(
+            Some("partial_write"),
+            1024,
+            BufferUsages::COPY_DST | BufferUsages::MAP_READ,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Write to first half
+        let data1 = vec![0xAA_u8; 512];
+        queue.write_buffer(&buffer, 0, &data1);
+
+        // Write to second half
+        let data2 = vec![0xBB_u8; 512];
+        queue.write_buffer(&buffer, 512, &data2);
+
+        device.poll(wgpu::Maintain::Wait);
+
+        // Verify both halves
+        BufferOps::map_read(&buffer).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&buffer);
+            assert!(view[..512].iter().all(|&b| b == 0xAA));
+            assert!(view[512..].iter().all(|&b| b == 0xBB));
+        }
+        BufferOps::unmap(&buffer);
+    });
+}
+
+#[test]
+fn test_buffer_zero_initialization() {
+    pollster::block_on(async {
+        let Some((device, _queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        // Create buffer with MAP_READ to verify contents
+        let buffer = BufferDescriptor::new(
+            Some("zero_init"),
+            256,
+            BufferUsages::MAP_READ | BufferUsages::COPY_DST,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Buffers should be zero-initialized
+        BufferOps::map_read(&buffer).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&buffer);
+            assert!(view.iter().all(|&b| b == 0));
+        }
+        BufferOps::unmap(&buffer);
+    });
+}
+
+#[test]
+fn test_buffer_overwrite_data() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let buffer = BufferDescriptor::new(
+            Some("overwrite"),
+            256,
+            BufferUsages::COPY_DST | BufferUsages::MAP_READ,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Write initial data
+        queue.write_buffer(&buffer, 0, &vec![1u8; 256]);
+        device.poll(wgpu::Maintain::Wait);
+
+        // Overwrite with different data
+        queue.write_buffer(&buffer, 0, &vec![2u8; 256]);
+        device.poll(wgpu::Maintain::Wait);
+
+        // Verify overwrite worked
+        BufferOps::map_read(&buffer).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&buffer);
+            assert!(view.iter().all(|&b| b == 2));
+        }
+        BufferOps::unmap(&buffer);
+    });
+}
+
+#[test]
+fn test_buffer_large_data_transfer() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let size = 1024 * 1024; // 1 MB
+        let buffer = BufferDescriptor::new(
+            Some("large_buffer"),
+            size,
+            BufferUsages::COPY_DST | BufferUsages::COPY_SRC,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Write large data
+        let data = vec![0x42_u8; size as usize];
+        queue.write_buffer(&buffer, 0, &data);
+        device.poll(wgpu::Maintain::Wait);
+
+        // Copy to readback buffer to verify
+        let readback = BufferDescriptor::new(
+            Some("readback"),
+            size,
+            BufferUsages::COPY_DST | BufferUsages::MAP_READ,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("copy"),
+        });
+        encoder.copy_buffer_to_buffer(&buffer, 0, &readback, 0, size);
+        queue.submit(std::iter::once(encoder.finish()));
+        device.poll(wgpu::Maintain::Wait);
+
+        // Verify first and last bytes
+        BufferOps::map_read(&readback).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&readback);
+            assert_eq!(view[0], 0x42);
+            assert_eq!(view[view.len() - 1], 0x42);
+        }
+        BufferOps::unmap(&readback);
+    });
+}
+
+#[test]
+fn test_buffer_multiple_map_unmap_cycles() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let buffer = BufferDescriptor::new(
+            Some("cycle_buffer"),
+            256,
+            BufferUsages::MAP_READ | BufferUsages::COPY_DST,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        queue.write_buffer(&buffer, 0, &vec![1u8; 256]);
+        device.poll(wgpu::Maintain::Wait);
+
+        // Map and unmap multiple times
+        for _ in 0..3 {
+            BufferOps::map_read(&buffer).await.unwrap();
+            {
+                let view = BufferOps::get_mapped_range(&buffer);
+                assert_eq!(view[0], 1);
+            }
+            BufferOps::unmap(&buffer);
+        }
+    });
+}
+
+#[test]
+fn test_buffer_map_write_modify_read() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        // Create a MAP_WRITE buffer
+        let write_buffer = BufferDescriptor::new(
+            Some("write_buf"),
+            256,
+            BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Create a MAP_READ buffer for reading back
+        let read_buffer = BufferDescriptor::new(
+            Some("read_buf"),
+            256,
+            BufferUsages::MAP_READ | BufferUsages::COPY_DST,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Write data using MAP_WRITE
+        BufferOps::map_write(&write_buffer).await.unwrap();
+        {
+            let mut view = BufferOps::get_mapped_range_mut(&write_buffer);
+            for (i, byte) in view.iter_mut().enumerate() {
+                *byte = (i % 256) as u8;
+            }
+        }
+        BufferOps::unmap(&write_buffer);
+
+        // Copy to read buffer
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("copy"),
+        });
+        encoder.copy_buffer_to_buffer(&write_buffer, 0, &read_buffer, 0, 256);
+        queue.submit(std::iter::once(encoder.finish()));
+        device.poll(wgpu::Maintain::Wait);
+
+        // Verify using MAP_READ
+        BufferOps::map_read(&read_buffer).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&read_buffer);
+            for (i, &byte) in view.iter().enumerate() {
+                assert_eq!(byte, (i % 256) as u8);
+            }
+        }
+        BufferOps::unmap(&read_buffer);
+    });
+}
+
+#[test]
+fn test_buffer_aligned_access() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        // Create buffer for aligned u32 access
+        let buffer = BufferDescriptor::new(
+            Some("aligned"),
+            256,
+            BufferUsages::COPY_DST | BufferUsages::MAP_READ,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Write u32 values
+        let data: Vec<u32> = (0..64).collect();
+        queue.write_buffer(&buffer, 0, bytemuck::cast_slice(&data));
+        device.poll(wgpu::Maintain::Wait);
+
+        // Read back as u32
+        BufferOps::map_read(&buffer).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&buffer);
+            let u32_view: &[u32] = bytemuck::cast_slice(&view);
+            for (i, &value) in u32_view.iter().enumerate() {
+                assert_eq!(value, i as u32);
+            }
+        }
+        BufferOps::unmap(&buffer);
+    });
+}
+
+#[test]
+fn test_buffer_empty_write() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let buffer = BufferDescriptor::new(
+            Some("empty_write"),
+            256,
+            BufferUsages::COPY_DST | BufferUsages::MAP_READ,
+        )
+        .create_buffer(&device)
+        .unwrap();
+
+        // Write empty slice (should not crash)
+        queue.write_buffer(&buffer, 0, &[]);
+        device.poll(wgpu::Maintain::Wait);
+
+        // Verify buffer is still zero-initialized
+        BufferOps::map_read(&buffer).await.unwrap();
+        {
+            let view = BufferOps::get_mapped_range(&buffer);
+            assert!(view.iter().all(|&b| b == 0));
+        }
+        BufferOps::unmap(&buffer);
+    });
+}
+
+#[test]
+fn test_buffer_descriptor_validation_in_create() {
+    pollster::block_on(async {
+        let Some((device, _queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        // These should fail at descriptor validation, not device creation
+        let invalid_descriptors = vec![
+            BufferDescriptor::new(Some("zero_size"), 0, BufferUsages::VERTEX),
+            BufferDescriptor::new(Some("empty_usage"), 256, BufferUsages::empty()),
+            BufferDescriptor::new(
+                Some("conflicting_map"),
+                256,
+                BufferUsages::MAP_READ | BufferUsages::MAP_WRITE,
+            ),
+        ];
+
+        for descriptor in invalid_descriptors {
+            let result = descriptor.create_buffer(&device);
+            assert!(
+                result.is_err(),
+                "Expected error for descriptor: {:?}",
+                descriptor
+            );
+        }
+    });
+}
+
+#[test]
+fn test_buffer_concurrent_access_different_buffers() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        // Create multiple buffers and write to them
+        let buffers: Vec<_> = (0..5)
+            .map(|i| {
+                BufferDescriptor::new(
+                    Some(&format!("buffer_{}", i)),
+                    256,
+                    BufferUsages::COPY_DST | BufferUsages::MAP_READ,
+                )
+                .create_buffer(&device)
+                .unwrap()
+            })
+            .collect();
+
+        // Write different data to each buffer
+        for (i, buffer) in buffers.iter().enumerate() {
+            queue.write_buffer(buffer, 0, &vec![i as u8; 256]);
+        }
+        device.poll(wgpu::Maintain::Wait);
+
+        // Verify each buffer has correct data
+        for (i, buffer) in buffers.iter().enumerate() {
+            BufferOps::map_read(buffer).await.unwrap();
+            {
+                let view = BufferOps::get_mapped_range(buffer);
+                assert!(view.iter().all(|&b| b == i as u8));
+            }
+            BufferOps::unmap(buffer);
+        }
+    });
+}
+
+#[test]
+fn test_buffer_all_individual_usage_flags() {
+    pollster::block_on(async {
+        let Some((device, _queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        // Test each usage flag individually (with COPY_DST for most)
+        let test_cases = vec![
+            ("vertex", BufferUsages::VERTEX | BufferUsages::COPY_DST),
+            ("index", BufferUsages::INDEX | BufferUsages::COPY_DST),
+            ("uniform", BufferUsages::UNIFORM | BufferUsages::COPY_DST),
+            ("storage", BufferUsages::STORAGE | BufferUsages::COPY_DST),
+            ("indirect", BufferUsages::INDIRECT | BufferUsages::COPY_DST),
+            ("copy_src", BufferUsages::COPY_SRC | BufferUsages::COPY_DST),
+            ("copy_dst", BufferUsages::COPY_DST),
+            ("map_read", BufferUsages::MAP_READ | BufferUsages::COPY_DST),
+            (
+                "map_write",
+                BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
+            ),
+            (
+                "query_resolve",
+                BufferUsages::QUERY_RESOLVE | BufferUsages::COPY_SRC,
+            ),
+        ];
+
+        for (name, usage) in test_cases {
+            let descriptor = BufferDescriptor::new(Some(name), 256, usage);
+            let buffer = descriptor.create_buffer(&device);
+            assert!(
+                buffer.is_ok(),
+                "Failed to create buffer with usage: {}",
+                name
+            );
+        }
+    });
+}
+
+#[test]
+fn test_buffer_name_preservation() {
+    pollster::block_on(async {
+        let Some((device, _queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let descriptor = BufferDescriptor::new(
+            Some("test_name"),
+            256,
+            BufferUsages::VERTEX | BufferUsages::COPY_DST,
+        );
+
+        // Verify label is preserved through descriptor
+        assert_eq!(descriptor.label(), Some("test_name"));
+
+        // Create buffer and verify it doesn't panic
+        let _buffer = descriptor.create_buffer(&device).unwrap();
+    });
+}

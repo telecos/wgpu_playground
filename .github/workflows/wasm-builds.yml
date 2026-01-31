@@ -13,6 +13,8 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  WASM_PACK_VERSION: "0.14.0"
+  MAX_WASM_SIZE_BYTES: "10485760"  # 10MB
 
 jobs:
   # Build WASM target for core library
@@ -37,14 +39,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/wasm-pack
-          key: ${{ runner.os }}-wasm-pack-0.14.0
+          key: ${{ runner.os }}-wasm-pack-${{ env.WASM_PACK_VERSION }}
           restore-keys: |
             ${{ runner.os }}-wasm-pack-
 
       - name: Install wasm-pack
         run: |
           if ! command -v wasm-pack &> /dev/null; then
-            cargo install wasm-pack --version 0.14.0
+            cargo install wasm-pack --version ${{ env.WASM_PACK_VERSION }}
           fi
 
       - name: Build wgpu_playground_core for WASM
@@ -81,14 +83,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/wasm-pack
-          key: ${{ runner.os }}-wasm-pack-0.14.0
+          key: ${{ runner.os }}-wasm-pack-${{ env.WASM_PACK_VERSION }}
           restore-keys: |
             ${{ runner.os }}-wasm-pack-
 
       - name: Install wasm-pack
         run: |
           if ! command -v wasm-pack &> /dev/null; then
-            cargo install wasm-pack --version 0.14.0
+            cargo install wasm-pack --version ${{ env.WASM_PACK_VERSION }}
           fi
 
       - name: Install Chrome for testing
@@ -141,10 +143,10 @@ jobs:
           echo "WASM file sizes:"
           du -h dist/pkg-core/wgpu_playground_core_bg.wasm
 
-          # Optional: Warn if files are too large (e.g., > 10MB)
+          # Warn if files are too large
           CORE_SIZE=$(stat -c%s dist/pkg-core/wgpu_playground_core_bg.wasm)
 
-          if [ $CORE_SIZE -gt 10485760 ]; then
+          if [ $CORE_SIZE -gt ${{ env.MAX_WASM_SIZE_BYTES }} ]; then
             echo "Warning: Core WASM file is larger than 10MB"
           else
             echo "✓ WASM file size is acceptable"

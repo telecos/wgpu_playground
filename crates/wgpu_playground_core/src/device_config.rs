@@ -71,13 +71,21 @@ impl DeviceConfigPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("⚙️ Device Configuration");
-            ui.label("Configure features and limits before device creation.");
+            ui.label("Configure features and limits for device creation.");
+            
+            ui.add_space(5.0);
+            ui.colored_label(
+                egui::Color32::from_rgb(255, 200, 100),
+                "ℹ️ Note: This panel shows available features and limits. In the current version, \
+                the device is created at startup with default settings. This UI can be used to \
+                explore what features and limits your adapter supports."
+            );
             ui.add_space(10.0);
 
             // Features section
             ui.heading("Available Features");
             ui.separator();
-            ui.label("Enable or disable WebGPU features for your device:");
+            ui.label("Enable or disable WebGPU features:");
             ui.add_space(5.0);
 
             self.render_features_ui(ui);
@@ -86,7 +94,7 @@ impl DeviceConfigPanel {
             // Limits section
             ui.heading("Device Limits");
             ui.separator();
-            ui.label("Adjust device limits (values cannot exceed adapter capabilities):");
+            ui.label("Adjust device limits (values are clamped to adapter capabilities):");
             ui.add_space(5.0);
 
             self.render_limits_ui(ui);
@@ -247,5 +255,46 @@ impl DeviceConfigPanel {
             *value = temp_value;
         }
         ui.end_row();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_device_config_default() {
+        let config = DeviceConfig::default();
+        assert_eq!(config.features, Features::empty());
+        assert_eq!(config.limits.max_texture_dimension_2d, Limits::default().max_texture_dimension_2d);
+    }
+
+    #[test]
+    fn test_device_config_new() {
+        let config = DeviceConfig::new();
+        assert_eq!(config.features, Features::empty());
+    }
+
+    #[test]
+    fn test_device_config_set_feature() {
+        let mut config = DeviceConfig::new();
+        
+        // Enable a feature
+        config.set_feature(Features::TIMESTAMP_QUERY, true);
+        assert!(config.has_feature(Features::TIMESTAMP_QUERY));
+        
+        // Disable a feature
+        config.set_feature(Features::TIMESTAMP_QUERY, false);
+        assert!(!config.has_feature(Features::TIMESTAMP_QUERY));
+    }
+
+    #[test]
+    fn test_device_config_has_feature() {
+        let mut config = DeviceConfig::new();
+        config.features = Features::DEPTH_CLIP_CONTROL | Features::TIMESTAMP_QUERY;
+        
+        assert!(config.has_feature(Features::DEPTH_CLIP_CONTROL));
+        assert!(config.has_feature(Features::TIMESTAMP_QUERY));
+        assert!(!config.has_feature(Features::SHADER_F16));
     }
 }

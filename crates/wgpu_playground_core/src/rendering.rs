@@ -453,6 +453,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     fn render_current_example(&mut self, device: &Device, queue: &Queue) {
         // Update animation state
+        // TODO: Pass actual delta_time from frame timer instead of hardcoded 60fps
+        // This currently assumes constant frame rate, causing animation speed to vary
         self.render_state.update(queue, 0.016); // ~60fps
 
         if let Some(view) = &self.render_texture_view {
@@ -646,24 +648,24 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                             // Render the example
                             self.render_current_example(device, queue);
 
-                            // Display a visual indicator that rendering is happening
-                            ui.add_space(5.0);
-                            
-                            // Show a colored rectangle representing the render canvas
+                            // Draw a gradient background to show the rendering area
                             let (rect, _response) = ui.allocate_exact_size(
                                 egui::vec2(512.0, 512.0),
                                 egui::Sense::hover(),
                             );
                             
-                            // Draw a gradient background to show the rendering area
+                            // Draw gradient background
                             let color_tl = egui::Color32::from_rgb(40, 20, 60);
                             let color_br = egui::Color32::from_rgb(20, 40, 80);
                             
-                            ui.painter().rect_filled(
-                                rect,
-                                4.0,
-                                color_tl,
-                            );
+                            let mut mesh = egui::Mesh::default();
+                            mesh.colored_vertex(rect.left_top(), color_tl);
+                            mesh.colored_vertex(rect.right_top(), color_tl);
+                            mesh.colored_vertex(rect.right_bottom(), color_br);
+                            mesh.colored_vertex(rect.left_bottom(), color_br);
+                            mesh.add_triangle(0, 1, 2);
+                            mesh.add_triangle(0, 2, 3);
+                            ui.painter().add(egui::Shape::mesh(mesh));
                             
                             // Draw a border
                             ui.painter().rect_stroke(
@@ -907,7 +909,7 @@ fn matrix_multiply(a: &[[f32; 4]; 4], b: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
 
 fn normalize(v: [f32; 3]) -> [f32; 3] {
     let len = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
-    if len == 0.0 {
+    if len < f32::EPSILON {
         v
     } else {
         [v[0] / len, v[1] / len, v[2] / len]

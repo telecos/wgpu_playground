@@ -335,7 +335,15 @@ impl BufferDescriptor {
     /// ```
     pub fn create_buffer(&self, device: &Device) -> Result<Buffer, BufferError> {
         self.validate()?;
-        Ok(device.create_buffer(&self.to_wgpu()))
+        log::debug!(
+            "Creating buffer: label={:?}, size={}, usage={:?}",
+            self.label,
+            self.size,
+            self.usage
+        );
+        let buffer = device.create_buffer(&self.to_wgpu());
+        log::trace!("Buffer created successfully");
+        Ok(buffer)
     }
 }
 
@@ -379,6 +387,7 @@ impl BufferOps {
     /// # }
     /// ```
     pub async fn map_read(buffer: &Buffer) -> Result<(), BufferError> {
+        log::debug!("Mapping buffer for reading");
         let (sender, receiver) = futures_channel::oneshot::channel();
 
         buffer.slice(..).map_async(MapMode::Read, move |result| {
@@ -386,6 +395,7 @@ impl BufferOps {
         });
 
         receiver.await.unwrap()?;
+        log::trace!("Buffer mapped for reading successfully");
         Ok(())
     }
 
@@ -419,6 +429,7 @@ impl BufferOps {
     /// # }
     /// ```
     pub async fn map_write(buffer: &Buffer) -> Result<(), BufferError> {
+        log::debug!("Mapping buffer for writing");
         let (sender, receiver) = futures_channel::oneshot::channel();
 
         buffer.slice(..).map_async(MapMode::Write, move |result| {
@@ -426,6 +437,7 @@ impl BufferOps {
         });
 
         receiver.await.unwrap()?;
+        log::trace!("Buffer mapped for writing successfully");
         Ok(())
     }
 
@@ -446,6 +458,7 @@ impl BufferOps {
     /// # }
     /// ```
     pub fn unmap(buffer: &Buffer) {
+        log::trace!("Unmapping buffer");
         buffer.unmap();
     }
 

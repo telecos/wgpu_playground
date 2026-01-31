@@ -77,18 +77,9 @@ impl AppState {
             .await
             .expect("Failed to create device");
 
-        // Set up device lost callback to handle GPU device loss events
-        // This can occur due to driver crashes, GPU resets, or intentional device destruction
-        device.set_device_lost_callback(|reason, message| {
-            eprintln!("Device lost! Reason: {:?}", reason);
-            eprintln!("Message: {}", message);
-        });
-
-        // Set up uncaptured error callback to handle validation and out-of-memory errors
-        // that are not caught by explicit error scopes
-        device.on_uncaptured_error(Box::new(|error| {
-            eprintln!("Uncaptured GPU error: {:?}", error);
-        }));
+        // Set up comprehensive error handling for the device
+        // This configures callbacks for device loss and uncaptured errors
+        wgpu_playground_core::error::setup_device_error_handling(&device);
 
         let surface_caps = surface.get_capabilities(&adapter);
         let surface_format = surface_caps

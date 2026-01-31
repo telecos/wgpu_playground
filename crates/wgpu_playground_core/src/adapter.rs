@@ -221,10 +221,13 @@ pub fn backend_input_options() -> Vec<&'static str> {
 
 /// Create a wgpu Instance with the specified backends
 pub fn create_instance(backends: Backends) -> Instance {
-    Instance::new(wgpu::InstanceDescriptor {
+    log::debug!("Creating wgpu Instance with backends: {:?}", backends);
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends,
         ..Default::default()
-    })
+    });
+    log::trace!("Instance created successfully");
+    instance
 }
 
 /// Create a wgpu Instance with backends from AdapterOptions
@@ -249,6 +252,12 @@ pub async fn request_adapter(
     options: &AdapterOptions,
     compatible_surface: Option<&wgpu::Surface<'_>>,
 ) -> Result<Adapter, AdapterError> {
+    log::debug!(
+        "Requesting GPU adapter: power_preference={:?}, backends={:?}",
+        options.power_preference,
+        options.backends
+    );
+
     let adapter = instance
         .request_adapter(&RequestAdapterOptions {
             power_preference: options.power_preference,
@@ -256,7 +265,18 @@ pub async fn request_adapter(
             compatible_surface,
         })
         .await
-        .ok_or(AdapterError::NoAdapterFound)?;
+        .ok_or_else(|| {
+            log::error!("No suitable GPU adapter found");
+            AdapterError::NoAdapterFound
+        })?;
+
+    let info = adapter.get_info();
+    log::info!(
+        "Adapter selected: {} (Backend: {:?}, Device Type: {:?})",
+        info.name,
+        info.backend,
+        info.device_type
+    );
 
     Ok(adapter)
 }

@@ -78,16 +78,31 @@ impl ShaderModule {
     /// );
     /// ```
     pub fn new(source: ShaderSource, label: Option<&str>) -> Result<Self, ShaderError> {
+        log::debug!("Loading shader: label={:?}", label);
         let source_code = match source {
             ShaderSource::Inline(code) => {
                 if code.trim().is_empty() {
+                    log::error!("Shader source is empty");
                     return Err(ShaderError::InvalidSource(
                         "Shader source cannot be empty".to_string(),
                     ));
                 }
+                log::trace!("Using inline shader source ({} bytes)", code.len());
                 code
             }
-            ShaderSource::File(filename) => crate::assets::load_shader(&filename)?,
+            ShaderSource::File(filename) => {
+                log::debug!("Loading shader from file: {}", filename);
+                match crate::assets::load_shader(&filename) {
+                    Ok(code) => {
+                        log::trace!("Loaded shader from file ({} bytes)", code.len());
+                        code
+                    }
+                    Err(e) => {
+                        log::error!("Failed to load shader from file '{}': {}", filename, e);
+                        return Err(e.into());
+                    }
+                }
+            }
         };
 
         Ok(Self {
@@ -165,10 +180,13 @@ impl ShaderModule {
     /// # }
     /// ```
     pub fn create_module(&self, device: &wgpu::Device) -> wgpu::ShaderModule {
-        device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        log::debug!("Creating shader module: label={:?}", self.label);
+        let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: self.label.as_deref(),
             source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(&self.source)),
-        })
+        });
+        log::trace!("Shader module created successfully");
+        module
     }
 }
 

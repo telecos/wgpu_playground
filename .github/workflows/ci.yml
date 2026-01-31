@@ -52,12 +52,7 @@ jobs:
         run: |
           cargo clippy --workspace --all-targets --all-features -- \
             -D warnings \
-            -D clippy::all \
-            -D clippy::correctness \
-            -D clippy::suspicious \
-            -D clippy::complexity \
-            -D clippy::perf \
-            -D clippy::style
+            -D clippy::all
 
   # Run tests
   test:

@@ -1,38 +1,12 @@
+mod common;
+
+use common::create_test_device;
 use std::num::NonZeroU64;
 use wgpu::ShaderStages;
 use wgpu_playground_core::bind_group::{
     BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType,
 };
 use wgpu_playground_core::pipeline_layout::{PipelineLayoutDescriptor, PushConstantRange};
-
-// Helper function to create a test device and queue
-async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
-        ..Default::default()
-    });
-
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
-            compatible_surface: None,
-        })
-        .await?;
-
-    adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: Some("Test Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
-        .await
-        .ok()
-}
 
 #[test]
 fn test_empty_pipeline_layout() {

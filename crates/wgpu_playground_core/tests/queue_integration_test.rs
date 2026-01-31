@@ -1,33 +1,7 @@
+mod common;
+
+use common::create_test_device;
 use wgpu_playground_core::queue::{submit_single, write_buffer_typed, QueueOps};
-
-// Helper function to create a test device and queue
-async fn create_test_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
-        ..Default::default()
-    });
-
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
-            compatible_surface: None,
-        })
-        .await?;
-
-    adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: Some("Test Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
-        .await
-        .ok()
-}
 
 // Helper struct for creating test textures with fewer function parameters
 struct TestTextureParams {

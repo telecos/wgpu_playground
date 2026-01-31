@@ -67,12 +67,72 @@ Since the application requires a display to run, here's a textual description of
 └─────────────────────────────────────────────────────────────────────┘
 
 When "Rendering" tab is selected:
-  Shows placeholder text describing planned rendering features:
-  - Render Pipelines
-  - Buffers & Vertex Data
-  - Textures & Sampling
-  - Render Passes
-  - Advanced Rendering
+  Shows two sub-tabs: "📚 Example Gallery" and "📝 Shader Editor"
+
+  Example Gallery Sub-tab:
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 🎨 Example Gallery                                                  │
+  │ Browse and explore WebGPU examples with descriptions and source code│
+  │                                                                      │
+  │ Filter by category:                                                  │
+  │ [All] [Rendering] [Compute]                                         │
+  │                                                                      │
+  │ Found 4 example(s):                                                  │
+  │                                                                      │
+  │ ┌─────────────────────────────────────────────┐                    │
+  │ │ ● 🎨 Basic Triangle (Rendering)              │ (selected)         │
+  │ │   Description: Renders a simple colored...   │                   │
+  │ │   [Hide Source Code]                         │                   │
+  │ │   Source Code:                                │                   │
+  │ │   // Triangle Rendering Example              │                   │
+  │ │   struct VertexInput { ... }                 │                   │
+  │ │   ...                                         │                   │
+  │ │   [📋 Copy Source Code]                       │                   │
+  │ └─────────────────────────────────────────────┘                    │
+  │                                                                      │
+  │ ○ 🎨 Rotating Cube (Rendering)                                      │
+  │ ○ 🎨 Texture Mapping (Rendering)                                    │
+  │ ○ 🧮 Compute Shader (Compute)                                       │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  Shader Editor Sub-tab:
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ 📝 WGSL Shader Editor                                                │
+  │ ─────────────────────                                                │
+  │ Label: [shader_editor]  File: [example.wgsl]                        │
+  │ [📁 Load] [📚 Load Example] [⚙️ Compile] [🔄 Reset]                 │
+  │                                                                      │
+  │ ℹ️ Not compiled yet. Click 'Compile' to validate your shader.       │
+  │                                                                      │
+  │ 💡 Tips:                                                             │
+  │ • Use '@vertex' and '@fragment' for render shaders                   │
+  │ • Use '@compute' for compute shaders                                 │
+  │ • Press Compile to validate syntax                                   │
+  │                                                                      │
+  │ Shader Code:                                                         │
+  │ ┌────────────────────────────────────────────────────────────┐     │
+  │ │ 1  │ // WGSL Shader Example                                │     │
+  │ │ 2  │ @vertex                                                │     │
+  │ │ 3  │ fn vs_main(@builtin(vertex_index) vertex_index: u32)  │     │
+  │ │ 4  │            -> @builtin(position) vec4<f32> {           │     │
+  │ │ 5  │     var positions = array<vec2<f32>, 3>(               │     │
+  │ │ 6  │         vec2<f32>(0.0, 0.5),                           │     │
+  │ │ 7  │         vec2<f32>(-0.5, -0.5),                         │     │
+  │ │ 8  │         vec2<f32>(0.5, -0.5)                           │     │
+  │ │ 9  │     );                                                  │     │
+  │ │ 10 │     let pos = positions[vertex_index];                 │     │
+  │ │ 11 │     return vec4<f32>(pos, 0.0, 1.0);                   │     │
+  │ │ 12 │ }                                                       │     │
+  │ │ 13 │                                                         │     │
+  │ │ 14 │ @fragment                                               │     │
+  │ │ 15 │ fn fs_main() -> @location(0) vec4<f32> {               │     │
+  │ │ 16 │     return vec4<f32>(1.0, 0.5, 0.0, 1.0);             │     │
+  │ │ 17 │ }                                                       │     │
+  │ └────────────────────────────────────────────────────────────┘     │
+  │                                                                      │
+  │ [✓] Show line numbers                                               │
+  └─────────────────────────────────────────────────────────────────────┘
+
 
 When "Buffer Config" tab is selected:
   Shows buffer configuration interface:
@@ -148,8 +208,18 @@ The application currently provides:
    - Mapped-at-creation option
    - Real-time validation with error messages
    - Configuration summary display
-7. **Tabbed interface** for organizing features
-8. **Placeholder panels** for future rendering and compute features
+7. **Rendering panel** with two sub-tabs:
+   - **Example Gallery**: Browse 4 WebGPU shader examples (triangle, cube, texture mapping, compute shader) with descriptions and source code viewing
+   - **WGSL Shader Editor**: Interactive shader editor with:
+     - Syntax highlighting (structure in place for future enhancement)
+     - Line numbers display
+     - File loading from assets/shaders directory
+     - Inline editing
+     - Shader compilation with wgpu
+     - Error reporting
+     - Example shader loading
+8. **Tabbed interface** for organizing features
+9. **Placeholder panels** for future compute features
 
 ## Next Steps
 

@@ -297,10 +297,8 @@ impl BindGroupLayoutPanel {
                         ui.horizontal(|ui| {
                             ui.heading(format!("Entry {}", index));
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                if entries_len > 1 {
-                                    if ui.button("🗑 Remove").clicked() {
-                                        entry_to_remove = Some(index);
-                                    }
+                                if entries_len > 1 && ui.button("🗑 Remove").clicked() {
+                                    entry_to_remove = Some(index);
                                 }
                             });
                         });

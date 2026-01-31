@@ -295,7 +295,7 @@ impl BindGroupLayoutPanel {
                 for (index, entry) in self.entries.iter_mut().enumerate() {
                     ui.group(|ui| {
                         ui.horizontal(|ui| {
-                            ui.heading(format!("Entry {}", index));
+                            ui.heading(format!("Entry {}", index + 1));
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                                 if entries_len > 1 && ui.button("🗑 Remove").clicked() {
                                     entry_to_remove = Some(index);
@@ -397,7 +397,7 @@ impl BindGroupLayoutPanel {
                     ui.add_space(5.0);
 
                     for (i, entry) in self.descriptor.entries().iter().enumerate() {
-                        ui.label(format!("Entry {}:", i));
+                        ui.label(format!("Entry {}:", i + 1));
                         ui.monospace(format!("  Binding: {}", entry.binding));
                         ui.monospace(format!("  Visibility: {:?}", entry.visibility));
                         ui.monospace(format!("  Type: {}", Self::binding_type_display(&entry.ty)));

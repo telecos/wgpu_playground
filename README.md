@@ -10,12 +10,14 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 
 - **GPU Adapter Selection**: Choose from available GPU adapters with detailed properties and configure power preferences
 - **Device Information**: View detailed information about your GPU, including adapter info, device limits, and supported features
+- **Device Configuration**: Configure device features and limits before device creation
+- **Buffer Configuration**: Create and configure GPU buffers with custom parameters including size, usage flags, and mapping options
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 
 ## User Interface
 
-The application provides a tabbed interface with four main sections:
+The application provides a tabbed interface with six main sections:
 
 1. **Adapter Selection Tab**: Choose and configure GPU adapters:
    - View all available GPU adapters with detailed properties
@@ -23,12 +25,17 @@ The application provides a tabbed interface with four main sections:
    - Configure power preference (None, Low Power, High Performance)
    - Filter adapters by backend (Vulkan, Metal, DX12, OpenGL, etc.)
 
-2. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
+2. **Device Config Tab**: Configure device settings:
+   - Enable/disable WebGPU features (texture compression, shader features, etc.)
+   - Adjust device limits to your needs
+   - View adapter capabilities and constraints
+
+3. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
    - Adapter details (name, vendor, backend)
    - Device limits (texture dimensions, buffer sizes, workgroup limits, etc.)
    - Supported features
 
-3. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
+4. **Rendering Tab**: Provides tools for experimenting with rendering APIs (planned features):
    - Render pipeline configuration
    - Shader editing and testing
    - Buffer and vertex data management
@@ -36,7 +43,15 @@ The application provides a tabbed interface with four main sections:
    - Render pass configuration
    - Advanced rendering techniques (instancing, MSAA, etc.)
 
-4. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
+5. **Buffer Config Tab**: Create and configure GPU buffers:
+   - Set buffer size with validation
+   - Select usage flags via checkboxes (VERTEX, INDEX, UNIFORM, STORAGE, INDIRECT, COPY_SRC, COPY_DST, MAP_READ, MAP_WRITE, QUERY_RESOLVE)
+   - Optional label for debugging
+   - Mapped-at-creation option
+   - Real-time validation with error messages
+   - Configuration summary display
+
+6. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
    - Compute pipeline setup
    - Storage buffer management
    - Matrix operations
@@ -65,9 +80,31 @@ cargo run --release
 
 **Note:** This application requires a display/window system to run. On Linux, ensure you have either X11 or Wayland available. On headless systems, the application won't run as it requires GPU rendering capabilities.
 
+### WebGPU Implementation
+
+The playground supports different WebGPU implementations:
+
+- **wgpu** (default): Pure Rust implementation used by Firefox
+  - Fast, safe, and cross-platform
+  - Actively maintained by the gfx-rs team
+  - https://github.com/gfx-rs/wgpu
+
+- **Dawn** (optional): C++ implementation used by Chromium
+  - Google's reference implementation
+  - Can be enabled with the `dawn` feature flag (experimental)
+  - https://dawn.googlesource.com/dawn
+
+By default, the application uses the **wgpu** implementation. To enable Dawn support (experimental), compile with:
+
+```bash
+cargo build --release --features dawn
+```
+
+The active WebGPU implementation is displayed in the **Device Info** and **Adapter Selection** tabs.
+
 ### Backend Selection
 
-The application supports multiple WebGPU backend implementations (similar to Chromium's Dawn). You can select which backend to use via the `WGPU_BACKEND` environment variable:
+Within a WebGPU implementation, you can select which graphics API backend to use via the `WGPU_BACKEND` environment variable:
 
 ```bash
 # Use Vulkan backend
@@ -175,6 +212,7 @@ Current coverage: 62% (see CI artifacts for detailed reports)
 
 ## Documentation
 
+- **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them
 - **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu
 - **[PLAN.md](PLAN.md)** - Complete project roadmap with implementation phases
 - **[UI_MOCKUP.md](UI_MOCKUP.md)** - UI design and layout documentation

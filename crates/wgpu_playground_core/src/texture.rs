@@ -663,4 +663,423 @@ mod tests {
         assert_eq!(builder.sample_count, 1);
         assert_eq!(builder.label, Some("chained_texture".to_string()));
     }
+
+    // Edge Cases and Boundary Tests
+
+    #[test]
+    fn test_texture_builder_minimum_size() {
+        // Test minimum valid texture size (1x1x1)
+        let builder = TextureBuilder::new().with_size(1, 1, 1);
+        assert_eq!(builder.size.width, 1);
+        assert_eq!(builder.size.height, 1);
+        assert_eq!(builder.size.depth_or_array_layers, 1);
+    }
+
+    #[test]
+    fn test_texture_builder_large_size() {
+        // Test large texture dimensions (within typical GPU limits)
+        let builder = TextureBuilder::new().with_size(8192, 8192, 1);
+        assert_eq!(builder.size.width, 8192);
+        assert_eq!(builder.size.height, 8192);
+    }
+
+    #[test]
+    fn test_texture_builder_1d_edge_cases() {
+        // Test 1D texture with minimum width
+        let builder = TextureBuilder::texture_1d(1);
+        assert_eq!(builder.size.width, 1);
+        assert_eq!(builder.dimension, TextureDimension::D1);
+
+        // Test 1D texture with large width
+        let builder = TextureBuilder::texture_1d(16384);
+        assert_eq!(builder.size.width, 16384);
+    }
+
+    #[test]
+    fn test_texture_builder_2d_edge_cases() {
+        // Test 2D texture with minimum dimensions
+        let builder = TextureBuilder::texture_2d(1, 1);
+        assert_eq!(builder.size.width, 1);
+        assert_eq!(builder.size.height, 1);
+
+        // Test 2D texture with non-square dimensions
+        let builder = TextureBuilder::texture_2d(256, 128);
+        assert_eq!(builder.size.width, 256);
+        assert_eq!(builder.size.height, 128);
+    }
+
+    #[test]
+    fn test_texture_builder_3d_edge_cases() {
+        // Test 3D texture with minimum dimensions
+        let builder = TextureBuilder::texture_3d(1, 1, 1);
+        assert_eq!(builder.size.width, 1);
+        assert_eq!(builder.size.height, 1);
+        assert_eq!(builder.size.depth_or_array_layers, 1);
+
+        // Test 3D texture with non-uniform dimensions
+        let builder = TextureBuilder::texture_3d(128, 64, 32);
+        assert_eq!(builder.size.width, 128);
+        assert_eq!(builder.size.height, 64);
+        assert_eq!(builder.size.depth_or_array_layers, 32);
+    }
+
+    #[test]
+    fn test_texture_builder_array_edge_cases() {
+        // Test array with single layer
+        let builder = TextureBuilder::texture_2d_array(256, 256, 1);
+        assert_eq!(builder.size.depth_or_array_layers, 1);
+
+        // Test array with many layers
+        let builder = TextureBuilder::texture_2d_array(256, 256, 256);
+        assert_eq!(builder.size.depth_or_array_layers, 256);
+    }
+
+    #[test]
+    fn test_texture_builder_cube_minimum_size() {
+        // Test cube texture with minimum size
+        let builder = TextureBuilder::texture_cube(1);
+        assert_eq!(builder.size.width, 1);
+        assert_eq!(builder.size.height, 1);
+        assert_eq!(builder.size.depth_or_array_layers, 6);
+    }
+
+    #[test]
+    fn test_texture_builder_mip_levels_edge_cases() {
+        // Test single mip level
+        let builder = TextureBuilder::new().with_mip_levels(1);
+        assert_eq!(builder.mip_level_count, 1);
+
+        // Test multiple mip levels
+        let builder = TextureBuilder::new().with_mip_levels(10);
+        assert_eq!(builder.mip_level_count, 10);
+
+        // Test maximum reasonable mip levels for a 256x256 texture (log2(256) + 1 = 9)
+        let builder = TextureBuilder::texture_2d(256, 256).with_mip_levels(9);
+        assert_eq!(builder.mip_level_count, 9);
+    }
+
+    #[test]
+    fn test_texture_builder_sample_count_values() {
+        // Test all valid MSAA sample counts
+        for &count in &[1, 2, 4, 8, 16, 32] {
+            let builder = TextureBuilder::new().with_sample_count(count);
+            assert_eq!(builder.sample_count, count);
+        }
+    }
+
+    // Format Support Tests
+
+    #[test]
+    fn test_texture_builder_color_formats() {
+        // Test various color formats
+        let color_formats = vec![
+            TextureFormat::Rgba8Unorm,
+            TextureFormat::Rgba8UnormSrgb,
+            TextureFormat::Bgra8Unorm,
+            TextureFormat::Bgra8UnormSrgb,
+            TextureFormat::Rgba16Float,
+            TextureFormat::Rgba32Float,
+            TextureFormat::Rgb10a2Unorm,
+            TextureFormat::R8Unorm,
+            TextureFormat::R8Snorm,
+            TextureFormat::R8Uint,
+            TextureFormat::R8Sint,
+            TextureFormat::R16Uint,
+            TextureFormat::R16Sint,
+            TextureFormat::R16Float,
+            TextureFormat::Rg8Unorm,
+            TextureFormat::Rg8Snorm,
+            TextureFormat::Rg8Uint,
+            TextureFormat::Rg8Sint,
+            TextureFormat::Rg16Uint,
+            TextureFormat::Rg16Sint,
+            TextureFormat::Rg16Float,
+            TextureFormat::Rgba16Uint,
+            TextureFormat::Rgba16Sint,
+            TextureFormat::Rgba32Uint,
+            TextureFormat::Rgba32Sint,
+        ];
+
+        for format in color_formats {
+            let builder = TextureBuilder::new().with_format(format);
+            assert_eq!(builder.format, format);
+        }
+    }
+
+    #[test]
+    fn test_texture_builder_depth_stencil_formats() {
+        // Test depth and stencil formats
+        let depth_stencil_formats = vec![
+            TextureFormat::Depth32Float,
+            TextureFormat::Depth24Plus,
+            TextureFormat::Depth24PlusStencil8,
+            TextureFormat::Stencil8,
+        ];
+
+        for format in depth_stencil_formats {
+            let builder = TextureBuilder::new().with_format(format);
+            assert_eq!(builder.format, format);
+        }
+    }
+
+    #[test]
+    fn test_texture_builder_compressed_formats() {
+        // Test compressed texture formats
+        let compressed_formats = vec![
+            TextureFormat::Bc1RgbaUnorm,
+            TextureFormat::Bc1RgbaUnormSrgb,
+            TextureFormat::Bc2RgbaUnorm,
+            TextureFormat::Bc2RgbaUnormSrgb,
+            TextureFormat::Bc3RgbaUnorm,
+            TextureFormat::Bc3RgbaUnormSrgb,
+            TextureFormat::Bc4RUnorm,
+            TextureFormat::Bc4RSnorm,
+            TextureFormat::Bc5RgUnorm,
+            TextureFormat::Bc5RgSnorm,
+            TextureFormat::Bc6hRgbUfloat,
+            TextureFormat::Bc6hRgbFloat,
+            TextureFormat::Bc7RgbaUnorm,
+            TextureFormat::Bc7RgbaUnormSrgb,
+        ];
+
+        for format in compressed_formats {
+            let builder = TextureBuilder::new().with_format(format);
+            assert_eq!(builder.format, format);
+        }
+    }
+
+    // Dimension Validation Tests
+
+    #[test]
+    fn test_texture_dimensions() {
+        // Test all texture dimensions
+        let builder = TextureBuilder::new().with_dimension(TextureDimension::D1);
+        assert_eq!(builder.dimension, TextureDimension::D1);
+
+        let builder = TextureBuilder::new().with_dimension(TextureDimension::D2);
+        assert_eq!(builder.dimension, TextureDimension::D2);
+
+        let builder = TextureBuilder::new().with_dimension(TextureDimension::D3);
+        assert_eq!(builder.dimension, TextureDimension::D3);
+    }
+
+    #[test]
+    fn test_texture_1d_constraints() {
+        // 1D textures should have height = 1 and depth/array = 1 for single texture
+        let builder = TextureBuilder::texture_1d(512);
+        assert_eq!(builder.dimension, TextureDimension::D1);
+        assert_eq!(builder.size.height, 1);
+        assert_eq!(builder.size.depth_or_array_layers, 1);
+    }
+
+    #[test]
+    fn test_texture_2d_constraints() {
+        // 2D textures can have arbitrary width and height, depth/array = 1 for single texture
+        let builder = TextureBuilder::texture_2d(1024, 768);
+        assert_eq!(builder.dimension, TextureDimension::D2);
+        assert_eq!(builder.size.depth_or_array_layers, 1);
+    }
+
+    #[test]
+    fn test_texture_3d_constraints() {
+        // 3D textures can have arbitrary width, height, and depth
+        let builder = TextureBuilder::texture_3d(64, 128, 256);
+        assert_eq!(builder.dimension, TextureDimension::D3);
+        assert_eq!(builder.size.width, 64);
+        assert_eq!(builder.size.height, 128);
+        assert_eq!(builder.size.depth_or_array_layers, 256);
+    }
+
+    #[test]
+    fn test_cube_texture_constraints() {
+        // Cube textures must be square and have 6 array layers
+        let builder = TextureBuilder::texture_cube(512);
+        assert_eq!(builder.dimension, TextureDimension::D2);
+        assert_eq!(builder.size.width, 512);
+        assert_eq!(builder.size.height, 512);
+        assert_eq!(builder.size.depth_or_array_layers, 6);
+    }
+
+    // Usage Flags Tests
+
+    #[test]
+    fn test_texture_usage_combinations() {
+        // Test various usage flag combinations
+        let usage_combinations = vec![
+            TextureUsages::TEXTURE_BINDING,
+            TextureUsages::COPY_DST,
+            TextureUsages::COPY_SRC,
+            TextureUsages::RENDER_ATTACHMENT,
+            TextureUsages::STORAGE_BINDING,
+            TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
+            TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_SRC,
+            TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING,
+            TextureUsages::STORAGE_BINDING | TextureUsages::COPY_DST,
+            TextureUsages::RENDER_ATTACHMENT | TextureUsages::COPY_SRC,
+            TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::COPY_SRC,
+        ];
+
+        for usage in usage_combinations {
+            let builder = TextureBuilder::new().with_usage(usage);
+            assert_eq!(builder.usage, usage);
+        }
+    }
+
+    #[test]
+    fn test_texture_empty_label() {
+        // Test with empty string label
+        let builder = TextureBuilder::new().with_label("");
+        assert_eq!(builder.label, Some("".to_string()));
+    }
+
+    #[test]
+    fn test_texture_long_label() {
+        // Test with long label string
+        let long_label = "a".repeat(1000);
+        let builder = TextureBuilder::new().with_label(&long_label);
+        assert_eq!(builder.label, Some(long_label));
+    }
+
+    #[test]
+    fn test_texture_view_formats_empty() {
+        // Test with empty view formats
+        let builder = TextureBuilder::new().with_view_formats(&[]);
+        assert_eq!(builder.view_formats, vec![]);
+    }
+
+    #[test]
+    fn test_texture_view_formats_multiple() {
+        // Test with multiple compatible view formats
+        let formats = vec![TextureFormat::Rgba8Unorm, TextureFormat::Rgba8UnormSrgb];
+        let builder = TextureBuilder::new().with_view_formats(&formats);
+        assert_eq!(builder.view_formats, formats);
+    }
+
+    // Texture View Builder Tests
+
+    #[test]
+    fn test_texture_view_all_dimensions() {
+        // Test all texture view dimensions
+        let dimensions = vec![
+            TextureViewDimension::D1,
+            TextureViewDimension::D2,
+            TextureViewDimension::D2Array,
+            TextureViewDimension::Cube,
+            TextureViewDimension::CubeArray,
+            TextureViewDimension::D3,
+        ];
+
+        for dimension in dimensions {
+            let builder = TextureViewBuilder::new().with_dimension(dimension);
+            assert_eq!(builder.dimension, Some(dimension));
+        }
+    }
+
+    #[test]
+    fn test_texture_view_all_aspects() {
+        // Test all texture aspects
+        let aspects = vec![
+            TextureAspect::All,
+            TextureAspect::StencilOnly,
+            TextureAspect::DepthOnly,
+        ];
+
+        for aspect in aspects {
+            let builder = TextureViewBuilder::new().with_aspect(aspect);
+            assert_eq!(builder.aspect, aspect);
+        }
+    }
+
+    #[test]
+    fn test_texture_view_mip_range_edge_cases() {
+        // Test single mip level
+        let builder = TextureViewBuilder::new().with_mip_level_range(0, 1);
+        assert_eq!(builder.base_mip_level, 0);
+        assert_eq!(builder.mip_level_count, Some(1));
+
+        // Test middle mip levels
+        let builder = TextureViewBuilder::new().with_mip_level_range(2, 3);
+        assert_eq!(builder.base_mip_level, 2);
+        assert_eq!(builder.mip_level_count, Some(3));
+
+        // Test last mip level
+        let builder = TextureViewBuilder::new().with_mip_level_range(8, 1);
+        assert_eq!(builder.base_mip_level, 8);
+        assert_eq!(builder.mip_level_count, Some(1));
+    }
+
+    #[test]
+    fn test_texture_view_array_range_edge_cases() {
+        // Test single array layer
+        let builder = TextureViewBuilder::new().with_array_layer_range(0, 1);
+        assert_eq!(builder.base_array_layer, 0);
+        assert_eq!(builder.array_layer_count, Some(1));
+
+        // Test middle array layers
+        let builder = TextureViewBuilder::new().with_array_layer_range(5, 10);
+        assert_eq!(builder.base_array_layer, 5);
+        assert_eq!(builder.array_layer_count, Some(10));
+    }
+
+    #[test]
+    fn test_texture_view_cube_array() {
+        // Cube arrays require multiples of 6 layers
+        let builder = TextureViewBuilder::new()
+            .with_dimension(TextureViewDimension::CubeArray)
+            .with_array_layer_range(0, 12); // 2 cubes
+        assert_eq!(builder.dimension, Some(TextureViewDimension::CubeArray));
+        assert_eq!(builder.array_layer_count, Some(12));
+    }
+
+    #[test]
+    fn test_default_trait_implementations() {
+        // Test Default trait for TextureBuilder
+        let default_texture_builder = TextureBuilder::default();
+        let new_texture_builder = TextureBuilder::new();
+        assert_eq!(
+            default_texture_builder.size.width,
+            new_texture_builder.size.width
+        );
+        assert_eq!(
+            default_texture_builder.size.height,
+            new_texture_builder.size.height
+        );
+        assert_eq!(default_texture_builder.format, new_texture_builder.format);
+
+        // Test Default trait for TextureViewBuilder
+        let default_view_builder = TextureViewBuilder::default();
+        let new_view_builder = TextureViewBuilder::new();
+        assert_eq!(default_view_builder.aspect, new_view_builder.aspect);
+        assert_eq!(
+            default_view_builder.base_mip_level,
+            new_view_builder.base_mip_level
+        );
+    }
+
+    #[test]
+    fn test_texture_builder_clone() {
+        // Test that builders are clonable
+        let builder = TextureBuilder::new()
+            .with_size(256, 256, 1)
+            .with_format(TextureFormat::Rgba8Unorm)
+            .with_label("test");
+
+        let cloned = builder.clone();
+        assert_eq!(builder.size.width, cloned.size.width);
+        assert_eq!(builder.format, cloned.format);
+        assert_eq!(builder.label, cloned.label);
+    }
+
+    #[test]
+    fn test_texture_view_builder_clone() {
+        // Test that view builders are clonable
+        let builder = TextureViewBuilder::new()
+            .with_label("test_view")
+            .with_mip_level_range(0, 4);
+
+        let cloned = builder.clone();
+        assert_eq!(builder.label, cloned.label);
+        assert_eq!(builder.base_mip_level, cloned.base_mip_level);
+        assert_eq!(builder.mip_level_count, cloned.mip_level_count);
+    }
 }

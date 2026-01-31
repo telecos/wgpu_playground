@@ -9,6 +9,11 @@ description = "GUI application for wgpu_playground"
 name = "wgpu_playground"
 path = "src/main.rs"
 
+[features]
+# Dawn WebGPU implementation support (experimental)
+# Propagates the dawn feature to wgpu_playground_core
+dawn = ["wgpu_playground_core/dawn"]
+
 [dependencies]
 wgpu_playground_core = { path = "../wgpu_playground_core" }
 wgpu = "22.1"

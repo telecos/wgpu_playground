@@ -42,11 +42,11 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       
       - name: Build workspace
-        if: ${{ !matrix.test }}
+        if: '!matrix.test'
         run: cargo build --workspace --all-features
       
       - name: Build and test workspace
-        if: ${{ matrix.test }}
+        if: matrix.test
         run: cargo test --workspace --all-features --release
   
   native-build-success:

@@ -77,8 +77,6 @@ Adding Dawn support enables:
 
 ### Platform-Specific Backends
 
-### Platform-Specific Backends
-
 Dawn automatically selects the appropriate backend for each platform:
 
 - **Windows**: Direct3D 12 (D3D12) - Primary backend for Windows 10+
@@ -189,8 +187,6 @@ The Dawn integration is functional but not yet complete. Contributions are welco
 See the main CONTRIBUTING.md for development guidelines.
 
 ### How Dawn Integration Works (Technical Details)
-
-#### Build Process
 
 #### Build Process
 

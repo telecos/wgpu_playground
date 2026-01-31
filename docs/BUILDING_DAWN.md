@@ -121,7 +121,7 @@ cargo build --release --features dawn
 1. Rust builds the wgpu_playground_core crate
 2. build.rs script detects the `dawn` feature
 3. Script clones Dawn from https://dawn.googlesource.com/dawn
-4. CMake configures Dawn build with `DAWN_FETCH_DEPENDENCIES=ON`
+4. CMake configures Dawn build with `-DDAWN_FETCH_DEPENDENCIES=ON` flag
 5. CMake builds Dawn in Release mode
 6. Dawn libraries are installed to the build output directory
 7. Rust links against the built Dawn libraries

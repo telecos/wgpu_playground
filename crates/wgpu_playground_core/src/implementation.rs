@@ -116,7 +116,7 @@ impl WebGPUImplementation {
         match self {
             Self::Wgpu => true,
             #[cfg(feature = "dawn")]
-            Self::Dawn => true, // Dawn is now natively integrated via FFI
+            Self::Dawn => false, // Dawn build infrastructure exists, but runtime integration pending
         }
     }
 
@@ -125,7 +125,7 @@ impl WebGPUImplementation {
         match self {
             Self::Wgpu => "Native wgpu implementation",
             #[cfg(feature = "dawn")]
-            Self::Dawn => "Native Dawn implementation (via FFI)",
+            Self::Dawn => "Placeholder: Build infrastructure ready, runtime integration pending",
         }
     }
 
@@ -206,7 +206,7 @@ mod tests {
     fn test_is_native() {
         assert!(WebGPUImplementation::Wgpu.is_native());
         #[cfg(feature = "dawn")]
-        assert!(WebGPUImplementation::Dawn.is_native());
+        assert!(!WebGPUImplementation::Dawn.is_native());
     }
 
     #[test]
@@ -216,8 +216,7 @@ mod tests {
         #[cfg(feature = "dawn")]
         {
             let status = WebGPUImplementation::Dawn.status_message();
-            assert!(status.contains("Native"));
-            assert!(status.contains("Dawn"));
+            assert!(status.contains("Placeholder"));
         }
     }
 

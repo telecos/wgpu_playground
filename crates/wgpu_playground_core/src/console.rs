@@ -219,6 +219,44 @@ impl ConsolePanel {
             .count()
     }
 
+    /// Add demo messages for testing
+    fn add_demo_messages(&mut self) {
+        self.info("WebGPU device initialized successfully");
+        self.info("Shader compilation started");
+        
+        self.warning("Buffer alignment may not be optimal for this usage pattern");
+        self.warning("Texture format conversion may impact performance");
+        
+        self.add_message(ConsoleMessage::with_details(
+            Severity::Error,
+            "Validation Error: Invalid buffer usage flags",
+            "Buffer created with incompatible usage flags: VERTEX | MAP_WRITE.\n\
+             MAP_WRITE is not compatible with VERTEX usage.\n\
+             \n\
+             Stack trace:\n\
+             at create_buffer (buffer.rs:145)\n\
+             at setup_vertex_buffer (rendering.rs:89)\n\
+             at initialize_pipeline (rendering.rs:34)"
+        ));
+        
+        self.add_message(ConsoleMessage::with_details(
+            Severity::Error,
+            "Shader Compilation Error: Type mismatch",
+            "Error in fragment shader at line 42:\n\
+             Expected 'vec4<f32>' but got 'vec3<f32>'\n\
+             \n\
+             fn fragment_main() -> vec4<f32> {\n\
+                 return vec3(1.0, 0.0, 0.0); // Error: vec3 instead of vec4\n\
+             }\n\
+             \n\
+             Suggestion: Add alpha component:\n\
+             return vec4(1.0, 0.0, 0.0, 1.0);"
+        ));
+        
+        self.warning("Device limit exceeded: Max texture dimension (8192) may be exceeded");
+        self.info("Render pass completed in 2.3ms");
+    }
+
     /// Render the console UI
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         ui.heading("🖥️ Error and Warning Console");
@@ -274,6 +312,10 @@ impl ConsolePanel {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui.button("🗑 Clear").clicked() {
                     self.clear();
+                }
+                
+                if ui.button("🧪 Add Demo Messages").clicked() {
+                    self.add_demo_messages();
                 }
             });
         });

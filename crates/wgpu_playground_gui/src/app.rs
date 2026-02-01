@@ -3,6 +3,7 @@ use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
+use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
@@ -22,6 +23,7 @@ pub struct PlaygroundApp {
     bind_group_panel: BindGroupPanel,
     bind_group_layout_panel: BindGroupLayoutPanel,
     render_pipeline_panel: RenderPipelinePanel,
+    console_panel: ConsolePanel,
     selected_tab: Tab,
 }
 
@@ -38,10 +40,16 @@ enum Tab {
     BindGroupLayoutConfig,
     RenderPipelineConfig,
     Compute,
+    Console,
 }
 
 impl PlaygroundApp {
     pub fn new(adapter: &wgpu::Adapter, device: &wgpu::Device) -> Self {
+        let mut console_panel = ConsolePanel::new();
+        // Add a welcome message to the console
+        console_panel.info("WebGPU Playground console initialized");
+        console_panel.info("GPU errors, warnings, and validation messages will appear here");
+        
         Self {
             device_info: DeviceInfo::new(adapter, device),
             device_config: DeviceConfigPanel::new(adapter),
@@ -54,6 +62,7 @@ impl PlaygroundApp {
             bind_group_panel: BindGroupPanel::new(),
             bind_group_layout_panel: BindGroupLayoutPanel::new(),
             render_pipeline_panel: RenderPipelinePanel::new(),
+            console_panel,
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -112,6 +121,7 @@ impl PlaygroundApp {
                 "⚡ Render Pipeline",
             );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
+            ui.selectable_value(&mut self.selected_tab, Tab::Console, "🖥️ Console");
         });
 
         // Main canvas area
@@ -127,6 +137,7 @@ impl PlaygroundApp {
             Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
             Tab::RenderPipelineConfig => self.render_pipeline_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
+            Tab::Console => self.console_panel.ui(ui),
         });
     }
 }

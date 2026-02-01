@@ -1,9 +1,14 @@
 use wgpu::{TextureDimension, TextureFormat, TextureUsages};
 use crate::buffer::BufferUsages;
 
+/// Type alias for unique resource identifiers
+pub type ResourceId = u64;
+
 /// Represents a tracked GPU buffer resource
 #[derive(Debug, Clone)]
 pub struct BufferInfo {
+    /// Unique identifier for this resource
+    pub id: ResourceId,
     /// Optional label for the buffer
     pub label: Option<String>,
     /// Size of the buffer in bytes
@@ -19,6 +24,8 @@ pub struct BufferInfo {
 /// Represents a tracked GPU texture resource
 #[derive(Debug, Clone)]
 pub struct TextureInfo {
+    /// Unique identifier for this resource
+    pub id: ResourceId,
     /// Optional label for the texture
     pub label: Option<String>,
     /// Width of the texture
@@ -44,6 +51,8 @@ pub struct TextureInfo {
 /// Represents a tracked render pipeline resource
 #[derive(Debug, Clone)]
 pub struct RenderPipelineInfo {
+    /// Unique identifier for this resource
+    pub id: ResourceId,
     /// Optional label for the pipeline
     pub label: Option<String>,
     /// Vertex entry point
@@ -57,6 +66,8 @@ pub struct RenderPipelineInfo {
 /// Represents a tracked compute pipeline resource
 #[derive(Debug, Clone)]
 pub struct ComputePipelineInfo {
+    /// Unique identifier for this resource
+    pub id: ResourceId,
     /// Optional label for the pipeline
     pub label: Option<String>,
     /// Compute entry point
@@ -231,6 +242,8 @@ pub struct ResourceInspectorPanel {
     search_query: String,
     /// Whether to show destroyed resources
     show_destroyed: bool,
+    /// Next available resource ID
+    next_id: ResourceId,
 }
 
 impl Default for ResourceInspectorPanel {
@@ -247,26 +260,46 @@ impl ResourceInspectorPanel {
             filter: ResourceFilter::All,
             search_query: String::new(),
             show_destroyed: false,
+            next_id: 1,
         }
     }
 
+    /// Get the next available resource ID and increment the counter
+    fn get_next_id(&mut self) -> ResourceId {
+        let id = self.next_id;
+        self.next_id += 1;
+        id
+    }
+
     /// Add a buffer to the tracked resources
-    pub fn add_buffer(&mut self, info: BufferInfo) {
+    pub fn add_buffer(&mut self, mut info: BufferInfo) {
+        if info.id == 0 {
+            info.id = self.get_next_id();
+        }
         self.resources.push(ResourceInfo::Buffer(info));
     }
 
     /// Add a texture to the tracked resources
-    pub fn add_texture(&mut self, info: TextureInfo) {
+    pub fn add_texture(&mut self, mut info: TextureInfo) {
+        if info.id == 0 {
+            info.id = self.get_next_id();
+        }
         self.resources.push(ResourceInfo::Texture(info));
     }
 
     /// Add a render pipeline to the tracked resources
-    pub fn add_render_pipeline(&mut self, info: RenderPipelineInfo) {
+    pub fn add_render_pipeline(&mut self, mut info: RenderPipelineInfo) {
+        if info.id == 0 {
+            info.id = self.get_next_id();
+        }
         self.resources.push(ResourceInfo::RenderPipeline(info));
     }
 
     /// Add a compute pipeline to the tracked resources
-    pub fn add_compute_pipeline(&mut self, info: ComputePipelineInfo) {
+    pub fn add_compute_pipeline(&mut self, mut info: ComputePipelineInfo) {
+        if info.id == 0 {
+            info.id = self.get_next_id();
+        }
         self.resources.push(ResourceInfo::ComputePipeline(info));
     }
 
@@ -274,6 +307,7 @@ impl ResourceInspectorPanel {
     pub fn add_demo_resources(&mut self) {
         // Add sample buffers
         self.add_buffer(BufferInfo {
+            id: 0,
             label: Some("Vertex Buffer".to_string()),
             size: 4096,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
@@ -282,6 +316,7 @@ impl ResourceInspectorPanel {
         });
 
         self.add_buffer(BufferInfo {
+            id: 0,
             label: Some("Index Buffer".to_string()),
             size: 2048,
             usage: BufferUsages::INDEX | BufferUsages::COPY_DST,
@@ -290,6 +325,7 @@ impl ResourceInspectorPanel {
         });
 
         self.add_buffer(BufferInfo {
+            id: 0,
             label: Some("Uniform Buffer".to_string()),
             size: 256,
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
@@ -299,6 +335,7 @@ impl ResourceInspectorPanel {
 
         // Add sample textures
         self.add_texture(TextureInfo {
+            id: 0,
             label: Some("Color Texture".to_string()),
             width: 1024,
             height: 1024,
@@ -312,6 +349,7 @@ impl ResourceInspectorPanel {
         });
 
         self.add_texture(TextureInfo {
+            id: 0,
             label: Some("Depth Texture".to_string()),
             width: 1024,
             height: 1024,
@@ -326,6 +364,7 @@ impl ResourceInspectorPanel {
 
         // Add sample pipelines
         self.add_render_pipeline(RenderPipelineInfo {
+            id: 0,
             label: Some("Main Render Pipeline".to_string()),
             vertex_entry_point: "vs_main".to_string(),
             fragment_entry_point: Some("fs_main".to_string()),
@@ -333,6 +372,7 @@ impl ResourceInspectorPanel {
         });
 
         self.add_compute_pipeline(ComputePipelineInfo {
+            id: 0,
             label: Some("Compute Shader".to_string()),
             entry_point: "cs_main".to_string(),
             state: ResourceState::Active,
@@ -551,7 +591,7 @@ impl ResourceInspectorPanel {
 
     /// Render buffer-specific details
     fn render_buffer_details(&self, ui: &mut egui::Ui, info: &BufferInfo) {
-        egui::Grid::new(format!("buffer_{:p}", info as *const _))
+        egui::Grid::new(format!("buffer_{}", info.id))
             .num_columns(2)
             .spacing([10.0, 3.0])
             .show(ui, |ui| {
@@ -568,7 +608,7 @@ impl ResourceInspectorPanel {
             });
 
         // Display usage flags
-        ui.indent(format!("usage_{:p}", info as *const _), |ui| {
+        ui.indent(format!("usage_{}", info.id), |ui| {
             if info.usage.contains(BufferUsages::VERTEX) {
                 ui.label("• VERTEX");
             }
@@ -604,7 +644,7 @@ impl ResourceInspectorPanel {
 
     /// Render texture-specific details
     fn render_texture_details(&self, ui: &mut egui::Ui, info: &TextureInfo) {
-        egui::Grid::new(format!("texture_{:p}", info as *const _))
+        egui::Grid::new(format!("texture_{}", info.id))
             .num_columns(2)
             .spacing([10.0, 3.0])
             .show(ui, |ui| {
@@ -636,7 +676,7 @@ impl ResourceInspectorPanel {
             });
 
         // Display usage flags
-        ui.indent(format!("usage_{:p}", info as *const _), |ui| {
+        ui.indent(format!("usage_{}", info.id), |ui| {
             if info.usage.contains(TextureUsages::COPY_SRC) {
                 ui.label("• COPY_SRC");
             }
@@ -657,7 +697,7 @@ impl ResourceInspectorPanel {
 
     /// Render render pipeline-specific details
     fn render_render_pipeline_details(&self, ui: &mut egui::Ui, info: &RenderPipelineInfo) {
-        egui::Grid::new(format!("render_pipeline_{:p}", info as *const _))
+        egui::Grid::new(format!("render_pipeline_{}", info.id))
             .num_columns(2)
             .spacing([10.0, 3.0])
             .show(ui, |ui| {
@@ -673,7 +713,7 @@ impl ResourceInspectorPanel {
 
     /// Render compute pipeline-specific details
     fn render_compute_pipeline_details(&self, ui: &mut egui::Ui, info: &ComputePipelineInfo) {
-        egui::Grid::new(format!("compute_pipeline_{:p}", info as *const _))
+        egui::Grid::new(format!("compute_pipeline_{}", info.id))
             .num_columns(2)
             .spacing([10.0, 3.0])
             .show(ui, |ui| {
@@ -701,6 +741,7 @@ mod tests {
     fn test_add_buffer() {
         let mut panel = ResourceInspectorPanel::new();
         let buffer_info = BufferInfo {
+            id: 0,
             label: Some("test_buffer".to_string()),
             size: 1024,
             usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
@@ -716,6 +757,7 @@ mod tests {
     fn test_add_texture() {
         let mut panel = ResourceInspectorPanel::new();
         let texture_info = TextureInfo {
+            id: 0,
             label: Some("test_texture".to_string()),
             width: 256,
             height: 256,
@@ -737,6 +779,7 @@ mod tests {
         let mut panel = ResourceInspectorPanel::new();
         
         panel.add_buffer(BufferInfo {
+            id: 0,
             label: Some("buffer1".to_string()),
             size: 1024,
             usage: BufferUsages::VERTEX,
@@ -745,6 +788,7 @@ mod tests {
         });
 
         panel.add_texture(TextureInfo {
+            id: 0,
             label: Some("texture1".to_string()),
             width: 256,
             height: 256,
@@ -768,6 +812,7 @@ mod tests {
         let mut panel = ResourceInspectorPanel::new();
         
         panel.add_buffer(BufferInfo {
+            id: 0,
             label: Some("vertex_buffer".to_string()),
             size: 1024,
             usage: BufferUsages::VERTEX,
@@ -776,6 +821,7 @@ mod tests {
         });
 
         panel.add_buffer(BufferInfo {
+            id: 0,
             label: Some("index_buffer".to_string()),
             size: 512,
             usage: BufferUsages::INDEX,
@@ -792,6 +838,7 @@ mod tests {
     #[test]
     fn test_memory_calculation_buffer() {
         let buffer_info = BufferInfo {
+            id: 0,
             label: Some("test".to_string()),
             size: 2048,
             usage: BufferUsages::VERTEX,
@@ -806,6 +853,7 @@ mod tests {
     #[test]
     fn test_memory_calculation_texture() {
         let texture_info = TextureInfo {
+            id: 0,
             label: Some("test".to_string()),
             width: 256,
             height: 256,
@@ -846,6 +894,7 @@ mod tests {
         let mut panel = ResourceInspectorPanel::new();
         
         panel.add_buffer(BufferInfo {
+            id: 0,
             label: Some("test".to_string()),
             size: 1024,
             usage: BufferUsages::VERTEX,
@@ -863,6 +912,7 @@ mod tests {
         let mut panel = ResourceInspectorPanel::new();
         
         panel.add_buffer(BufferInfo {
+            id: 0,
             label: Some("active".to_string()),
             size: 1024,
             usage: BufferUsages::VERTEX,
@@ -871,6 +921,7 @@ mod tests {
         });
 
         panel.add_buffer(BufferInfo {
+            id: 0,
             label: Some("destroyed".to_string()),
             size: 1024,
             usage: BufferUsages::VERTEX,

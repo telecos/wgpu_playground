@@ -74,9 +74,10 @@ Click the "📝 Load Demo Data" button to populate the panel with sample resourc
 
 ```rust
 use wgpu_playground_core::resource_inspector::{
-    BufferInfo, ResourceInspectorPanel, ResourceState,
+    BufferInfo, TextureInfo, ResourceInspectorPanel, ResourceState,
 };
 use wgpu_playground_core::buffer::BufferUsages;
+use wgpu::{TextureDimension, TextureFormat, TextureUsages};
 
 // Create the panel
 let mut inspector = ResourceInspectorPanel::new();

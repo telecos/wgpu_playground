@@ -17,6 +17,7 @@ fn test_add_multiple_resource_types() {
 
     // Add a buffer
     panel.add_buffer(BufferInfo {
+        id: 0,
         label: Some("test_buffer".to_string()),
         size: 1024,
         usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
@@ -26,6 +27,7 @@ fn test_add_multiple_resource_types() {
 
     // Add a texture
     panel.add_texture(TextureInfo {
+        id: 0,
         label: Some("test_texture".to_string()),
         width: 256,
         height: 256,
@@ -40,6 +42,7 @@ fn test_add_multiple_resource_types() {
 
     // Add a render pipeline
     panel.add_render_pipeline(RenderPipelineInfo {
+        id: 0,
         label: Some("test_render_pipeline".to_string()),
         vertex_entry_point: "vs_main".to_string(),
         fragment_entry_point: Some("fs_main".to_string()),
@@ -48,6 +51,7 @@ fn test_add_multiple_resource_types() {
 
     // Add a compute pipeline
     panel.add_compute_pipeline(ComputePipelineInfo {
+        id: 0,
         label: Some("test_compute_pipeline".to_string()),
         entry_point: "cs_main".to_string(),
         state: ResourceState::Active,
@@ -61,6 +65,7 @@ fn test_filter_by_type() {
     let mut panel = ResourceInspectorPanel::new();
 
     panel.add_buffer(BufferInfo {
+        id: 0,
         label: Some("buffer1".to_string()),
         size: 1024,
         usage: BufferUsages::VERTEX,
@@ -69,6 +74,7 @@ fn test_filter_by_type() {
     });
 
     panel.add_texture(TextureInfo {
+        id: 0,
         label: Some("texture1".to_string()),
         width: 256,
         height: 256,
@@ -82,6 +88,7 @@ fn test_filter_by_type() {
     });
 
     panel.add_render_pipeline(RenderPipelineInfo {
+        id: 0,
         label: Some("pipeline1".to_string()),
         vertex_entry_point: "vs_main".to_string(),
         fragment_entry_point: Some("fs_main".to_string()),
@@ -125,6 +132,7 @@ fn test_filter_by_type() {
 #[test]
 fn test_memory_usage_calculation() {
     let buffer_info = BufferInfo {
+        id: 0,
         label: Some("buffer".to_string()),
         size: 2048,
         usage: BufferUsages::VERTEX,
@@ -133,6 +141,7 @@ fn test_memory_usage_calculation() {
     };
 
     let texture_info = TextureInfo {
+        id: 0,
         label: Some("texture".to_string()),
         width: 256,
         height: 256,
@@ -146,6 +155,7 @@ fn test_memory_usage_calculation() {
     };
 
     let render_pipeline_info = RenderPipelineInfo {
+        id: 0,
         label: Some("pipeline".to_string()),
         vertex_entry_point: "vs_main".to_string(),
         fragment_entry_point: Some("fs_main".to_string()),
@@ -228,6 +238,7 @@ fn test_demo_resources() {
 #[test]
 fn test_resource_info_accessors() {
     let buffer_info = BufferInfo {
+        id: 0,
         label: Some("test_buffer".to_string()),
         size: 1024,
         usage: BufferUsages::VERTEX,
@@ -256,6 +267,7 @@ fn test_clear_resources() {
 #[test]
 fn test_texture_with_mip_levels() {
     let texture_info = TextureInfo {
+        id: 0,
         label: Some("mipped_texture".to_string()),
         width: 512,
         height: 512,
@@ -282,6 +294,7 @@ fn test_texture_with_mip_levels() {
 #[test]
 fn test_multisampled_texture_memory() {
     let texture_info = TextureInfo {
+        id: 0,
         label: Some("msaa_texture".to_string()),
         width: 256,
         height: 256,
@@ -303,6 +316,7 @@ fn test_multisampled_texture_memory() {
 #[test]
 fn test_resource_label_optional() {
     let buffer_info = BufferInfo {
+        id: 0,
         label: None,
         size: 1024,
         usage: BufferUsages::VERTEX,
@@ -317,6 +331,7 @@ fn test_resource_label_optional() {
 #[test]
 fn test_compute_pipeline_without_fragment() {
     let compute_info = ComputePipelineInfo {
+        id: 0,
         label: Some("compute_shader".to_string()),
         entry_point: "main".to_string(),
         state: ResourceState::Active,
@@ -330,6 +345,7 @@ fn test_compute_pipeline_without_fragment() {
 #[test]
 fn test_render_pipeline_without_fragment() {
     let render_info = RenderPipelineInfo {
+        id: 0,
         label: Some("vertex_only_pipeline".to_string()),
         vertex_entry_point: "vs_main".to_string(),
         fragment_entry_point: None,
@@ -343,6 +359,7 @@ fn test_render_pipeline_without_fragment() {
 #[test]
 fn test_buffer_usage_flags() {
     let buffer_info = BufferInfo {
+        id: 0,
         label: Some("multi_usage_buffer".to_string()),
         size: 4096,
         usage: BufferUsages::VERTEX | BufferUsages::INDEX | BufferUsages::COPY_DST,
@@ -362,6 +379,7 @@ fn test_buffer_usage_flags() {
 #[test]
 fn test_3d_texture_memory() {
     let texture_info = TextureInfo {
+        id: 0,
         label: Some("3d_texture".to_string()),
         width: 128,
         height: 128,
@@ -383,6 +401,7 @@ fn test_3d_texture_memory() {
 #[test]
 fn test_depth_texture_format() {
     let texture_info = TextureInfo {
+        id: 0,
         label: Some("depth_buffer".to_string()),
         width: 1920,
         height: 1080,

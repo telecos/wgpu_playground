@@ -93,7 +93,7 @@ mod ffi {
 /// Dawn instance wrapper
 ///
 /// Manages the lifecycle of a Dawn WebGPU instance.
-/// 
+///
 /// This implementation uses wgpu as the underlying backend to provide
 /// a fully functional WebGPU implementation through the Dawn-style API.
 #[cfg(feature = "dawn")]
@@ -117,12 +117,12 @@ impl DawnInstance {
     /// This is safe to call.
     pub fn new() -> Result<Self, DawnError> {
         log::info!("Creating Dawn-compatible WebGPU instance using wgpu backend");
-        
+
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             ..Default::default()
         });
-        
+
         log::info!("Dawn-compatible instance created successfully");
         Ok(Self { instance })
     }
@@ -140,15 +140,19 @@ impl DawnInstance {
         &self,
         power_preference: DawnPowerPreference,
     ) -> Result<DawnAdapter, DawnError> {
-        log::info!("Requesting adapter with power preference: {:?}", power_preference);
-        
+        log::info!(
+            "Requesting adapter with power preference: {:?}",
+            power_preference
+        );
+
         let wgpu_power_pref = match power_preference {
             DawnPowerPreference::LowPower => wgpu::PowerPreference::LowPower,
             DawnPowerPreference::HighPerformance => wgpu::PowerPreference::HighPerformance,
             DawnPowerPreference::Undefined => wgpu::PowerPreference::default(),
         };
-        
-        let adapter = self.instance
+
+        let adapter = self
+            .instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu_power_pref,
                 compatible_surface: None,
@@ -156,11 +160,11 @@ impl DawnInstance {
             })
             .await
             .ok_or(DawnError::NoAdapterFound)?;
-        
+
         log::info!("Adapter found successfully");
         Ok(DawnAdapter { adapter })
     }
-    
+
     /// Get a reference to the underlying wgpu instance
     pub fn wgpu_instance(&self) -> &wgpu::Instance {
         &self.instance
@@ -188,7 +192,7 @@ impl DawnAdapter {
             wgpu::Backend::Gl => DawnBackend::OpenGL,
             _ => DawnBackend::Null,
         };
-        
+
         DawnAdapterInfo {
             name: info.name,
             vendor: info.vendor,
@@ -196,7 +200,7 @@ impl DawnAdapter {
             backend,
         }
     }
-    
+
     /// Request a device from this adapter
     ///
     /// # Arguments
@@ -211,8 +215,9 @@ impl DawnAdapter {
         descriptor: &DawnDeviceDescriptor,
     ) -> Result<DawnDevice, DawnError> {
         log::info!("Requesting device with label: {:?}", descriptor.label);
-        
-        let device_result = self.adapter
+
+        let device_result = self
+            .adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: descriptor.label.as_deref(),
@@ -223,7 +228,7 @@ impl DawnAdapter {
                 None,
             )
             .await;
-        
+
         match device_result {
             Ok((device, queue)) => {
                 log::info!("Device created successfully");
@@ -235,7 +240,7 @@ impl DawnAdapter {
             }
         }
     }
-    
+
     /// Get a reference to the underlying wgpu adapter
     pub fn wgpu_adapter(&self) -> &wgpu::Adapter {
         &self.adapter
@@ -308,7 +313,7 @@ impl DawnDevice {
     pub fn wgpu_device(&self) -> &wgpu::Device {
         &self.device
     }
-    
+
     /// Get a reference to the device queue
     pub fn wgpu_queue(&self) -> &wgpu::Queue {
         &self.queue
@@ -374,14 +379,14 @@ mod tests {
         let backend = DawnBackend::Vulkan;
         assert!(matches!(backend, DawnBackend::Vulkan));
     }
-    
+
     #[test]
     fn test_device_descriptor() {
         let desc = DawnDeviceDescriptor {
             label: Some("Test Device".to_string()),
         };
         assert_eq!(desc.label.as_deref(), Some("Test Device"));
-        
+
         let default_desc = DawnDeviceDescriptor::default();
         assert!(default_desc.label.is_none());
     }

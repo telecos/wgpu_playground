@@ -9,6 +9,7 @@ use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
+use wgpu_playground_core::performance_panel::PerformancePanel;
 use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
@@ -34,6 +35,7 @@ pub struct PlaygroundApp {
     draw_command_panel: DrawCommandPanel,
     render_pass_panel: RenderPassPanel,
     resource_inspector_panel: ResourceInspectorPanel,
+    performance_panel: PerformancePanel,
     selected_tab: Tab,
 }
 
@@ -56,6 +58,7 @@ enum Tab {
     Compute,
     Console,
     ResourceInspector,
+    Performance,
 }
 
 impl PlaygroundApp {
@@ -83,6 +86,7 @@ impl PlaygroundApp {
             draw_command_panel: DrawCommandPanel::new(),
             render_pass_panel: RenderPassPanel::new(),
             resource_inspector_panel: ResourceInspectorPanel::new(),
+            performance_panel: PerformancePanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -94,6 +98,9 @@ impl PlaygroundApp {
         queue: &wgpu::Queue,
         renderer: &mut egui_wgpu::Renderer,
     ) {
+        // Update performance metrics each frame
+        self.performance_panel.update();
+
         // Menu bar at the top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.heading("🎮 WebGPU Playground");
@@ -169,6 +176,11 @@ impl PlaygroundApp {
                 Tab::ResourceInspector,
                 "🔍 Resource Inspector",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::Performance,
+                "📊 Performance",
+            );
         });
 
         // Main canvas area
@@ -190,6 +202,7 @@ impl PlaygroundApp {
             Tab::Compute => self.compute_panel.ui(ui),
             Tab::Console => self.console_panel.ui(ui),
             Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
+            Tab::Performance => self.performance_panel.ui(ui),
         });
     }
 }

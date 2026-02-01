@@ -4,6 +4,7 @@ use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
 use wgpu_playground_core::compute_pipeline_panel::ComputePipelinePanel;
+use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
@@ -26,6 +27,7 @@ pub struct PlaygroundApp {
     bind_group_panel: BindGroupPanel,
     bind_group_layout_panel: BindGroupLayoutPanel,
     render_pipeline_panel: RenderPipelinePanel,
+    console_panel: ConsolePanel,
     draw_command_panel: DrawCommandPanel,
     render_pass_panel: RenderPassPanel,
     selected_tab: Tab,
@@ -47,10 +49,16 @@ enum Tab {
     DrawCommand,
     RenderPassConfig,
     Compute,
+    Console,
 }
 
 impl PlaygroundApp {
     pub fn new(adapter: &wgpu::Adapter, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
+        let mut console_panel = ConsolePanel::new();
+        // Add a welcome message to the console
+        console_panel.info("WebGPU Playground console initialized");
+        console_panel.info("GPU errors, warnings, and validation messages will appear here");
+
         Self {
             device_info: DeviceInfo::new(adapter, device),
             device_config: DeviceConfigPanel::new(adapter),
@@ -64,6 +72,7 @@ impl PlaygroundApp {
             bind_group_panel: BindGroupPanel::new(),
             bind_group_layout_panel: BindGroupLayoutPanel::new(),
             render_pipeline_panel: RenderPipelinePanel::new(),
+            console_panel,
             draw_command_panel: DrawCommandPanel::new(),
             render_pass_panel: RenderPassPanel::new(),
             selected_tab: Tab::AdapterSelection,
@@ -135,6 +144,7 @@ impl PlaygroundApp {
                 "🎬 Render Pass",
             );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
+            ui.selectable_value(&mut self.selected_tab, Tab::Console, "🖥️ Console");
         });
 
         // Main canvas area
@@ -153,6 +163,7 @@ impl PlaygroundApp {
             Tab::DrawCommand => self.draw_command_panel.ui(ui),
             Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
+            Tab::Console => self.console_panel.ui(ui),
         });
     }
 }

@@ -524,7 +524,7 @@ mod tests {
     fn test_instance_data_size() {
         // InstanceData should be aligned properly
         let size = std::mem::size_of::<InstanceData>();
-        assert_eq!(size, 32); // Properly aligned for GPU
+        assert_eq!(size, 48); // 12 + 4 + 4 + 12 + 12 + 4 = 48 bytes
     }
 
     #[test]

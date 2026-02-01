@@ -115,11 +115,7 @@ impl PlaygroundApp {
                 Tab::RenderPipelineConfig,
                 "⚡ Render Pipeline",
             );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::DrawCommand,
-                "📊 Draw Command",
-            );
+            ui.selectable_value(&mut self.selected_tab, Tab::DrawCommand, "📊 Draw Command");
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 

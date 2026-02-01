@@ -41,12 +41,12 @@ enum Tab {
 }
 
 impl PlaygroundApp {
-    pub fn new(adapter: &wgpu::Adapter, device: &wgpu::Device) -> Self {
+    pub fn new(adapter: &wgpu::Adapter, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
         Self {
             device_info: DeviceInfo::new(adapter, device),
             device_config: DeviceConfigPanel::new(adapter),
             adapter_selection: AdapterSelectionPanel::new(adapter),
-            rendering_panel: RenderingPanel::new(),
+            rendering_panel: RenderingPanel::new(device, queue),
             compute_panel: ComputePanel::new(),
             buffer_panel: BufferPanel::new(),
             sampler_panel: SamplerPanel::new(),
@@ -58,7 +58,7 @@ impl PlaygroundApp {
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context) {
+    pub fn ui(&mut self, ctx: &egui::Context, device: &wgpu::Device, queue: &wgpu::Queue) {
         // Menu bar at the top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.heading("🎮 WebGPU Playground");
@@ -119,7 +119,7 @@ impl PlaygroundApp {
             Tab::AdapterSelection => self.adapter_selection.ui(ui),
             Tab::DeviceConfig => self.device_config.ui(ui),
             Tab::DeviceInfo => self.device_info.ui(ui),
-            Tab::Rendering => self.rendering_panel.ui(ui),
+            Tab::Rendering => self.rendering_panel.ui(ui, device, queue),
             Tab::BufferConfig => self.buffer_panel.ui(ui),
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
             Tab::TextureConfig => self.texture_panel.ui(ui),
@@ -207,7 +207,7 @@ mod tests {
             };
 
             // Test that we can create a PlaygroundApp
-            let _app = PlaygroundApp::new(&adapter, &device);
+            let _app = PlaygroundApp::new(&adapter, &device, &_queue);
             // If we get here without panicking, the test passes
         });
     }

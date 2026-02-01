@@ -29,6 +29,16 @@ fn configure_and_build_dawn() {
     if !dawn_dir.exists() {
         println!("cargo:warning=Cloning Dawn repository...");
 
+        // Configure git to support long paths on Windows
+        // This is necessary because Dawn repository contains files with very long paths
+        // that exceed the default Windows path length limit of 260 characters
+        if cfg!(target_os = "windows") {
+            println!("cargo:warning=Configuring Git to support long paths on Windows...");
+            let _ = Command::new("git")
+                .args(["config", "--global", "core.longpaths", "true"])
+                .status();
+        }
+
         let status = Command::new("git")
             .args([
                 "clone",

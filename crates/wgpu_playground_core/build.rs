@@ -34,9 +34,26 @@ fn configure_and_build_dawn() {
         // that exceed the default Windows path length limit of 260 characters
         if cfg!(target_os = "windows") {
             println!("cargo:warning=Configuring Git to support long paths on Windows...");
-            let _ = Command::new("git")
+            match Command::new("git")
                 .args(["config", "--global", "core.longpaths", "true"])
-                .status();
+                .status()
+            {
+                Ok(s) if s.success() => {
+                    println!("cargo:warning=Git long paths support enabled");
+                }
+                Ok(s) => {
+                    println!(
+                        "cargo:warning=Failed to configure Git long paths (exit code: {}). Clone may fail on Windows.",
+                        s
+                    );
+                }
+                Err(e) => {
+                    println!(
+                        "cargo:warning=Could not configure Git long paths: {}. Clone may fail on Windows.",
+                        e
+                    );
+                }
+            }
         }
 
         let status = Command::new("git")

@@ -257,6 +257,83 @@ The 3D cube was successfully rendered with:
   • Rotation animation over 5 frames
 ```
 
+#### Compute-Render Buffer Sharing Example
+
+A comprehensive example demonstrating buffer sharing between compute and render pipelines:
+
+```bash
+cargo run --package wgpu_playground_examples --example compute_render_sharing
+```
+
+This example demonstrates:
+- Creating a compute shader that processes particle data (position, velocity updates)
+- Creating a render pipeline that visualizes the computed particles as colored points
+- Sharing a buffer between compute and render pipelines using STORAGE + VERTEX usage flags
+- Multiple frames showing the compute shader updating particle positions
+- Simple particle physics with boundary collision and circular motion
+
+**Example output:**
+```
+=== Compute-Render Buffer Sharing Example ===
+
+Using adapter: NVIDIA GeForce RTX 3080
+Backend: Vulkan
+
+Created 1024 particles arranged in a circle
+  - Each particle has position, velocity, and color
+  - Particles will be updated by compute shader
+  - Same buffer will be used for vertex data in render pass
+
+✓ Created shared buffer with STORAGE + VERTEX usage
+  - Size: 32768 bytes (1024 particles)
+  - STORAGE flag: allows compute shader access
+  - VERTEX flag: allows render pipeline access
+
+Setting up compute pipeline...
+✓ Compute pipeline created
+  - Updates particle positions based on velocity
+  - Applies boundary collision detection
+  - Adds circular motion effect
+
+Setting up render pipeline...
+✓ Render pipeline created
+  - Draws particles as points (PointList topology)
+  - Uses particle position and color from buffer
+  - Alpha blending enabled for nice visual effect
+
+Executing compute and render operations...
+
+Frame 0:
+  ✓ Compute pass: Updated particle positions
+  ✓ Render pass: Drew 1024 particles as points
+  ✓ Commands submitted and completed
+
+Frame 1:
+  ✓ Compute pass: Updated particle positions
+  ✓ Render pass: Drew 1024 particles as points
+  ✓ Commands submitted and completed
+
+Frame 2:
+  ✓ Compute pass: Updated particle positions
+  ✓ Render pass: Drew 1024 particles as points
+  ✓ Commands submitted and completed
+
+=== Example Complete ===
+
+This example demonstrated:
+  ✓ Creating a shared buffer with STORAGE + VERTEX usage flags
+  ✓ Compute shader that processes particle data
+  ✓ Render pipeline that visualizes the same data
+  ✓ Buffer sharing between compute and render pipelines
+  ✓ Multiple frames showing data updates from compute shader
+
+Key Concepts:
+  • STORAGE usage: Enables read/write access in compute shaders
+  • VERTEX usage: Enables use as vertex buffer in render pipeline
+  • Combined usage allows seamless data flow from compute to render
+  • Same buffer used without copying, maximizing GPU efficiency
+```
+
 Other available examples:
 - `adapter_demo` - Enumerate and select GPU adapters
 - `texture_mapping` - Texture creation, sampling, and binding

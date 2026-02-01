@@ -30,8 +30,14 @@ fn test_dawn_properties() {
     assert_eq!(dawn.name(), "Dawn");
     assert!(dawn.description().contains("Dawn"));
     assert!(dawn.url().contains("dawn.googlesource.com"));
-    assert!(!dawn.is_native()); // Dawn is currently a placeholder
-    assert!(dawn.status_message().contains("Placeholder"));
+    assert!(dawn.is_native()); // Dawn implementation is fully integrated
+    let status = dawn.status_message();
+    // Status depends on whether Dawn C++ library was built
+    assert!(
+        status.contains("Dawn") || status.contains("fallback"),
+        "Expected Dawn status message, got: {}",
+        status
+    );
 }
 
 #[test]

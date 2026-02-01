@@ -3,6 +3,7 @@ use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
+use wgpu_playground_core::compute_dispatch_panel::ComputeDispatchPanel;
 use wgpu_playground_core::compute_pipeline_panel::ComputePipelinePanel;
 use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
@@ -11,6 +12,7 @@ use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
 use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
+use wgpu_playground_core::resource_inspector::ResourceInspectorPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
 use wgpu_playground_core::texture_panel::TexturePanel;
 
@@ -21,6 +23,7 @@ pub struct PlaygroundApp {
     rendering_panel: RenderingPanel,
     compute_panel: ComputePanel,
     compute_pipeline_panel: ComputePipelinePanel,
+    compute_dispatch_panel: ComputeDispatchPanel,
     buffer_panel: BufferPanel,
     sampler_panel: SamplerPanel,
     texture_panel: TexturePanel,
@@ -30,6 +33,7 @@ pub struct PlaygroundApp {
     console_panel: ConsolePanel,
     draw_command_panel: DrawCommandPanel,
     render_pass_panel: RenderPassPanel,
+    resource_inspector_panel: ResourceInspectorPanel,
     selected_tab: Tab,
 }
 
@@ -48,8 +52,10 @@ enum Tab {
     RenderPipelineConfig,
     DrawCommand,
     RenderPassConfig,
+    ComputeDispatch,
     Compute,
     Console,
+    ResourceInspector,
 }
 
 impl PlaygroundApp {
@@ -66,6 +72,7 @@ impl PlaygroundApp {
             rendering_panel: RenderingPanel::new(device, queue),
             compute_panel: ComputePanel::new(),
             compute_pipeline_panel: ComputePipelinePanel::new(),
+            compute_dispatch_panel: ComputeDispatchPanel::new(),
             buffer_panel: BufferPanel::new(),
             sampler_panel: SamplerPanel::new(),
             texture_panel: TexturePanel::new(),
@@ -75,11 +82,18 @@ impl PlaygroundApp {
             console_panel,
             draw_command_panel: DrawCommandPanel::new(),
             render_pass_panel: RenderPassPanel::new(),
+            resource_inspector_panel: ResourceInspectorPanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context, device: &wgpu::Device, queue: &wgpu::Queue) {
+    pub fn ui(
+        &mut self,
+        ctx: &egui::Context,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        renderer: &mut egui_wgpu::Renderer,
+    ) {
         // Menu bar at the top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.heading("🎮 WebGPU Playground");
@@ -143,8 +157,18 @@ impl PlaygroundApp {
                 Tab::RenderPassConfig,
                 "🎬 Render Pass",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::ComputeDispatch,
+                "🚀 Compute Dispatch",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
             ui.selectable_value(&mut self.selected_tab, Tab::Console, "🖥️ Console");
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::ResourceInspector,
+                "🔍 Resource Inspector",
+            );
         });
 
         // Main canvas area
@@ -152,7 +176,7 @@ impl PlaygroundApp {
             Tab::AdapterSelection => self.adapter_selection.ui(ui),
             Tab::DeviceConfig => self.device_config.ui(ui),
             Tab::DeviceInfo => self.device_info.ui(ui),
-            Tab::Rendering => self.rendering_panel.ui(ui, device, queue),
+            Tab::Rendering => self.rendering_panel.ui(ui, device, queue, renderer),
             Tab::BufferConfig => self.buffer_panel.ui(ui),
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
             Tab::TextureConfig => self.texture_panel.ui(ui),
@@ -162,8 +186,10 @@ impl PlaygroundApp {
             Tab::RenderPipelineConfig => self.render_pipeline_panel.ui(ui),
             Tab::DrawCommand => self.draw_command_panel.ui(ui),
             Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
+            Tab::ComputeDispatch => self.compute_dispatch_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
             Tab::Console => self.console_panel.ui(ui),
+            Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
         });
     }
 }

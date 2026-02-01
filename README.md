@@ -141,12 +141,12 @@ The playground supports different WebGPU implementations:
   - Production-ready with full WebGPU support
   - https://github.com/gfx-rs/wgpu
 
-- **Dawn** (build infrastructure complete): C++ implementation used by Chromium
+- **Dawn** (native + fallback): C++ implementation used by Chromium
   - Google's reference implementation
-  - Built automatically from source using CMake
+  - Attempts to build actual Dawn C++ library from source
+  - Falls back to wgpu-core when Dawn build unavailable
   - Cross-platform support (Windows D3D12, Linux Vulkan, macOS Metal)
-  - Requires Git, CMake, C++ compiler, Python 3
-  - **Status**: Build system functional, runtime integration in progress
+  - **Status**: Native FFI when built, wgpu-core fallback otherwise
   - https://dawn.googlesource.com/dawn
 
 #### Selecting Implementation
@@ -163,13 +163,16 @@ cargo build --release --features dawn
 ```
 
 **First Dawn build requirements:**
-- Git (clone repository)
-- CMake 3.16+ (build configuration)
+- Git (to clone Dawn repository)
+- CMake 3.16+ (to build Dawn)
 - C++ compiler with C++20 support
-- Python 3 (dependency scripts)
-- 10-30 minutes build time (one-time)
+- Python 3 (for Dawn's dependency scripts)
+- Build time: 10-30 minutes (first build only)
+- **Note**: If build fails, automatically falls back to wgpu-core
 
 **Install build tools:**
+If you want to use actual Dawn C++ library (optional), install:
+
 ```bash
 # Ubuntu/Debian:
 sudo apt-get install git cmake build-essential python3 libvulkan-dev
@@ -180,6 +183,8 @@ brew install git cmake python3
 # Windows:
 # Install Visual Studio with C++ support, CMake, Git, Python 3
 ```
+
+**Note**: If build tools are not available, the `dawn` feature will automatically use wgpu-core as a compatible fallback. See [docs/BUILDING_DAWN.md](docs/BUILDING_DAWN.md) for details.
 
 **2. Runtime (environment variable):**
 ```bash

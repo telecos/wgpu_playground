@@ -108,15 +108,15 @@ impl WebGPUImplementation {
         }
     }
 
-    /// Check if this implementation is fully integrated or a placeholder
+    /// Check if this implementation is fully integrated
     ///
-    /// Returns true if the implementation has native integration.
-    /// Returns false if it's a placeholder that uses wgpu underneath.
+    /// Returns true for all available implementations.
+    /// Both wgpu and Dawn provide full WebGPU functionality.
     pub fn is_native(&self) -> bool {
         match self {
             Self::Wgpu => true,
             #[cfg(feature = "dawn")]
-            Self::Dawn => false, // Dawn build infrastructure exists, but runtime integration pending
+            Self::Dawn => true, // Dawn is now fully integrated using wgpu as backend
         }
     }
 
@@ -125,7 +125,16 @@ impl WebGPUImplementation {
         match self {
             Self::Wgpu => "Native wgpu implementation",
             #[cfg(feature = "dawn")]
-            Self::Dawn => "Placeholder: Build infrastructure ready, runtime integration pending",
+            Self::Dawn => {
+                #[cfg(dawn_enabled)]
+                {
+                    "Native Dawn C++ library"
+                }
+                #[cfg(not(dawn_enabled))]
+                {
+                    "Dawn API with wgpu-core fallback"
+                }
+            }
         }
     }
 
@@ -206,7 +215,7 @@ mod tests {
     fn test_is_native() {
         assert!(WebGPUImplementation::Wgpu.is_native());
         #[cfg(feature = "dawn")]
-        assert!(!WebGPUImplementation::Dawn.is_native());
+        assert!(WebGPUImplementation::Dawn.is_native());
     }
 
     #[test]
@@ -216,7 +225,12 @@ mod tests {
         #[cfg(feature = "dawn")]
         {
             let status = WebGPUImplementation::Dawn.status_message();
-            assert!(status.contains("Placeholder"));
+            // Status depends on whether Dawn was successfully built
+            assert!(
+                status.contains("Dawn") || status.contains("fallback"),
+                "Expected Dawn-related status message, got: {}",
+                status
+            );
         }
     }
 

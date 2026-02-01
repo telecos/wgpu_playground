@@ -254,10 +254,7 @@ mod tests {
         match result {
             Ok(_instance) => {
                 // If Dawn is fully integrated, this would succeed
-                assert!(
-                    false,
-                    "Dawn should not be fully integrated yet - runtime FFI not connected"
-                );
+                panic!("Dawn should not be fully integrated yet - runtime FFI not connected");
             }
             Err(e) => {
                 // Expected - Dawn FFI stubs are not yet connected

@@ -168,7 +168,7 @@ Potential areas for expansion:
 
 ## Files Modified
 
-1. `crates/wgpu_playground_core/src/command_recording_panel.rs` - New file (681 lines)
+1. `crates/wgpu_playground_core/src/command_recording_panel.rs` - New file (677 lines)
 2. `crates/wgpu_playground_core/src/lib.rs` - Added module declaration
 3. `crates/wgpu_playground_gui/src/app.rs` - Integrated panel into main app
 

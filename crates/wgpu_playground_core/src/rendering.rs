@@ -863,29 +863,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_rendering_panel_new_without_device() {
-        let panel = RenderingPanel::new_without_device();
-        assert_eq!(panel.examples.len(), 4);
-        assert_eq!(panel.selected_example, None);
-        assert!(!panel.show_source_code);
-        assert_eq!(panel.category_filter, None);
-        assert!(!panel.is_example_running);
-        assert!(!panel.show_shader_editor);
-    }
-
-    #[test]
-    fn test_rendering_panel_default() {
-        let panel = RenderingPanel::default();
-        assert_eq!(panel.examples.len(), 4);
-        assert!(!panel.is_example_running);
-    }
-}
-
 // Matrix math utilities
 fn identity_matrix() -> [[f32; 4]; 4] {
     [
@@ -972,4 +949,27 @@ fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
 
 fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
     a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_rendering_panel_new_without_device() {
+        let panel = RenderingPanel::new_without_device();
+        assert_eq!(panel.examples.len(), 4);
+        assert_eq!(panel.selected_example, None);
+        assert!(!panel.show_source_code);
+        assert_eq!(panel.category_filter, None);
+        assert!(!panel.is_example_running);
+        assert!(!panel.show_shader_editor);
+    }
+
+    #[test]
+    fn test_rendering_panel_default() {
+        let panel = RenderingPanel::default();
+        assert_eq!(panel.examples.len(), 4);
+        assert!(!panel.is_example_running);
+    }
 }

@@ -1,9 +1,15 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
+use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
+use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
+use wgpu_playground_core::compute_pipeline_panel::ComputePipelinePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
+use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
+use wgpu_playground_core::sampler_panel::SamplerPanel;
+use wgpu_playground_core::texture_panel::TexturePanel;
 
 pub struct PlaygroundApp {
     device_info: DeviceInfo,
@@ -11,7 +17,13 @@ pub struct PlaygroundApp {
     adapter_selection: AdapterSelectionPanel,
     rendering_panel: RenderingPanel,
     compute_panel: ComputePanel,
+    compute_pipeline_panel: ComputePipelinePanel,
     buffer_panel: BufferPanel,
+    sampler_panel: SamplerPanel,
+    texture_panel: TexturePanel,
+    bind_group_panel: BindGroupPanel,
+    bind_group_layout_panel: BindGroupLayoutPanel,
+    render_pipeline_panel: RenderPipelinePanel,
     selected_tab: Tab,
 }
 
@@ -22,23 +34,35 @@ enum Tab {
     DeviceInfo,
     Rendering,
     BufferConfig,
+    SamplerConfig,
+    TextureConfig,
+    BindGroupConfig,
+    BindGroupLayoutConfig,
+    ComputePipelineConfig,
+    RenderPipelineConfig,
     Compute,
 }
 
 impl PlaygroundApp {
-    pub fn new(adapter: &wgpu::Adapter, device: &wgpu::Device) -> Self {
+    pub fn new(adapter: &wgpu::Adapter, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
         Self {
             device_info: DeviceInfo::new(adapter, device),
             device_config: DeviceConfigPanel::new(adapter),
             adapter_selection: AdapterSelectionPanel::new(adapter),
-            rendering_panel: RenderingPanel::new(),
+            rendering_panel: RenderingPanel::new(device, queue),
             compute_panel: ComputePanel::new(),
+            compute_pipeline_panel: ComputePipelinePanel::new(),
             buffer_panel: BufferPanel::new(),
+            sampler_panel: SamplerPanel::new(),
+            texture_panel: TexturePanel::new(),
+            bind_group_panel: BindGroupPanel::new(),
+            bind_group_layout_panel: BindGroupLayoutPanel::new(),
+            render_pipeline_panel: RenderPipelinePanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context) {
+    pub fn ui(&mut self, ctx: &egui::Context, device: &wgpu::Device, queue: &wgpu::Queue) {
         // Menu bar at the top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.heading("🎮 WebGPU Playground");
@@ -66,6 +90,36 @@ impl PlaygroundApp {
                 Tab::BufferConfig,
                 "📐 Buffer Config",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::SamplerConfig,
+                "🎨 Sampler Config",
+            );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::TextureConfig,
+                "🖼️ Texture Config",
+            );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::BindGroupConfig,
+                "🔗 Bind Group Config",
+            );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::BindGroupLayoutConfig,
+                "🔗 Bind Group Layout",
+            );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::ComputePipelineConfig,
+                "⚙️ Compute Pipeline",
+            );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::RenderPipelineConfig,
+                "⚡ Render Pipeline",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 
@@ -74,8 +128,14 @@ impl PlaygroundApp {
             Tab::AdapterSelection => self.adapter_selection.ui(ui),
             Tab::DeviceConfig => self.device_config.ui(ui),
             Tab::DeviceInfo => self.device_info.ui(ui),
-            Tab::Rendering => self.rendering_panel.ui(ui),
+            Tab::Rendering => self.rendering_panel.ui(ui, device, queue),
             Tab::BufferConfig => self.buffer_panel.ui(ui),
+            Tab::SamplerConfig => self.sampler_panel.ui(ui),
+            Tab::TextureConfig => self.texture_panel.ui(ui),
+            Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
+            Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
+            Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),
+            Tab::RenderPipelineConfig => self.render_pipeline_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
         });
     }
@@ -157,7 +217,7 @@ mod tests {
             };
 
             // Test that we can create a PlaygroundApp
-            let _app = PlaygroundApp::new(&adapter, &device);
+            let _app = PlaygroundApp::new(&adapter, &device, &_queue);
             // If we get here without panicking, the test passes
         });
     }

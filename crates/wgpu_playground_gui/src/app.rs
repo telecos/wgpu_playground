@@ -11,6 +11,7 @@ use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
 use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
+use wgpu_playground_core::resource_inspector::ResourceInspectorPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
 use wgpu_playground_core::texture_panel::TexturePanel;
 
@@ -30,6 +31,7 @@ pub struct PlaygroundApp {
     console_panel: ConsolePanel,
     draw_command_panel: DrawCommandPanel,
     render_pass_panel: RenderPassPanel,
+    resource_inspector_panel: ResourceInspectorPanel,
     selected_tab: Tab,
 }
 
@@ -50,6 +52,7 @@ enum Tab {
     RenderPassConfig,
     Compute,
     Console,
+    ResourceInspector,
 }
 
 impl PlaygroundApp {
@@ -75,6 +78,7 @@ impl PlaygroundApp {
             console_panel,
             draw_command_panel: DrawCommandPanel::new(),
             render_pass_panel: RenderPassPanel::new(),
+            resource_inspector_panel: ResourceInspectorPanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -145,6 +149,11 @@ impl PlaygroundApp {
             );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
             ui.selectable_value(&mut self.selected_tab, Tab::Console, "🖥️ Console");
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::ResourceInspector,
+                "🔍 Resource Inspector",
+            );
         });
 
         // Main canvas area
@@ -164,6 +173,7 @@ impl PlaygroundApp {
             Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
             Tab::Console => self.console_panel.ui(ui),
+            Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
         });
     }
 }

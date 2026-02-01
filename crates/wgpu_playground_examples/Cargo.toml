@@ -17,3 +17,7 @@ bytemuck = { version = "1.14", features = ["derive"] }
 [[bin]]
 name = "adapter_demo"
 path = "src/adapter_demo.rs"
+
+[[bin]]
+name = "texture_mapping"
+path = "src/texture_mapping.rs"

@@ -1,5 +1,5 @@
-use wgpu::{TextureDimension, TextureFormat, TextureUsages};
 use crate::buffer::BufferUsages;
+use wgpu::{TextureDimension, TextureFormat, TextureUsages};
 
 /// Type alias for unique resource identifiers
 pub type ResourceId = u64;
@@ -155,19 +155,19 @@ impl ResourceInfo {
                 // Calculate texture memory based on format, dimensions, and mip levels
                 let bytes_per_pixel = Self::bytes_per_pixel(info.format);
                 let mut total_bytes = 0u64;
-                
+
                 for mip in 0..info.mip_level_count {
                     let mip_width = (info.width >> mip).max(1);
                     let mip_height = (info.height >> mip).max(1);
                     let mip_depth = info.depth_or_array_layers;
-                    
-                    total_bytes += (mip_width as u64) 
-                        * (mip_height as u64) 
-                        * (mip_depth as u64) 
-                        * bytes_per_pixel 
+
+                    total_bytes += (mip_width as u64)
+                        * (mip_height as u64)
+                        * (mip_depth as u64)
+                        * bytes_per_pixel
                         * (info.sample_count as u64);
                 }
-                
+
                 total_bytes
             }
             ResourceInfo::RenderPipeline(_) | ResourceInfo::ComputePipeline(_) => {
@@ -180,17 +180,29 @@ impl ResourceInfo {
     /// Get bytes per pixel for a texture format (approximate)
     fn bytes_per_pixel(format: TextureFormat) -> u64 {
         match format {
-            TextureFormat::R8Unorm | TextureFormat::R8Snorm | TextureFormat::R8Uint | TextureFormat::R8Sint => 1,
+            TextureFormat::R8Unorm
+            | TextureFormat::R8Snorm
+            | TextureFormat::R8Uint
+            | TextureFormat::R8Sint => 1,
             TextureFormat::R16Uint | TextureFormat::R16Sint | TextureFormat::R16Float => 2,
-            TextureFormat::Rg8Unorm | TextureFormat::Rg8Snorm | TextureFormat::Rg8Uint | TextureFormat::Rg8Sint => 2,
+            TextureFormat::Rg8Unorm
+            | TextureFormat::Rg8Snorm
+            | TextureFormat::Rg8Uint
+            | TextureFormat::Rg8Sint => 2,
             TextureFormat::R32Uint | TextureFormat::R32Sint | TextureFormat::R32Float => 4,
             TextureFormat::Rg16Uint | TextureFormat::Rg16Sint | TextureFormat::Rg16Float => 4,
-            TextureFormat::Rgba8Unorm | TextureFormat::Rgba8UnormSrgb | TextureFormat::Rgba8Snorm | TextureFormat::Rgba8Uint | TextureFormat::Rgba8Sint => 4,
+            TextureFormat::Rgba8Unorm
+            | TextureFormat::Rgba8UnormSrgb
+            | TextureFormat::Rgba8Snorm
+            | TextureFormat::Rgba8Uint
+            | TextureFormat::Rgba8Sint => 4,
             TextureFormat::Bgra8Unorm | TextureFormat::Bgra8UnormSrgb => 4,
             TextureFormat::Rgb10a2Unorm => 4,
             TextureFormat::Rg32Uint | TextureFormat::Rg32Sint | TextureFormat::Rg32Float => 8,
             TextureFormat::Rgba16Uint | TextureFormat::Rgba16Sint | TextureFormat::Rgba16Float => 8,
-            TextureFormat::Rgba32Uint | TextureFormat::Rgba32Sint | TextureFormat::Rgba32Float => 16,
+            TextureFormat::Rgba32Uint | TextureFormat::Rgba32Sint | TextureFormat::Rgba32Float => {
+                16
+            }
             TextureFormat::Depth32Float => 4,
             TextureFormat::Depth24Plus => 4,
             TextureFormat::Depth24PlusStencil8 => 4,
@@ -412,11 +424,12 @@ impl ResourceInspectorPanel {
                 // Apply search filter
                 if !self.search_query.is_empty() {
                     let query = self.search_query.to_lowercase();
-                    let label_match = r.label()
+                    let label_match = r
+                        .label()
                         .map(|l| l.to_lowercase().contains(&query))
                         .unwrap_or(false);
                     let type_match = r.type_name().to_lowercase().contains(&query);
-                    
+
                     if !label_match && !type_match {
                         return false;
                     }
@@ -777,7 +790,7 @@ mod tests {
     #[test]
     fn test_filter_buffers() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         panel.add_buffer(BufferInfo {
             id: 0,
             label: Some("buffer1".to_string()),
@@ -810,7 +823,7 @@ mod tests {
     #[test]
     fn test_search_filter() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         panel.add_buffer(BufferInfo {
             id: 0,
             label: Some("vertex_buffer".to_string()),
@@ -892,7 +905,7 @@ mod tests {
     #[test]
     fn test_clear_resources() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         panel.add_buffer(BufferInfo {
             id: 0,
             label: Some("test".to_string()),
@@ -910,7 +923,7 @@ mod tests {
     #[test]
     fn test_show_destroyed_filter() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         panel.add_buffer(BufferInfo {
             id: 0,
             label: Some("active".to_string()),

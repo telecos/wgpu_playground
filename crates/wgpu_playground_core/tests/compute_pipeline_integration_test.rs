@@ -561,6 +561,8 @@ fn test_compute_pipeline_wrong_shader_stage() {
         return;
     }
 
+    let (device, _queue) = device_queue.unwrap();
+
     // Vertex shader instead of compute shader
     let shader_source = r#"
 @vertex
@@ -572,19 +574,16 @@ fn main(@builtin(vertex_index) index: u32) -> @builtin(position) vec4<f32> {
     let shader_result = ShaderModule::from_source(shader_source, Some("vertex_not_compute"));
 
     if let Ok(shader) = shader_result {
-        let device_queue = pollster::block_on(create_test_device());
-        if let Some((device, _queue)) = device_queue {
-            let descriptor = ComputePipelineDescriptor::new(Some("wrong_stage"))
-                .with_shader(shader)
-                .with_entry_point("main");
+        let descriptor = ComputePipelineDescriptor::new(Some("wrong_stage"))
+            .with_shader(shader)
+            .with_entry_point("main");
 
-            let pipeline = descriptor.create_pipeline(&device);
+        let pipeline = descriptor.create_pipeline(&device);
 
-            // Pipeline creation should fail - not a compute shader
-            assert!(
-                pipeline.is_err(),
-                "Expected pipeline creation to fail when using vertex shader for compute pipeline"
-            );
-        }
+        // Pipeline creation should fail - not a compute shader
+        assert!(
+            pipeline.is_err(),
+            "Expected pipeline creation to fail when using vertex shader for compute pipeline"
+        );
     }
 }

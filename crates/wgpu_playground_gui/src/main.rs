@@ -126,7 +126,7 @@ impl AppState {
 
         let egui_renderer = egui_wgpu::Renderer::new(&device, surface_config.format, None, 1, true);
 
-        let playground_app = PlaygroundApp::new(&adapter, &device);
+        let playground_app = PlaygroundApp::new(&adapter, &device, &queue);
 
         Self {
             window,
@@ -187,7 +187,7 @@ impl AppState {
         // Run egui
         let raw_input = self.egui_state.take_egui_input(&self.window);
         let egui_output = self.egui_ctx.run(raw_input, |ctx| {
-            self.playground_app.ui(ctx);
+            self.playground_app.ui(ctx, &self.device, &self.queue);
         });
 
         self.egui_state

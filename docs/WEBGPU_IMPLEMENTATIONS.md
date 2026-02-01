@@ -28,123 +28,193 @@ wgpu supports multiple graphics API backends:
 - **OpenGL/GLES** - Fallback for older platforms
 - **WebGPU** - Browser environments (via WASM)
 
-## Future Implementation: Dawn
+## Dawn Implementation
 
 **Dawn** is Google's C++ implementation of WebGPU, used by Chromium/Chrome browsers.
 
-### Status: Experimental / Placeholder
+### Status: Build Infrastructure Complete
 
-The `dawn` feature flag is currently a **placeholder** for future integration. To fully support Dawn, the following work would be needed:
+The `dawn` feature flag now provides a complete build infrastructure for Dawn integration:
 
-1. **FFI Bindings**: Add Rust FFI bindings to Dawn's C API (e.g., using `dawn-sys` crate)
-2. **Build System**: Configure the build to compile and link Dawn C++ libraries
-3. **Adapter Abstraction**: Create an abstraction layer to switch between wgpu and Dawn adapters
-4. **Instance Management**: Implement Dawn-specific instance creation
-5. **Testing**: Extensive testing to ensure feature parity
+✅ **Implemented**:
+1. **Build System**: Automatic building of Dawn from source using CMake
+2. **FFI Foundation**: Custom FFI type definitions for Dawn's C API
+3. **Cross-Platform Support**: Platform-specific linking for Windows (D3D12), Linux (Vulkan), macOS (Metal)
+4. **Wrapper Module**: Safe Rust abstractions over Dawn's C API
+5. **Instance Management**: Structure for Dawn instance and adapter management
+
+🚧 **In Progress**:
+- **Runtime Integration**: Connecting FFI stubs to built Dawn libraries
+- **Adapter Enumeration**: Implementing full adapter discovery
+- **Device Creation**: Complete device initialization flow
+
+### Building Dawn from Source
+
+When you enable the `dawn` feature, the build system automatically:
+
+1. Clones the Dawn repository from `https://dawn.googlesource.com/dawn`
+2. Configures the build using CMake with dependency fetching
+3. Builds Dawn in Release mode with parallel compilation
+4. Installs Dawn libraries and headers to the build output directory
+5. Sets up platform-specific linking
+
+**Build Requirements**:
+- Git (for cloning Dawn repository)
+- CMake 3.16+ (for build configuration)
+- C++ compiler with C++20 support (MSVC on Windows, GCC/Clang on Linux/macOS)
+- Python 3 (for Dawn's dependency management scripts)
+
+**Build Time**: First build with Dawn takes 10-30 minutes depending on your system.
 
 ### Why Dawn Support?
 
-Adding Dawn support would enable:
+Adding Dawn support enables:
 - **Implementation Comparison**: Compare behavior between wgpu (Firefox) and Dawn (Chrome)
 - **Conformance Testing**: Test against Chrome's reference implementation
 - **Bug Discovery**: Find implementation-specific bugs and differences
 - **Educational Value**: Learn about different WebGPU implementation approaches
+- **Production Parity**: Match the WebGPU implementation used in Chromium browsers
 
-### How to Add Dawn Support (Future Work)
+### Platform-Specific Backends
 
-Here's a roadmap for implementing full Dawn support:
+Dawn automatically selects the appropriate backend for each platform:
 
-#### Step 1: Add Dawn Dependencies
+- **Windows**: Direct3D 12 (D3D12) - Primary backend for Windows 10+
+- **Linux**: Vulkan - Native high-performance graphics API
+- **macOS**: Metal - Apple's native graphics API
 
-```toml
-# In crates/wgpu_playground_core/Cargo.toml
-[dependencies]
-# Existing dependencies...
+The build system automatically configures platform-specific linking requirements.
 
-# Optional Dawn support
-dawn-sys = { version = "0.x", optional = true }
+### Building with Dawn
 
-[features]
-dawn = ["dawn-sys"]
+To build the playground with Dawn support:
+
+```bash
+# Install required tools first
+# On Ubuntu/Debian:
+sudo apt-get install git cmake build-essential python3
+
+# On macOS (with Homebrew):
+brew install git cmake python3
+
+# On Windows:
+# Install Visual Studio with C++ support, CMake, Git, and Python 3
+
+# Then build with Dawn feature:
+cargo build --release --features dawn
 ```
 
-#### Step 2: Create Dawn Wrapper Module
+**Note**: The first build will clone and compile Dawn, which can take 10-30 minutes.
+Subsequent builds will be much faster as Dawn is cached in the build directory.
 
-Create `crates/wgpu_playground_core/src/dawn_wrapper.rs`:
+### Running with Dawn
 
-```rust
-#[cfg(feature = "dawn")]
-pub mod dawn {
-    use dawn_sys::*;
-    
-    pub struct DawnInstance {
-        // Dawn-specific instance
-    }
-    
-    pub struct DawnAdapter {
-        // Dawn-specific adapter
-    }
-    
-    // Implement Dawn-specific initialization
-}
+Once built, you can run the playground with Dawn:
+
+```bash
+# Using environment variable (recommended)
+WEBGPU_IMPL=dawn cargo run --release --features dawn
+
+# Or let it use the compile-time default (Dawn when feature is enabled)
+cargo run --release --features dawn
 ```
 
-#### Step 3: Abstract Instance Creation
+### Implementation Architecture
 
-Update `src/implementation.rs` to support runtime switching:
+The Dawn integration uses the following architecture:
 
-```rust
-pub enum WebGPUInstance {
-    Wgpu(wgpu::Instance),
-    #[cfg(feature = "dawn")]
-    Dawn(DawnInstance),
-}
+1. **build.rs**: Handles Dawn compilation and linking
+   - Clones Dawn repository if not present
+   - Configures CMake build
+   - Compiles Dawn in Release mode
+   - Sets up library search paths
 
-impl WebGPUInstance {
-    pub fn new(impl_type: WebGPUImplementation) -> Self {
-        match impl_type {
-            WebGPUImplementation::Wgpu => {
-                Self::Wgpu(wgpu::Instance::new(...))
-            }
-            #[cfg(feature = "dawn")]
-            WebGPUImplementation::Dawn => {
-                Self::Dawn(DawnInstance::new())
-            }
-        }
-    }
-}
-```
+2. **dawn_wrapper.rs**: Provides safe Rust abstractions
+   - FFI type definitions matching webgpu.h
+   - Safe wrappers around unsafe FFI calls
+   - Resource lifecycle management
+   - Error handling
 
-#### Step 4: Update Main Application
+3. **implementation.rs**: Runtime switching support
+   - Compile-time feature detection
+   - Runtime implementation selection
+   - Environment variable overrides
 
-Modify initialization in `crates/wgpu_playground_gui/src/main.rs` to support selection:
+### Current Limitations
 
-```rust
-// Check environment variable for implementation preference
-let impl_type = std::env::var("WEBGPU_IMPL")
-    .ok()
-    .and_then(|s| match s.as_str() {
-        "dawn" => Some(WebGPUImplementation::Dawn),
-        "wgpu" => Some(WebGPUImplementation::Wgpu),
-        _ => None
-    })
-    .unwrap_or(WebGPUImplementation::current());
+While the build infrastructure is complete, full runtime integration is still in progress:
 
-let instance = WebGPUInstance::new(impl_type);
-```
+- FFI function declarations are defined but not yet linked to compiled Dawn libraries
+- Instance creation returns a placeholder error
+- Adapter enumeration is not yet implemented
+- The build warns about the placeholder status
 
-#### Step 5: Test and Validate
+These will be addressed in future updates as the FFI integration is completed.
 
-- Run test suite with both implementations
-- Compare rendering output
-- Benchmark performance differences
-- Document any behavioral differences
+### Troubleshooting Dawn Builds
+
+**"Git not found"**:
+- Install Git: https://git-scm.com/downloads
+- Ensure `git` is in your PATH
+
+**"CMake not found"**:
+- Install CMake 3.16 or later: https://cmake.org/download/
+- Ensure `cmake` is in your PATH
+
+**"Build failed" on Linux**:
+- Install build essentials: `sudo apt-get install build-essential`
+- Install Vulkan development files: `sudo apt-get install libvulkan-dev`
+
+**"Build failed" on Windows**:
+- Install Visual Studio 2019 or later with C++ Desktop Development
+- Ensure you have Windows SDK installed
+
+**"Python not found"**:
+- Install Python 3: https://www.python.org/downloads/
+- Ensure `python3` (or `python` on Windows) is in your PATH
+
+### Contributing to Dawn Integration
+
+The Dawn integration is functional but not yet complete. Contributions are welcome in these areas:
+
+1. **FFI Runtime Integration**: Connect FFI stubs to built libraries
+2. **Adapter Enumeration**: Implement adapter discovery and selection
+3. **Device Creation**: Complete device initialization flow
+4. **Testing**: Add comprehensive tests for Dawn code paths
+5. **Documentation**: Improve build and usage documentation
+6. **CI/CD**: Add Dawn builds to continuous integration
+
+See the main CONTRIBUTING.md for development guidelines.
+
+### How Dawn Integration Works (Technical Details)
+
+#### Build Process
+
+When `--features dawn` is enabled:
+
+1. **Clone Dawn**: build.rs checks if Dawn source exists, clones if needed
+2. **CMake Configure**: Runs `cmake -S dawn -B build -DDAWN_FETCH_DEPENDENCIES=ON`
+3. **Build Dawn**: Runs `cmake --build build --parallel`
+4. **Install**: Runs `cmake --install build` to output directory
+5. **Link**: Sets rustc link flags for Dawn libraries and platform dependencies
+
+#### FFI Layer
+
+The FFI layer (`dawn_wrapper.rs`) provides:
+
+- Type definitions matching Dawn's webgpu.h API
+- Safe wrappers for `DawnInstance`, `DawnAdapter`, `DawnDevice`
+- Rust enums for power preferences and backends
+- Error types for Dawn-specific errors
+- Resource lifecycle management
+
+Currently, FFI functions are declared but not yet linked. Full runtime integration is in progress.
 
 ## Using Different Implementations
 
 ### Current Usage
 
-The playground now supports runtime switching between implementations using environment variables:
+The playground supports runtime switching between implementations using environment variables:
 
 ```bash
 # Default: uses wgpu implementation
@@ -153,7 +223,7 @@ cargo run --release
 # Explicitly select wgpu
 WEBGPU_IMPL=wgpu cargo run --release
 
-# Select Dawn placeholder mode (requires compilation with --features dawn)
+# Select Dawn (requires compilation with --features dawn)
 cargo run --release --features dawn
 WEBGPU_IMPL=dawn cargo run --release --features dawn
 
@@ -168,35 +238,28 @@ WEBGPU_IMPL=wgpu WGPU_BACKEND=vulkan cargo run --release
 
 ### Implementation Status
 
-Currently, the Dawn implementation is a **placeholder** that uses the wgpu backend underneath. This allows the infrastructure for switching implementations to be tested and used, while full Dawn integration is still in progress.
+**wgpu**: Fully functional, production-ready
+- Native Rust implementation
+- All features supported
+- Used by Firefox
+
+**Dawn**: Build infrastructure complete, runtime integration in progress
+- Builds from source automatically
+- FFI types and wrappers defined
+- Runtime calls pending
+- Will match Chromium's implementation when complete
 
 When you enable the Dawn feature flag:
-- The UI will show "Dawn" as the active implementation
-- A warning message indicates it's using wgpu underneath
-- All the switching infrastructure is in place and functional
-- This allows testing the implementation selection mechanism
-
-### Future: Full Dawn Integration
-
-When full Dawn support is implemented (via FFI bindings to Dawn's C API), the usage will remain the same:
-
-```bash
-# Use wgpu implementation (default)
-cargo run --release
-
-# Use Dawn implementation (native, when integrated)
-cargo run --release --features dawn
-WEBGPU_IMPL=dawn cargo run --release --features dawn
-
-# Combine with backend selection
-WEBGPU_IMPL=dawn WGPU_BACKEND=vulkan cargo run --release --features dawn
-```
+- Build system automatically builds Dawn from source
+- FFI infrastructure is in place
+- Runtime calls return placeholder errors until integration is complete
+- All the switching infrastructure is functional
 
 ## Implementation Information in UI
 
 The active WebGPU implementation is displayed in two places:
 
-1. **Device Info Tab**: Shows the implementation name, description, source URL, and status (native or placeholder)
+1. **Device Info Tab**: Shows the implementation name, description, source URL, and status
 2. **Adapter Selection Tab**: Lists available implementations and indicates which is active
 
 This information helps users understand which implementation they're using and what features are available.
@@ -210,6 +273,7 @@ The implementation switching is designed with these principles:
 3. **Minimal Overhead**: When Dawn is not compiled in, it adds zero runtime cost
 4. **Extensibility**: Easy to add more implementations in the future
 5. **Type Safety**: Leverage Rust's type system to prevent misuse
+6. **Build from Source**: Dawn is built automatically from source for maximum compatibility
 
 ## References
 

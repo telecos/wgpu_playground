@@ -94,12 +94,15 @@ The playground supports different WebGPU implementations:
 - **wgpu** (default): Pure Rust implementation used by Firefox
   - Fast, safe, and cross-platform
   - Actively maintained by the gfx-rs team
+  - Production-ready with full WebGPU support
   - https://github.com/gfx-rs/wgpu
 
-- **Dawn** (experimental): C++ implementation used by Chromium
+- **Dawn** (build infrastructure complete): C++ implementation used by Chromium
   - Google's reference implementation
-  - Can be enabled with the `dawn` feature flag
-  - **Note**: Currently a placeholder - uses wgpu backend until full Dawn FFI integration
+  - Built automatically from source using CMake
+  - Cross-platform support (Windows D3D12, Linux Vulkan, macOS Metal)
+  - Requires Git, CMake, C++ compiler, Python 3
+  - **Status**: Build system functional, runtime integration in progress
   - https://dawn.googlesource.com/dawn
 
 #### Selecting Implementation
@@ -111,8 +114,27 @@ By default, the application uses the **wgpu** implementation. You can select the
 # Default: wgpu implementation
 cargo build --release
 
-# Enable Dawn placeholder mode
+# Enable Dawn (builds from source, requires CMake)
 cargo build --release --features dawn
+```
+
+**First Dawn build requirements:**
+- Git (clone repository)
+- CMake 3.16+ (build configuration)
+- C++ compiler with C++20 support
+- Python 3 (dependency scripts)
+- 10-30 minutes build time (one-time)
+
+**Install build tools:**
+```bash
+# Ubuntu/Debian:
+sudo apt-get install git cmake build-essential python3 libvulkan-dev
+
+# macOS (Homebrew):
+brew install git cmake python3
+
+# Windows:
+# Install Visual Studio with C++ support, CMake, Git, Python 3
 ```
 
 **2. Runtime (environment variable):**
@@ -124,7 +146,7 @@ WEBGPU_IMPL=wgpu cargo run --release
 WEBGPU_IMPL=dawn cargo run --release --features dawn
 ```
 
-The active WebGPU implementation and its status is displayed in the **Device Info** and **Adapter Selection** tabs. When Dawn mode is active, a warning is shown indicating it's using the wgpu backend underneath until full Dawn integration is complete.
+The active WebGPU implementation and its status is displayed in the **Device Info** and **Adapter Selection** tabs.
 
 ### Backend Selection
 

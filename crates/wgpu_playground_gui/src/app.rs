@@ -5,6 +5,7 @@ use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
+use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
@@ -22,6 +23,7 @@ pub struct PlaygroundApp {
     bind_group_panel: BindGroupPanel,
     bind_group_layout_panel: BindGroupLayoutPanel,
     render_pipeline_panel: RenderPipelinePanel,
+    draw_command_panel: DrawCommandPanel,
     selected_tab: Tab,
 }
 
@@ -37,6 +39,7 @@ enum Tab {
     BindGroupConfig,
     BindGroupLayoutConfig,
     RenderPipelineConfig,
+    DrawCommand,
     Compute,
 }
 
@@ -54,6 +57,7 @@ impl PlaygroundApp {
             bind_group_panel: BindGroupPanel::new(),
             bind_group_layout_panel: BindGroupLayoutPanel::new(),
             render_pipeline_panel: RenderPipelinePanel::new(),
+            draw_command_panel: DrawCommandPanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -111,6 +115,11 @@ impl PlaygroundApp {
                 Tab::RenderPipelineConfig,
                 "⚡ Render Pipeline",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::DrawCommand,
+                "📊 Draw Command",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
         });
 
@@ -126,6 +135,7 @@ impl PlaygroundApp {
             Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
             Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
             Tab::RenderPipelineConfig => self.render_pipeline_panel.ui(ui),
+            Tab::DrawCommand => self.draw_command_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
         });
     }

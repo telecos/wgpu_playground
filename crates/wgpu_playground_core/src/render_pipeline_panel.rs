@@ -340,17 +340,13 @@ impl RenderPipelinePanel {
                 pass_op: self.stencil_back_pass_op,
             };
 
-            let stencil_read_mask = u32::from_str_radix(
-                self.stencil_read_mask_input.trim_start_matches("0x"),
-                16,
-            )
-            .unwrap_or(0xFFFFFFFF);
+            let stencil_read_mask =
+                u32::from_str_radix(self.stencil_read_mask_input.trim_start_matches("0x"), 16)
+                    .unwrap_or(0xFFFFFFFF);
 
-            let stencil_write_mask = u32::from_str_radix(
-                self.stencil_write_mask_input.trim_start_matches("0x"),
-                16,
-            )
-            .unwrap_or(0xFFFFFFFF);
+            let stencil_write_mask =
+                u32::from_str_radix(self.stencil_write_mask_input.trim_start_matches("0x"), 16)
+                    .unwrap_or(0xFFFFFFFF);
 
             let mut depth_stencil = DepthStencilState::new(self.depth_format.to_wgpu())
                 .with_depth_write_enabled(self.depth_write_enabled)
@@ -396,8 +392,8 @@ impl RenderPipelinePanel {
             write_mask = write_mask | ColorWrites::ALPHA;
         }
 
-        let mut target = ColorTargetState::new(self.target_format.to_wgpu())
-            .with_write_mask(write_mask);
+        let mut target =
+            ColorTargetState::new(self.target_format.to_wgpu()).with_write_mask(write_mask);
 
         if let Some(blend) = blend {
             target = target.with_blend(blend);
@@ -792,11 +788,7 @@ impl RenderPipelinePanel {
             });
     }
 
-    fn render_compare_function_combo(
-        ui: &mut egui::Ui,
-        compare: &mut CompareFunction,
-        id: &str,
-    ) {
+    fn render_compare_function_combo(ui: &mut egui::Ui, compare: &mut CompareFunction, id: &str) {
         egui::ComboBox::from_id_salt(id)
             .selected_text(Self::compare_function_name(*compare))
             .show_ui(ui, |ui| {
@@ -835,8 +827,16 @@ impl RenderPipelinePanel {
                 ui.selectable_value(operation, StencilOperation::Keep, "Keep");
                 ui.selectable_value(operation, StencilOperation::Zero, "Zero");
                 ui.selectable_value(operation, StencilOperation::Replace, "Replace");
-                ui.selectable_value(operation, StencilOperation::IncrementClamp, "Increment Clamp");
-                ui.selectable_value(operation, StencilOperation::DecrementClamp, "Decrement Clamp");
+                ui.selectable_value(
+                    operation,
+                    StencilOperation::IncrementClamp,
+                    "Increment Clamp",
+                );
+                ui.selectable_value(
+                    operation,
+                    StencilOperation::DecrementClamp,
+                    "Decrement Clamp",
+                );
                 ui.selectable_value(operation, StencilOperation::Invert, "Invert");
                 ui.selectable_value(operation, StencilOperation::IncrementWrap, "Increment Wrap");
                 ui.selectable_value(operation, StencilOperation::DecrementWrap, "Decrement Wrap");
@@ -869,10 +869,18 @@ impl RenderPipelinePanel {
                 ui.selectable_value(factor, BlendFactor::Dst, "Destination");
                 ui.selectable_value(factor, BlendFactor::OneMinusDst, "One - Destination");
                 ui.selectable_value(factor, BlendFactor::DstAlpha, "Destination Alpha");
-                ui.selectable_value(factor, BlendFactor::OneMinusDstAlpha, "One - Destination Alpha");
+                ui.selectable_value(
+                    factor,
+                    BlendFactor::OneMinusDstAlpha,
+                    "One - Destination Alpha",
+                );
                 ui.selectable_value(factor, BlendFactor::Constant, "Constant");
                 ui.selectable_value(factor, BlendFactor::OneMinusConstant, "One - Constant");
-                ui.selectable_value(factor, BlendFactor::SrcAlphaSaturated, "Source Alpha Saturated");
+                ui.selectable_value(
+                    factor,
+                    BlendFactor::SrcAlphaSaturated,
+                    "Source Alpha Saturated",
+                );
             });
     }
 
@@ -894,17 +902,17 @@ impl RenderPipelinePanel {
         }
     }
 
-    fn render_blend_operation_combo(
-        ui: &mut egui::Ui,
-        operation: &mut BlendOperation,
-        id: &str,
-    ) {
+    fn render_blend_operation_combo(ui: &mut egui::Ui, operation: &mut BlendOperation, id: &str) {
         egui::ComboBox::from_id_salt(id)
             .selected_text(Self::blend_operation_name(*operation))
             .show_ui(ui, |ui| {
                 ui.selectable_value(operation, BlendOperation::Add, "Add");
                 ui.selectable_value(operation, BlendOperation::Subtract, "Subtract");
-                ui.selectable_value(operation, BlendOperation::ReverseSubtract, "Reverse Subtract");
+                ui.selectable_value(
+                    operation,
+                    BlendOperation::ReverseSubtract,
+                    "Reverse Subtract",
+                );
                 ui.selectable_value(operation, BlendOperation::Min, "Min");
                 ui.selectable_value(operation, BlendOperation::Max, "Max");
             });
@@ -1110,14 +1118,8 @@ mod tests {
 
     #[test]
     fn test_cull_mode_name() {
-        assert_eq!(
-            RenderPipelinePanel::cull_mode_name(CullMode::None),
-            "None"
-        );
-        assert_eq!(
-            RenderPipelinePanel::cull_mode_name(CullMode::Back),
-            "Back"
-        );
+        assert_eq!(RenderPipelinePanel::cull_mode_name(CullMode::None), "None");
+        assert_eq!(RenderPipelinePanel::cull_mode_name(CullMode::Back), "Back");
     }
 
     #[test]

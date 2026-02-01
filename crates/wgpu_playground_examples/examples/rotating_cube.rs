@@ -91,12 +91,17 @@ fn create_cube_vertices() -> Vec<Vertex> {
 /// Create cube indices (6 faces, 2 triangles per face, 3 indices per triangle)
 fn create_cube_indices() -> Vec<u16> {
     vec![
-        // Front face
-        0, 1, 2, 2, 3, 0, // Back face
-        5, 4, 7, 7, 6, 5, // Top face
-        3, 2, 6, 6, 7, 3, // Bottom face
-        4, 5, 1, 1, 0, 4, // Right face
-        1, 5, 6, 6, 2, 1, // Left face
+        // Front face (vertices 0-3)
+        0, 1, 2, 2, 3, 0,
+        // Back face (vertices 4-7)
+        5, 4, 7, 7, 6, 5,
+        // Top face (vertices 3, 2, 6, 7)
+        3, 2, 6, 6, 7, 3,
+        // Bottom face (vertices 4, 5, 1, 0)
+        4, 5, 1, 1, 0, 4,
+        // Right face (vertices 1, 5, 6, 2)
+        1, 5, 6, 6, 2, 1,
+        // Left face (vertices 4, 0, 3, 7)
         4, 0, 3, 3, 7, 4,
     ]
 }

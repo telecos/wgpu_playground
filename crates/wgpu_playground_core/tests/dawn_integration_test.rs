@@ -92,11 +92,13 @@ fn test_dawn_device_creation() {
 
         let device = device.unwrap();
 
-        // Verify device has queue
-        let _queue = device.wgpu_queue();
-        let _device = device.wgpu_device();
-
-        println!("Device created successfully");
+        // Verify device has queue (when using fallback)
+        if let Some(_queue) = device.wgpu_queue() {
+            let _device = device.wgpu_device();
+            println!("Device created successfully");
+        } else {
+            println!("Using native Dawn device");
+        }
     } else {
         println!("No adapter available for device creation (expected in headless environment)");
     }
@@ -173,9 +175,12 @@ fn test_dawn_full_workflow() {
             println!("✓ Device created");
 
             // 5. Access device components
-            let _wgpu_device = device.wgpu_device();
-            let _queue = device.wgpu_queue();
-            println!("✓ Device components accessible");
+            if let Some(_wgpu_device) = device.wgpu_device() {
+                let _queue = device.wgpu_queue();
+                println!("✓ Device components accessible");
+            } else {
+                println!("✓ Native Dawn device created");
+            }
 
             println!("\n✅ Full Dawn workflow completed successfully!");
         } else {

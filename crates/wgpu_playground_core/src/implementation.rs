@@ -125,7 +125,16 @@ impl WebGPUImplementation {
         match self {
             Self::Wgpu => "Native wgpu implementation",
             #[cfg(feature = "dawn")]
-            Self::Dawn => "Fully integrated: WebGPU implementation with wgpu backend",
+            Self::Dawn => {
+                #[cfg(dawn_enabled)]
+                {
+                    "Native Dawn C++ library"
+                }
+                #[cfg(not(dawn_enabled))]
+                {
+                    "Dawn API with wgpu-core fallback"
+                }
+            }
         }
     }
 
@@ -216,7 +225,12 @@ mod tests {
         #[cfg(feature = "dawn")]
         {
             let status = WebGPUImplementation::Dawn.status_message();
-            assert!(status.contains("Fully integrated"));
+            // Status depends on whether Dawn was successfully built
+            assert!(
+                status.contains("Dawn") || status.contains("fallback"),
+                "Expected Dawn-related status message, got: {}",
+                status
+            );
         }
     }
 

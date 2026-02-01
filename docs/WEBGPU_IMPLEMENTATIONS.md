@@ -32,25 +32,36 @@ wgpu supports multiple graphics API backends:
 
 **Dawn** is Google's C++ implementation of WebGPU, used by Chromium/Chrome browsers.
 
-### Status: Fully Integrated
+### Status: Native Dawn Support with wgpu-core Fallback
 
-The `dawn` feature flag now provides a fully functional WebGPU implementation:
+The `dawn` feature flag attempts to build and use the actual Dawn C++ library:
 
-✅ **Implemented**:
-1. **Instance Management**: Create and manage WebGPU instances
-2. **Adapter Enumeration**: Discover and select GPU adapters
-3. **Device Creation**: Create devices with custom configurations
-4. **Power Preferences**: Support for low-power and high-performance modes
-5. **Backend Abstraction**: Uses wgpu as the underlying implementation
-6. **Full API Coverage**: All WebGPU features available through Dawn-style API
+✅ **Implemented - Native Dawn Path**:
+1. **Build System**: Automatic building of Dawn from source using CMake
+2. **FFI Declarations**: Complete FFI type definitions matching Dawn's C API
+3. **Conditional Compilation**: Uses native Dawn when successfully built
+4. **Cross-Platform Linking**: Platform-specific linking for Windows (D3D12), Linux (Vulkan), macOS (Metal)
 
-### Architecture
+✅ **Implemented - Fallback Path**:
+1. **wgpu-core Backend**: When Dawn build fails, uses wgpu-core as compatible implementation
+2. **Full API Coverage**: All WebGPU features available through fallback
+3. **Graceful Degradation**: Automatic fallback without user intervention
 
-The Dawn integration uses wgpu as the backend implementation, providing:
-- A Dawn-compatible API layer
-- Full WebGPU functionality
-- Cross-platform support
-- No external build dependencies
+### How It Works
+
+When you enable the `dawn` feature:
+
+1. **Build Phase** (build.rs):
+   - Attempts to clone Dawn from https://dawn.googlesource.com/dawn
+   - Configures and builds Dawn with CMake
+   - If successful: Sets `dawn_enabled` cfg and links to Dawn libraries
+   - If failed: Uses wgpu-core fallback (no cfg set)
+
+2. **Runtime Phase**:
+   - When `dawn_enabled`: Uses actual Dawn C++ library via FFI
+   - When not `dawn_enabled`: Uses wgpu-core with Dawn-compatible API
+
+This provides the best of both worlds: actual Dawn integration when possible, full functionality always.
 
 ### Building with Dawn
 

@@ -25,7 +25,15 @@ enum RenderState {
 }
 
 impl RenderState {
-    fn update(&mut self, queue: &Queue, delta_time: f32) {
+    fn update(
+        &mut self,
+        queue: &Queue,
+        delta_time: f32,
+        camera_distance: f32,
+        camera_rot_x: f32,
+        camera_rot_y: f32,
+        aspect: f32,
+    ) {
         if let RenderState::Cube(cube_state) = self {
             cube_state.time += delta_time;
 
@@ -37,9 +45,14 @@ impl RenderState {
                 model: [[f32; 4]; 4],
             }
 
-            let aspect = 1.0;
             let projection = perspective_matrix(45.0_f32.to_radians(), aspect, 0.1, 100.0);
-            let view = look_at_matrix([0.0, 0.0, 3.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
+
+            // Calculate camera position based on rotation and distance
+            let cam_x = camera_distance * camera_rot_y.sin() * camera_rot_x.cos();
+            let cam_y = camera_distance * camera_rot_x.sin();
+            let cam_z = camera_distance * camera_rot_y.cos() * camera_rot_x.cos();
+
+            let view = look_at_matrix([cam_x, cam_y, cam_z], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
             let view_proj = matrix_multiply(&projection, &view);
 
             let rotation_y = rotation_y_matrix(cube_state.time);
@@ -65,9 +78,18 @@ pub struct RenderingPanel {
     render_state: RenderState,
     render_texture: Option<wgpu::Texture>,
     render_texture_view: Option<wgpu::TextureView>,
+    render_texture_id: Option<egui::TextureId>,
     is_example_running: bool,
     shader_editor: ShaderEditor,
     show_shader_editor: bool,
+    // Canvas controls
+    canvas_width: u32,
+    canvas_height: u32,
+    clear_color: [f32; 4],
+    // Camera control for 3D examples
+    camera_distance: f32,
+    camera_rotation_x: f32,
+    camera_rotation_y: f32,
 }
 
 impl Default for RenderingPanel {
@@ -92,17 +114,24 @@ impl RenderingPanel {
             render_state: RenderState::None,
             render_texture: None,
             render_texture_view: None,
+            render_texture_id: None,
             is_example_running: false,
             shader_editor: ShaderEditor::new(),
             show_shader_editor: false,
+            canvas_width: 512,
+            canvas_height: 512,
+            clear_color: [0.05, 0.05, 0.1, 1.0],
+            camera_distance: 3.0,
+            camera_rotation_x: 0.0,
+            camera_rotation_y: 0.0,
         }
     }
 
     fn init_render_texture(&mut self, device: &Device) {
-        // Create a 512x512 texture for rendering examples
+        // Create a texture for rendering examples using current canvas size
         let size = wgpu::Extent3d {
-            width: 512,
-            height: 512,
+            width: self.canvas_width,
+            height: self.canvas_height,
             depth_or_array_layers: 1,
         };
 
@@ -113,7 +142,9 @@ impl RenderingPanel {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Bgra8UnormSrgb,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+                | wgpu::TextureUsages::TEXTURE_BINDING
+                | wgpu::TextureUsages::COPY_SRC, // For screenshot
             view_formats: &[],
         });
 
@@ -121,6 +152,8 @@ impl RenderingPanel {
 
         self.render_texture = Some(texture);
         self.render_texture_view = Some(view);
+        // Reset texture ID when texture is recreated
+        self.render_texture_id = None;
     }
 
     fn create_triangle_render_state(&mut self, device: &Device, queue: &Queue) {
@@ -396,8 +429,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
         // Create depth texture
         let size = wgpu::Extent3d {
-            width: 512,
-            height: 512,
+            width: self.canvas_width,
+            height: self.canvas_height,
             depth_or_array_layers: 1,
         };
 
@@ -483,7 +516,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         // Update animation state
         // TODO: Pass actual delta_time from frame timer instead of hardcoded 60fps
         // This currently assumes constant frame rate, causing animation speed to vary
-        self.render_state.update(queue, 0.016); // ~60fps
+        let aspect = self.canvas_width as f32 / self.canvas_height as f32;
+        self.render_state.update(
+            queue,
+            0.016, // ~60fps
+            self.camera_distance,
+            self.camera_rotation_x,
+            self.camera_rotation_y,
+            aspect,
+        );
 
         if let Some(view) = &self.render_texture_view {
             let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -512,10 +553,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                         resolve_target: None,
                         ops: wgpu::Operations {
                             load: wgpu::LoadOp::Clear(wgpu::Color {
-                                r: 0.05,
-                                g: 0.05,
-                                b: 0.1,
-                                a: 1.0,
+                                r: self.clear_color[0] as f64,
+                                g: self.clear_color[1] as f64,
+                                b: self.clear_color[2] as f64,
+                                a: self.clear_color[3] as f64,
                             }),
                             store: wgpu::StoreOp::Store,
                         },
@@ -549,7 +590,160 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         }
     }
 
-    pub fn ui(&mut self, ui: &mut egui::Ui, device: &Device, queue: &Queue) {
+    /// Register the render texture with egui renderer and return the texture ID
+    pub fn register_texture(
+        &mut self,
+        device: &Device,
+        renderer: &mut egui_wgpu::Renderer,
+    ) -> Option<egui::TextureId> {
+        if let Some(view) = &self.render_texture_view {
+            // If already registered, return existing ID
+            if let Some(id) = self.render_texture_id {
+                return Some(id);
+            }
+
+            // Register the texture
+            let texture_id =
+                renderer.register_native_texture(device, view, wgpu::FilterMode::Linear);
+            self.render_texture_id = Some(texture_id);
+            Some(texture_id)
+        } else {
+            None
+        }
+    }
+
+    /// Resize the canvas and recreate render texture
+    pub fn resize_canvas(&mut self, device: &Device, width: u32, height: u32) {
+        if width > 0 && height > 0 && (width != self.canvas_width || height != self.canvas_height) {
+            self.canvas_width = width;
+            self.canvas_height = height;
+            self.init_render_texture(device);
+
+            // Recreate render state with new size if needed
+            if let RenderState::Cube(_) = &self.render_state {
+                // Need to recreate depth texture for cube
+                // This will be handled by re-running the example
+                self.is_example_running = false;
+                self.render_state = RenderState::None;
+            }
+        }
+    }
+
+    /// Capture screenshot of current render
+    pub fn capture_screenshot(&self, device: &Device, queue: &Queue) {
+        if let Some(texture) = &self.render_texture {
+            let width = self.canvas_width;
+            let height = self.canvas_height;
+            let bytes_per_pixel = 4; // BGRA8
+            let unpadded_bytes_per_row = width * bytes_per_pixel;
+            let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
+            let padded_bytes_per_row = unpadded_bytes_per_row.div_ceil(align) * align;
+            let buffer_size = (padded_bytes_per_row * height) as u64;
+
+            let output_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+                label: Some("Screenshot Buffer"),
+                size: buffer_size,
+                usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+                mapped_at_creation: false,
+            });
+
+            let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Screenshot Encoder"),
+            });
+
+            encoder.copy_texture_to_buffer(
+                wgpu::ImageCopyTexture {
+                    texture,
+                    mip_level: 0,
+                    origin: wgpu::Origin3d::ZERO,
+                    aspect: wgpu::TextureAspect::All,
+                },
+                wgpu::ImageCopyBuffer {
+                    buffer: &output_buffer,
+                    layout: wgpu::ImageDataLayout {
+                        offset: 0,
+                        bytes_per_row: Some(padded_bytes_per_row),
+                        rows_per_image: Some(height),
+                    },
+                },
+                wgpu::Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                },
+            );
+
+            queue.submit(std::iter::once(encoder.finish()));
+
+            // Map the buffer and save to file
+            let buffer_slice = output_buffer.slice(..);
+            let (tx, rx) = std::sync::mpsc::channel();
+            buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
+                let _ = tx.send(result); // Ignore send errors (receiver might be dropped)
+            });
+
+            device.poll(wgpu::Maintain::Wait);
+
+            match rx.recv() {
+                Ok(Ok(())) => {
+                    let data = buffer_slice.get_mapped_range();
+
+                    // Convert BGRA to RGBA
+                    let mut rgba_data = vec![0u8; (width * height * 4) as usize];
+                    for row in 0..height {
+                        let src_offset = (row * padded_bytes_per_row) as usize;
+                        let dst_offset = (row * width * 4) as usize;
+                        for col in 0..width {
+                            let src_idx = src_offset + (col * 4) as usize;
+                            let dst_idx = dst_offset + (col * 4) as usize;
+                            // BGRA -> RGBA
+                            rgba_data[dst_idx] = data[src_idx + 2]; // R
+                            rgba_data[dst_idx + 1] = data[src_idx + 1]; // G
+                            rgba_data[dst_idx + 2] = data[src_idx]; // B
+                            rgba_data[dst_idx + 3] = data[src_idx + 3]; // A
+                        }
+                    }
+
+                    drop(data);
+                    output_buffer.unmap();
+
+                    // Save to file
+                    use std::time::SystemTime;
+                    let timestamp = SystemTime::now()
+                        .duration_since(SystemTime::UNIX_EPOCH)
+                        .expect("Failed to get current timestamp for screenshot filename")
+                        .as_secs();
+                    let filename = format!("screenshot_{}.png", timestamp);
+
+                    if let Err(e) = image::save_buffer(
+                        &filename,
+                        &rgba_data,
+                        width,
+                        height,
+                        image::ColorType::Rgba8,
+                    ) {
+                        log::error!("Failed to save screenshot: {}", e);
+                    } else {
+                        log::info!("Screenshot saved to {}", filename);
+                    }
+                }
+                Ok(Err(e)) => {
+                    log::error!("Failed to map screenshot buffer: {:?}", e);
+                }
+                Err(e) => {
+                    log::error!("Failed to receive buffer mapping result: {}", e);
+                }
+            }
+        }
+    }
+
+    pub fn ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: &Device,
+        queue: &Queue,
+        renderer: &mut egui_wgpu::Renderer,
+    ) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("🎨 Rendering Examples");
             ui.separator();
@@ -574,12 +768,18 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 self.shader_editor.ui(ui, None);
             } else {
                 // Show the example gallery (existing code)
-                self.render_example_gallery(ui, device, queue);
+                self.render_example_gallery(ui, device, queue, renderer);
             }
         });
     }
 
-    fn render_example_gallery(&mut self, ui: &mut egui::Ui, device: &Device, queue: &Queue) {
+    fn render_example_gallery(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: &Device,
+        queue: &Queue,
+        renderer: &mut egui_wgpu::Renderer,
+    ) {
         // Category filter
         ui.horizontal(|ui| {
             ui.label("Filter by category:");
@@ -695,116 +895,130 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     if self.is_example_running && example_category == ExampleCategory::Rendering {
                         ui.add_space(10.0);
                         ui.separator();
+
+                        // Canvas controls
+                        ui.collapsing("⚙️ Canvas Controls", |ui| {
+                            ui.horizontal(|ui| {
+                                ui.label("Canvas Size:");
+                                let mut width = self.canvas_width;
+                                let mut height = self.canvas_height;
+
+                                ui.add(
+                                    egui::DragValue::new(&mut width)
+                                        .prefix("W: ")
+                                        .range(64..=2048),
+                                );
+                                ui.add(
+                                    egui::DragValue::new(&mut height)
+                                        .prefix("H: ")
+                                        .range(64..=2048),
+                                );
+
+                                if ui.button("Apply").clicked() {
+                                    self.resize_canvas(device, width, height);
+                                    // Restart the current example with new size
+                                    if example_id == "triangle" {
+                                        self.create_triangle_render_state(device, queue);
+                                    } else if example_id == "cube" {
+                                        self.create_cube_render_state(device, queue);
+                                    }
+                                }
+                            });
+
+                            ui.horizontal(|ui| {
+                                ui.label("Clear Color:");
+                                ui.color_edit_button_rgba_unmultiplied(&mut self.clear_color);
+                            });
+
+                            if ui.button("📷 Capture Screenshot").clicked() {
+                                self.capture_screenshot(device, queue);
+                            }
+
+                            // Camera controls for 3D examples
+                            if example_id == "cube" {
+                                ui.separator();
+                                ui.label("Camera Controls:");
+                                ui.add(
+                                    egui::Slider::new(&mut self.camera_distance, 1.0..=10.0)
+                                        .text("Distance"),
+                                );
+                                ui.add(
+                                    egui::Slider::new(
+                                        &mut self.camera_rotation_x,
+                                        -std::f32::consts::FRAC_PI_2..=std::f32::consts::FRAC_PI_2,
+                                    )
+                                    .text("Rotation X (up/down)"),
+                                );
+                                ui.add(
+                                    egui::Slider::new(
+                                        &mut self.camera_rotation_y,
+                                        -std::f32::consts::PI..=std::f32::consts::PI,
+                                    )
+                                    .text("Rotation Y (left/right)"),
+                                );
+                                if ui.button("Reset Camera").clicked() {
+                                    self.camera_distance = 3.0;
+                                    self.camera_rotation_x = 0.0;
+                                    self.camera_rotation_y = 0.0;
+                                }
+                            }
+                        });
+
+                        ui.add_space(10.0);
                         ui.label(egui::RichText::new("Preview:").strong());
 
                         // Render the example
                         self.render_current_example(device, queue);
 
-                        // Draw a gradient background to show the rendering area
-                        let (rect, _response) =
-                            ui.allocate_exact_size(egui::vec2(512.0, 512.0), egui::Sense::hover());
+                        // Register and display the texture
+                        if let Some(texture_id) = self.register_texture(device, renderer) {
+                            let size =
+                                egui::vec2(self.canvas_width as f32, self.canvas_height as f32);
 
-                        // Draw gradient background
-                        let color_tl = egui::Color32::from_rgb(40, 20, 60);
-                        let color_br = egui::Color32::from_rgb(20, 40, 80);
+                            // Create an interactive canvas for mouse control
+                            let response = ui.add(
+                                egui::Image::new(egui::load::SizedTexture::new(texture_id, size))
+                                    .sense(egui::Sense::click_and_drag()),
+                            );
 
-                        let mut mesh = egui::Mesh::default();
-                        mesh.colored_vertex(rect.left_top(), color_tl);
-                        mesh.colored_vertex(rect.right_top(), color_tl);
-                        mesh.colored_vertex(rect.right_bottom(), color_br);
-                        mesh.colored_vertex(rect.left_bottom(), color_br);
-                        mesh.add_triangle(0, 1, 2);
-                        mesh.add_triangle(0, 2, 3);
-                        ui.painter().add(egui::Shape::mesh(mesh));
+                            // Handle mouse interaction for 3D camera control
+                            if example_id == "cube" {
+                                if response.dragged() {
+                                    let delta = response.drag_delta();
+                                    self.camera_rotation_y += delta.x * 0.01;
+                                    self.camera_rotation_x -= delta.y * 0.01;
+                                    // Clamp rotation_x to avoid gimbal lock
+                                    self.camera_rotation_x = self.camera_rotation_x.clamp(
+                                        -std::f32::consts::PI / 2.0,
+                                        std::f32::consts::PI / 2.0,
+                                    );
+                                }
 
-                        // Draw a border
-                        ui.painter().rect_stroke(
-                            rect,
-                            4.0,
-                            egui::Stroke::new(2.0, egui::Color32::from_rgb(100, 150, 255)),
-                        );
+                                // Mouse wheel for zoom
+                                let scroll_delta = ui.input(|i| i.smooth_scroll_delta.y);
+                                if scroll_delta.abs() > 0.1 {
+                                    self.camera_distance -= scroll_delta * 0.01;
+                                    self.camera_distance = self.camera_distance.clamp(1.0, 10.0);
+                                }
+                            }
 
-                        // For triangle example, draw a simple triangle representation
-                        if example_id == "triangle" {
-                            let center = rect.center();
-                            let size = 200.0;
-
-                            let top = egui::pos2(center.x, center.y - size * 0.5);
-                            let left = egui::pos2(center.x - size * 0.5, center.y + size * 0.5);
-                            let right = egui::pos2(center.x + size * 0.5, center.y + size * 0.5);
-
-                            // Draw the triangle with gradient colors
-                            let mesh = {
-                                let mut mesh = egui::Mesh::default();
-                                mesh.colored_vertex(top, egui::Color32::RED);
-                                mesh.colored_vertex(left, egui::Color32::GREEN);
-                                mesh.colored_vertex(right, egui::Color32::BLUE);
-                                mesh.add_triangle(0, 1, 2);
-                                mesh
-                            };
-
-                            ui.painter().add(egui::Shape::mesh(mesh));
-                        } else if example_id == "cube" {
-                            // Draw a simple isometric cube representation
-                            let center = rect.center();
-                            let size = 120.0;
-
-                            // Draw isometric cube faces
-                            // Front face
-                            let front_bl = egui::pos2(center.x - size * 0.5, center.y + size * 0.3);
-                            let front_br = egui::pos2(center.x + size * 0.5, center.y + size * 0.3);
-                            let front_tr = egui::pos2(center.x + size * 0.5, center.y - size * 0.7);
-                            let front_tl = egui::pos2(center.x - size * 0.5, center.y - size * 0.7);
-
-                            // Top face
-                            let top_fr = front_tr;
-                            let top_fl = front_tl;
-                            let top_bl = egui::pos2(center.x - size * 0.3, center.y - size);
-                            let top_br = egui::pos2(center.x + size * 0.7, center.y - size);
-
-                            // Right face
-                            let right_br = front_br;
-                            let right_tr = front_tr;
-
-                            // Draw faces
-                            // Front face (red)
-                            ui.painter().add(egui::Shape::convex_polygon(
-                                vec![front_bl, front_br, front_tr, front_tl],
-                                egui::Color32::from_rgb(200, 80, 80),
-                                egui::Stroke::NONE,
-                            ));
-
-                            // Top face (orange)
-                            ui.painter().add(egui::Shape::convex_polygon(
-                                vec![top_fl, top_fr, top_br, top_bl],
-                                egui::Color32::from_rgb(240, 160, 80),
-                                egui::Stroke::NONE,
-                            ));
-
-                            // Right face (blue)
-                            ui.painter().add(egui::Shape::convex_polygon(
-                                vec![right_br, top_br, top_fr, right_tr],
-                                egui::Color32::from_rgb(80, 120, 200),
-                                egui::Stroke::NONE,
-                            ));
-
-                            // Add rotating arrow to indicate animation
-                            ui.painter().text(
-                                egui::pos2(center.x, center.y + size * 0.8),
-                                egui::Align2::CENTER_CENTER,
-                                "🔄 Rotating",
-                                egui::FontId::proportional(14.0),
-                                egui::Color32::WHITE,
+                            ui.label(
+                                egui::RichText::new("✓ Rendering with WebGPU")
+                                    .color(egui::Color32::from_rgb(100, 255, 100)),
+                            );
+                            if example_id == "cube" {
+                                ui.label(
+                                    egui::RichText::new("💡 Drag to rotate, scroll to zoom")
+                                        .color(egui::Color32::GRAY)
+                                        .italics(),
+                                );
+                            }
+                        } else {
+                            ui.colored_label(
+                                egui::Color32::RED,
+                                "Failed to register render texture",
                             );
                         }
-
-                        ui.painter().text(
-                            egui::pos2(rect.left() + 10.0, rect.top() + 10.0),
-                            egui::Align2::LEFT_TOP,
-                            "✓ Example is rendering on GPU",
-                            egui::FontId::proportional(14.0),
-                            egui::Color32::from_rgb(100, 255, 100),
-                        );
                     }
 
                     ui.add_space(10.0);

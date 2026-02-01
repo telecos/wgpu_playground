@@ -79,7 +79,7 @@ impl PlaygroundApp {
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context, device: &wgpu::Device, queue: &wgpu::Queue) {
+    pub fn ui(&mut self, ctx: &egui::Context, device: &wgpu::Device, queue: &wgpu::Queue, renderer: &mut egui_wgpu::Renderer) {
         // Menu bar at the top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.heading("🎮 WebGPU Playground");
@@ -152,7 +152,7 @@ impl PlaygroundApp {
             Tab::AdapterSelection => self.adapter_selection.ui(ui),
             Tab::DeviceConfig => self.device_config.ui(ui),
             Tab::DeviceInfo => self.device_info.ui(ui),
-            Tab::Rendering => self.rendering_panel.ui(ui, device, queue),
+            Tab::Rendering => self.rendering_panel.ui(ui, device, queue, renderer),
             Tab::BufferConfig => self.buffer_panel.ui(ui),
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
             Tab::TextureConfig => self.texture_panel.ui(ui),

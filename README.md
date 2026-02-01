@@ -125,7 +125,86 @@ Triangle vertices:
 ✓ Rendering complete
 ```
 
+#### Texture Mapping Example
+
+A comprehensive example demonstrating texture creation, sampling, and binding:
+
+```bash
+cargo run --package wgpu_playground_examples --bin texture_mapping
+```
+
+This example demonstrates:
+- Creating a texture programmatically with data (8x8 checkerboard pattern)
+- Configuring a sampler for texture filtering
+- Setting up vertex data with UV coordinates
+- Loading and compiling shaders with texture sampling
+- Binding textures and samplers to shaders via bind groups
+- Rendering a textured quad to an offscreen texture
+
+**Example output:**
+```
+=== Texture Mapping Example ===
+
+1. Initializing wgpu context...
+   ✓ Adapter: NVIDIA GeForce RTX 3080
+   ✓ Device and queue created
+
+2. Creating checkerboard texture...
+   ✓ Texture created: 8x8 pixels
+   ✓ Format: Rgba8Unorm
+   ✓ Data uploaded: 256 bytes
+
+3. Creating texture view...
+   ✓ Texture view created
+
+4. Creating texture sampler...
+   ✓ Sampler created
+   - Address mode: Repeat
+   - Filter mode: Nearest
+
+5. Loading textured quad shader...
+   ✓ Shader loaded and compiled
+
+6. Creating vertex buffer for textured quad...
+   ✓ Vertex buffer created
+   - Vertices: 6
+   - Buffer size: 96 bytes
+
+7. Creating bind group layout...
+   ✓ Bind group layout created
+
+8. Creating bind group...
+   ✓ Bind group created
+   - Binding 0: Sampler
+   - Binding 1: Texture
+
+9. Creating render pipeline...
+   ✓ Render pipeline created
+
+10. Creating output texture for rendering...
+    ✓ Output texture created: 256x256 pixels
+
+11. Recording and submitting render commands...
+    ✓ Render commands submitted
+
+12. Waiting for GPU to complete...
+    ✓ Rendering complete!
+
+=== Example Summary ===
+This example demonstrated:
+  ✓ Creating a texture programmatically (8x8 checkerboard)
+  ✓ Configuring a sampler (Repeat + Nearest filtering)
+  ✓ Setting up vertex data with UV coordinates
+  ✓ Loading and compiling a shader with texture sampling
+  ✓ Binding textures and samplers to shaders via bind groups
+  ✓ Rendering a textured quad to an offscreen texture
+
+=== Example Complete ===
+```
+
 Other available examples:
+- `adapter_demo` - Enumerate and select GPU adapters
+- `texture_mapping` - Texture creation, sampling, and binding
 - `backend_selection` - Enumerate and select GPU backends
 - `compute_pass` - Compute shader operations
 - `shader_loading` - Load and compile WGSL shaders

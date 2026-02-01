@@ -276,7 +276,7 @@ This example demonstrates:
 ```
 === Compute-Render Buffer Sharing Example ===
 
-Using adapter: NVIDIA GeForce RTX 3080
+Using adapter: Your GPU Name
 Backend: Vulkan
 
 Created 1024 particles arranged in a circle

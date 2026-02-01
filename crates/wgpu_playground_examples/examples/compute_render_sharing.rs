@@ -12,6 +12,10 @@
 /// Run with: cargo run --package wgpu_playground_examples --example compute_render_sharing
 use wgpu::util::DeviceExt;
 
+/// Workgroup size used in the compute shader
+/// This must match the @workgroup_size annotation in the compute shader
+const WORKGROUP_SIZE: u32 = 64;
+
 /// Particle structure used by both compute and render shaders
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -104,7 +108,7 @@ fn main() {
     let mut particles = Vec::with_capacity(num_particles);
     
     for i in 0..num_particles {
-        let angle = (i as f32 / num_particles as f32) * std::f32::consts::TAU;
+        let angle = (i as f32 / num_particles as f32) * std::f32::consts::TAU; // TAU = 2π (full circle)
         let radius = 0.3;
         particles.push(Particle::new(
             [angle.cos() * radius, angle.sin() * radius],
@@ -155,7 +159,7 @@ struct Particle {
 @group(0) @binding(0)
 var<storage, read_write> particles: array<Particle>;
 
-@compute @workgroup_size(64)
+@compute @workgroup_size(64)  // Must match WORKGROUP_SIZE constant
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let index = global_id.x;
     if (index >= arrayLength(&particles)) {
@@ -370,8 +374,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             compute_pass.set_pipeline(&compute_pipeline);
             compute_pass.set_bind_group(0, &compute_bind_group, &[]);
             
-            // Dispatch with workgroup size of 64, so we need ceil(1024/64) = 16 workgroups
-            let workgroup_count = (num_particles as u32).div_ceil(64);
+            // Calculate number of workgroups needed to cover all particles
+            let workgroup_count = (num_particles as u32).div_ceil(WORKGROUP_SIZE);
             compute_pass.dispatch_workgroups(workgroup_count, 1, 1);
         }
         println!("  ✓ Compute pass: Updated particle positions");

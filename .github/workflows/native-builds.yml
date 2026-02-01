@@ -39,6 +39,23 @@ jobs:
           shared-key: "native-${{ matrix.os }}"
           save-if: ${{ github.ref == 'refs/heads/main' }}
       
+      # Cache Dawn build artifacts to speed up Windows builds
+      # Dawn build can take 10-30 minutes, caching reduces this to seconds
+      - name: Cache Dawn build
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/release/build/wgpu_playground_core-*/out/dawn
+            target/release/build/wgpu_playground_core-*/out/dawn-build
+            target/release/build/wgpu_playground_core-*/out/dawn-install
+            target/debug/build/wgpu_playground_core-*/out/dawn
+            target/debug/build/wgpu_playground_core-*/out/dawn-build
+            target/debug/build/wgpu_playground_core-*/out/dawn-install
+          key: dawn-${{ matrix.os }}-${{ hashFiles('crates/wgpu_playground_core/build.rs') }}
+          restore-keys: |
+            dawn-${{ matrix.os }}-
+      
       - name: Build workspace
         if: "!matrix.test"
         run: cargo build --workspace --all-features

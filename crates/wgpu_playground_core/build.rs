@@ -87,6 +87,30 @@ fn configure_and_build_dawn() {
         println!("cargo:warning=Dawn source already exists, skipping clone");
     }
 
+    // Check if Dawn is already built and installed
+    let lib_dir = dawn_install_dir.join("lib");
+    let include_dir = dawn_install_dir.join("include");
+    
+    if lib_dir.exists() && include_dir.exists() {
+        println!("cargo:warning=Dawn already built and installed, skipping build");
+        println!("cargo:warning=Using cached Dawn from: {}", dawn_install_dir.display());
+        
+        // Set up library paths
+        println!("cargo:rustc-link-search=native={}", lib_dir.display());
+        println!("cargo:rustc-link-lib=static=dawn");
+        println!("cargo:rustc-link-lib=static=dawn_native");
+        println!("cargo:rustc-link-lib=static=dawn_platform");
+
+        // Platform-specific linking
+        configure_platform_linking();
+
+        // Export paths for use in code
+        println!("cargo:include={}", include_dir.display());
+
+        println!("cargo:warning=Dawn integration complete (using cache)!");
+        return;
+    }
+
     // Check if CMake is available
     let cmake_check = Command::new("cmake").arg("--version").output();
     match cmake_check {

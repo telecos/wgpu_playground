@@ -391,9 +391,28 @@ To build with Dawn in CI:
     sudo apt-get update
     sudo apt-get install -y git cmake build-essential python3 libvulkan-dev
 
+# Cache Dawn build artifacts to drastically reduce build time
+# First build: 10-30 minutes, subsequent builds: seconds
+- name: Cache Dawn build
+  if: runner.os == 'Windows'
+  uses: actions/cache@v4
+  with:
+    path: |
+      target/release/build/wgpu_playground_core-*/out/dawn
+      target/release/build/wgpu_playground_core-*/out/dawn-build
+      target/release/build/wgpu_playground_core-*/out/dawn-install
+      target/debug/build/wgpu_playground_core-*/out/dawn
+      target/debug/build/wgpu_playground_core-*/out/dawn-build
+      target/debug/build/wgpu_playground_core-*/out/dawn-install
+    key: dawn-${{ runner.os }}-${{ hashFiles('crates/wgpu_playground_core/build.rs') }}
+    restore-keys: |
+      dawn-${{ runner.os }}-
+
 - name: Build with Dawn
   run: cargo build --release --features dawn
 ```
+
+**Note**: The cache key includes a hash of `build.rs`, so the cache is invalidated when the build script changes. This ensures Dawn is rebuilt when necessary.
 
 ## Getting Help
 

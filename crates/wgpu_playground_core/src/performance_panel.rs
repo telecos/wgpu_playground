@@ -227,19 +227,13 @@ impl PerformancePanel {
 
                 // Add reference lines for common frame time targets
                 let num_samples = frame_times.len();
-                let line_60fps = Line::new(vec![
-                    [0.0, 16.67],
-                    [num_samples as f64, 16.67],
-                ])
-                .name("60 FPS target")
-                .color(egui::Color32::GREEN);
+                let line_60fps = Line::new(vec![[0.0, 16.67], [num_samples as f64, 16.67]])
+                    .name("60 FPS target")
+                    .color(egui::Color32::GREEN);
 
-                let line_30fps = Line::new(vec![
-                    [0.0, 33.33],
-                    [num_samples as f64, 33.33],
-                ])
-                .name("30 FPS target")
-                .color(egui::Color32::YELLOW);
+                let line_30fps = Line::new(vec![[0.0, 33.33], [num_samples as f64, 33.33]])
+                    .name("30 FPS target")
+                    .color(egui::Color32::YELLOW);
 
                 plot_ui.line(line_60fps);
                 plot_ui.line(line_30fps);
@@ -281,19 +275,13 @@ impl PerformancePanel {
 
                 // Add reference lines for common FPS targets
                 let num_samples = frame_times.len();
-                let line_60fps = Line::new(vec![
-                    [0.0, 60.0],
-                    [num_samples as f64, 60.0],
-                ])
-                .name("60 FPS")
-                .color(egui::Color32::GREEN);
+                let line_60fps = Line::new(vec![[0.0, 60.0], [num_samples as f64, 60.0]])
+                    .name("60 FPS")
+                    .color(egui::Color32::GREEN);
 
-                let line_30fps = Line::new(vec![
-                    [0.0, 30.0],
-                    [num_samples as f64, 30.0],
-                ])
-                .name("30 FPS")
-                .color(egui::Color32::YELLOW);
+                let line_30fps = Line::new(vec![[0.0, 30.0], [num_samples as f64, 30.0]])
+                    .name("30 FPS")
+                    .color(egui::Color32::YELLOW);
 
                 plot_ui.line(line_60fps);
                 plot_ui.line(line_30fps);

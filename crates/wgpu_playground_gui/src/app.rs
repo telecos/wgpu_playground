@@ -176,11 +176,7 @@ impl PlaygroundApp {
                 Tab::ResourceInspector,
                 "🔍 Resource Inspector",
             );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::Performance,
-                "📊 Performance",
-            );
+            ui.selectable_value(&mut self.selected_tab, Tab::Performance, "📊 Performance");
         });
 
         // Main canvas area

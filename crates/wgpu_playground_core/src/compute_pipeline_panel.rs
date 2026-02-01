@@ -176,7 +176,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
                         ui.label("Entry Point:");
                         ui.text_edit_singleline(&mut self.entry_point_input)
-                            .on_hover_text("Entry point function name in the shader (e.g., 'main')");
+                            .on_hover_text(
+                                "Entry point function name in the shader (e.g., 'main')",
+                            );
                         ui.end_row();
                     });
             });
@@ -302,7 +304,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 ui.label("A compute pipeline consists of:");
                 ui.label("• Shader Module: Contains the compute shader code (WGSL)");
                 ui.label("• Entry Point: The function name to execute (e.g., 'main')");
-                ui.label("• Pipeline Layout: Defines bind group organization (auto-generated or manual)");
+                ui.label(
+                    "• Pipeline Layout: Defines bind group organization (auto-generated or manual)",
+                );
 
                 ui.add_space(5.0);
                 ui.label("Compute shaders must have:");

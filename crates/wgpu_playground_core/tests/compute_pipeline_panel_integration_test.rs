@@ -141,10 +141,7 @@ fn main() {
     assert!(panel.cached_shader.is_some());
 
     // Verify the cached shader has the new source
-    assert_ne!(
-        panel.cached_shader.as_ref().unwrap().source(),
-        first_source
-    );
+    assert_ne!(panel.cached_shader.as_ref().unwrap().source(), first_source);
 }
 
 #[test]

@@ -23,6 +23,9 @@ enum DispatchType {
     Indirect,
 }
 
+/// Type alias for workgroup counts (X, Y, Z)
+type WorkgroupCounts = (u32, u32, u32);
+
 impl Default for ComputeDispatchPanel {
     fn default() -> Self {
         Self::new()
@@ -44,6 +47,41 @@ impl ComputeDispatchPanel {
         }
     }
 
+    /// Parse workgroup counts from input strings
+    /// Returns Ok((x, y, z)) if all values are valid and non-zero
+    fn parse_workgroups(&self) -> Result<WorkgroupCounts, String> {
+        // Parse X
+        let workgroups_x = self
+            .workgroups_x_input
+            .parse::<u32>()
+            .map_err(|_| "Workgroups X must be a valid number".to_string())?;
+
+        // Parse Y
+        let workgroups_y = self
+            .workgroups_y_input
+            .parse::<u32>()
+            .map_err(|_| "Workgroups Y must be a valid number".to_string())?;
+
+        // Parse Z
+        let workgroups_z = self
+            .workgroups_z_input
+            .parse::<u32>()
+            .map_err(|_| "Workgroups Z must be a valid number".to_string())?;
+
+        // Check for zero values
+        if workgroups_x == 0 {
+            return Err("Workgroups X must be greater than 0".to_string());
+        }
+        if workgroups_y == 0 {
+            return Err("Workgroups Y must be greater than 0".to_string());
+        }
+        if workgroups_z == 0 {
+            return Err("Workgroups Z must be greater than 0".to_string());
+        }
+
+        Ok((workgroups_x, workgroups_y, workgroups_z))
+    }
+
     /// Validate the current parameters
     fn validate(&mut self) -> bool {
         self.validation_error = None;
@@ -51,40 +89,8 @@ impl ComputeDispatchPanel {
 
         match self.dispatch_type {
             DispatchType::Direct => {
-                // Validate workgroups X
-                if self.workgroups_x_input.parse::<u32>().is_err() {
-                    self.validation_error = Some("Workgroups X must be a valid number".to_string());
-                    return false;
-                }
-
-                // Validate workgroups Y
-                if self.workgroups_y_input.parse::<u32>().is_err() {
-                    self.validation_error = Some("Workgroups Y must be a valid number".to_string());
-                    return false;
-                }
-
-                // Validate workgroups Z
-                if self.workgroups_z_input.parse::<u32>().is_err() {
-                    self.validation_error = Some("Workgroups Z must be a valid number".to_string());
-                    return false;
-                }
-
-                let workgroups_x = self.workgroups_x_input.parse::<u32>().unwrap();
-                let workgroups_y = self.workgroups_y_input.parse::<u32>().unwrap();
-                let workgroups_z = self.workgroups_z_input.parse::<u32>().unwrap();
-
-                if workgroups_x == 0 {
-                    self.validation_error = Some("Workgroups X must be greater than 0".to_string());
-                    return false;
-                }
-
-                if workgroups_y == 0 {
-                    self.validation_error = Some("Workgroups Y must be greater than 0".to_string());
-                    return false;
-                }
-
-                if workgroups_z == 0 {
-                    self.validation_error = Some("Workgroups Z must be greater than 0".to_string());
+                if let Err(error) = self.parse_workgroups() {
+                    self.validation_error = Some(error);
                     return false;
                 }
             }
@@ -117,9 +123,8 @@ impl ComputeDispatchPanel {
     fn get_summary(&self) -> String {
         match self.dispatch_type {
             DispatchType::Direct => {
-                let workgroups_x = self.workgroups_x_input.parse::<u32>().unwrap_or(0);
-                let workgroups_y = self.workgroups_y_input.parse::<u32>().unwrap_or(0);
-                let workgroups_z = self.workgroups_z_input.parse::<u32>().unwrap_or(0);
+                let (workgroups_x, workgroups_y, workgroups_z) =
+                    self.parse_workgroups().unwrap_or((0, 0, 0));
 
                 format!(
                     "dispatch_workgroups({}, {}, {})",

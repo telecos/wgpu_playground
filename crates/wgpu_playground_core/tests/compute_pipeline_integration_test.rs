@@ -348,11 +348,12 @@ fn test_compute_pipeline_invalid_workgroup_size() {
 
     let (device, _queue) = device_queue.unwrap();
 
-    // Workgroup size exceeds typical limits (256 is common max)
+    // Workgroup size exceeds limits (WebGPU guarantees 256 invocations minimum,
+    // but 1024x1024x1024 = 1,073,741,824 far exceeds any device's maximum)
     let shader_source = r#"
 @compute @workgroup_size(1024, 1024, 1024)
 fn main() {
-    // Workgroup size way too large
+    // Workgroup size way too large - exceeds maxComputeInvocationsPerWorkgroup
 }
 "#;
 

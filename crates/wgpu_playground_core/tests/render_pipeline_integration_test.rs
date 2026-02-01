@@ -607,9 +607,9 @@ fn test_render_pipeline_invalid_msaa_count() {
             return;
         };
 
-        // Test with invalid MSAA sample count (must be 1, 2, or 4)
+        // Test with invalid MSAA sample count (valid values are 1, 2, 4, or 8)
         let multisample = MultisampleState::new()
-            .with_count(3) // Invalid - not a power of 2
+            .with_count(3) // Invalid - 3 is not a valid MSAA sample count
             .with_alpha_to_coverage(false);
 
         let vertex_shader = ShaderModule::from_source(

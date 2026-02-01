@@ -371,7 +371,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             compute_pass.set_bind_group(0, &compute_bind_group, &[]);
             
             // Dispatch with workgroup size of 64, so we need ceil(1024/64) = 16 workgroups
-            let workgroup_count = (num_particles as u32 + 63) / 64;
+            let workgroup_count = (num_particles as u32).div_ceil(64);
             compute_pass.dispatch_workgroups(workgroup_count, 1, 1);
         }
         println!("  ✓ Compute pass: Updated particle positions");

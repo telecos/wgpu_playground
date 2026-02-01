@@ -55,7 +55,7 @@ impl PlaygroundApp {
         // Add a welcome message to the console
         console_panel.info("WebGPU Playground console initialized");
         console_panel.info("GPU errors, warnings, and validation messages will appear here");
-        
+
         Self {
             device_info: DeviceInfo::new(adapter, device),
             device_config: DeviceConfigPanel::new(adapter),

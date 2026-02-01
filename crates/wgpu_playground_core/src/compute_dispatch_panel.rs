@@ -53,22 +53,19 @@ impl ComputeDispatchPanel {
             DispatchType::Direct => {
                 // Validate workgroups X
                 if self.workgroups_x_input.parse::<u32>().is_err() {
-                    self.validation_error =
-                        Some("Workgroups X must be a valid number".to_string());
+                    self.validation_error = Some("Workgroups X must be a valid number".to_string());
                     return false;
                 }
 
                 // Validate workgroups Y
                 if self.workgroups_y_input.parse::<u32>().is_err() {
-                    self.validation_error =
-                        Some("Workgroups Y must be a valid number".to_string());
+                    self.validation_error = Some("Workgroups Y must be a valid number".to_string());
                     return false;
                 }
 
                 // Validate workgroups Z
                 if self.workgroups_z_input.parse::<u32>().is_err() {
-                    self.validation_error =
-                        Some("Workgroups Z must be a valid number".to_string());
+                    self.validation_error = Some("Workgroups Z must be a valid number".to_string());
                     return false;
                 }
 
@@ -77,20 +74,17 @@ impl ComputeDispatchPanel {
                 let workgroups_z = self.workgroups_z_input.parse::<u32>().unwrap();
 
                 if workgroups_x == 0 {
-                    self.validation_error =
-                        Some("Workgroups X must be greater than 0".to_string());
+                    self.validation_error = Some("Workgroups X must be greater than 0".to_string());
                     return false;
                 }
 
                 if workgroups_y == 0 {
-                    self.validation_error =
-                        Some("Workgroups Y must be greater than 0".to_string());
+                    self.validation_error = Some("Workgroups Y must be greater than 0".to_string());
                     return false;
                 }
 
                 if workgroups_z == 0 {
-                    self.validation_error =
-                        Some("Workgroups Z must be greater than 0".to_string());
+                    self.validation_error = Some("Workgroups Z must be greater than 0".to_string());
                     return false;
                 }
             }
@@ -104,9 +98,8 @@ impl ComputeDispatchPanel {
 
                 // Check if a buffer is selected
                 if self.selected_buffer_index.is_none() {
-                    self.validation_error = Some(
-                        "Please select an indirect buffer for indirect dispatch".to_string(),
-                    );
+                    self.validation_error =
+                        Some("Please select an indirect buffer for indirect dispatch".to_string());
                     return false;
                 }
             }
@@ -154,7 +147,9 @@ impl ComputeDispatchPanel {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("🧮 Compute Dispatch Configuration");
             ui.separator();
-            ui.label("Configure and preview compute dispatch parameters for GPU compute operations.");
+            ui.label(
+                "Configure and preview compute dispatch parameters for GPU compute operations.",
+            );
             ui.add_space(10.0);
 
             // Dispatch type selection
@@ -254,7 +249,9 @@ impl ComputeDispatchPanel {
                         ui.label("• Workgroups Z: Number of workgroups in the Z dimension");
                         ui.add_space(5.0);
                         ui.label("Each workgroup executes the compute shader with the");
-                        ui.label("workgroup size specified in the shader's @workgroup_size attribute.");
+                        ui.label(
+                            "workgroup size specified in the shader's @workgroup_size attribute.",
+                        );
                         ui.add_space(5.0);
                         ui.label(
                             egui::RichText::new("Example: @workgroup_size(64, 1, 1)")
@@ -362,7 +359,9 @@ impl ComputeDispatchPanel {
                         egui::TextEdit::singleline(&mut self.indirect_offset_input)
                             .desired_width(100.0),
                     )
-                    .on_hover_text("Byte offset into the indirect buffer where dispatch parameters are stored");
+                    .on_hover_text(
+                        "Byte offset into the indirect buffer where dispatch parameters are stored",
+                    );
                     ui.end_row();
                 });
 

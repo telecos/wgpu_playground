@@ -1,3 +1,4 @@
+use bytemuck::{Pod, Zeroable};
 /// Example demonstrating texture creation, sampler configuration, and texture binding
 ///
 /// This example shows how to:
@@ -10,7 +11,6 @@
 use wgpu_playground_core::sampler::{AddressMode, FilterMode, SamplerDescriptor};
 use wgpu_playground_core::shader::ShaderModule;
 use wgpu_playground_core::texture::TextureBuilder;
-use bytemuck::{Pod, Zeroable};
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Pod, Zeroable)]
@@ -20,6 +20,7 @@ struct Vertex {
 }
 
 impl Vertex {
+    #[allow(dead_code)]
     fn new(position: [f32; 2], tex_coords: [f32; 2]) -> Self {
         Self {
             position,
@@ -29,6 +30,7 @@ impl Vertex {
 }
 
 /// Create a simple checkerboard texture (8x8 pixels)
+#[allow(dead_code)]
 fn create_checkerboard_texture_data() -> Vec<u8> {
     const SIZE: usize = 8;
     let mut data = Vec::with_capacity(SIZE * SIZE * 4); // RGBA
@@ -49,6 +51,7 @@ fn create_checkerboard_texture_data() -> Vec<u8> {
     data
 }
 
+#[allow(dead_code)]
 async fn run_texture_example() {
     println!("=== Texture Mapping Example ===\n");
 
@@ -88,7 +91,7 @@ async fn run_texture_example() {
     // Step 2: Create a checkerboard texture
     println!("\n2. Creating checkerboard texture...");
     const TEXTURE_SIZE: u32 = 8;
-    
+
     let texture = TextureBuilder::new()
         .with_size(TEXTURE_SIZE, TEXTURE_SIZE, 1)
         .with_format(wgpu::TextureFormat::Rgba8Unorm)
@@ -118,7 +121,10 @@ async fn run_texture_example() {
         },
     );
 
-    println!("   ✓ Texture created: {}x{} pixels", TEXTURE_SIZE, TEXTURE_SIZE);
+    println!(
+        "   ✓ Texture created: {}x{} pixels",
+        TEXTURE_SIZE, TEXTURE_SIZE
+    );
     println!("   ✓ Format: Rgba8Unorm");
     println!("   ✓ Data uploaded: {} bytes", texture_data.len());
 
@@ -155,7 +161,7 @@ async fn run_texture_example() {
 
     // Step 6: Create vertex buffer with quad vertices
     println!("\n6. Creating vertex buffer for textured quad...");
-    
+
     // Define a quad with two triangles
     // Positions range from -0.5 to 0.5, UVs from 0.0 to 2.0 to show texture repeat
     let vertices = [
@@ -176,7 +182,7 @@ async fn run_texture_example() {
         usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
-    
+
     queue.write_buffer(&vertex_buffer, 0, vertex_data);
 
     println!("   ✓ Vertex buffer created");
@@ -300,18 +306,19 @@ async fn run_texture_example() {
     // Step 10: Create output texture
     println!("\n10. Creating output texture for rendering...");
     const OUTPUT_SIZE: u32 = 256;
-    
+
     let output_texture = TextureBuilder::new()
         .with_size(OUTPUT_SIZE, OUTPUT_SIZE, 1)
         .with_format(wgpu::TextureFormat::Rgba8Unorm)
-        .with_usage(
-            wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
-        )
+        .with_usage(wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC)
         .with_label("Output Texture")
         .build(&device);
 
     let output_view = output_texture.create_view(&wgpu::TextureViewDescriptor::default());
-    println!("   ✓ Output texture created: {}x{} pixels", OUTPUT_SIZE, OUTPUT_SIZE);
+    println!(
+        "   ✓ Output texture created: {}x{} pixels",
+        OUTPUT_SIZE, OUTPUT_SIZE
+    );
 
     // Step 11: Record and submit rendering commands
     println!("\n11. Recording and submitting render commands...");
@@ -366,6 +373,7 @@ async fn run_texture_example() {
 }
 
 #[tokio::main]
+#[allow(dead_code)]
 async fn main() {
     env_logger::init();
     run_texture_example().await;

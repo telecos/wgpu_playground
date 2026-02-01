@@ -125,6 +125,63 @@ Triangle vertices:
 ✓ Rendering complete
 ```
 
+#### Rotating Cube Example
+
+A 3D rotating cube demonstrating advanced rendering features:
+
+```bash
+cargo run --package wgpu_playground_examples --example rotating_cube
+```
+
+This example demonstrates:
+- 3D cube geometry with 8 vertices and index buffer (36 indices for 12 triangles)
+- Uniform buffers for transformation matrices (model-view-projection)
+- Depth testing with Depth24Plus format
+- Back-face culling
+- Animation with rotation over multiple frames
+- Perspective projection and camera positioning
+
+**Example output:**
+```
+=== Rotating 3D Cube Example ===
+Using adapter: NVIDIA GeForce RTX 3080
+Backend: Vulkan
+
+Cube geometry:
+  8 vertices (8 corners)
+  36 indices (12 triangles, 6 faces)
+
+✓ Vertex buffer created (192 bytes)
+✓ Index buffer created (72 bytes)
+✓ Shader loaded and compiled
+✓ Uniform buffer created (64 bytes)
+✓ Bind group created
+
+✓ Render pipeline created with depth testing
+
+✓ Render target created (800x600)
+✓ Depth buffer created
+
+Rendering animation frames:
+  Frame 0: rotation = 0.00 radians
+  Frame 1: rotation = 1.26 radians
+  Frame 2: rotation = 2.51 radians
+  Frame 3: rotation = 3.77 radians
+  Frame 4: rotation = 5.03 radians
+
+✓ All frames rendered successfully
+
+=== Rotating Cube Example Complete ===
+
+The 3D cube was successfully rendered with:
+  • 8 vertices defining cube corners
+  • 36 indices defining 12 triangles (6 faces)
+  • Uniform buffer with model-view-projection matrix
+  • Depth testing enabled (Depth24Plus format)
+  • Back-face culling enabled
+  • Rotation animation over 5 frames
+```
+
 Other available examples:
 - `backend_selection` - Enumerate and select GPU backends
 - `compute_pass` - Compute shader operations

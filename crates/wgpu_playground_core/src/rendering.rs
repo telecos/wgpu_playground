@@ -3,33 +3,31 @@ use crate::shader_editor::ShaderEditor;
 use wgpu::{Device, Queue};
 
 /// Rendering state for executable examples
+struct TriangleState {
+    pipeline: wgpu::RenderPipeline,
+    vertex_buffer: wgpu::Buffer,
+}
+
+struct CubeState {
+    pipeline: wgpu::RenderPipeline,
+    vertex_buffer: wgpu::Buffer,
+    index_buffer: wgpu::Buffer,
+    bind_group: wgpu::BindGroup,
+    uniform_buffer: wgpu::Buffer,
+    depth_view: wgpu::TextureView,
+    time: f32,
+}
+
 enum RenderState {
     None,
-    Triangle {
-        pipeline: wgpu::RenderPipeline,
-        vertex_buffer: wgpu::Buffer,
-    },
-    Cube {
-        pipeline: wgpu::RenderPipeline,
-        vertex_buffer: wgpu::Buffer,
-        index_buffer: wgpu::Buffer,
-        bind_group: wgpu::BindGroup,
-        uniform_buffer: wgpu::Buffer,
-        depth_texture: wgpu::Texture,
-        depth_view: wgpu::TextureView,
-        time: f32,
-    },
+    Triangle(Box<TriangleState>),
+    Cube(Box<CubeState>),
 }
 
 impl RenderState {
     fn update(&mut self, queue: &Queue, delta_time: f32) {
-        if let RenderState::Cube {
-            time,
-            uniform_buffer,
-            ..
-        } = self
-        {
-            *time += delta_time;
+        if let RenderState::Cube(cube_state) = self {
+            cube_state.time += delta_time;
 
             // Update transformation matrix
             #[repr(C)]
@@ -44,13 +42,17 @@ impl RenderState {
             let view = look_at_matrix([0.0, 0.0, 3.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]);
             let view_proj = matrix_multiply(&projection, &view);
 
-            let rotation_y = rotation_y_matrix(*time);
-            let rotation_x = rotation_x_matrix(*time * 0.5);
+            let rotation_y = rotation_y_matrix(cube_state.time);
+            let rotation_x = rotation_x_matrix(cube_state.time * 0.5);
             let model = matrix_multiply(&rotation_y, &rotation_x);
 
             let uniforms = Uniforms { view_proj, model };
 
-            queue.write_buffer(uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
+            queue.write_buffer(
+                &cube_state.uniform_buffer,
+                0,
+                bytemuck::cast_slice(&[uniforms]),
+            );
         }
     }
 }
@@ -63,7 +65,6 @@ pub struct RenderingPanel {
     render_state: RenderState,
     render_texture: Option<wgpu::Texture>,
     render_texture_view: Option<wgpu::TextureView>,
-    render_texture_id: Option<egui::TextureId>,
     is_example_running: bool,
     shader_editor: ShaderEditor,
     show_shader_editor: bool,
@@ -91,7 +92,6 @@ impl RenderingPanel {
             render_state: RenderState::None,
             render_texture: None,
             render_texture_view: None,
-            render_texture_id: None,
             is_example_running: false,
             shader_editor: ShaderEditor::new(),
             show_shader_editor: false,
@@ -233,10 +233,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             cache: None,
         });
 
-        self.render_state = RenderState::Triangle {
+        self.render_state = RenderState::Triangle(Box::new(TriangleState {
             pipeline,
             vertex_buffer,
-        };
+        }));
     }
 
     fn create_cube_render_state(&mut self, device: &Device, queue: &Queue) {
@@ -289,15 +289,39 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         // Cube vertices (8 corners)
         let vertices = [
             // Front face (red-ish)
-            Vertex { position: [-0.5, -0.5, 0.5], color: [1.0, 0.0, 0.0] },
-            Vertex { position: [0.5, -0.5, 0.5], color: [1.0, 0.3, 0.0] },
-            Vertex { position: [0.5, 0.5, 0.5], color: [1.0, 0.6, 0.0] },
-            Vertex { position: [-0.5, 0.5, 0.5], color: [1.0, 0.9, 0.0] },
+            Vertex {
+                position: [-0.5, -0.5, 0.5],
+                color: [1.0, 0.0, 0.0],
+            },
+            Vertex {
+                position: [0.5, -0.5, 0.5],
+                color: [1.0, 0.3, 0.0],
+            },
+            Vertex {
+                position: [0.5, 0.5, 0.5],
+                color: [1.0, 0.6, 0.0],
+            },
+            Vertex {
+                position: [-0.5, 0.5, 0.5],
+                color: [1.0, 0.9, 0.0],
+            },
             // Back face (blue-ish)
-            Vertex { position: [-0.5, -0.5, -0.5], color: [0.0, 0.0, 1.0] },
-            Vertex { position: [0.5, -0.5, -0.5], color: [0.0, 0.3, 1.0] },
-            Vertex { position: [0.5, 0.5, -0.5], color: [0.0, 0.6, 1.0] },
-            Vertex { position: [-0.5, 0.5, -0.5], color: [0.0, 0.9, 1.0] },
+            Vertex {
+                position: [-0.5, -0.5, -0.5],
+                color: [0.0, 0.0, 1.0],
+            },
+            Vertex {
+                position: [0.5, -0.5, -0.5],
+                color: [0.0, 0.3, 1.0],
+            },
+            Vertex {
+                position: [0.5, 0.5, -0.5],
+                color: [0.0, 0.6, 1.0],
+            },
+            Vertex {
+                position: [-0.5, 0.5, -0.5],
+                color: [0.0, 0.9, 1.0],
+            },
         ];
 
         // Cube indices (36 indices for 12 triangles)
@@ -444,16 +468,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             cache: None,
         });
 
-        self.render_state = RenderState::Cube {
+        self.render_state = RenderState::Cube(Box::new(CubeState {
             pipeline,
             vertex_buffer,
             index_buffer,
             bind_group,
             uniform_buffer,
-            depth_texture,
             depth_view,
             time: 0.0,
-        };
+        }));
     }
 
     fn render_current_example(&mut self, device: &Device, queue: &Queue) {
@@ -468,18 +491,19 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             });
 
             {
-                let depth_stencil_attachment = if let RenderState::Cube { depth_view, .. } = &self.render_state {
-                    Some(wgpu::RenderPassDepthStencilAttachment {
-                        view: depth_view,
-                        depth_ops: Some(wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(1.0),
-                            store: wgpu::StoreOp::Store,
-                        }),
-                        stencil_ops: None,
-                    })
-                } else {
-                    None
-                };
+                let depth_stencil_attachment =
+                    if let RenderState::Cube(cube_state) = &self.render_state {
+                        Some(wgpu::RenderPassDepthStencilAttachment {
+                            view: &cube_state.depth_view,
+                            depth_ops: Some(wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(1.0),
+                                store: wgpu::StoreOp::Store,
+                            }),
+                            stencil_ops: None,
+                        })
+                    } else {
+                        None
+                    };
 
                 let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("Example Render Pass"),
@@ -502,25 +526,19 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 });
 
                 match &self.render_state {
-                    RenderState::Triangle {
-                        pipeline,
-                        vertex_buffer,
-                    } => {
-                        render_pass.set_pipeline(pipeline);
-                        render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+                    RenderState::Triangle(triangle_state) => {
+                        render_pass.set_pipeline(&triangle_state.pipeline);
+                        render_pass.set_vertex_buffer(0, triangle_state.vertex_buffer.slice(..));
                         render_pass.draw(0..3, 0..1);
                     }
-                    RenderState::Cube {
-                        pipeline,
-                        vertex_buffer,
-                        index_buffer,
-                        bind_group,
-                        ..
-                    } => {
-                        render_pass.set_pipeline(pipeline);
-                        render_pass.set_bind_group(0, bind_group, &[]);
-                        render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
-                        render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                    RenderState::Cube(cube_state) => {
+                        render_pass.set_pipeline(&cube_state.pipeline);
+                        render_pass.set_bind_group(0, &cube_state.bind_group, &[]);
+                        render_pass.set_vertex_buffer(0, cube_state.vertex_buffer.slice(..));
+                        render_pass.set_index_buffer(
+                            cube_state.index_buffer.slice(..),
+                            wgpu::IndexFormat::Uint16,
+                        );
                         render_pass.draw_indexed(0..36, 0, 0..1);
                     }
                     _ => {}
@@ -556,17 +574,12 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 self.shader_editor.ui(ui, None);
             } else {
                 // Show the example gallery (existing code)
-                self.render_example_gallery(ui);
+                self.render_example_gallery(ui, device, queue);
             }
         });
     }
 
-    fn render_example_gallery(&mut self, ui: &mut egui::Ui) {
-        ui.heading("🎨 Example Gallery");
-        ui.separator();
-        ui.label("Browse and explore WebGPU examples with descriptions and source code.");
-        ui.add_space(10.0);
-
+    fn render_example_gallery(&mut self, ui: &mut egui::Ui, device: &Device, queue: &Queue) {
         // Category filter
         ui.horizontal(|ui| {
             ui.label("Filter by category:");
@@ -599,254 +612,253 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         ui.add_space(10.0);
         ui.separator();
 
-        // Example list
-        let filtered_examples: Vec<(usize, &Example)> = self
-            .examples
-            .iter()
-            .enumerate()
-            .filter(|(_, ex)| {
-                self.category_filter.is_none()
-                    || self.category_filter.as_ref() == Some(&ex.category)
-            })
-            .collect();
+        // Two-column layout: examples list on left, preview on right
+        ui.columns(2, |columns| {
+            // Left column: Example list
+            columns[0].vertical(|ui| {
+                ui.heading("Examples");
+                ui.separator();
 
-        if filtered_examples.is_empty() {
-            ui.label("No examples found for this category.");
-        } else {
-            ui.label(format!("Found {} example(s):", filtered_examples.len()));
-            ui.add_space(10.0);
+                let filtered_examples: Vec<(usize, &Example)> = self
+                    .examples
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, ex)| {
+                        self.category_filter.is_none()
+                            || self.category_filter.as_ref() == Some(&ex.category)
+                    })
+                    .collect();
 
-            for (idx, example) in filtered_examples {
-                ui.group(|ui| {
-                        let is_selected = self.selected_example == Some(idx);
+                for (idx, example) in filtered_examples {
+                    let is_selected = self.selected_example == Some(idx);
+                    let category_icon = match example.category {
+                        ExampleCategory::Rendering => "🎨",
+                        ExampleCategory::Compute => "🧮",
+                    };
 
-                    let filtered_examples: Vec<(usize, &Example)> = self
-                        .examples
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, ex)| {
-                            self.category_filter.is_none()
-                                || self.category_filter.as_ref() == Some(&ex.category)
-                        })
-                        .collect();
-
-                    for (idx, example) in filtered_examples {
-                        let is_selected = self.selected_example == Some(idx);
-                        let category_icon = match example.category {
-                            ExampleCategory::Rendering => "🎨",
-                            ExampleCategory::Compute => "🧮",
-                        };
-
-                        if ui
-                            .selectable_label(is_selected, format!("{} {}", category_icon, example.name))
-                            .clicked()
-                        {
-                            self.selected_example = Some(idx);
-                            self.show_source_code = false;
-                            self.is_example_running = false;
-                        }
+                    if ui
+                        .selectable_label(
+                            is_selected,
+                            format!("{} {}", category_icon, example.name),
+                        )
+                        .clicked()
+                    {
+                        self.selected_example = Some(idx);
+                        self.show_source_code = false;
+                        self.is_example_running = false;
                     }
-                });
+                }
+            });
 
-                // Right column: Preview and source code
-                columns[1].vertical(|ui| {
-                    if let Some(idx) = self.selected_example {
-                        let example_id = self.examples[idx].id;
-                        let example_name = self.examples[idx].name;
-                        let example_description = self.examples[idx].description;
-                        let example_category = self.examples[idx].category.clone();
-                        let example_source_code = self.examples[idx].source_code;
+            // Right column: Preview and source code
+            columns[1].vertical(|ui| {
+                if let Some(idx) = self.selected_example {
+                    let example_id = self.examples[idx].id;
+                    let example_name = self.examples[idx].name;
+                    let example_description = self.examples[idx].description;
+                    let example_category = self.examples[idx].category.clone();
+                    let example_source_code = self.examples[idx].source_code;
 
-                        ui.heading(format!("🎨 {}", example_name));
-                        ui.separator();
+                    ui.heading(format!("🎨 {}", example_name));
+                    ui.separator();
 
-                        // Description
-                        ui.label(egui::RichText::new("Description:").strong());
-                        ui.label(example_description);
-                        ui.add_space(10.0);
+                    // Description
+                    ui.label(egui::RichText::new("Description:").strong());
+                    ui.label(example_description);
+                    ui.add_space(10.0);
 
-                        // Run button (only for rendering examples)
-                        if example_category == ExampleCategory::Rendering {
-                            if ui.button(if self.is_example_running {
+                    // Run button (only for rendering examples)
+                    if example_category == ExampleCategory::Rendering
+                        && ui
+                            .button(if self.is_example_running {
                                 "⏹ Stop Example"
                             } else {
                                 "▶ Run Example"
-                            }).clicked() {
-                                if self.is_example_running {
-                                    self.is_example_running = false;
-                                    self.render_state = RenderState::None;
-                                } else {
-                                    self.is_example_running = true;
-                                    // Create render state based on example
-                                    if example_id == "triangle" {
-                                        self.create_triangle_render_state(device, queue);
-                                    } else if example_id == "cube" {
-                                        self.create_cube_render_state(device, queue);
-                                    }
-                                }
-                            }
-                        }
-
-                        // Render preview if example is running
-                        if self.is_example_running && example_category == ExampleCategory::Rendering {
-                            ui.add_space(10.0);
-                            ui.separator();
-                            ui.label(egui::RichText::new("Preview:").strong());
-                            
-                            // Render the example
-                            self.render_current_example(device, queue);
-
-                            // Draw a gradient background to show the rendering area
-                            let (rect, _response) = ui.allocate_exact_size(
-                                egui::vec2(512.0, 512.0),
-                                egui::Sense::hover(),
-                            );
-                            
-                            // Draw gradient background
-                            let color_tl = egui::Color32::from_rgb(40, 20, 60);
-                            let color_br = egui::Color32::from_rgb(20, 40, 80);
-                            
-                            let mut mesh = egui::Mesh::default();
-                            mesh.colored_vertex(rect.left_top(), color_tl);
-                            mesh.colored_vertex(rect.right_top(), color_tl);
-                            mesh.colored_vertex(rect.right_bottom(), color_br);
-                            mesh.colored_vertex(rect.left_bottom(), color_br);
-                            mesh.add_triangle(0, 1, 2);
-                            mesh.add_triangle(0, 2, 3);
-                            ui.painter().add(egui::Shape::mesh(mesh));
-                            
-                            // Draw a border
-                            ui.painter().rect_stroke(
-                                rect,
-                                4.0,
-                                egui::Stroke::new(2.0, egui::Color32::from_rgb(100, 150, 255)),
-                            );
-                            
-                            // For triangle example, draw a simple triangle representation
-                            if example_id == "triangle" {
-                                let center = rect.center();
-                                let size = 200.0;
-                                
-                                let top = egui::pos2(center.x, center.y - size * 0.5);
-                                let left = egui::pos2(center.x - size * 0.5, center.y + size * 0.5);
-                                let right = egui::pos2(center.x + size * 0.5, center.y + size * 0.5);
-                                
-                                // Draw the triangle with gradient colors
-                                let mesh = {
-                                    let mut mesh = egui::Mesh::default();
-                                    mesh.colored_vertex(top, egui::Color32::RED);
-                                    mesh.colored_vertex(left, egui::Color32::GREEN);
-                                    mesh.colored_vertex(right, egui::Color32::BLUE);
-                                    mesh.add_triangle(0, 1, 2);
-                                    mesh
-                                };
-                                
-                                ui.painter().add(egui::Shape::mesh(mesh));
-                            } else if example_id == "cube" {
-                                // Draw a simple isometric cube representation
-                                let center = rect.center();
-                                let size = 120.0;
-                                
-                                // Draw isometric cube faces
-                                // Front face
-                                let front_bl = egui::pos2(center.x - size * 0.5, center.y + size * 0.3);
-                                let front_br = egui::pos2(center.x + size * 0.5, center.y + size * 0.3);
-                                let front_tr = egui::pos2(center.x + size * 0.5, center.y - size * 0.7);
-                                let front_tl = egui::pos2(center.x - size * 0.5, center.y - size * 0.7);
-                                
-                                // Top face
-                                let top_fr = front_tr;
-                                let top_fl = front_tl;
-                                let top_bl = egui::pos2(center.x - size * 0.3, center.y - size);
-                                let top_br = egui::pos2(center.x + size * 0.7, center.y - size);
-                                
-                                // Right face
-                                let right_br = front_br;
-                                let right_tr = front_tr;
-                                
-                                // Draw faces
-                                // Front face (red)
-                                ui.painter().add(egui::Shape::convex_polygon(
-                                    vec![front_bl, front_br, front_tr, front_tl],
-                                    egui::Color32::from_rgb(200, 80, 80),
-                                    egui::Stroke::NONE,
-                                ));
-                                
-                                // Top face (orange)
-                                ui.painter().add(egui::Shape::convex_polygon(
-                                    vec![top_fl, top_fr, top_br, top_bl],
-                                    egui::Color32::from_rgb(240, 160, 80),
-                                    egui::Stroke::NONE,
-                                ));
-                                
-                                // Right face (blue)
-                                ui.painter().add(egui::Shape::convex_polygon(
-                                    vec![right_br, top_br, top_fr, right_tr],
-                                    egui::Color32::from_rgb(80, 120, 200),
-                                    egui::Stroke::NONE,
-                                ));
-                                
-                                // Add rotating arrow to indicate animation
-                                ui.painter().text(
-                                    egui::pos2(center.x, center.y + size * 0.8),
-                                    egui::Align2::CENTER_CENTER,
-                                    "🔄 Rotating",
-                                    egui::FontId::proportional(14.0),
-                                    egui::Color32::WHITE,
-                                );
-                            }
-                            
-                            ui.painter().text(
-                                egui::pos2(rect.left() + 10.0, rect.top() + 10.0),
-                                egui::Align2::LEFT_TOP,
-                                "✓ Example is rendering on GPU",
-                                egui::FontId::proportional(14.0),
-                                egui::Color32::from_rgb(100, 255, 100),
-                            );
-                        }
-
-                        ui.add_space(10.0);
-
-                        // Toggle source code button
-                        if ui
-                            .button(if self.show_source_code {
-                                "Hide Source Code"
-                            } else {
-                                "Show Source Code"
                             })
                             .clicked()
-                        {
-                            self.show_source_code = !self.show_source_code;
+                    {
+                        if self.is_example_running {
+                            self.is_example_running = false;
+                            self.render_state = RenderState::None;
+                        } else {
+                            self.is_example_running = true;
+                            // Create render state based on example
+                            if example_id == "triangle" {
+                                self.create_triangle_render_state(device, queue);
+                            } else if example_id == "cube" {
+                                self.create_cube_render_state(device, queue);
+                            }
+                        }
+                    }
+
+                    // Render preview if example is running
+                    if self.is_example_running && example_category == ExampleCategory::Rendering {
+                        ui.add_space(10.0);
+                        ui.separator();
+                        ui.label(egui::RichText::new("Preview:").strong());
+
+                        // Render the example
+                        self.render_current_example(device, queue);
+
+                        // Draw a gradient background to show the rendering area
+                        let (rect, _response) =
+                            ui.allocate_exact_size(egui::vec2(512.0, 512.0), egui::Sense::hover());
+
+                        // Draw gradient background
+                        let color_tl = egui::Color32::from_rgb(40, 20, 60);
+                        let color_br = egui::Color32::from_rgb(20, 40, 80);
+
+                        let mut mesh = egui::Mesh::default();
+                        mesh.colored_vertex(rect.left_top(), color_tl);
+                        mesh.colored_vertex(rect.right_top(), color_tl);
+                        mesh.colored_vertex(rect.right_bottom(), color_br);
+                        mesh.colored_vertex(rect.left_bottom(), color_br);
+                        mesh.add_triangle(0, 1, 2);
+                        mesh.add_triangle(0, 2, 3);
+                        ui.painter().add(egui::Shape::mesh(mesh));
+
+                        // Draw a border
+                        ui.painter().rect_stroke(
+                            rect,
+                            4.0,
+                            egui::Stroke::new(2.0, egui::Color32::from_rgb(100, 150, 255)),
+                        );
+
+                        // For triangle example, draw a simple triangle representation
+                        if example_id == "triangle" {
+                            let center = rect.center();
+                            let size = 200.0;
+
+                            let top = egui::pos2(center.x, center.y - size * 0.5);
+                            let left = egui::pos2(center.x - size * 0.5, center.y + size * 0.5);
+                            let right = egui::pos2(center.x + size * 0.5, center.y + size * 0.5);
+
+                            // Draw the triangle with gradient colors
+                            let mesh = {
+                                let mut mesh = egui::Mesh::default();
+                                mesh.colored_vertex(top, egui::Color32::RED);
+                                mesh.colored_vertex(left, egui::Color32::GREEN);
+                                mesh.colored_vertex(right, egui::Color32::BLUE);
+                                mesh.add_triangle(0, 1, 2);
+                                mesh
+                            };
+
+                            ui.painter().add(egui::Shape::mesh(mesh));
+                        } else if example_id == "cube" {
+                            // Draw a simple isometric cube representation
+                            let center = rect.center();
+                            let size = 120.0;
+
+                            // Draw isometric cube faces
+                            // Front face
+                            let front_bl = egui::pos2(center.x - size * 0.5, center.y + size * 0.3);
+                            let front_br = egui::pos2(center.x + size * 0.5, center.y + size * 0.3);
+                            let front_tr = egui::pos2(center.x + size * 0.5, center.y - size * 0.7);
+                            let front_tl = egui::pos2(center.x - size * 0.5, center.y - size * 0.7);
+
+                            // Top face
+                            let top_fr = front_tr;
+                            let top_fl = front_tl;
+                            let top_bl = egui::pos2(center.x - size * 0.3, center.y - size);
+                            let top_br = egui::pos2(center.x + size * 0.7, center.y - size);
+
+                            // Right face
+                            let right_br = front_br;
+                            let right_tr = front_tr;
+
+                            // Draw faces
+                            // Front face (red)
+                            ui.painter().add(egui::Shape::convex_polygon(
+                                vec![front_bl, front_br, front_tr, front_tl],
+                                egui::Color32::from_rgb(200, 80, 80),
+                                egui::Stroke::NONE,
+                            ));
+
+                            // Top face (orange)
+                            ui.painter().add(egui::Shape::convex_polygon(
+                                vec![top_fl, top_fr, top_br, top_bl],
+                                egui::Color32::from_rgb(240, 160, 80),
+                                egui::Stroke::NONE,
+                            ));
+
+                            // Right face (blue)
+                            ui.painter().add(egui::Shape::convex_polygon(
+                                vec![right_br, top_br, top_fr, right_tr],
+                                egui::Color32::from_rgb(80, 120, 200),
+                                egui::Stroke::NONE,
+                            ));
+
+                            // Add rotating arrow to indicate animation
+                            ui.painter().text(
+                                egui::pos2(center.x, center.y + size * 0.8),
+                                egui::Align2::CENTER_CENTER,
+                                "🔄 Rotating",
+                                egui::FontId::proportional(14.0),
+                                egui::Color32::WHITE,
+                            );
                         }
 
-                        // Source code display
-                        if self.show_source_code {
-                            ui.add_space(5.0);
-                            ui.separator();
-                            ui.label(egui::RichText::new("Source Code:").strong());
+                        ui.painter().text(
+                            egui::pos2(rect.left() + 10.0, rect.top() + 10.0),
+                            egui::Align2::LEFT_TOP,
+                            "✓ Example is rendering on GPU",
+                            egui::FontId::proportional(14.0),
+                            egui::Color32::from_rgb(100, 255, 100),
+                        );
+                    }
 
-                            egui::ScrollArea::vertical()
-                                .max_height(300.0)
-                                .show(ui, |ui| {
-                                    let mut source_code = example_source_code.to_string();
-                                    ui.add(
-                                        egui::TextEdit::multiline(&mut source_code)
-                                            .code_editor()
-                                            .desired_width(f32::INFINITY)
-                                            .interactive(false),
-                                    );
-                                });
-                        }
+                    ui.add_space(10.0);
 
-                ui.add_space(10.0);
-            }
-        }
+                    // Toggle source code button
+                    if ui
+                        .button(if self.show_source_code {
+                            "Hide Source Code"
+                        } else {
+                            "Show Source Code"
+                        })
+                        .clicked()
+                    {
+                        self.show_source_code = !self.show_source_code;
+                    }
+
+                    // Source code display
+                    if self.show_source_code {
+                        ui.add_space(5.0);
+                        ui.separator();
+                        ui.label(egui::RichText::new("Source Code:").strong());
+
+                        egui::ScrollArea::vertical()
+                            .max_height(300.0)
+                            .show(ui, |ui| {
+                                let mut source_code = example_source_code.to_string();
+                                ui.add(
+                                    egui::TextEdit::multiline(&mut source_code)
+                                        .code_editor()
+                                        .desired_width(f32::INFINITY)
+                                        .interactive(false),
+                                );
+                            });
+                    }
+
+                    // Copy source code button
+                    ui.add_space(5.0);
+                    if ui.button("📋 Copy Source Code").clicked() {
+                        ui.output_mut(|o| o.copied_text = example_source_code.to_string());
+                    }
+                } else {
+                    ui.colored_label(
+                        egui::Color32::GRAY,
+                        "← Select an example from the list to get started",
+                    );
+                }
+            });
+        });
 
         ui.add_space(20.0);
         ui.separator();
         ui.colored_label(
             egui::Color32::from_rgb(100, 150, 255),
-            "💡 Tip: Select an example to view its description and source code",
+            "💡 Tip: Select a rendering example and click 'Run Example' to see it in action!",
         );
     }
 }
@@ -895,11 +907,7 @@ fn perspective_matrix(fov_y: f32, aspect: f32, near: f32, far: f32) -> [[f32; 4]
 }
 
 fn look_at_matrix(eye: [f32; 3], center: [f32; 3], up: [f32; 3]) -> [[f32; 4]; 4] {
-    let f = normalize([
-        center[0] - eye[0],
-        center[1] - eye[1],
-        center[2] - eye[2],
-    ]);
+    let f = normalize([center[0] - eye[0], center[1] - eye[1], center[2] - eye[2]]);
     let s = normalize(cross(f, up));
     let u = cross(s, f);
 

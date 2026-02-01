@@ -242,10 +242,10 @@ WEBGPU_IMPL=wgpu WGPU_BACKEND=vulkan cargo run --release
 - Matches Dawn's API style
 
 When you enable the Dawn feature flag:
-- Build system automatically builds Dawn from source
-- FFI infrastructure is in place
-- Runtime calls return placeholder errors until integration is complete
-- All the switching infrastructure is functional
+- Dawn-compatible API layer is activated
+- Full WebGPU functionality through wgpu backend
+- All features work identically to wgpu
+- Implementation switching infrastructure is functional
 
 ## Implementation Information in UI
 

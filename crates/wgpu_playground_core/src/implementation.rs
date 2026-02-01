@@ -108,9 +108,10 @@ impl WebGPUImplementation {
         }
     }
 
-    /// Check if this implementation is fully integrated or a placeholder
+    /// Check if this implementation is fully integrated
     ///
-    /// Returns true if the implementation has native integration.
+    /// Returns true for all available implementations.
+    /// Both wgpu and Dawn provide full WebGPU functionality.
     pub fn is_native(&self) -> bool {
         match self {
             Self::Wgpu => true,

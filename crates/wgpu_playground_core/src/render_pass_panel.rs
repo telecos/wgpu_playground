@@ -333,7 +333,7 @@ impl RenderPassPanel {
                                     ui.add_space(5.0);
                                     ui.horizontal(|ui| {
                                         ui.label("Preview:");
-                                        let color = egui::Color32::from_rgba_premultiplied(
+                                        let color = egui::Color32::from_rgba_unmultiplied(
                                             (self.clear_color_r * 255.0) as u8,
                                             (self.clear_color_g * 255.0) as u8,
                                             (self.clear_color_b * 255.0) as u8,

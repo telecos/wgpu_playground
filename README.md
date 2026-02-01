@@ -87,6 +87,50 @@ cargo run --release
 
 **Note:** This application requires a display/window system to run. On Linux, ensure you have either X11 or Wayland available. On headless systems, the application won't run as it requires GPU rendering capabilities.
 
+### Examples
+
+The project includes standalone examples demonstrating various WebGPU features:
+
+#### Triangle Example
+
+A classic "Hello Triangle" example showing basic rendering setup:
+
+```bash
+cargo run --package wgpu_playground_examples --example triangle
+```
+
+This example demonstrates:
+- Creating a vertex buffer with position and color data
+- Loading and compiling WGSL shaders
+- Setting up a render pipeline
+- Executing a render pass with draw commands
+
+**Example output:**
+```
+=== Triangle Rendering Example ===
+Using adapter: NVIDIA GeForce RTX 3080
+Backend: Vulkan
+
+Triangle vertices:
+  Vertex 0: pos(0.0, 0.5), color(1.0, 0.0, 0.0)   # Red
+  Vertex 1: pos(-0.5, -0.5), color(0.0, 1.0, 0.0) # Green
+  Vertex 2: pos(0.5, -0.5), color(0.0, 0.0, 1.0)  # Blue
+
+✓ Vertex buffer created (60 bytes)
+✓ Shader loaded and compiled
+✓ Render pipeline created
+✓ Render target created (800x600)
+✓ Render pass configured
+✓ Render commands submitted to GPU
+✓ Rendering complete
+```
+
+Other available examples:
+- `backend_selection` - Enumerate and select GPU backends
+- `compute_pass` - Compute shader operations
+- `shader_loading` - Load and compile WGSL shaders
+- `error_handling` - Error handling patterns
+
 ### WebGPU Implementation
 
 The playground supports different WebGPU implementations:
@@ -234,7 +278,12 @@ This project uses a Cargo workspace structure with the following crates:
   - `src/main.rs` - Main application entry point and window management
   - `src/app.rs` - Main UI application structure and tab management
 
-- **wgpu_playground_examples** (`crates/wgpu_playground_examples/`) - Example programs (planned)
+- **wgpu_playground_examples** (`crates/wgpu_playground_examples/`) - Example programs
+  - `examples/triangle.rs` - Basic triangle rendering example
+  - `examples/backend_selection.rs` - GPU backend enumeration and selection
+  - `examples/compute_pass.rs` - Compute shader operations
+  - `examples/shader_loading.rs` - WGSL shader loading and compilation
+  - `examples/error_handling.rs` - Error handling patterns
 
 - **assets/** - Static assets directory
   - `shaders/` - WGSL shader files

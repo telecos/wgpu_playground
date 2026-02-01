@@ -6,6 +6,9 @@ fn main() {
     // Print cargo configuration for debugging
     println!("cargo:rerun-if-changed=build.rs");
 
+    // Register the dawn_enabled cfg
+    println!("cargo::rustc-check-cfg=cfg(dawn_enabled)");
+
     #[cfg(feature = "dawn")]
     configure_and_build_dawn();
 }
@@ -15,7 +18,6 @@ fn configure_and_build_dawn() {
     use std::env;
     use std::path::PathBuf;
     use std::process::Command;
-    println!("cargo:rustc-cfg=dawn_enabled");
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let dawn_dir = out_dir.join("dawn");
@@ -48,11 +50,13 @@ fn configure_and_build_dawn() {
                 );
                 println!("cargo:warning=Please clone manually: git clone https://dawn.googlesource.com/dawn");
                 println!("cargo:warning=Continuing with placeholder Dawn support");
+                println!("cargo:warning=Dawn will use wgpu-core fallback");
                 return;
             }
             Err(e) => {
                 println!("cargo:warning=Git command failed: {}. Is git installed?", e);
                 println!("cargo:warning=Continuing with placeholder Dawn support");
+                println!("cargo:warning=Dawn will use wgpu-core fallback");
                 return;
             }
         }
@@ -73,6 +77,7 @@ fn configure_and_build_dawn() {
         _ => {
             println!("cargo:warning=CMake not found. Please install CMake to build Dawn.");
             println!("cargo:warning=Continuing with placeholder Dawn support");
+            println!("cargo:warning=Dawn will use wgpu-core fallback");
             return;
         }
     }
@@ -103,11 +108,13 @@ fn configure_and_build_dawn() {
                 s
             );
             println!("cargo:warning=Continuing with placeholder Dawn support");
+            println!("cargo:warning=Dawn will use wgpu-core fallback");
             return;
         }
         Err(e) => {
             println!("cargo:warning=CMake configuration error: {}", e);
             println!("cargo:warning=Continuing with placeholder Dawn support");
+            println!("cargo:warning=Dawn will use wgpu-core fallback");
             return;
         }
     }
@@ -132,11 +139,13 @@ fn configure_and_build_dawn() {
         Ok(s) => {
             println!("cargo:warning=Dawn build failed (exit code: {})", s);
             println!("cargo:warning=Continuing with placeholder Dawn support");
+            println!("cargo:warning=Dawn will use wgpu-core fallback");
             return;
         }
         Err(e) => {
             println!("cargo:warning=Dawn build error: {}", e);
             println!("cargo:warning=Continuing with placeholder Dawn support");
+            println!("cargo:warning=Dawn will use wgpu-core fallback");
             return;
         }
     }
@@ -155,11 +164,13 @@ fn configure_and_build_dawn() {
         Ok(s) => {
             println!("cargo:warning=Dawn install failed (exit code: {})", s);
             println!("cargo:warning=Continuing with placeholder Dawn support");
+            println!("cargo:warning=Dawn will use wgpu-core fallback");
             return;
         }
         Err(e) => {
             println!("cargo:warning=Dawn install error: {}", e);
             println!("cargo:warning=Continuing with placeholder Dawn support");
+            println!("cargo:warning=Dawn will use wgpu-core fallback");
             return;
         }
     }
@@ -178,6 +189,9 @@ fn configure_and_build_dawn() {
 
     // Export paths for use in code
     println!("cargo:include={}", include_dir.display());
+
+    // ONLY set dawn_enabled if we successfully built and installed Dawn
+    println!("cargo:rustc-cfg=dawn_enabled");
 
     println!("cargo:warning=Dawn integration complete!");
     println!("cargo:warning=Include directory: {}", include_dir.display());

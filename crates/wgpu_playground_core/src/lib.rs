@@ -8,6 +8,7 @@ pub mod buffer;
 pub mod buffer_panel;
 pub mod command_encoder;
 pub mod compute;
+pub mod compute_dispatch_panel;
 pub mod compute_pass_encoder;
 pub mod compute_pipeline_panel;
 pub mod console;

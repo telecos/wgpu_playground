@@ -3,6 +3,7 @@ use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::compute::ComputePanel;
+use wgpu_playground_core::compute_dispatch_panel::ComputeDispatchPanel;
 use wgpu_playground_core::compute_pipeline_panel::ComputePipelinePanel;
 use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
@@ -21,6 +22,7 @@ pub struct PlaygroundApp {
     rendering_panel: RenderingPanel,
     compute_panel: ComputePanel,
     compute_pipeline_panel: ComputePipelinePanel,
+    compute_dispatch_panel: ComputeDispatchPanel,
     buffer_panel: BufferPanel,
     sampler_panel: SamplerPanel,
     texture_panel: TexturePanel,
@@ -48,6 +50,7 @@ enum Tab {
     RenderPipelineConfig,
     DrawCommand,
     RenderPassConfig,
+    ComputeDispatch,
     Compute,
     Console,
 }
@@ -66,6 +69,7 @@ impl PlaygroundApp {
             rendering_panel: RenderingPanel::new(device, queue),
             compute_panel: ComputePanel::new(),
             compute_pipeline_panel: ComputePipelinePanel::new(),
+            compute_dispatch_panel: ComputeDispatchPanel::new(),
             buffer_panel: BufferPanel::new(),
             sampler_panel: SamplerPanel::new(),
             texture_panel: TexturePanel::new(),
@@ -143,6 +147,11 @@ impl PlaygroundApp {
                 Tab::RenderPassConfig,
                 "🎬 Render Pass",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::ComputeDispatch,
+                "🚀 Compute Dispatch",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
             ui.selectable_value(&mut self.selected_tab, Tab::Console, "🖥️ Console");
         });
@@ -162,6 +171,7 @@ impl PlaygroundApp {
             Tab::RenderPipelineConfig => self.render_pipeline_panel.ui(ui),
             Tab::DrawCommand => self.draw_command_panel.ui(ui),
             Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
+            Tab::ComputeDispatch => self.compute_dispatch_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
             Tab::Console => self.console_panel.ui(ui),
         });

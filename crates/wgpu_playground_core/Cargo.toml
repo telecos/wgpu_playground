@@ -23,7 +23,7 @@ egui = "0.29"
 egui-wgpu = "0.29"
 bytemuck = { version = "1.14", features = ["derive"] }
 futures-channel = "0.3"
-image = "0.25"
+image = { version = "0.25", default-features = false, features = ["png"] }
 
 # Dawn FFI bindings (optional) - currently using custom bindings
 # dawn-sys has compatibility issues on Linux, so we build our own

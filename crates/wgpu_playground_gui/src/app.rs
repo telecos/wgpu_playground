@@ -2,6 +2,7 @@ use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
 use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_panel::BufferPanel;
+use wgpu_playground_core::command_recording_panel::CommandRecordingPanel;
 use wgpu_playground_core::compute::ComputePanel;
 use wgpu_playground_core::compute_dispatch_panel::ComputeDispatchPanel;
 use wgpu_playground_core::compute_pipeline_panel::ComputePipelinePanel;
@@ -34,6 +35,7 @@ pub struct PlaygroundApp {
     draw_command_panel: DrawCommandPanel,
     render_pass_panel: RenderPassPanel,
     resource_inspector_panel: ResourceInspectorPanel,
+    command_recording_panel: CommandRecordingPanel,
     selected_tab: Tab,
 }
 
@@ -56,6 +58,7 @@ enum Tab {
     Compute,
     Console,
     ResourceInspector,
+    CommandRecording,
 }
 
 impl PlaygroundApp {
@@ -83,6 +86,7 @@ impl PlaygroundApp {
             draw_command_panel: DrawCommandPanel::new(),
             render_pass_panel: RenderPassPanel::new(),
             resource_inspector_panel: ResourceInspectorPanel::new(),
+            command_recording_panel: CommandRecordingPanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -169,6 +173,11 @@ impl PlaygroundApp {
                 Tab::ResourceInspector,
                 "🔍 Resource Inspector",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::CommandRecording,
+                "📹 Command Recording",
+            );
         });
 
         // Main canvas area
@@ -190,6 +199,7 @@ impl PlaygroundApp {
             Tab::Compute => self.compute_panel.ui(ui),
             Tab::Console => self.console_panel.ui(ui),
             Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
+            Tab::CommandRecording => self.command_recording_panel.ui(ui),
         });
     }
 }

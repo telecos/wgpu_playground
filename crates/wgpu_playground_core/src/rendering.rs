@@ -674,51 +674,59 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             let buffer_slice = output_buffer.slice(..);
             let (tx, rx) = std::sync::mpsc::channel();
             buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
-                tx.send(result).unwrap();
+                let _ = tx.send(result); // Ignore send errors (receiver might be dropped)
             });
 
             device.poll(wgpu::Maintain::Wait);
 
-            if rx.recv().unwrap().is_ok() {
-                let data = buffer_slice.get_mapped_range();
-                
-                // Convert BGRA to RGBA
-                let mut rgba_data = vec![0u8; (width * height * 4) as usize];
-                for row in 0..height {
-                    let src_offset = (row * padded_bytes_per_row) as usize;
-                    let dst_offset = (row * width * 4) as usize;
-                    for col in 0..width {
-                        let src_idx = src_offset + (col * 4) as usize;
-                        let dst_idx = dst_offset + (col * 4) as usize;
-                        // BGRA -> RGBA
-                        rgba_data[dst_idx] = data[src_idx + 2];     // R
-                        rgba_data[dst_idx + 1] = data[src_idx + 1]; // G
-                        rgba_data[dst_idx + 2] = data[src_idx];     // B
-                        rgba_data[dst_idx + 3] = data[src_idx + 3]; // A
+            match rx.recv() {
+                Ok(Ok(())) => {
+                    let data = buffer_slice.get_mapped_range();
+                    
+                    // Convert BGRA to RGBA
+                    let mut rgba_data = vec![0u8; (width * height * 4) as usize];
+                    for row in 0..height {
+                        let src_offset = (row * padded_bytes_per_row) as usize;
+                        let dst_offset = (row * width * 4) as usize;
+                        for col in 0..width {
+                            let src_idx = src_offset + (col * 4) as usize;
+                            let dst_idx = dst_offset + (col * 4) as usize;
+                            // BGRA -> RGBA
+                            rgba_data[dst_idx] = data[src_idx + 2];     // R
+                            rgba_data[dst_idx + 1] = data[src_idx + 1]; // G
+                            rgba_data[dst_idx + 2] = data[src_idx];     // B
+                            rgba_data[dst_idx + 3] = data[src_idx + 3]; // A
+                        }
+                    }
+                    
+                    drop(data);
+                    output_buffer.unmap();
+
+                    // Save to file
+                    use std::time::SystemTime;
+                    let timestamp = SystemTime::now()
+                        .duration_since(SystemTime::UNIX_EPOCH)
+                        .expect("System time is before UNIX epoch")
+                        .as_secs();
+                    let filename = format!("screenshot_{}.png", timestamp);
+                    
+                    if let Err(e) = image::save_buffer(
+                        &filename,
+                        &rgba_data,
+                        width,
+                        height,
+                        image::ColorType::Rgba8,
+                    ) {
+                        log::error!("Failed to save screenshot: {}", e);
+                    } else {
+                        log::info!("Screenshot saved to {}", filename);
                     }
                 }
-                
-                drop(data);
-                output_buffer.unmap();
-
-                // Save to file
-                use std::time::SystemTime;
-                let timestamp = SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs();
-                let filename = format!("screenshot_{}.png", timestamp);
-                
-                if let Err(e) = image::save_buffer(
-                    &filename,
-                    &rgba_data,
-                    width,
-                    height,
-                    image::ColorType::Rgba8,
-                ) {
-                    log::error!("Failed to save screenshot: {}", e);
-                } else {
-                    log::info!("Screenshot saved to {}", filename);
+                Ok(Err(e)) => {
+                    log::error!("Failed to map screenshot buffer: {:?}", e);
+                }
+                Err(e) => {
+                    log::error!("Failed to receive buffer mapping result: {}", e);
                 }
             }
         }

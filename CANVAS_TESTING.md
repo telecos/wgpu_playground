@@ -19,7 +19,6 @@ This document provides instructions for testing the newly implemented main rende
 ### 1. Build and Run the Application
 
 ```bash
-cd /home/runner/work/wgpu_playground/wgpu_playground
 cargo run --release --package wgpu_playground_gui
 ```
 

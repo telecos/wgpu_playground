@@ -18,3 +18,7 @@ glam = "0.29"
 [[bin]]
 name = "adapter_demo"
 path = "src/adapter_demo.rs"
+
+[[bin]]
+name = "texture_mapping"
+path = "src/texture_mapping.rs"

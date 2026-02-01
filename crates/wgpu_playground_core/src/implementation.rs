@@ -116,7 +116,7 @@ impl WebGPUImplementation {
         match self {
             Self::Wgpu => true,
             #[cfg(feature = "dawn")]
-            Self::Dawn => false, // Dawn is currently a placeholder
+            Self::Dawn => false, // Dawn build infrastructure exists, but runtime integration pending
         }
     }
 
@@ -125,7 +125,7 @@ impl WebGPUImplementation {
         match self {
             Self::Wgpu => "Native wgpu implementation",
             #[cfg(feature = "dawn")]
-            Self::Dawn => "⚠️ Placeholder mode: Using wgpu backend (Dawn FFI not yet integrated)",
+            Self::Dawn => "Placeholder: Build infrastructure ready, runtime integration pending",
         }
     }
 

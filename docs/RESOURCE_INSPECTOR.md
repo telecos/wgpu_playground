@@ -84,6 +84,7 @@ let mut inspector = ResourceInspectorPanel::new();
 
 // Track a buffer
 inspector.add_buffer(BufferInfo {
+    id: 0,
     label: Some("Vertex Buffer".to_string()),
     size: 4096,
     usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
@@ -93,6 +94,7 @@ inspector.add_buffer(BufferInfo {
 
 // Track a texture
 inspector.add_texture(TextureInfo {
+    id: 0,
     label: Some("Color Texture".to_string()),
     width: 1024,
     height: 1024,

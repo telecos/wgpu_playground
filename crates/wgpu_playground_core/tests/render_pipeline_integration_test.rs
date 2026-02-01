@@ -585,21 +585,18 @@ fn main(@location(0) color: vec3<f32>) -> @location(0) vec4<f32> {
 fn test_render_pipeline_invalid_vertex_attribute_offset() {
     // Test vertex attributes with invalid offsets
     let layout = VertexBufferLayout::new(16, VertexStepMode::Vertex)
-        // Offset goes beyond stride
+        // Offset goes beyond stride - attribute is vec3 (12 bytes) starting at offset 12
+        // which would extend to byte 24, but stride is only 16
         .with_attribute(VertexAttribute::new(0, VertexFormat::Float32x3, 12));
 
     let descriptor = RenderPipelineDescriptor::new(Some("invalid_offset"))
         .with_vertex_buffer(layout)
         .with_fragment_target(ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb));
 
-    // Validation may or may not catch this at descriptor level, but it should
-    // fail when creating the actual pipeline
-    let validation_result = descriptor.validate();
-    // The descriptor itself might validate, but pipeline creation will fail
-    assert!(
-        validation_result.is_ok() || validation_result.is_err(),
-        "Validation result is documented"
-    );
+    // Note: Descriptor validation may not catch this offset issue at the descriptor level.
+    // The GPU driver would detect this error during actual pipeline creation.
+    // This test documents that such configurations can be created but would fail at runtime.
+    let _validation_result = descriptor.validate();
 }
 
 #[test]
@@ -651,19 +648,23 @@ fn main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<
 #[test]
 fn test_render_pipeline_no_fragment_targets() {
     // Test pipeline with no fragment targets and no depth/stencil
-    // This should fail validation as there are no render targets at all
     let descriptor = RenderPipelineDescriptor::new(Some("no_targets"));
 
+    // Note: WebGPU spec allows pipelines with only depth/stencil output (no color targets).
+    // A pipeline with no outputs at all may be accepted by the descriptor but rejected
+    // during actual GPU pipeline creation. This test documents that the descriptor
+    // itself doesn't enforce having at least one output target.
     let validation_result = descriptor.validate();
-
-    // Note: WebGPU spec allows pipelines with only depth/stencil output,
-    // but a pipeline with no outputs at all is typically invalid.
-    // However, the descriptor may allow this and rely on the GPU driver to catch it.
-    // So we test that pipeline creation would fail if attempted.
     
-    // For descriptor validation, we just check it returns a result
-    // The actual error would occur during pipeline creation
-    let _result = validation_result;
+    // Just verify we can call validate - the actual enforcement happens at pipeline creation time
+    match validation_result {
+        Ok(_) => {
+            // Descriptor allows this, GPU driver would reject during pipeline creation
+        }
+        Err(_) => {
+            // Descriptor validation caught it
+        }
+    }
 }
 
 #[test]

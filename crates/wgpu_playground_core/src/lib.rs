@@ -14,6 +14,7 @@ pub mod console;
 pub mod dawn_wrapper;
 pub mod device_config;
 pub mod device_info;
+pub mod draw_command_panel;
 pub mod error;
 pub mod examples;
 pub mod implementation;

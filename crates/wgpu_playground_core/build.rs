@@ -94,17 +94,18 @@ fn configure_and_build_dawn() {
     // Check if Dawn is already built and installed
     let lib_dir = dawn_install_dir.join("lib");
     let include_dir = dawn_install_dir.join("include");
-    
+
     // Validate cached Dawn build by checking for required files
     let dawn_header = include_dir.join("dawn").join("dawn_proc.h");
-    let cache_valid = lib_dir.exists() 
-        && include_dir.exists() 
-        && dawn_header.exists();
-    
+    let cache_valid = lib_dir.exists() && include_dir.exists() && dawn_header.exists();
+
     if cache_valid {
         println!("cargo:warning=Dawn already built and installed, skipping build");
-        println!("cargo:warning=Using cached Dawn from: {}", dawn_install_dir.display());
-        
+        println!(
+            "cargo:warning=Using cached Dawn from: {}",
+            dawn_install_dir.display()
+        );
+
         setup_dawn_linking(&lib_dir, &include_dir);
 
         println!("cargo:warning=Dawn integration complete (using cache)!");

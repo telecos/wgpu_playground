@@ -450,9 +450,9 @@ mod tests {
         assert!(panel.cached_shader.is_some());
 
         // Shader should remain cached if source hasn't changed
-        let first_shader_ptr = panel.cached_shader.as_ref().map(|s| s as *const _);
+        let _first_shader_ptr = panel.cached_shader.as_ref().map(|s| s as *const _);
         assert!(panel.update_descriptor().is_ok());
-        let second_shader_ptr = panel.cached_shader.as_ref().map(|s| s as *const _);
+        let _second_shader_ptr = panel.cached_shader.as_ref().map(|s| s as *const _);
 
         // Pointers should be different because we're creating a new shader,
         // but the source should be the same

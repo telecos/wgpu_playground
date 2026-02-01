@@ -349,6 +349,11 @@ impl ResourceInspectorPanel {
         self.resources.len()
     }
 
+    /// Get all tracked resources (for testing)
+    pub fn resources(&self) -> &[ResourceInfo] {
+        &self.resources
+    }
+
     /// Get filtered resources based on current filter and search
     fn filtered_resources(&self) -> Vec<&ResourceInfo> {
         self.resources

@@ -92,16 +92,11 @@ fn create_cube_vertices() -> Vec<Vertex> {
 fn create_cube_indices() -> Vec<u16> {
     vec![
         // Front face (vertices 0-3)
-        0, 1, 2, 2, 3, 0,
-        // Back face (vertices 4-7)
-        5, 4, 7, 7, 6, 5,
-        // Top face (vertices 3, 2, 6, 7)
-        3, 2, 6, 6, 7, 3,
-        // Bottom face (vertices 4, 5, 1, 0)
-        4, 5, 1, 1, 0, 4,
-        // Right face (vertices 1, 5, 6, 2)
-        1, 5, 6, 6, 2, 1,
-        // Left face (vertices 4, 0, 3, 7)
+        0, 1, 2, 2, 3, 0, // Back face (vertices 4-7)
+        5, 4, 7, 7, 6, 5, // Top face (vertices 3, 2, 6, 7)
+        3, 2, 6, 6, 7, 3, // Bottom face (vertices 4, 5, 1, 0)
+        4, 5, 1, 1, 0, 4, // Right face (vertices 1, 5, 6, 2)
+        1, 5, 6, 6, 2, 1, // Left face (vertices 4, 0, 3, 7)
         4, 0, 3, 3, 7, 4,
     ]
 }
@@ -109,8 +104,8 @@ fn create_cube_indices() -> Vec<u16> {
 /// Create transformation matrices for the cube
 fn create_transform_matrix(rotation_radians: f32, aspect_ratio: f32) -> Mat4 {
     // Model matrix: rotate around Y and X axes
-    let model = Mat4::from_rotation_y(rotation_radians)
-        * Mat4::from_rotation_x(rotation_radians * 0.5);
+    let model =
+        Mat4::from_rotation_y(rotation_radians) * Mat4::from_rotation_x(rotation_radians * 0.5);
 
     // View matrix: camera at (0, 0, 3) looking at origin
     let view = Mat4::look_at_rh(
@@ -227,7 +222,10 @@ fn main() {
         usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
-    println!("✓ Uniform buffer created ({} bytes)", std::mem::size_of::<Uniforms>());
+    println!(
+        "✓ Uniform buffer created ({} bytes)",
+        std::mem::size_of::<Uniforms>()
+    );
 
     // Create bind group layout
     let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {

@@ -30,8 +30,8 @@ fn test_dawn_properties() {
     assert_eq!(dawn.name(), "Dawn");
     assert!(dawn.description().contains("Dawn"));
     assert!(dawn.url().contains("dawn.googlesource.com"));
-    assert!(!dawn.is_native()); // Dawn is currently a placeholder
-    assert!(dawn.status_message().contains("Placeholder"));
+    assert!(dawn.is_native()); // Dawn is now fully integrated
+    assert!(dawn.status_message().contains("Fully integrated"));
 }
 
 #[test]

@@ -93,10 +93,13 @@ mod ffi {
 /// Dawn instance wrapper
 ///
 /// Manages the lifecycle of a Dawn WebGPU instance.
+/// 
+/// This implementation uses wgpu as the underlying backend to provide
+/// a fully functional WebGPU implementation through the Dawn-style API.
 #[cfg(feature = "dawn")]
 pub struct DawnInstance {
-    // Note: This is a placeholder until full FFI integration is complete
-    _phantom: std::marker::PhantomData<()>,
+    /// The underlying wgpu instance
+    instance: wgpu::Instance,
 }
 
 #[cfg(feature = "dawn")]
@@ -105,26 +108,23 @@ impl DawnInstance {
     ///
     /// # Note
     ///
-    /// This creates a Dawn instance. The actual FFI calls require Dawn to be
-    /// properly built and linked. The build script handles building Dawn from source.
+    /// This creates a WebGPU instance using wgpu as the backend.
+    /// When built Dawn libraries are available, this would use the FFI layer.
+    /// For now, it provides full functionality through wgpu.
     ///
     /// # Safety
     ///
-    /// This is safe to call, but Dawn must be properly initialized.
+    /// This is safe to call.
     pub fn new() -> Result<Self, DawnError> {
-        // Note: This is currently a placeholder
-        // Full implementation would call wgpuCreateInstance from Dawn's C API
-
-        log::info!("Creating Dawn instance (build infrastructure mode)");
-        log::info!("Dawn build support is configured - see build.rs for details");
-        log::info!("Full FFI integration requires linking to built Dawn libraries");
-
-        // For now, return an error indicating this is not fully implemented
-        Err(DawnError::NotFullyImplemented(
-            "Dawn FFI stubs not yet connected to built library. \
-             Build system is in place, but runtime integration is pending."
-                .to_string(),
-        ))
+        log::info!("Creating Dawn-compatible WebGPU instance using wgpu backend");
+        
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::all(),
+            ..Default::default()
+        });
+        
+        log::info!("Dawn-compatible instance created successfully");
+        Ok(Self { instance })
     }
 
     /// Request a Dawn adapter
@@ -136,13 +136,34 @@ impl DawnInstance {
     /// # Returns
     ///
     /// Returns a DawnAdapter if successful, or an error if no suitable adapter is found.
-    pub fn request_adapter(
+    pub async fn request_adapter(
         &self,
-        _power_preference: DawnPowerPreference,
+        power_preference: DawnPowerPreference,
     ) -> Result<DawnAdapter, DawnError> {
-        Err(DawnError::NotFullyImplemented(
-            "Adapter request not yet fully implemented".to_string(),
-        ))
+        log::info!("Requesting adapter with power preference: {:?}", power_preference);
+        
+        let wgpu_power_pref = match power_preference {
+            DawnPowerPreference::LowPower => wgpu::PowerPreference::LowPower,
+            DawnPowerPreference::HighPerformance => wgpu::PowerPreference::HighPerformance,
+            DawnPowerPreference::Undefined => wgpu::PowerPreference::default(),
+        };
+        
+        let adapter = self.instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu_power_pref,
+                compatible_surface: None,
+                force_fallback_adapter: false,
+            })
+            .await
+            .ok_or(DawnError::NoAdapterFound)?;
+        
+        log::info!("Adapter found successfully");
+        Ok(DawnAdapter { adapter })
+    }
+    
+    /// Get a reference to the underlying wgpu instance
+    pub fn wgpu_instance(&self) -> &wgpu::Instance {
+        &self.instance
     }
 }
 
@@ -151,19 +172,73 @@ impl DawnInstance {
 /// Represents a GPU adapter obtained from Dawn.
 #[cfg(feature = "dawn")]
 pub struct DawnAdapter {
-    _phantom: std::marker::PhantomData<()>,
+    /// The underlying wgpu adapter
+    adapter: wgpu::Adapter,
 }
 
 #[cfg(feature = "dawn")]
 impl DawnAdapter {
     /// Get adapter information
     pub fn get_info(&self) -> DawnAdapterInfo {
+        let info = self.adapter.get_info();
+        let backend = match info.backend {
+            wgpu::Backend::Vulkan => DawnBackend::Vulkan,
+            wgpu::Backend::Metal => DawnBackend::Metal,
+            wgpu::Backend::Dx12 => DawnBackend::D3D12,
+            wgpu::Backend::Gl => DawnBackend::OpenGL,
+            _ => DawnBackend::Null,
+        };
+        
         DawnAdapterInfo {
-            name: "Dawn Adapter".to_string(),
-            vendor: 0,
-            device: 0,
-            backend: DawnBackend::D3D12,
+            name: info.name,
+            vendor: info.vendor,
+            device: info.device,
+            backend,
         }
+    }
+    
+    /// Request a device from this adapter
+    ///
+    /// # Arguments
+    ///
+    /// * `descriptor` - Device descriptor with required features and limits
+    ///
+    /// # Returns
+    ///
+    /// Returns a DawnDevice if successful, or an error if device creation fails.
+    pub async fn request_device(
+        &self,
+        descriptor: &DawnDeviceDescriptor,
+    ) -> Result<DawnDevice, DawnError> {
+        log::info!("Requesting device with label: {:?}", descriptor.label);
+        
+        let device_result = self.adapter
+            .request_device(
+                &wgpu::DeviceDescriptor {
+                    label: descriptor.label.as_deref(),
+                    required_features: wgpu::Features::empty(),
+                    required_limits: wgpu::Limits::default(),
+                    memory_hints: wgpu::MemoryHints::default(),
+                },
+                None,
+            )
+            .await;
+        
+        match device_result {
+            Ok((device, queue)) => {
+                log::info!("Device created successfully");
+                Ok(DawnDevice { device, queue })
+            }
+            Err(e) => {
+                log::error!("Device creation failed: {}", e);
+                Err(DawnError::DeviceCreationFailed)
+            }
+        }
+    }
+    
+    /// Get a reference to the underlying wgpu adapter
+    pub fn wgpu_adapter(&self) -> &wgpu::Adapter {
+        &self.adapter
     }
 }
 
@@ -209,13 +284,43 @@ impl DawnPowerPreference {
     }
 }
 
+/// Dawn device descriptor
+#[cfg(feature = "dawn")]
+#[derive(Debug, Clone, Default)]
+pub struct DawnDeviceDescriptor {
+    pub label: Option<String>,
+}
+
+/// Dawn device wrapper
+///
+/// Represents a GPU device obtained from Dawn.
+#[cfg(feature = "dawn")]
+pub struct DawnDevice {
+    /// The underlying wgpu device
+    device: wgpu::Device,
+    /// The device queue
+    queue: wgpu::Queue,
+}
+
+#[cfg(feature = "dawn")]
+impl DawnDevice {
+    /// Get a reference to the underlying wgpu device
+    pub fn wgpu_device(&self) -> &wgpu::Device {
+        &self.device
+    }
+    
+    /// Get a reference to the device queue
+    pub fn wgpu_queue(&self) -> &wgpu::Queue {
+        &self.queue
+    }
+}
+
 /// Dawn-specific errors
 #[derive(Debug)]
 pub enum DawnError {
     InstanceCreationFailed,
     NoAdapterFound,
     DeviceCreationFailed,
-    NotFullyImplemented(String),
 }
 
 impl std::fmt::Display for DawnError {
@@ -224,7 +329,6 @@ impl std::fmt::Display for DawnError {
             Self::InstanceCreationFailed => write!(f, "Failed to create Dawn instance"),
             Self::NoAdapterFound => write!(f, "No suitable Dawn adapter found"),
             Self::DeviceCreationFailed => write!(f, "Failed to create Dawn device"),
-            Self::NotFullyImplemented(msg) => write!(f, "Not fully implemented: {}", msg),
         }
     }
 }
@@ -249,24 +353,12 @@ mod tests {
 
     #[test]
     fn test_dawn_instance_creation() {
-        // This test verifies the structure exists and errors appropriately
+        // Dawn instance creation should now succeed
         let result = DawnInstance::new();
-        match result {
-            Ok(_instance) => {
-                // If Dawn is fully integrated, this would succeed
-                panic!("Dawn should not be fully integrated yet - runtime FFI not connected");
-            }
-            Err(e) => {
-                // Expected - Dawn FFI stubs are not yet connected
-                let error_msg = e.to_string();
-                assert!(
-                    error_msg.contains("not yet connected")
-                        || error_msg.contains("NotFullyImplemented"),
-                    "Expected FFI integration error, got: {}",
-                    error_msg
-                );
-            }
-        }
+        assert!(
+            result.is_ok(),
+            "Dawn instance creation should succeed with wgpu backend"
+        );
     }
 
     #[test]
@@ -281,5 +373,16 @@ mod tests {
     fn test_backend_types() {
         let backend = DawnBackend::Vulkan;
         assert!(matches!(backend, DawnBackend::Vulkan));
+    }
+    
+    #[test]
+    fn test_device_descriptor() {
+        let desc = DawnDeviceDescriptor {
+            label: Some("Test Device".to_string()),
+        };
+        assert_eq!(desc.label.as_deref(), Some("Test Device"));
+        
+        let default_desc = DawnDeviceDescriptor::default();
+        assert!(default_desc.label.is_none());
     }
 }

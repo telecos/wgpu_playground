@@ -95,7 +95,7 @@ impl ConsoleMessage {
         let secs = duration.as_secs();
         let millis = duration.subsec_millis();
         
-        // Format as HH:MM:SS.mmm
+        // Format as HH:MM:SS.mmm (where mmm is milliseconds)
         let hours = (secs / 3600) % 24;
         let minutes = (secs / 60) % 60;
         let seconds = secs % 60;
@@ -134,6 +134,15 @@ pub struct ConsolePanel {
     selected_message: Option<usize>,
 }
 
+/// Filtered message for display in the UI
+struct FilteredMessage {
+    index: usize,
+    timestamp: String,
+    severity: Severity,
+    message: String,
+    is_selected: bool,
+}
+
 impl Default for ConsolePanel {
     fn default() -> Self {
         Self::new()
@@ -155,7 +164,8 @@ impl ConsolePanel {
     pub fn add_message(&mut self, message: ConsoleMessage) {
         self.messages.push(message);
         
-        // Keep only the most recent messages
+        // Keep only the most recent messages to prevent unbounded growth
+        // Using VecDeque would be more efficient, but Vec is simpler for this use case
         if self.messages.len() > self.max_messages {
             self.messages.drain(0..self.messages.len() - self.max_messages);
             
@@ -323,12 +333,18 @@ impl ConsolePanel {
         ui.add_space(5.0);
         ui.separator();
 
-        // Message list
-        let filtered: Vec<(usize, String, Severity, String, bool)> = self.filtered_messages()
+        // Message list - collect into a temporary structure to avoid borrow checker issues
+        let filtered: Vec<FilteredMessage> = self.filtered_messages()
             .iter()
             .map(|(idx, msg)| {
                 let is_selected = self.selected_message == Some(*idx);
-                (*idx, msg.format_timestamp(), msg.severity, msg.message.clone(), is_selected)
+                FilteredMessage {
+                    index: *idx,
+                    timestamp: msg.format_timestamp(),
+                    severity: msg.severity,
+                    message: msg.message.clone(),
+                    is_selected,
+                }
             })
             .collect();
         
@@ -341,25 +357,25 @@ impl ConsolePanel {
         } else {
             // Split view: message list on top, details on bottom
             ui.horizontal(|ui| {
-                // Message list
+                // Message list - display in reverse chronological order (newest first)
                 egui::ScrollArea::vertical()
                     .id_salt("message_list")
                     .max_height(ui.available_height() - 150.0)
                     .show(ui, |ui| {
-                        for (original_idx, timestamp, severity, message, is_selected) in filtered.iter().rev() {
+                        for msg in filtered.iter().rev() {
                             let response = ui.selectable_label(
-                                *is_selected,
+                                msg.is_selected,
                                 format!(
                                     "[{}] {} {} {}",
-                                    timestamp,
-                                    severity.icon(),
-                                    severity.as_str(),
-                                    message
+                                    msg.timestamp,
+                                    msg.severity.icon(),
+                                    msg.severity.as_str(),
+                                    msg.message
                                 ),
                             );
 
                             if response.clicked() {
-                                self.selected_message = Some(*original_idx);
+                                self.selected_message = Some(msg.index);
                             }
                         }
                     });

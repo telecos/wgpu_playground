@@ -12,7 +12,7 @@
 //! ## Building Dawn (Preferred)
 //!
 //! When the `dawn` feature is enabled, the build script attempts to:
-//! 1. Clone the Dawn repository from https://dawn.googlesource.com/dawn
+//! 1. Clone the Dawn repository from <https://dawn.googlesource.com/dawn>
 //! 2. Build Dawn using CMake with all dependencies
 //! 3. Link the Rust code against Dawn's C API
 //!

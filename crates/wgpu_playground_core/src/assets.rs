@@ -115,7 +115,7 @@ pub fn load_string_from_path(_path: &Path) -> Result<String, std::io::Error> {
 /// * `path` - The path to the file
 ///
 /// # Returns
-/// The file contents as a Vec<u8>
+/// The file contents as a `Vec<u8>`
 ///
 /// # Errors
 /// Returns an error if the file cannot be read
@@ -140,7 +140,7 @@ pub fn load_binary_from_path(_path: &Path) -> Result<Vec<u8>, std::io::Error> {
 /// * `filename` - The name of the texture file (e.g., "texture.png")
 ///
 /// # Returns
-/// The texture data as a Vec<u8>
+/// The texture data as a `Vec<u8>`
 ///
 /// # Errors
 /// Returns an error if the file cannot be read or if the filename is invalid
@@ -156,7 +156,7 @@ pub fn load_texture(filename: &str) -> Result<Vec<u8>, std::io::Error> {
 /// * `filename` - The name of the model file (e.g., "model.obj")
 ///
 /// # Returns
-/// The model data as a Vec<u8>
+/// The model data as a `Vec<u8>`
 ///
 /// # Errors
 /// Returns an error if the file cannot be read or if the filename is invalid

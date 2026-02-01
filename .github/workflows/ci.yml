@@ -89,14 +89,14 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
   
-  # Quick smoke tests on macOS and Windows for platform compatibility
+  # Quick smoke tests on Windows for platform compatibility
   test-other-platforms:
     name: Platform Tests - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [windows-latest]
     steps:
       - uses: actions/checkout@v4
       

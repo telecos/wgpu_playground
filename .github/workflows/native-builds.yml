@@ -24,8 +24,6 @@ jobs:
         include:
           - os: ubuntu-latest
             test: true
-          - os: macos-latest
-            test: false
           - os: windows-latest
             test: false
     

@@ -22,6 +22,7 @@ pub mod query_set;
 pub mod queue;
 pub mod render_bundle_encoder;
 pub mod render_pass_encoder;
+pub mod render_pass_panel;
 pub mod render_pipeline;
 pub mod render_pipeline_panel;
 pub mod rendering;

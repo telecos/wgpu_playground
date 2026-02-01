@@ -7,6 +7,7 @@ use wgpu_playground_core::compute_pipeline_panel::ComputePipelinePanel;
 use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
+use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
@@ -26,6 +27,7 @@ pub struct PlaygroundApp {
     bind_group_layout_panel: BindGroupLayoutPanel,
     render_pipeline_panel: RenderPipelinePanel,
     console_panel: ConsolePanel,
+    render_pass_panel: RenderPassPanel,
     selected_tab: Tab,
 }
 
@@ -42,6 +44,7 @@ enum Tab {
     BindGroupLayoutConfig,
     ComputePipelineConfig,
     RenderPipelineConfig,
+    RenderPassConfig,
     Compute,
     Console,
 }
@@ -67,6 +70,7 @@ impl PlaygroundApp {
             bind_group_layout_panel: BindGroupLayoutPanel::new(),
             render_pipeline_panel: RenderPipelinePanel::new(),
             console_panel,
+            render_pass_panel: RenderPassPanel::new(),
             selected_tab: Tab::AdapterSelection,
         }
     }
@@ -129,6 +133,11 @@ impl PlaygroundApp {
                 Tab::RenderPipelineConfig,
                 "⚡ Render Pipeline",
             );
+            ui.selectable_value(
+                &mut self.selected_tab,
+                Tab::RenderPassConfig,
+                "🎬 Render Pass",
+            );
             ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
             ui.selectable_value(&mut self.selected_tab, Tab::Console, "🖥️ Console");
         });
@@ -146,6 +155,7 @@ impl PlaygroundApp {
             Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
             Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),
             Tab::RenderPipelineConfig => self.render_pipeline_panel.ui(ui),
+            Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
             Tab::Compute => self.compute_panel.ui(ui),
             Tab::Console => self.console_panel.ui(ui),
         });

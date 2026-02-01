@@ -10,6 +10,7 @@ pub mod command_encoder;
 pub mod compute;
 pub mod compute_pass_encoder;
 pub mod compute_pipeline_panel;
+pub mod dawn_wrapper;
 pub mod device_config;
 pub mod device_info;
 pub mod error;

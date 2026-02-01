@@ -706,7 +706,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     use std::time::SystemTime;
                     let timestamp = SystemTime::now()
                         .duration_since(SystemTime::UNIX_EPOCH)
-                        .expect("System time is before UNIX epoch")
+                        .expect("Failed to get current timestamp for screenshot filename")
                         .as_secs();
                     let filename = format!("screenshot_{}.png", timestamp);
                     
@@ -914,8 +914,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                                 ui.separator();
                                 ui.label("Camera Controls:");
                                 ui.add(egui::Slider::new(&mut self.camera_distance, 1.0..=10.0).text("Distance"));
-                                ui.add(egui::Slider::new(&mut self.camera_rotation_x, -std::f32::consts::PI..=std::f32::consts::PI).text("Rotation X"));
-                                ui.add(egui::Slider::new(&mut self.camera_rotation_y, -std::f32::consts::PI..=std::f32::consts::PI).text("Rotation Y"));
+                                ui.add(egui::Slider::new(&mut self.camera_rotation_x, -std::f32::consts::FRAC_PI_2..=std::f32::consts::FRAC_PI_2).text("Rotation X (up/down)"));
+                                ui.add(egui::Slider::new(&mut self.camera_rotation_y, -std::f32::consts::PI..=std::f32::consts::PI).text("Rotation Y (left/right)"));
                                 if ui.button("Reset Camera").clicked() {
                                     self.camera_distance = 3.0;
                                     self.camera_rotation_x = 0.0;

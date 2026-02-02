@@ -133,18 +133,33 @@ fn configure_and_build_dawn() {
     // Configure Dawn with CMake
     println!("cargo:warning=Configuring Dawn build with CMake...");
 
-    let configure_status = Command::new("cmake")
-        .args([
-            "-S",
-            dawn_dir.to_str().unwrap(),
-            "-B",
-            dawn_build_dir.to_str().unwrap(),
-            "-DDAWN_FETCH_DEPENDENCIES=ON",
-            "-DDAWN_ENABLE_INSTALL=ON",
-            "-DCMAKE_BUILD_TYPE=Release",
-            &format!("-DCMAKE_INSTALL_PREFIX={}", dawn_install_dir.display()),
-        ])
-        .status();
+    // Check if Ninja is available for faster builds
+    let use_ninja = Command::new("ninja").arg("--version").output().is_ok();
+    if use_ninja {
+        println!("cargo:warning=Using Ninja build system for faster builds");
+    }
+
+    let mut cmake_args = vec![
+        "-S".to_string(),
+        dawn_dir.to_str().unwrap().to_string(),
+        "-B".to_string(),
+        dawn_build_dir.to_str().unwrap().to_string(),
+        "-DDAWN_FETCH_DEPENDENCIES=ON".to_string(),
+        "-DDAWN_ENABLE_INSTALL=ON".to_string(),
+        "-DCMAKE_BUILD_TYPE=Release".to_string(),
+        format!("-DCMAKE_INSTALL_PREFIX={}", dawn_install_dir.display()),
+        // Disable tests and samples to reduce build time
+        "-DDAWN_BUILD_SAMPLES=OFF".to_string(),
+        "-DTINT_BUILD_TESTS=OFF".to_string(),
+        "-DTINT_BUILD_CMD_TOOLS=OFF".to_string(),
+    ];
+
+    if use_ninja {
+        cmake_args.push("-G".to_string());
+        cmake_args.push("Ninja".to_string());
+    }
+
+    let configure_status = Command::new("cmake").args(&cmake_args).status();
 
     match configure_status {
         Ok(s) if s.success() => {

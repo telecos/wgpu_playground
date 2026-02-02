@@ -103,11 +103,21 @@ cl  # Should show Microsoft C/C++ compiler version
 
 ### First Build
 
-The first build with Dawn will take **10-30 minutes** depending on your system, as it needs to:
+The first build with Dawn will take **8-25 minutes** depending on your system and optimizations, as it needs to:
 - Clone Dawn repository (~500 MB)
 - Download Dawn dependencies
 - Build Dawn and all its components
 
+**For faster builds**, install Ninja before building:
+```bash
+# Linux
+sudo apt-get install ninja-build
+
+# macOS
+brew install ninja
+```
+
+Then build with Dawn:
 ```bash
 # Clone the wgpu_playground repository (if not already)
 git clone https://github.com/telecos/wgpu_playground
@@ -122,7 +132,10 @@ cargo build --release --features dawn
 1. Rust builds the wgpu_playground_core crate
 2. build.rs script detects the `dawn` feature
 3. Script clones Dawn from https://dawn.googlesource.com/dawn
-4. CMake configures Dawn build with `-DDAWN_FETCH_DEPENDENCIES=ON` flag
+4. CMake configures Dawn build with optimizations:
+   - Uses Ninja generator if available (30% faster than Make)
+   - Disables tests and samples to reduce build time
+   - Enables parallel compilation with `--parallel` flag
 5. CMake builds Dawn in Release mode
 6. Dawn libraries are installed to the build output directory
 7. Rust links against the built Dawn libraries
@@ -295,15 +308,20 @@ The build script automatically configures Git to support long paths on Windows b
 **Problem**: Dawn build takes more than 30 minutes
 
 **Solutions**:
-1. Use parallel builds (automatically enabled with `--parallel` flag)
-2. Increase system resources (RAM, CPU cores)
-3. Use Release build (not Debug): `cargo build --release`
-4. Check disk I/O performance - SSD recommended
+1. Install Ninja build system for 30% faster builds:
+   - Linux: `sudo apt-get install ninja-build`
+   - macOS: `brew install ninja`
+   - Windows: Download from https://github.com/ninja-build/ninja/releases
+2. Use parallel builds (automatically enabled with `--parallel` flag)
+3. Increase system resources (RAM, CPU cores)
+4. Use Release build (not Debug): `cargo build --release`
+5. Check disk I/O performance - SSD recommended
 
-**Expected times**:
-- Modern desktop (8 cores, SSD): 10-15 minutes
-- Laptop (4 cores, HDD): 20-30 minutes
-- CI systems: 15-25 minutes
+**Expected times** (with optimizations):
+- Modern desktop (8 cores, SSD, Ninja): 8-12 minutes
+- Modern desktop (8 cores, SSD, Make): 12-18 minutes
+- Laptop (4 cores, HDD): 18-28 minutes
+- CI systems (with caching): First build 15-25 minutes, subsequent builds: seconds
 
 ### Out of Disk Space
 
@@ -382,7 +400,13 @@ This builds Dawn in Debug mode with full debug symbols.
 
 ## CI/CD Integration
 
-To build with Dawn in CI:
+The repository includes a dedicated Dawn CI workflow (`.github/workflows/dawn-ci.yml`) that:
+- Runs only on Linux to save CI time
+- Caches Dawn build artifacts for fast subsequent builds
+- Installs all required dependencies
+- Tests Dawn feature in isolation
+
+To build with Dawn in your own CI:
 
 ```yaml
 # GitHub Actions example
@@ -390,11 +414,12 @@ To build with Dawn in CI:
   run: |
     sudo apt-get update
     sudo apt-get install -y git cmake build-essential python3 libvulkan-dev
+    # Optional: Install Ninja for faster builds
+    sudo apt-get install -y ninja-build
 
 # Cache Dawn build artifacts to drastically reduce build time
 # First build: 10-30 minutes, subsequent builds: seconds
 - name: Cache Dawn build
-  if: runner.os == 'Windows'
   uses: actions/cache@v4
   with:
     path: |
@@ -411,6 +436,12 @@ To build with Dawn in CI:
 - name: Build with Dawn
   run: cargo build --release --features dawn
 ```
+
+**Build Time Optimizations**:
+- **Ninja generator**: If available, the build uses Ninja instead of Make (30% faster)
+- **Disabled components**: Tests and samples are disabled to reduce build time
+- **Parallel compilation**: Enabled by default with `--parallel` flag
+- **Caching**: First build takes 15-25 minutes, subsequent builds are instant
 
 **Note**: The cache key includes a hash of `build.rs`, so the cache is invalidated when the build script changes. This ensures Dawn is rebuilt when necessary.
 

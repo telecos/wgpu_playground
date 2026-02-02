@@ -26,8 +26,8 @@ allow = [
 confidence-threshold = 0.8
 # Crates that are allowed even if their license is not in the allow list
 exceptions = [
-    # epaint_default_fonts uses UFL-1.0 for Ubuntu font files
-    { allow = ["LicenseRef-UFL-1.0"], crate = "epaint_default_fonts" },
+    # epaint_default_fonts uses Ubuntu-font-1.0 for Ubuntu font files
+    { allow = ["Ubuntu-font-1.0"], crate = "epaint_default_fonts" },
 ]
 
 [bans]

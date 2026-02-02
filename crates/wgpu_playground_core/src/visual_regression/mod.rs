@@ -81,7 +81,10 @@ pub enum VisualRegressionError {
     /// Failed to save image
     SaveError(String),
     /// Image dimensions don't match
-    DimensionMismatch { expected: (u32, u32), actual: (u32, u32) },
+    DimensionMismatch {
+        expected: (u32, u32),
+        actual: (u32, u32),
+    },
 }
 
 impl std::fmt::Display for VisualRegressionError {
@@ -91,7 +94,11 @@ impl std::fmt::Display for VisualRegressionError {
             Self::ReferenceLoadError(msg) => write!(f, "Reference load error: {}", msg),
             Self::SaveError(msg) => write!(f, "Save error: {}", msg),
             Self::DimensionMismatch { expected, actual } => {
-                write!(f, "Dimension mismatch: expected {:?}, got {:?}", expected, actual)
+                write!(
+                    f,
+                    "Dimension mismatch: expected {:?}, got {:?}",
+                    expected, actual
+                )
             }
         }
     }
@@ -123,7 +130,7 @@ pub async fn capture_texture(
     let bytes_per_pixel = 4; // RGBA
     let unpadded_bytes_per_row = width * bytes_per_pixel;
     let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
-    let padded_bytes_per_row = (unpadded_bytes_per_row + align - 1) / align * align;
+    let padded_bytes_per_row = unpadded_bytes_per_row.div_ceil(align) * align;
 
     let buffer = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("Visual Regression Capture Buffer"),
@@ -138,15 +145,15 @@ pub async fn capture_texture(
     });
 
     encoder.copy_texture_to_buffer(
-        wgpu::ImageCopyTexture {
+        wgpu::TexelCopyTextureInfo {
             texture,
             mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
-        wgpu::ImageCopyBuffer {
+        wgpu::TexelCopyBufferInfo {
             buffer: &buffer,
-            layout: wgpu::ImageDataLayout {
+            layout: wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(padded_bytes_per_row),
                 rows_per_image: Some(height),
@@ -164,11 +171,16 @@ pub async fn capture_texture(
         sender.send(result).ok();
     });
 
-    device.poll(wgpu::Maintain::Wait);
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
     receiver
         .await
         .map_err(|_| VisualRegressionError::CaptureError("Failed to receive map result".into()))?
-        .map_err(|e| VisualRegressionError::CaptureError(format!("Failed to map buffer: {:?}", e)))?;
+        .map_err(|e| {
+            VisualRegressionError::CaptureError(format!("Failed to map buffer: {:?}", e))
+        })?;
 
     let data = buffer_slice.get_mapped_range();
 
@@ -214,29 +226,34 @@ pub fn compare_with_reference(
     // Load or create reference image
     let reference = if reference_path.exists() {
         image::open(&reference_path)
-            .map_err(|e| VisualRegressionError::ReferenceLoadError(format!("Failed to load reference: {}", e)))?
+            .map_err(|e| {
+                VisualRegressionError::ReferenceLoadError(format!(
+                    "Failed to load reference: {}",
+                    e
+                ))
+            })?
             .to_rgba8()
-    } else {
-        if config.update_references {
-            // Save captured image as new reference
-            if let Some(parent) = reference_path.parent() {
-                std::fs::create_dir_all(parent)
-                    .map_err(|e| VisualRegressionError::SaveError(format!("Failed to create directory: {}", e)))?;
-            }
-            captured
-                .save(&reference_path)
-                .map_err(|e| VisualRegressionError::SaveError(format!("Failed to save reference: {}", e)))?;
-
-            return Ok(ComparisonResult {
-                is_match: true,
-                difference: 0.0,
-                diff_image_path: None,
-            });
-        } else {
-            return Err(VisualRegressionError::ReferenceLoadError(
-                format!("Reference image not found: {:?}. Run with update_references=true to create it.", reference_path)
-            ));
+    } else if config.update_references {
+        // Save captured image as new reference
+        if let Some(parent) = reference_path.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| {
+                VisualRegressionError::SaveError(format!("Failed to create directory: {}", e))
+            })?;
         }
+        captured.save(&reference_path).map_err(|e| {
+            VisualRegressionError::SaveError(format!("Failed to save reference: {}", e))
+        })?;
+
+        return Ok(ComparisonResult {
+            is_match: true,
+            difference: 0.0,
+            diff_image_path: None,
+        });
+    } else {
+        return Err(VisualRegressionError::ReferenceLoadError(format!(
+            "Reference image not found: {:?}. Run with update_references=true to create it.",
+            reference_path
+        )));
     };
 
     // Check dimensions match
@@ -295,7 +312,7 @@ pub fn compare_with_reference(
 }
 
 /// Gets the path to a reference image
-/// 
+///
 /// Note: Uses a relative path from CARGO_MANIFEST_DIR (the core crate directory)
 /// to the workspace-level tests directory. This is intentional as visual regression
 /// tests are workspace-level integration tests, not crate-specific unit tests.

@@ -39,13 +39,13 @@ fn create_test_pipeline(
         layout: None,
         vertex: wgpu::VertexState {
             module: shader,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             buffers: &[],
             compilation_options: Default::default(),
         },
         fragment: Some(wgpu::FragmentState {
             module: shader,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Bgra8UnormSrgb,
                 blend: Some(wgpu::BlendState::REPLACE),
@@ -192,7 +192,10 @@ fn test_render_bundle_execution() {
         queue.submit(std::iter::once(command_buffer));
 
         // Wait for the GPU to finish
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -269,6 +272,9 @@ fn test_render_bundle_multiple_execution() {
         queue.submit(std::iter::once(command_buffer));
 
         // Wait for the GPU to finish
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }

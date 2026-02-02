@@ -57,7 +57,7 @@ async fn run_texture_example() {
 
     // Step 1: Initialize wgpu context
     println!("1. Initializing wgpu context...");
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -74,15 +74,14 @@ async fn run_texture_example() {
     println!("   ✓ Adapter: {}", adapter.get_info().name);
 
     let (device, queue) = adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                label: Some("Device"),
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            label: Some("Device"),
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+            memory_hints: Default::default(),
+            experimental_features: Default::default(),
+            trace: Default::default(),
+        })
         .await
         .expect("Failed to create device");
 
@@ -102,14 +101,14 @@ async fn run_texture_example() {
     // Upload texture data
     let texture_data = create_checkerboard_texture_data();
     queue.write_texture(
-        wgpu::ImageCopyTexture {
+        wgpu::TexelCopyTextureInfo {
             texture: &texture,
             mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
         &texture_data,
-        wgpu::ImageDataLayout {
+        wgpu::TexelCopyBufferLayout {
             offset: 0,
             bytes_per_row: Some(4 * TEXTURE_SIZE),
             rows_per_image: Some(TEXTURE_SIZE),
@@ -251,7 +250,7 @@ async fn run_texture_example() {
         layout: Some(&pipeline_layout),
         vertex: wgpu::VertexState {
             module: &shader_module,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             buffers: &[wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Vertex,
@@ -274,7 +273,7 @@ async fn run_texture_example() {
         },
         fragment: Some(wgpu::FragmentState {
             module: &shader_module,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8Unorm,
                 blend: Some(wgpu::BlendState::REPLACE),
@@ -341,6 +340,7 @@ async fn run_texture_example() {
                     }),
                     store: wgpu::StoreOp::Store,
                 },
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
@@ -358,7 +358,10 @@ async fn run_texture_example() {
 
     // Step 12: Wait for completion
     println!("\n12. Waiting for GPU to complete...");
-    device.poll(wgpu::Maintain::Wait);
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
     println!("   ✓ Rendering complete!");
 
     println!("\n=== Example Summary ===");

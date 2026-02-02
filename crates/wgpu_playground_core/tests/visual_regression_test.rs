@@ -8,8 +8,8 @@ mod common;
 use common::create_test_device;
 use wgpu::util::DeviceExt;
 use wgpu_playground_core::assert_visual_match;
-use wgpu_playground_core::visual_regression::*;
 use wgpu_playground_core::visual_regression::test_utils::*;
+use wgpu_playground_core::visual_regression::*;
 
 /// Vertex structure for simple rendering tests
 #[repr(C)]
@@ -84,7 +84,7 @@ fn render_triangle(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture 
         layout: None,
         vertex: wgpu::VertexState {
             module: &shader,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             buffers: &[wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Vertex>() as u64,
                 step_mode: wgpu::VertexStepMode::Vertex,
@@ -105,7 +105,7 @@ fn render_triangle(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture 
         },
         fragment: Some(wgpu::FragmentState {
             module: &shader,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
                 blend: None,
@@ -139,6 +139,7 @@ fn render_triangle(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture 
                     load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
                     store: wgpu::StoreOp::Store,
                 },
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
@@ -203,7 +204,7 @@ fn render_solid_quad(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Textur
         layout: None,
         vertex: wgpu::VertexState {
             module: &shader,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             buffers: &[wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Vertex>() as u64,
                 step_mode: wgpu::VertexStepMode::Vertex,
@@ -224,7 +225,7 @@ fn render_solid_quad(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Textur
         },
         fragment: Some(wgpu::FragmentState {
             module: &shader,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
                 blend: None,
@@ -258,6 +259,7 @@ fn render_solid_quad(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Textur
                     load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
                     store: wgpu::StoreOp::Store,
                 },
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
@@ -286,7 +288,7 @@ fn test_visual_regression_triangle() {
             "triangle",
             &device,
             &queue,
-            |device, queue| render_triangle(device, queue),
+            render_triangle,
             ComparisonConfig::default(),
         )
         .await;
@@ -318,7 +320,7 @@ fn test_visual_regression_solid_quad() {
             "solid_quad",
             &device,
             &queue,
-            |device, queue| render_solid_quad(device, queue),
+            render_solid_quad,
             ComparisonConfig::default(),
         )
         .await;

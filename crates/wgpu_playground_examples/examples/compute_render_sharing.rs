@@ -41,7 +41,7 @@ impl Particle {
 
 /// Create GPU device and queue
 async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -52,21 +52,21 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
             force_fallback_adapter: false,
             compatible_surface: None,
         })
-        .await?;
+        .await
+        .ok()?;
 
     println!("Using adapter: {}", adapter.get_info().name);
     println!("Backend: {:?}\n", adapter.get_info().backend);
 
     adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: Some("Compute-Render Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+            label: Some("Compute-Render Device"),
+            memory_hints: Default::default(),
+            experimental_features: Default::default(),
+            trace: Default::default(),
+        })
         .await
         .ok()
 }
@@ -219,7 +219,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         label: Some("Particle Compute Pipeline"),
         layout: Some(&compute_pipeline_layout),
         module: &compute_shader,
-        entry_point: "main",
+        entry_point: Some("main"),
         compilation_options: Default::default(),
         cache: None,
     });
@@ -310,7 +310,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         layout: Some(&render_pipeline_layout),
         vertex: wgpu::VertexState {
             module: &render_shader,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             compilation_options: Default::default(),
             buffers: &[vertex_buffer_layout],
         },
@@ -331,7 +331,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         },
         fragment: Some(wgpu::FragmentState {
             module: &render_shader,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             compilation_options: Default::default(),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
@@ -395,6 +395,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                         }),
                         store: wgpu::StoreOp::Store,
                     },
+                    depth_slice: None,
                 })],
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
@@ -412,7 +413,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
         // Submit commands
         queue.submit(std::iter::once(encoder.finish()));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         println!("  ✓ Commands submitted and completed\n");
     }
 

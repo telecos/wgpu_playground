@@ -33,7 +33,7 @@ impl Vertex {
 
 /// Create GPU device and queue
 async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -44,21 +44,21 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
             force_fallback_adapter: false,
             compatible_surface: None,
         })
-        .await?;
+        .await
+        .ok()?;
 
     println!("Using adapter: {}", adapter.get_info().name);
     println!("Backend: {:?}", adapter.get_info().backend);
 
     adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: Some("Multisampling Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+            label: Some("Multisampling Device"),
+            memory_hints: Default::default(),
+            experimental_features: Default::default(),
+            trace: Default::default(),
+        })
         .await
         .ok()
 }
@@ -150,7 +150,7 @@ fn create_pipeline(
         layout: Some(&pipeline_layout),
         vertex: wgpu::VertexState {
             module: shader_module,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             compilation_options: Default::default(),
             buffers: &[vertex_buffer_layout],
         },
@@ -171,7 +171,7 @@ fn create_pipeline(
         },
         fragment: Some(wgpu::FragmentState {
             module: shader_module,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             compilation_options: Default::default(),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
@@ -265,6 +265,7 @@ fn main() {
                     }),
                     store: wgpu::StoreOp::Store,
                 },
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
@@ -277,7 +278,10 @@ fn main() {
     }
 
     queue.submit(std::iter::once(encoder.finish()));
-    device.poll(wgpu::Maintain::Wait);
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
     println!("✓ Non-MSAA rendering complete\n");
 
     // === Part 2: Render WITH 4x multisampling (anti-aliased) ===
@@ -330,6 +334,7 @@ fn main() {
                     }),
                     store: wgpu::StoreOp::Store,
                 },
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
@@ -342,7 +347,10 @@ fn main() {
     }
 
     queue.submit(std::iter::once(encoder.finish()));
-    device.poll(wgpu::Maintain::Wait);
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
     println!("✓ MSAA rendering complete");
     println!("✓ Resolve operation complete (MSAA → regular texture)\n");
 

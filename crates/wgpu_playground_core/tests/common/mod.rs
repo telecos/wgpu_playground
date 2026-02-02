@@ -28,7 +28,7 @@ use wgpu::{Adapter, Device, Instance, Queue};
 /// # }
 /// ```
 pub async fn create_test_device() -> Option<(Device, Queue)> {
-    let instance = Instance::new(wgpu::InstanceDescriptor {
+    let instance = Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -39,18 +39,18 @@ pub async fn create_test_device() -> Option<(Device, Queue)> {
             force_fallback_adapter: false,
             compatible_surface: None,
         })
-        .await?;
+        .await
+        .ok()?;
 
     adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: Some("Test Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+            label: Some("Test Device"),
+            memory_hints: Default::default(),
+            experimental_features: Default::default(),
+            trace: Default::default(),
+        })
         .await
         .ok()
 }
@@ -67,7 +67,7 @@ pub async fn create_test_device() -> Option<(Device, Queue)> {
 /// the requested features, or `None` otherwise.
 #[allow(dead_code)]
 pub async fn create_test_device_with_features(features: wgpu::Features) -> Option<(Device, Queue)> {
-    let instance = Instance::new(wgpu::InstanceDescriptor {
+    let instance = Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -78,7 +78,8 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
             force_fallback_adapter: false,
             compatible_surface: None,
         })
-        .await?;
+        .await
+        .ok()?;
 
     // Check if adapter supports the requested features
     if !adapter.features().contains(features) {
@@ -86,15 +87,14 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
     }
 
     adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: features,
-                required_limits: wgpu::Limits::default(),
-                label: Some("Test Device with Features"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            required_features: features,
+            required_limits: wgpu::Limits::default(),
+            label: Some("Test Device with Features"),
+            memory_hints: Default::default(),
+            experimental_features: Default::default(),
+            trace: Default::default(),
+        })
         .await
         .ok()
 }
@@ -111,7 +111,7 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
 /// the requested limits, or `None` otherwise.
 #[allow(dead_code)]
 pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Device, Queue)> {
-    let instance = Instance::new(wgpu::InstanceDescriptor {
+    let instance = Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -122,18 +122,18 @@ pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Dev
             force_fallback_adapter: false,
             compatible_surface: None,
         })
-        .await?;
+        .await
+        .ok()?;
 
     adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: limits,
-                label: Some("Test Device with Limits"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::empty(),
+            required_limits: limits,
+            label: Some("Test Device with Limits"),
+            memory_hints: Default::default(),
+            experimental_features: Default::default(),
+            trace: Default::default(),
+        })
         .await
         .ok()
 }
@@ -146,7 +146,7 @@ pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Dev
 /// adapter is available.
 #[allow(dead_code)]
 pub async fn create_test_instance_and_adapter() -> Option<(Instance, Adapter)> {
-    let instance = Instance::new(wgpu::InstanceDescriptor {
+    let instance = Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -157,7 +157,8 @@ pub async fn create_test_instance_and_adapter() -> Option<(Instance, Adapter)> {
             force_fallback_adapter: false,
             compatible_surface: None,
         })
-        .await?;
+        .await
+        .ok()?;
 
     Some((instance, adapter))
 }

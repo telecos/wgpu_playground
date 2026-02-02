@@ -227,11 +227,17 @@ impl PerformancePanel {
 
                 // Add reference lines for common frame time targets
                 let num_samples = frame_times.len();
-                let line_60fps = Line::new("60 FPS target", vec![[0.0, 16.67], [num_samples as f64, 16.67]])
-                    .color(egui::Color32::GREEN);
+                let line_60fps = Line::new(
+                    "60 FPS target",
+                    vec![[0.0, 16.67], [num_samples as f64, 16.67]],
+                )
+                .color(egui::Color32::GREEN);
 
-                let line_30fps = Line::new("30 FPS target", vec![[0.0, 33.33], [num_samples as f64, 33.33]])
-                    .color(egui::Color32::YELLOW);
+                let line_30fps = Line::new(
+                    "30 FPS target",
+                    vec![[0.0, 33.33], [num_samples as f64, 33.33]],
+                )
+                .color(egui::Color32::YELLOW);
 
                 plot_ui.line(line_60fps);
                 plot_ui.line(line_30fps);

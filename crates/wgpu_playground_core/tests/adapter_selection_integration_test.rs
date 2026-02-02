@@ -3,7 +3,7 @@ use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
 
 // Helper function to create a test adapter
 async fn create_test_adapter() -> Option<wgpu::Adapter> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -15,6 +15,7 @@ async fn create_test_adapter() -> Option<wgpu::Adapter> {
             compatible_surface: None,
         })
         .await
+        .ok()
 }
 
 #[test]

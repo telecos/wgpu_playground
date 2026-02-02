@@ -54,7 +54,7 @@ impl TexturedVertex {
 
 /// Create GPU device and queue
 async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });
@@ -65,21 +65,21 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
             force_fallback_adapter: false,
             compatible_surface: None,
         })
-        .await?;
+        .await
+        .ok()?;
 
     println!("Using adapter: {}", adapter.get_info().name);
     println!("Backend: {:?}", adapter.get_info().backend);
 
     adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                label: Some("Render-to-Texture Device"),
-                memory_hints: Default::default(),
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor {
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+            label: Some("Render-to-Texture Device"),
+            memory_hints: Default::default(),
+            experimental_features: Default::default(),
+            trace: Default::default(),
+        })
         .await
         .ok()
 }
@@ -198,7 +198,7 @@ fn main() {
         layout: Some(&scene_pipeline_layout),
         vertex: wgpu::VertexState {
             module: &scene_shader_module,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             compilation_options: Default::default(),
             buffers: &[wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<ColorVertex>() as u64,
@@ -234,7 +234,7 @@ fn main() {
         },
         fragment: Some(wgpu::FragmentState {
             module: &scene_shader_module,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             compilation_options: Default::default(),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
@@ -359,7 +359,7 @@ fn main() {
         layout: Some(&display_pipeline_layout),
         vertex: wgpu::VertexState {
             module: &display_shader_module,
-            entry_point: "vs_main",
+            entry_point: Some("vs_main"),
             compilation_options: Default::default(),
             buffers: &[wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<TexturedVertex>() as u64,
@@ -395,7 +395,7 @@ fn main() {
         },
         fragment: Some(wgpu::FragmentState {
             module: &display_shader_module,
-            entry_point: "fs_main",
+            entry_point: Some("fs_main"),
             compilation_options: Default::default(),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
@@ -440,6 +440,7 @@ fn main() {
                     }),
                     store: wgpu::StoreOp::Store, // Important: Store the result for next pass
                 },
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
@@ -469,6 +470,7 @@ fn main() {
                     }),
                     store: wgpu::StoreOp::Store,
                 },
+                depth_slice: None,
             })],
             depth_stencil_attachment: None,
             timestamp_writes: None,
@@ -487,7 +489,10 @@ fn main() {
     println!("\n✓ Render commands submitted to GPU");
 
     // Wait for completion
-    device.poll(wgpu::Maintain::Wait);
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
     println!("✓ Rendering complete\n");
 
     println!("=== Render-to-Texture Example Complete ===");

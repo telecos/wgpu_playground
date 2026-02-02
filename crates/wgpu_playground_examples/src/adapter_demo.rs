@@ -27,7 +27,7 @@ async fn main() {
     // Request adapter with different options
     println!("\n=== Requesting Adapter ===\n");
 
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });

@@ -683,7 +683,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 let _ = tx.send(result); // Ignore send errors (receiver might be dropped)
             });
 
-            device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+            let _ = device.poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            });
 
             match rx.recv() {
                 Ok(Ok(())) => {
@@ -1058,7 +1061,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     // Copy source code button
                     ui.add_space(5.0);
                     if ui.button("📋 Copy Source Code").clicked() {
-                        ui.output_mut(|o| o.commands.push(egui::OutputCommand::CopyText(example_source_code.to_string())));
+                        ui.output_mut(|o| {
+                            o.commands.push(egui::OutputCommand::CopyText(
+                                example_source_code.to_string(),
+                            ))
+                        });
                     }
                 } else {
                     ui.colored_label(

@@ -33,6 +33,8 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 # WASM dependencies
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+console_error_panic_hook = "0.1"
 web-sys = { version = "0.3", features = [
     "Document",
     "Window",
@@ -50,6 +52,16 @@ web-sys = { version = "0.3", features = [
     "GpuTextureDescriptor",
     "GpuTextureFormat",
     "GpuCanvasContext",
+    "console",
+    "Navigator",
+    "Performance",
+    "Location",
+    "Storage",
+    "CanvasRenderingContext2d",
+    "ImageData",
+    "DomRect",
+    "MouseEvent",
+    "CssStyleDeclaration",
 ] }
 js-sys = "0.3"
 
@@ -60,6 +72,9 @@ cc = "1.2"
 [dev-dependencies]
 pollster = "0.3"
 serial_test = "3.0"
+
+# Criterion doesn't support WASM, so only include it for native targets
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 
 # WASM-specific test dependencies

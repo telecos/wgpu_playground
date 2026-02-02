@@ -3278,6 +3278,7 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "cc",
+ "console_error_panic_hook",
  "criterion",
  "egui",
  "egui-wgpu",
@@ -3290,6 +3291,7 @@ dependencies = [
  "pollster 0.3.0",
  "serial_test",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "wasm-bindgen-test",
  "web-sys",
  "wgpu",

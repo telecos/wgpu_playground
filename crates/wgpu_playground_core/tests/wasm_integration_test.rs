@@ -8,6 +8,7 @@
 
 #![cfg(target_arch = "wasm32")]
 
+use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
 // Configure tests to run in browser
@@ -72,7 +73,6 @@ async fn test_gpu_availability() {
     
     // Check if GPU is accessible via navigator.gpu
     // In some browsers/environments this may not be available
-    use wasm_bindgen::JsCast;
     let gpu = js_sys::Reflect::get(&navigator, &"gpu".into());
     
     // We just verify the API is accessible, even if GPU is not available
@@ -117,10 +117,10 @@ async fn test_adapter_enumeration_browser_backend() {
     // In headless test environment, adapter may not be available
     // We just verify the API works, not that it succeeds
     match adapter {
-        Some(_) => {
+        Ok(_) => {
             // GPU is available in test environment
         }
-        None => {
+        Err(_) => {
             // GPU not available in test environment - this is ok
         }
     }
@@ -136,7 +136,7 @@ async fn test_device_creation_if_available() {
         ..Default::default()
     });
     
-    if let Some(adapter) = instance
+    if let Ok(adapter) = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,

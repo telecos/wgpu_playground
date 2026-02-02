@@ -7,6 +7,7 @@
 
 #![cfg(target_arch = "wasm32")]
 
+use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
@@ -23,13 +24,12 @@ fn test_create_canvas() {
         .create_element("canvas")
         .expect("Should create canvas");
     
-    let canvas: HtmlCanvasElement = canvas
+    let _canvas: HtmlCanvasElement = canvas
         .dyn_into()
         .expect("Element should be a canvas");
     
-    // Verify default properties
-    assert!(canvas.width() >= 0);
-    assert!(canvas.height() >= 0);
+    // Canvas is created successfully - no need to verify dimensions
+    // as u32 is always >= 0
 }
 
 /// Test setting canvas dimensions
@@ -58,7 +58,6 @@ fn test_canvas_dimensions() {
 #[wasm_bindgen_test]
 fn test_canvas_2d_context() {
     use web_sys::{window, HtmlCanvasElement, CanvasRenderingContext2d};
-    use wasm_bindgen::JsCast;
     
     let window = window().expect("Should have a window");
     let document = window.document().expect("Should have a document");
@@ -142,7 +141,6 @@ fn test_canvas_dom_insertion() {
 #[wasm_bindgen_test]
 fn test_canvas_image_data() {
     use web_sys::{window, HtmlCanvasElement, CanvasRenderingContext2d, ImageData};
-    use wasm_bindgen::JsCast;
     
     let window = window().expect("Should have a window");
     let document = window.document().expect("Should have a document");
@@ -180,7 +178,6 @@ fn test_canvas_image_data() {
 #[wasm_bindgen_test]
 fn test_offscreen_canvas_creation() {
     use web_sys::window;
-    use wasm_bindgen::JsCast;
     
     let window = window().expect("Should have a window");
     
@@ -227,7 +224,6 @@ fn test_canvas_to_data_url() {
 #[wasm_bindgen_test]
 async fn test_canvas_webgpu_context() {
     use web_sys::{window, HtmlCanvasElement};
-    use wasm_bindgen::JsCast;
     
     let window = window().expect("Should have a window");
     let document = window.document().expect("Should have a document");
@@ -262,7 +258,6 @@ async fn test_canvas_webgpu_context() {
 #[wasm_bindgen_test]
 async fn test_wgpu_surface_from_canvas() {
     use web_sys::{window, HtmlCanvasElement};
-    use wasm_bindgen::JsCast;
     use wgpu::Instance;
     
     let window = window().expect("Should have a window");

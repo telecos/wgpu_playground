@@ -208,7 +208,7 @@ impl DawnInstance {
                         force_fallback_adapter: false,
                     })
                     .await
-                    .ok_or(DawnError::NoAdapterFound)?;
+                    .map_err(|_| DawnError::NoAdapterFound)?;
 
                 log::info!("Adapter found successfully");
                 Ok(DawnAdapter {
@@ -313,15 +313,14 @@ impl DawnAdapter {
                 log::info!("Requesting device with label: {:?}", descriptor.label);
 
                 let device_result = adapter
-                    .request_device(
-                        &wgpu::DeviceDescriptor {
-                            label: descriptor.label.as_deref(),
-                            required_features: wgpu::Features::empty(),
-                            required_limits: wgpu::Limits::default(),
-                            memory_hints: wgpu::MemoryHints::default(),
-                        },
-                        None,
-                    )
+                    .request_device(&wgpu::DeviceDescriptor {
+                        label: descriptor.label.as_deref(),
+                        required_features: wgpu::Features::empty(),
+                        required_limits: wgpu::Limits::default(),
+                        memory_hints: wgpu::MemoryHints::default(),
+                        experimental_features: Default::default(),
+                        trace: Default::default(),
+                    })
                     .await;
 
                 match device_result {

@@ -505,8 +505,7 @@ fn main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<
 
         // Try to create pipeline without fragment shader (fragment shader is optional but
         // we're testing it can be created without one)
-        let result =
-            descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
+        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
 
         // Pipeline creation should succeed - fragment shader is optional
         assert!(
@@ -634,8 +633,7 @@ fn main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<
             .with_fragment_target(ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb));
 
         // Descriptor validation may succeed, but pipeline creation should fail
-        let result =
-            descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
+        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
 
         // Pipeline creation should fail due to invalid MSAA sample count
         assert!(
@@ -655,7 +653,7 @@ fn test_render_pipeline_no_fragment_targets() {
     // during actual GPU pipeline creation. This test documents that the descriptor
     // itself doesn't enforce having at least one output target.
     let validation_result = descriptor.validate();
-    
+
     // Just verify we can call validate - the actual enforcement happens at pipeline creation time
     match validation_result {
         Ok(_) => {
@@ -728,8 +726,7 @@ fn main(@location(0) pos: vec3<f32>) -> @builtin(position) vec4<f32> {
             .with_fragment_target(ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb));
 
         // Pipeline creation should fail due to duplicate vertex locations
-        let result =
-            descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
+        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
 
         assert!(
             result.is_err(),
@@ -773,8 +770,7 @@ fn main(@location(2) data: vec4<f32>) -> @builtin(position) vec4<f32> {
             .with_vertex_buffer(layout)
             .with_fragment_target(ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb));
 
-        let result =
-            descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
+        let result = descriptor.create_pipeline(&device, &pipeline_layout, &vertex_shader, None);
 
         // Pipeline creation should fail - shader expects location 2 but we only provide 0 and 1
         assert!(

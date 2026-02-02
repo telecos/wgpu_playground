@@ -582,6 +582,39 @@ This is currently a skeleton/framework for the full application. See [PLAN.md](P
 
 ## Testing
 
+### Running Tests
+
+The project includes comprehensive unit and integration tests that run in both local and CI environments:
+
+```bash
+# Run all tests
+cargo test --workspace
+
+# Run tests for a specific package
+cargo test --package wgpu_playground_core
+
+# Run a specific test
+cargo test --package wgpu_playground_core --test buffer_integration_test
+```
+
+### Headless GPU Testing
+
+Tests automatically detect headless/CI environments (via `CI` or `WGPU_HEADLESS` environment variables) and use software rendering adapters to enable GPU testing without physical hardware:
+
+- **Local Testing**: Tests use available hardware GPU adapters
+- **CI/Headless**: Tests automatically switch to software rendering (Vulkan lavapipe or OpenGL)
+- **Fallback Adapter**: In headless mode, `force_fallback_adapter` is enabled for software rendering
+
+**Manually enable headless mode:**
+
+```bash
+# Set WGPU_HEADLESS to force software rendering
+WGPU_HEADLESS=1 cargo test --workspace
+
+# Or set CI variable
+CI=1 cargo test --workspace
+```
+
 ### Visual Regression Testing
 
 This project includes a visual regression testing framework to catch unintended visual changes in GPU rendering output. The framework:
@@ -601,7 +634,7 @@ cargo test --package wgpu_playground_core visual_regression
 UPDATE_VISUAL_REFERENCES=1 cargo test --package wgpu_playground_core visual_regression
 ```
 
-**Note:** Visual regression tests require a GPU and will skip gracefully in headless/CI environments without GPU access.
+**Note:** Visual regression tests work in both local and headless/CI environments thanks to automatic software rendering adapter selection.
 
 For detailed information about the visual regression framework, see [tests/visual_regression/reference/README.md](tests/visual_regression/reference/README.md).
 

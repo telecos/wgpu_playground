@@ -376,7 +376,8 @@ mod tests {
     #[test]
     fn test_vertex_size() {
         // Verify vertex structure has correct size
-        assert_eq!(std::mem::size_of::<Vertex>(), 20); // 2*f32 + 3*f32 = 20 bytes
+        // 2 floats (position) + 3 floats (color) = 5 floats × 4 bytes = 20 bytes
+        assert_eq!(std::mem::size_of::<Vertex>(), 20);
     }
 
     #[test]

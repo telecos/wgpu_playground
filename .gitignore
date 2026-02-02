@@ -16,3 +16,6 @@ coverage/
 lcov.info
 cobertura.xml
 target/llvm-cov/html/
+
+# Visual regression test outputs
+tests/visual_regression/output/

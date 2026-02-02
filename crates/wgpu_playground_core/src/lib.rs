@@ -39,3 +39,4 @@ pub mod shader_editor;
 pub mod surface;
 pub mod texture;
 pub mod texture_panel;
+pub mod visual_regression;

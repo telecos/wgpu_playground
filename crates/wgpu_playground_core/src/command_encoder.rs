@@ -183,7 +183,7 @@ impl CommandEncoderOps {
     /// encoder.copy_buffer_to_texture(
     ///     wgpu::TexelCopyBufferInfo {
     ///         buffer,
-    ///         layout: wgpu::ImageDataLayout {
+    ///         layout: wgpu::TexelCopyBufferLayout {
     ///             offset: 0,
     ///             bytes_per_row: Some(256 * 4),
     ///             rows_per_image: Some(256),
@@ -251,7 +251,7 @@ impl CommandEncoderOps {
     ///     },
     ///     wgpu::TexelCopyBufferInfo {
     ///         buffer,
-    ///         layout: wgpu::ImageDataLayout {
+    ///         layout: wgpu::TexelCopyBufferLayout {
     ///             offset: 0,
     ///             bytes_per_row: Some(256 * 4),
     ///             rows_per_image: Some(256),

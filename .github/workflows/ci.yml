@@ -67,7 +67,7 @@ jobs:
       - name: Install software rendering dependencies for headless GPU testing
         run: |
           sudo apt-get update
-          # Install Mesa software rendering (llvmpipe) for headless GPU testing
+          # Install Mesa software rendering (lavapipe for Vulkan, llvmpipe for OpenGL) for headless GPU testing
           sudo apt-get install -y \
             mesa-vulkan-drivers \
             libvulkan1 \

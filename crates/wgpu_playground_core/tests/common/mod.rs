@@ -40,7 +40,7 @@ fn is_headless_environment() -> bool {
 /// ```
 pub async fn create_test_device() -> Option<(Device, Queue)> {
     let is_headless = is_headless_environment();
-    
+
     // In headless environments, prefer software rendering backends
     let backends = if is_headless {
         // Try Vulkan first (with software rendering), then GL as fallback
@@ -89,7 +89,7 @@ pub async fn create_test_device() -> Option<(Device, Queue)> {
 #[allow(dead_code)]
 pub async fn create_test_device_with_features(features: wgpu::Features) -> Option<(Device, Queue)> {
     let is_headless = is_headless_environment();
-    
+
     let backends = if is_headless {
         wgpu::Backends::VULKAN | wgpu::Backends::GL
     } else {
@@ -141,7 +141,7 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
 #[allow(dead_code)]
 pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Device, Queue)> {
     let is_headless = is_headless_environment();
-    
+
     let backends = if is_headless {
         wgpu::Backends::VULKAN | wgpu::Backends::GL
     } else {
@@ -184,7 +184,7 @@ pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Dev
 #[allow(dead_code)]
 pub async fn create_test_instance_and_adapter() -> Option<(Instance, Adapter)> {
     let is_headless = is_headless_environment();
-    
+
     let backends = if is_headless {
         wgpu::Backends::VULKAN | wgpu::Backends::GL
     } else {

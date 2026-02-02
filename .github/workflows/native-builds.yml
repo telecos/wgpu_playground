@@ -37,7 +37,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          # Install Mesa software rendering (llvmpipe) for headless GPU testing
+          # Install Mesa software rendering (lavapipe for Vulkan, llvmpipe for OpenGL) for headless GPU testing
           sudo apt-get install -y \
             mesa-vulkan-drivers \
             libvulkan1 \

@@ -20,7 +20,7 @@ winit = "0.30"
 env_logger = "0.11"
 log = "0.4"
 egui = "0.29"
-egui-wgpu = "0.29"
+egui-wgpu = "0.33"
 egui_plot = "0.34"
 bytemuck = { version = "1.14", features = ["derive"] }
 futures-channel = "0.3"

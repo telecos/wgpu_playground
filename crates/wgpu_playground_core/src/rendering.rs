@@ -683,7 +683,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 let _ = tx.send(result); // Ignore send errors (receiver might be dropped)
             });
 
-            device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
             match rx.recv() {
                 Ok(Ok(())) => {

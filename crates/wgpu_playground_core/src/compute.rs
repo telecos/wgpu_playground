@@ -250,7 +250,7 @@ impl ComputePipelineDescriptor {
         self.validate()?;
 
         let shader = self.shader.as_ref().unwrap();
-        let entry_point = self.entry_point.as_ref().unwrap();
+        let _entry_point = self.entry_point.as_ref().unwrap();
 
         let shader_module = shader.create_module(device);
 

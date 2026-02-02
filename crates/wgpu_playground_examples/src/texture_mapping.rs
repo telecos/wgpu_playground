@@ -358,7 +358,7 @@ async fn run_texture_example() {
 
     // Step 12: Wait for completion
     println!("\n12. Waiting for GPU to complete...");
-    device.poll(wgpu::PollType::Wait {
+    let _ = device.poll(wgpu::PollType::Wait {
         submission_index: None,
         timeout: None,
     });

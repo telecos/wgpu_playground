@@ -107,7 +107,7 @@ fn test_write_buffer_operation() {
         queue_ops.write_buffer(&buffer, 0, bytemuck::cast_slice(&data));
 
         // Poll the device to ensure the operation completes
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -133,7 +133,7 @@ fn test_write_buffer_typed_helper() {
         write_buffer_typed(&queue, &buffer, 0, &data);
 
         // Poll the device to ensure the operation completes
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -157,7 +157,7 @@ fn test_submit_command_buffer() {
         let _submission_index = queue_ops.submit(std::iter::once(command_buffer));
 
         // Poll the device to ensure the operation completes
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -179,7 +179,7 @@ fn test_submit_single_helper() {
         let _submission_index = submit_single(&queue, command_buffer);
 
         // Poll the device to ensure the operation completes
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -214,14 +214,14 @@ fn test_write_texture_operation() {
 
         // Test write_texture - this should not panic
         queue_ops.write_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
             &data,
-            wgpu::ImageDataLayout {
+            wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(16), // 4 pixels * 4 bytes per pixel
                 rows_per_image: Some(4),
@@ -234,7 +234,7 @@ fn test_write_texture_operation() {
         );
 
         // Poll the device to ensure the operation completes
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -271,7 +271,7 @@ fn test_multiple_buffer_writes() {
         queue_ops.write_buffer(&buffer2, 0, bytemuck::cast_slice(&data2));
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -300,7 +300,7 @@ fn test_submit_multiple_command_buffers() {
         let _submission_index = queue_ops.submit([command_buffer1, command_buffer2]);
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -330,7 +330,7 @@ fn test_buffer_write_with_offset() {
         queue_ops.write_buffer(&buffer, 64, bytemuck::cast_slice(&data2));
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -357,13 +357,13 @@ fn test_copy_texture_to_texture_basic() {
         let _submission_index = copy_texture_to_texture(
             &device,
             &queue,
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -377,7 +377,7 @@ fn test_copy_texture_to_texture_basic() {
         );
 
         // Poll the device to ensure the operation completes
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -402,13 +402,13 @@ fn test_copy_texture_to_texture_with_queue_ops() {
         // Test copy operation using QueueOps
         let queue_ops = QueueOps::with_device(&queue, &device);
         let _submission_index = queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -422,7 +422,7 @@ fn test_copy_texture_to_texture_with_queue_ops() {
         );
 
         // Poll the device to ensure the operation completes
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -448,13 +448,13 @@ fn test_copy_texture_with_different_mip_levels() {
 
         // Copy mip level 0 (256x256)
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -469,13 +469,13 @@ fn test_copy_texture_with_different_mip_levels() {
 
         // Copy mip level 1 (128x128)
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 1,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 1,
                 origin: wgpu::Origin3d::ZERO,
@@ -490,13 +490,13 @@ fn test_copy_texture_with_different_mip_levels() {
 
         // Copy mip level 2 (64x64)
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 2,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 2,
                 origin: wgpu::Origin3d::ZERO,
@@ -510,7 +510,7 @@ fn test_copy_texture_with_different_mip_levels() {
         );
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -536,13 +536,13 @@ fn test_copy_texture_with_array_layers() {
 
         // Copy all array layers at once
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -556,7 +556,7 @@ fn test_copy_texture_with_array_layers() {
         );
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -582,7 +582,7 @@ fn test_copy_texture_with_specific_array_layer() {
 
         // Copy a specific layer (layer 2 to layer 5)
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d {
@@ -592,7 +592,7 @@ fn test_copy_texture_with_specific_array_layer() {
                 },
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d {
@@ -610,7 +610,7 @@ fn test_copy_texture_with_specific_array_layer() {
         );
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -659,13 +659,13 @@ fn test_copy_texture_with_depth_aspect() {
 
         // Copy depth aspect
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::DepthOnly,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -679,7 +679,7 @@ fn test_copy_texture_with_depth_aspect() {
         );
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -705,13 +705,13 @@ fn test_copy_texture_partial_region() {
 
         // Copy a partial region (64x64 from position (64, 64) to position (128, 128))
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d { x: 64, y: 64, z: 0 },
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d {
@@ -729,7 +729,7 @@ fn test_copy_texture_partial_region() {
         );
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -755,13 +755,13 @@ fn test_copy_texture_3d() {
 
         // Copy the entire 3D texture
         queue_ops.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -775,6 +775,6 @@ fn test_copy_texture_3d() {
         );
 
         // Poll the device to ensure operations complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }

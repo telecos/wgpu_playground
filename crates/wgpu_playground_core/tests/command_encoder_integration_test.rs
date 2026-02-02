@@ -36,7 +36,7 @@ fn test_encoder_finish() {
         let _submission_index = queue.submit(std::iter::once(command_buffer));
 
         // Poll to ensure completion
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -74,7 +74,7 @@ fn test_copy_buffer_to_buffer() {
 
         // Submit and wait
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify the copy by mapping the destination buffer
         let buffer_slice = dst_buffer.slice(..);
@@ -82,7 +82,7 @@ fn test_copy_buffer_to_buffer() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -126,7 +126,7 @@ fn test_copy_buffer_with_offset() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify the copy
         let buffer_slice = dst_buffer.slice(128..256);
@@ -134,7 +134,7 @@ fn test_copy_buffer_with_offset() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -184,15 +184,15 @@ fn test_copy_buffer_to_texture() {
         // Copy buffer to texture
         let mut encoder = CommandEncoderOps::new(&device, Some("Buffer to Texture Encoder"));
         encoder.copy_buffer_to_texture(
-            wgpu::ImageCopyBuffer {
+            wgpu::TexelCopyBufferInfo {
                 buffer: &buffer,
-                layout: wgpu::ImageDataLayout {
+                layout: wgpu::TexelCopyBufferLayout {
                     offset: 0,
                     bytes_per_row: Some(16), // 4 pixels * 4 bytes
                     rows_per_image: Some(4),
                 },
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -207,7 +207,7 @@ fn test_copy_buffer_to_texture() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }
 
@@ -246,14 +246,14 @@ fn test_copy_texture_to_buffer() {
         // Write test data to texture
         let test_data = vec![128u8; 64];
         queue.write_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
             &test_data,
-            wgpu::ImageDataLayout {
+            wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(16),
                 rows_per_image: Some(4),
@@ -268,15 +268,15 @@ fn test_copy_texture_to_buffer() {
         // Copy texture to buffer
         let mut encoder = CommandEncoderOps::new(&device, Some("Texture to Buffer Encoder"));
         encoder.copy_texture_to_buffer(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyBuffer {
+            wgpu::TexelCopyBufferInfo {
                 buffer: &buffer,
-                layout: wgpu::ImageDataLayout {
+                layout: wgpu::TexelCopyBufferLayout {
                     offset: 0,
                     bytes_per_row: Some(16),
                     rows_per_image: Some(4),
@@ -291,7 +291,7 @@ fn test_copy_texture_to_buffer() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify the copy
         let buffer_slice = buffer.slice(..);
@@ -299,7 +299,7 @@ fn test_copy_texture_to_buffer() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -353,14 +353,14 @@ fn test_copy_texture_to_texture() {
         // Write test data to source texture
         let test_data = vec![200u8; 64];
         queue.write_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
             &test_data,
-            wgpu::ImageDataLayout {
+            wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(16),
                 rows_per_image: Some(4),
@@ -375,13 +375,13 @@ fn test_copy_texture_to_texture() {
         // Copy texture to texture
         let mut encoder = CommandEncoderOps::new(&device, Some("Texture to Texture Encoder"));
         encoder.copy_texture_to_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &src_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
@@ -396,7 +396,7 @@ fn test_copy_texture_to_texture() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify by reading back the destination texture
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
@@ -408,15 +408,15 @@ fn test_copy_texture_to_texture() {
 
         let mut encoder = CommandEncoderOps::new(&device, Some("Verification Encoder"));
         encoder.copy_texture_to_buffer(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 texture: &dst_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
             },
-            wgpu::ImageCopyBuffer {
+            wgpu::TexelCopyBufferInfo {
                 buffer: &buffer,
-                layout: wgpu::ImageDataLayout {
+                layout: wgpu::TexelCopyBufferLayout {
                     offset: 0,
                     bytes_per_row: Some(16),
                     rows_per_image: Some(4),
@@ -431,14 +431,14 @@ fn test_copy_texture_to_texture() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         let buffer_slice = buffer.slice(..);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -490,7 +490,7 @@ fn test_multiple_copy_commands() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify the copies
         let buffer_slice = buffer3.slice(..);
@@ -498,7 +498,7 @@ fn test_multiple_copy_commands() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -556,7 +556,7 @@ fn test_copy_buffer_helper() {
         // Use the helper function
         let command_buffer = copy_buffer(&device, &src_buffer, 0, &dst_buffer, 0, 256);
         queue.submit(std::iter::once(command_buffer));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify the copy
         let buffer_slice = dst_buffer.slice(..);
@@ -564,7 +564,7 @@ fn test_copy_buffer_helper() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -613,6 +613,6 @@ fn test_submit_multiple_encoders() {
 
         // Submit all command buffers at once
         queue.submit([cmd1, cmd2, cmd3]);
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     });
 }

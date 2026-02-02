@@ -185,7 +185,7 @@ fn test_map_read_buffer() {
         queue.write_buffer(&buffer, 0, &data);
 
         // Wait for the write to complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Map the buffer for reading
         BufferOps::map_read(&buffer).await.unwrap();
@@ -407,7 +407,7 @@ fn test_buffer_copy_operations() {
         queue.submit(std::iter::once(encoder.finish()));
 
         // Wait for operations to complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Map and verify destination buffer
         BufferOps::map_read(&dst_buffer).await.unwrap();
@@ -442,7 +442,7 @@ fn test_buffer_read_back() {
         queue.write_buffer(&buffer, 0, &test_data);
 
         // Wait for write to complete
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Map and read the buffer
         BufferOps::map_read(&buffer).await.unwrap();
@@ -496,7 +496,7 @@ fn test_buffer_write_then_read_back() {
         encoder.copy_buffer_to_buffer(&buffer, 0, &staging, 0, 1024);
         queue.submit(std::iter::once(encoder.finish()));
 
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Read back and verify
         BufferOps::map_read(&staging).await.unwrap();
@@ -535,7 +535,7 @@ fn test_buffer_partial_write() {
         let data2 = vec![0xBB_u8; 512];
         queue.write_buffer(&buffer, 512, &data2);
 
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify both halves
         BufferOps::map_read(&buffer).await.unwrap();
@@ -593,11 +593,11 @@ fn test_buffer_overwrite_data() {
 
         // Write initial data
         queue.write_buffer(&buffer, 0, &vec![1u8; 256]);
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Overwrite with different data
         queue.write_buffer(&buffer, 0, &vec![2u8; 256]);
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify overwrite worked
         BufferOps::map_read(&buffer).await.unwrap();
@@ -629,7 +629,7 @@ fn test_buffer_large_data_transfer() {
         // Write large data
         let data = vec![0x42_u8; size as usize];
         queue.write_buffer(&buffer, 0, &data);
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Copy to readback buffer to verify
         let readback = BufferDescriptor::new(
@@ -645,7 +645,7 @@ fn test_buffer_large_data_transfer() {
         });
         encoder.copy_buffer_to_buffer(&buffer, 0, &readback, 0, size);
         queue.submit(std::iter::once(encoder.finish()));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify first and last bytes
         BufferOps::map_read(&readback).await.unwrap();
@@ -675,7 +675,7 @@ fn test_buffer_multiple_map_unmap_cycles() {
         .unwrap();
 
         queue.write_buffer(&buffer, 0, &vec![1u8; 256]);
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Map and unmap multiple times
         for _ in 0..3 {
@@ -731,7 +731,7 @@ fn test_buffer_map_write_modify_read() {
         });
         encoder.copy_buffer_to_buffer(&write_buffer, 0, &read_buffer, 0, 256);
         queue.submit(std::iter::once(encoder.finish()));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify using MAP_READ
         BufferOps::map_read(&read_buffer).await.unwrap();
@@ -765,7 +765,7 @@ fn test_buffer_aligned_access() {
         // Write u32 values
         let data: Vec<u32> = (0..64).collect();
         queue.write_buffer(&buffer, 0, bytemuck::cast_slice(&data));
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Read back as u32
         BufferOps::map_read(&buffer).await.unwrap();
@@ -798,7 +798,7 @@ fn test_buffer_empty_write() {
 
         // Write empty slice (should not crash)
         queue.write_buffer(&buffer, 0, &[]);
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify buffer is still zero-initialized
         BufferOps::map_read(&buffer).await.unwrap();
@@ -865,7 +865,7 @@ fn test_buffer_concurrent_access_different_buffers() {
         for (i, buffer) in buffers.iter().enumerate() {
             queue.write_buffer(buffer, 0, &vec![i as u8; 256]);
         }
-        device.poll(wgpu::Maintain::Wait);
+        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
         // Verify each buffer has correct data
         for (i, buffer) in buffers.iter().enumerate() {

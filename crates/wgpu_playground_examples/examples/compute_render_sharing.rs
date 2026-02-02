@@ -20,9 +20,9 @@ const WORKGROUP_SIZE: u32 = 64;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 struct Particle {
-    position: [f32; 2],  // x, y position
-    velocity: [f32; 2],  // x, y velocity
-    color: [f32; 4],     // r, g, b, a color
+    position: [f32; 2], // x, y position
+    velocity: [f32; 2], // x, y velocity
+    color: [f32; 4],    // r, g, b, a color
 }
 
 // Safety: Particle is repr(C) with simple primitive types
@@ -106,7 +106,7 @@ fn main() {
     // Initialize particle data
     let num_particles = 1024;
     let mut particles = Vec::with_capacity(num_particles);
-    
+
     for i in 0..num_particles {
         let angle = (i as f32 / num_particles as f32) * std::f32::consts::TAU; // TAU = 2π (full circle)
         let radius = 0.3;
@@ -132,13 +132,14 @@ fn main() {
     let particle_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Particle Buffer"),
         contents: bytemuck::cast_slice(&particles),
-        usage: wgpu::BufferUsages::STORAGE 
+        usage: wgpu::BufferUsages::STORAGE
             | wgpu::BufferUsages::VERTEX
             | wgpu::BufferUsages::COPY_DST,
     });
 
     println!("✓ Created shared buffer with STORAGE + VERTEX usage");
-    println!("  - Size: {} bytes ({} particles)", 
+    println!(
+        "  - Size: {} bytes ({} particles)",
         particles.len() * std::mem::size_of::<Particle>(),
         particles.len()
     );
@@ -208,12 +209,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             }],
         });
 
-    let compute_pipeline_layout =
-        device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Compute Pipeline Layout"),
-            bind_group_layouts: &[&compute_bind_group_layout],
-            push_constant_ranges: &[],
-        });
+    let compute_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("Compute Pipeline Layout"),
+        bind_group_layouts: &[&compute_bind_group_layout],
+        push_constant_ranges: &[],
+    });
 
     let compute_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
         label: Some("Particle Compute Pipeline"),
@@ -299,12 +299,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         ],
     };
 
-    let render_pipeline_layout =
-        device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Render Pipeline Layout"),
-            bind_group_layouts: &[],
-            push_constant_ranges: &[],
-        });
+    let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("Render Pipeline Layout"),
+        bind_group_layouts: &[],
+        push_constant_ranges: &[],
+    });
 
     let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("Particle Render Pipeline"),
@@ -373,7 +372,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
             compute_pass.set_pipeline(&compute_pipeline);
             compute_pass.set_bind_group(0, &compute_bind_group, &[]);
-            
+
             // Calculate number of workgroups needed to cover all particles
             let workgroup_count = (num_particles as u32).div_ceil(WORKGROUP_SIZE);
             compute_pass.dispatch_workgroups(workgroup_count, 1, 1);
@@ -406,7 +405,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             render_pass.set_vertex_buffer(0, particle_buffer.slice(..));
             render_pass.draw(0..num_particles as u32, 0..1);
         }
-        println!("  ✓ Render pass: Drew {} particles as points", num_particles);
+        println!(
+            "  ✓ Render pass: Drew {} particles as points",
+            num_particles
+        );
 
         // Submit commands
         queue.submit(std::iter::once(encoder.finish()));

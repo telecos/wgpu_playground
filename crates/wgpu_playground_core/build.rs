@@ -31,6 +31,33 @@ fn configure_and_build_dawn() {
     if !dawn_dir.exists() {
         println!("cargo:warning=Cloning Dawn repository...");
 
+        // Configure git to support long paths on Windows
+        // This is necessary because Dawn repository contains files with very long paths
+        // that exceed the default Windows path length limit of 260 characters
+        if cfg!(target_os = "windows") {
+            println!("cargo:warning=Configuring Git to support long paths on Windows...");
+            match Command::new("git")
+                .args(["config", "--global", "core.longpaths", "true"])
+                .status()
+            {
+                Ok(s) if s.success() => {
+                    println!("cargo:warning=Git long paths support enabled");
+                }
+                Ok(s) => {
+                    println!(
+                        "cargo:warning=Failed to configure Git long paths (exit code: {}). Clone may fail on Windows.",
+                        s
+                    );
+                }
+                Err(e) => {
+                    println!(
+                        "cargo:warning=Could not configure Git long paths: {}. Clone may fail on Windows.",
+                        e
+                    );
+                }
+            }
+        }
+
         let status = Command::new("git")
             .args([
                 "clone",
@@ -62,6 +89,27 @@ fn configure_and_build_dawn() {
         }
     } else {
         println!("cargo:warning=Dawn source already exists, skipping clone");
+    }
+
+    // Check if Dawn is already built and installed
+    let lib_dir = dawn_install_dir.join("lib");
+    let include_dir = dawn_install_dir.join("include");
+
+    // Validate cached Dawn build by checking for required files
+    let dawn_header = include_dir.join("dawn").join("dawn_proc.h");
+    let cache_valid = lib_dir.exists() && include_dir.exists() && dawn_header.exists();
+
+    if cache_valid {
+        println!("cargo:warning=Dawn already built and installed, skipping build");
+        println!(
+            "cargo:warning=Using cached Dawn from: {}",
+            dawn_install_dir.display()
+        );
+
+        setup_dawn_linking(&lib_dir, &include_dir);
+
+        println!("cargo:warning=Dawn integration complete (using cache)!");
+        return;
     }
 
     // Check if CMake is available
@@ -179,6 +227,15 @@ fn configure_and_build_dawn() {
     let lib_dir = dawn_install_dir.join("lib");
     let include_dir = dawn_install_dir.join("include");
 
+    setup_dawn_linking(&lib_dir, &include_dir);
+
+    println!("cargo:warning=Dawn integration complete!");
+    println!("cargo:warning=Include directory: {}", include_dir.display());
+    println!("cargo:warning=Library directory: {}", lib_dir.display());
+}
+
+#[cfg(feature = "dawn")]
+fn setup_dawn_linking(lib_dir: &std::path::Path, include_dir: &std::path::Path) {
     println!("cargo:rustc-link-search=native={}", lib_dir.display());
     println!("cargo:rustc-link-lib=static=dawn");
     println!("cargo:rustc-link-lib=static=dawn_native");

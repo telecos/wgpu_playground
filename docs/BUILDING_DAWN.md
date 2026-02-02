@@ -84,6 +84,7 @@ clang++ --version
 3. **Git**:
    - Download from: https://git-scm.com/download/win
    - Or use: `winget install Git.Git`
+   - **Important**: The build script automatically configures Git to support long paths (required for Dawn's test files)
 
 4. **Python 3**:
    - Download from: https://python.org/downloads/
@@ -231,6 +232,33 @@ cargo run --release --features dawn
 3. Use "x64 Native Tools Command Prompt for VS" instead of regular Command Prompt
 4. Check that cl.exe (MSVC compiler) is in PATH
 
+### "Filename too long" errors on Windows
+
+**Problem**: Git clone fails with errors like "unable to create file ... Filename too long"
+
+**Solution**:
+The build script automatically configures Git to support long paths on Windows by setting `core.longpaths=true`. This happens before cloning Dawn. If you still encounter issues:
+
+1. Manually enable long paths in Git:
+   ```powershell
+   git config --global core.longpaths true
+   ```
+
+2. Alternatively, enable long paths support in Windows 10/11:
+   - Open Registry Editor (regedit)
+   - Navigate to: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`
+   - Set `LongPathsEnabled` to `1`
+   - Restart your computer
+
+3. Use a shorter build path by setting a custom target directory closer to the drive root:
+   ```powershell
+   # Clone to a shorter path
+   cd C:\
+   git clone https://github.com/telecos/wgpu_playground
+   cd wgpu_playground
+   cargo build --release --features dawn
+   ```
+
 ### "Build failed" on macOS
 
 **Problem**: Compilation fails or can't find clang
@@ -363,9 +391,28 @@ To build with Dawn in CI:
     sudo apt-get update
     sudo apt-get install -y git cmake build-essential python3 libvulkan-dev
 
+# Cache Dawn build artifacts to drastically reduce build time
+# First build: 10-30 minutes, subsequent builds: seconds
+- name: Cache Dawn build
+  if: runner.os == 'Windows'
+  uses: actions/cache@v4
+  with:
+    path: |
+      target/release/build/wgpu_playground_core-*/out/dawn
+      target/release/build/wgpu_playground_core-*/out/dawn-build
+      target/release/build/wgpu_playground_core-*/out/dawn-install
+      target/debug/build/wgpu_playground_core-*/out/dawn
+      target/debug/build/wgpu_playground_core-*/out/dawn-build
+      target/debug/build/wgpu_playground_core-*/out/dawn-install
+    key: dawn-${{ runner.os }}-${{ hashFiles('crates/wgpu_playground_core/build.rs') }}
+    restore-keys: |
+      dawn-${{ runner.os }}-
+
 - name: Build with Dawn
   run: cargo build --release --features dawn
 ```
+
+**Note**: The cache key includes a hash of `build.rs`, so the cache is invalidated when the build script changes. This ensures Dawn is rebuilt when necessary.
 
 ## Getting Help
 

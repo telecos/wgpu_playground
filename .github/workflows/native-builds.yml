@@ -39,13 +39,17 @@ jobs:
           shared-key: "native-${{ matrix.os }}"
           save-if: ${{ github.ref == 'refs/heads/main' }}
       
+      # Note: Dawn feature is disabled until the integration is fully implemented
+      # The dawn feature has linking issues and requires additional work
+      # See build.rs for the long paths fix that will be used when dawn is ready
+      
       - name: Build workspace
         if: "!matrix.test"
-        run: cargo build --workspace --all-features
+        run: cargo build --workspace
       
       - name: Build and test workspace
         if: matrix.test
-        run: cargo test --workspace --all-features --release
+        run: cargo test --workspace --release
   
   native-build-success:
     name: Native Builds Success

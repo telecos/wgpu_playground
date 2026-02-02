@@ -271,12 +271,6 @@ impl Default for ErrorHandler {
 pub enum DeviceLostReason {
     /// Device was intentionally destroyed
     Destroyed,
-    /// Device was dropped
-    Dropped,
-    /// Device lost callback was replaced
-    ReplacedCallback,
-    /// Device is invalid
-    DeviceInvalid,
     /// Device was lost due to unknown reason (possibly driver crash or GPU reset)
     Unknown,
 }
@@ -286,9 +280,6 @@ impl From<wgpu::DeviceLostReason> for DeviceLostReason {
         match reason {
             wgpu::DeviceLostReason::Unknown => DeviceLostReason::Unknown,
             wgpu::DeviceLostReason::Destroyed => DeviceLostReason::Destroyed,
-            wgpu::DeviceLostReason::Dropped => DeviceLostReason::Dropped,
-            wgpu::DeviceLostReason::ReplacedCallback => DeviceLostReason::ReplacedCallback,
-            wgpu::DeviceLostReason::DeviceInvalid => DeviceLostReason::DeviceInvalid,
         }
     }
 }
@@ -297,9 +288,6 @@ impl fmt::Display for DeviceLostReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DeviceLostReason::Destroyed => write!(f, "Destroyed"),
-            DeviceLostReason::Dropped => write!(f, "Dropped"),
-            DeviceLostReason::ReplacedCallback => write!(f, "ReplacedCallback"),
-            DeviceLostReason::DeviceInvalid => write!(f, "DeviceInvalid"),
             DeviceLostReason::Unknown => write!(f, "Unknown"),
         }
     }
@@ -328,7 +316,7 @@ pub type DeviceLostCallback = Box<dyn Fn(DeviceLostReason, String) + Send + 'sta
 /// ```
 pub fn setup_device_error_handling(device: &wgpu::Device) {
     // Set up uncaptured error callback
-    device.on_uncaptured_error(Box::new(|error| {
+    device.on_uncaptured_error(Arc::new(|error| {
         let err = Error::from(error);
         log::error!("Uncaptured GPU error: {}", err);
     }));
@@ -411,12 +399,6 @@ mod tests {
     #[test]
     fn test_device_lost_reason_display() {
         assert_eq!(DeviceLostReason::Destroyed.to_string(), "Destroyed");
-        assert_eq!(DeviceLostReason::Dropped.to_string(), "Dropped");
-        assert_eq!(
-            DeviceLostReason::ReplacedCallback.to_string(),
-            "ReplacedCallback"
-        );
-        assert_eq!(DeviceLostReason::DeviceInvalid.to_string(), "DeviceInvalid");
         assert_eq!(DeviceLostReason::Unknown.to_string(), "Unknown");
     }
 
@@ -429,18 +411,6 @@ mod tests {
         assert_eq!(
             DeviceLostReason::from(wgpu::DeviceLostReason::Destroyed),
             DeviceLostReason::Destroyed
-        );
-        assert_eq!(
-            DeviceLostReason::from(wgpu::DeviceLostReason::Dropped),
-            DeviceLostReason::Dropped
-        );
-        assert_eq!(
-            DeviceLostReason::from(wgpu::DeviceLostReason::ReplacedCallback),
-            DeviceLostReason::ReplacedCallback
-        );
-        assert_eq!(
-            DeviceLostReason::from(wgpu::DeviceLostReason::DeviceInvalid),
-            DeviceLostReason::DeviceInvalid
         );
     }
 }

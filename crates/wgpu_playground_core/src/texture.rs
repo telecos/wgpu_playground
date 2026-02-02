@@ -382,6 +382,7 @@ impl TextureViewBuilder {
             mip_level_count: self.mip_level_count,
             base_array_layer: self.base_array_layer,
             array_layer_count: self.array_layer_count,
+            usage: None,
         });
 
         log::trace!("Texture view created successfully");

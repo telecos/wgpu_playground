@@ -77,15 +77,14 @@ impl AppState {
         );
 
         let (device, queue) = adapter
-            .request_device(
-                &wgpu::DeviceDescriptor {
-                    required_features: wgpu::Features::empty(),
-                    required_limits: wgpu::Limits::default(),
-                    label: Some("WebGPU Playground Device"),
-                    memory_hints: Default::default(),
-                },
-                None,
-            )
+            .request_device(&wgpu::DeviceDescriptor {
+                required_features: wgpu::Features::empty(),
+                required_limits: wgpu::Limits::default(),
+                label: Some("WebGPU Playground Device"),
+                memory_hints: Default::default(),
+                experimental_features: Default::default(),
+                trace: wgpu::Trace::Off,
+            })
             .await
             .expect("Failed to create device");
 
@@ -124,7 +123,14 @@ impl AppState {
             None,
         );
 
-        let egui_renderer = egui_wgpu::Renderer::new(&device, surface_config.format, None, 1, true);
+        let egui_renderer = egui_wgpu::Renderer::new(
+            &device, 
+            surface_config.format, 
+            egui_wgpu::RendererOptions {
+                msaa_samples: 1,
+                ..Default::default()
+            }
+        );
 
         let playground_app = PlaygroundApp::new(&adapter, &device, &queue);
 
@@ -177,6 +183,7 @@ impl AppState {
                         }),
                         store: wgpu::StoreOp::Store,
                     },
+                    depth_slice: None,
                 })],
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
@@ -227,6 +234,7 @@ impl AppState {
                         load: wgpu::LoadOp::Load,
                         store: wgpu::StoreOp::Store,
                     },
+                    depth_slice: None,
                 })],
                 depth_stencil_attachment: None,
                 timestamp_writes: None,

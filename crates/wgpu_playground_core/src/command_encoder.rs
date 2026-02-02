@@ -1,7 +1,7 @@
 use std::fmt;
 use wgpu::{
-    CommandBuffer, CommandEncoder, CommandEncoderDescriptor, Device, Extent3d, ImageCopyBuffer,
-    ImageCopyTexture,
+    CommandBuffer, CommandEncoder, CommandEncoderDescriptor, Device, Extent3d,
+    TexelCopyBufferInfo, TexelCopyTextureInfo,
 };
 
 /// Alignment requirement for buffer copy operations
@@ -181,15 +181,15 @@ impl CommandEncoderOps {
     /// # let texture: &wgpu::Texture = todo!();
     /// let mut encoder = CommandEncoderOps::new(device, Some("Buffer to Texture"));
     /// encoder.copy_buffer_to_texture(
-    ///     wgpu::ImageCopyBuffer {
+    ///     wgpu::TexelCopyBufferInfo {
     ///         buffer,
-    ///         layout: wgpu::ImageDataLayout {
+    ///         layout: wgpu::TexelCopyBufferLayout {
     ///             offset: 0,
     ///             bytes_per_row: Some(256 * 4),
     ///             rows_per_image: Some(256),
     ///         },
     ///     },
-    ///     wgpu::ImageCopyTexture {
+    ///     wgpu::TexelCopyTextureInfo {
     ///         texture,
     ///         mip_level: 0,
     ///         origin: wgpu::Origin3d::ZERO,
@@ -204,8 +204,8 @@ impl CommandEncoderOps {
     /// ```
     pub fn copy_buffer_to_texture(
         &mut self,
-        source: ImageCopyBuffer,
-        destination: ImageCopyTexture,
+        source: TexelCopyBufferInfo<'_>,
+        destination: TexelCopyTextureInfo,
         copy_size: Extent3d,
     ) {
         self.validate_buffer_to_texture_copy(&source, &destination, &copy_size)
@@ -243,15 +243,15 @@ impl CommandEncoderOps {
     /// # let buffer: &wgpu::Buffer = todo!();
     /// let mut encoder = CommandEncoderOps::new(device, Some("Texture to Buffer"));
     /// encoder.copy_texture_to_buffer(
-    ///     wgpu::ImageCopyTexture {
+    ///     wgpu::TexelCopyTextureInfo {
     ///         texture,
     ///         mip_level: 0,
     ///         origin: wgpu::Origin3d::ZERO,
     ///         aspect: wgpu::TextureAspect::All,
     ///     },
-    ///     wgpu::ImageCopyBuffer {
+    ///     wgpu::TexelCopyBufferInfo {
     ///         buffer,
-    ///         layout: wgpu::ImageDataLayout {
+    ///         layout: wgpu::TexelCopyBufferLayout {
     ///             offset: 0,
     ///             bytes_per_row: Some(256 * 4),
     ///             rows_per_image: Some(256),
@@ -266,8 +266,8 @@ impl CommandEncoderOps {
     /// ```
     pub fn copy_texture_to_buffer(
         &mut self,
-        source: ImageCopyTexture,
-        destination: ImageCopyBuffer,
+        source: TexelCopyTextureInfo,
+        destination: TexelCopyBufferInfo<'_>,
         copy_size: Extent3d,
     ) {
         self.validate_texture_to_buffer_copy(&source, &destination, &copy_size)
@@ -294,13 +294,13 @@ impl CommandEncoderOps {
     /// # let dst_texture: &wgpu::Texture = todo!();
     /// let mut encoder = CommandEncoderOps::new(device, Some("Texture to Texture"));
     /// encoder.copy_texture_to_texture(
-    ///     wgpu::ImageCopyTexture {
+    ///     wgpu::TexelCopyTextureInfo {
     ///         texture: src_texture,
     ///         mip_level: 0,
     ///         origin: wgpu::Origin3d::ZERO,
     ///         aspect: wgpu::TextureAspect::All,
     ///     },
-    ///     wgpu::ImageCopyTexture {
+    ///     wgpu::TexelCopyTextureInfo {
     ///         texture: dst_texture,
     ///         mip_level: 0,
     ///         origin: wgpu::Origin3d::ZERO,
@@ -315,8 +315,8 @@ impl CommandEncoderOps {
     /// ```
     pub fn copy_texture_to_texture(
         &mut self,
-        source: ImageCopyTexture,
-        destination: ImageCopyTexture,
+        source: TexelCopyTextureInfo,
+        destination: TexelCopyTextureInfo,
         copy_size: Extent3d,
     ) {
         self.encoder
@@ -393,8 +393,8 @@ impl CommandEncoderOps {
     /// Validate buffer to texture copy parameters
     fn validate_buffer_to_texture_copy(
         &self,
-        source: &ImageCopyBuffer,
-        _destination: &ImageCopyTexture,
+        source: &TexelCopyBufferInfo<'_>,
+        _destination: &TexelCopyTextureInfo,
         copy_size: &Extent3d,
     ) -> Result<(), CommandEncoderError> {
         // Validate copy size is non-zero
@@ -432,8 +432,8 @@ impl CommandEncoderOps {
     /// Validate texture to buffer copy parameters
     fn validate_texture_to_buffer_copy(
         &self,
-        _source: &ImageCopyTexture,
-        destination: &ImageCopyBuffer,
+        _source: &TexelCopyTextureInfo,
+        destination: &TexelCopyBufferInfo<'_>,
         copy_size: &Extent3d,
     ) -> Result<(), CommandEncoderError> {
         // Validate copy size is non-zero

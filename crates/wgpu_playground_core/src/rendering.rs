@@ -229,7 +229,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             layout: Some(&pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &shader,
-                entry_point: "vs_main",
+                entry_point: Some("vs_main"),
                 buffers: &[wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
@@ -239,7 +239,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
-                entry_point: "fs_main",
+                entry_point: Some("fs_main"),
                 targets: &[Some(wgpu::ColorTargetState {
                     format: wgpu::TextureFormat::Bgra8UnormSrgb,
                     blend: Some(wgpu::BlendState::REPLACE),
@@ -458,7 +458,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             layout: Some(&pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &shader,
-                entry_point: "vs_main",
+                entry_point: Some("vs_main"),
                 buffers: &[wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
@@ -468,7 +468,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
-                entry_point: "fs_main",
+                entry_point: Some("fs_main"),
                 targets: &[Some(wgpu::ColorTargetState {
                     format: wgpu::TextureFormat::Bgra8UnormSrgb,
                     blend: Some(wgpu::BlendState::REPLACE),
@@ -560,6 +560,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                             }),
                             store: wgpu::StoreOp::Store,
                         },
+                        depth_slice: None,
                     })],
                     depth_stencil_attachment,
                     timestamp_writes: None,
@@ -652,15 +653,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             });
 
             encoder.copy_texture_to_buffer(
-                wgpu::ImageCopyTexture {
+                wgpu::TexelCopyTextureInfo {
                     texture,
                     mip_level: 0,
                     origin: wgpu::Origin3d::ZERO,
                     aspect: wgpu::TextureAspect::All,
                 },
-                wgpu::ImageCopyBuffer {
+                wgpu::TexelCopyBufferInfo {
                     buffer: &output_buffer,
-                    layout: wgpu::ImageDataLayout {
+                    layout: wgpu::TexelCopyBufferLayout {
                         offset: 0,
                         bytes_per_row: Some(padded_bytes_per_row),
                         rows_per_image: Some(height),
@@ -682,7 +683,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 let _ = tx.send(result); // Ignore send errors (receiver might be dropped)
             });
 
-            device.poll(wgpu::Maintain::Wait);
+            device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
             match rx.recv() {
                 Ok(Ok(())) => {
@@ -1057,7 +1058,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     // Copy source code button
                     ui.add_space(5.0);
                     if ui.button("📋 Copy Source Code").clicked() {
-                        ui.output_mut(|o| o.copied_text = example_source_code.to_string());
+                        ui.output_mut(|o| o.commands.push(egui::OutputCommand::CopyText(example_source_code.to_string())));
                     }
                 } else {
                     ui.colored_label(

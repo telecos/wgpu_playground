@@ -216,6 +216,7 @@ impl<'a> RenderPassColorAttachment<'a> {
                 load: self.load_op.to_wgpu(),
                 store: self.store_op.to_wgpu(),
             },
+            depth_slice: None,
         }
     }
 }

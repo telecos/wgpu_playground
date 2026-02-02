@@ -1241,7 +1241,7 @@ impl RenderPipelineDescriptor {
             layout: Some(layout),
             vertex: wgpu::VertexState {
                 module: &vertex_module,
-                entry_point: &self.vertex_entry_point,
+                entry_point: Some(&self.vertex_entry_point),
                 compilation_options: Default::default(),
                 buffers: &vertex_buffer_layouts,
             },

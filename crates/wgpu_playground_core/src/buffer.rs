@@ -483,7 +483,7 @@ impl BufferOps {
     /// BufferOps::unmap(&buffer);
     /// # }
     /// ```
-    pub fn get_mapped_range(buffer: &Buffer) -> BufferView<'_> {
+    pub fn get_mapped_range(buffer: &Buffer) -> BufferView {
         buffer.slice(..).get_mapped_range()
     }
 
@@ -508,7 +508,7 @@ impl BufferOps {
     /// BufferOps::unmap(&buffer);
     /// # }
     /// ```
-    pub fn get_mapped_range_mut(buffer: &Buffer) -> wgpu::BufferViewMut<'_> {
+    pub fn get_mapped_range_mut(buffer: &Buffer) -> wgpu::BufferViewMut {
         buffer.slice(..).get_mapped_range_mut()
     }
 }

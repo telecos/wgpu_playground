@@ -258,7 +258,7 @@ impl ComputePipelineDescriptor {
             label: self.label.as_deref(),
             layout: self.layout.as_ref(),
             module: &shader_module,
-            entry_point,
+            entry_point: self.entry_point.as_deref(),
             compilation_options: Default::default(),
             cache: None,
         });

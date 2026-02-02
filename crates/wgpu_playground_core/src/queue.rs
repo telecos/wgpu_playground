@@ -1,4 +1,4 @@
-use wgpu::{CommandBuffer, Device, Extent3d, ImageCopyTexture, ImageDataLayout, Queue};
+use wgpu::{CommandBuffer, Device, Extent3d, Queue, TexelCopyTextureInfo, TexelCopyBufferLayout};
 
 /// Error types for queue operations
 ///
@@ -131,7 +131,7 @@ impl<'a> QueueOps<'a> {
     ///
     /// # Arguments
     ///
-    /// * `texture` - The GPU texture to write to (via ImageCopyTexture)
+    /// * `texture` - The GPU texture to write to (via TexelCopyTextureInfo)
     /// * `data` - Data to write to the texture
     /// * `data_layout` - Layout of the texture data (bytes per row, rows per image)
     /// * `size` - Size of the texture region to write
@@ -149,14 +149,14 @@ impl<'a> QueueOps<'a> {
     /// let queue_ops = QueueOps::new(queue);
     /// let data = vec![0u8; 256 * 256 * 4]; // RGBA data for a 256x256 texture
     /// queue_ops.write_texture(
-    ///     wgpu::ImageCopyTexture {
+    ///     wgpu::TexelCopyTextureInfo {
     ///         texture,
     ///         mip_level: 0,
     ///         origin: wgpu::Origin3d::ZERO,
     ///         aspect: wgpu::TextureAspect::All,
     ///     },
     ///     &data,
-    ///     wgpu::ImageDataLayout {
+    ///     wgpu::TexelCopyBufferLayout {
     ///         offset: 0,
     ///         bytes_per_row: Some(256 * 4),
     ///         rows_per_image: Some(256),
@@ -170,9 +170,9 @@ impl<'a> QueueOps<'a> {
     /// ```
     pub fn write_texture(
         &self,
-        texture: ImageCopyTexture,
+        texture: TexelCopyTextureInfo,
         data: &[u8],
-        data_layout: ImageDataLayout,
+        data_layout: TexelCopyBufferLayout,
         size: Extent3d,
     ) {
         self.queue.write_texture(texture, data, data_layout, size);
@@ -215,13 +215,13 @@ impl<'a> QueueOps<'a> {
     /// # let dst_texture: &wgpu::Texture = todo!();
     /// let queue_ops = QueueOps::with_device(queue, device);
     /// let submission_index = queue_ops.copy_texture_to_texture(
-    ///     wgpu::ImageCopyTexture {
+    ///     wgpu::TexelCopyTextureInfo {
     ///         texture: src_texture,
     ///         mip_level: 0,
     ///         origin: wgpu::Origin3d::ZERO,
     ///         aspect: wgpu::TextureAspect::All,
     ///     },
-    ///     wgpu::ImageCopyTexture {
+    ///     wgpu::TexelCopyTextureInfo {
     ///         texture: dst_texture,
     ///         mip_level: 0,
     ///         origin: wgpu::Origin3d::ZERO,
@@ -236,8 +236,8 @@ impl<'a> QueueOps<'a> {
     /// ```
     pub fn copy_texture_to_texture(
         &self,
-        source: ImageCopyTexture,
-        destination: ImageCopyTexture,
+        source: TexelCopyTextureInfo,
+        destination: TexelCopyTextureInfo,
         copy_size: Extent3d,
     ) -> wgpu::SubmissionIndex {
         let device = self
@@ -339,13 +339,13 @@ pub fn write_buffer_typed<T: bytemuck::Pod>(
 /// let submission_index = copy_texture_to_texture(
 ///     device,
 ///     queue,
-///     wgpu::ImageCopyTexture {
+///     wgpu::TexelCopyTextureInfo {
 ///         texture: src_texture,
 ///         mip_level: 0,
 ///         origin: wgpu::Origin3d::ZERO,
 ///         aspect: wgpu::TextureAspect::All,
 ///     },
-///     wgpu::ImageCopyTexture {
+///     wgpu::TexelCopyTextureInfo {
 ///         texture: dst_texture,
 ///         mip_level: 0,
 ///         origin: wgpu::Origin3d::ZERO,
@@ -361,8 +361,8 @@ pub fn write_buffer_typed<T: bytemuck::Pod>(
 pub fn copy_texture_to_texture(
     device: &Device,
     queue: &Queue,
-    source: ImageCopyTexture,
-    destination: ImageCopyTexture,
+    source: TexelCopyTextureInfo,
+    destination: TexelCopyTextureInfo,
     copy_size: Extent3d,
 ) -> wgpu::SubmissionIndex {
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {

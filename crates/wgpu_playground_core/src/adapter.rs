@@ -160,7 +160,7 @@ impl AdapterInfo {
 /// Convert a Backend to a human-readable string
 pub fn backend_to_str(backend: &wgpu::Backend) -> &'static str {
     match backend {
-        wgpu::Backend::Empty => "Empty",
+        wgpu::Backend::Noop => "Noop",
         wgpu::Backend::Vulkan => "Vulkan",
         wgpu::Backend::Metal => "Metal",
         wgpu::Backend::Dx12 => "DirectX 12",
@@ -222,7 +222,7 @@ pub fn backend_input_options() -> Vec<&'static str> {
 /// Create a wgpu Instance with the specified backends
 pub fn create_instance(backends: Backends) -> Instance {
     log::debug!("Creating wgpu Instance with backends: {:?}", backends);
-    let instance = Instance::new(wgpu::InstanceDescriptor {
+    let instance = Instance::new(&wgpu::InstanceDescriptor {
         backends,
         ..Default::default()
     });
@@ -273,8 +273,8 @@ pub async fn request_adapter(
             compatible_surface,
         })
         .await
-        .ok_or_else(|| {
-            log::error!("No suitable GPU adapter found");
+        .map_err(|e| {
+            log::error!("No suitable GPU adapter found: {}", e);
             AdapterError::NoAdapterFound
         })?;
 

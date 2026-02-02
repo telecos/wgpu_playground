@@ -379,7 +379,7 @@ Example: Creating and using a render pipeline
 - **iced**: Elm-inspired architecture, but more complex state management
 - **imgui-rs**: C++ FFI overhead, less "Rusty" API
 
-See [GUI_FRAMEWORK_EVALUATION.md](../GUI_FRAMEWORK_EVALUATION.md) for detailed comparison.
+See [GUI_FRAMEWORK_EVALUATION.md](../GUI_FRAMEWORK_EVALUATION.md) (in repository root) for detailed comparison.
 
 ### 3. WebGPU Implementation: wgpu (with optional Dawn)
 

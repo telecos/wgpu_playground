@@ -16,7 +16,7 @@ dawn = ["wgpu_playground_core/dawn"]
 
 [dependencies]
 wgpu_playground_core = { path = "../wgpu_playground_core" }
-wgpu = "27.0"
+wgpu = "28.0"
 winit = "0.30"
 pollster = "0.4"
 env_logger = "0.11"

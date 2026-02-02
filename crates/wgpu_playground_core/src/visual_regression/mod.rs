@@ -295,6 +295,11 @@ pub fn compare_with_reference(
 }
 
 /// Gets the path to a reference image
+/// 
+/// Note: Uses a relative path from CARGO_MANIFEST_DIR (the core crate directory)
+/// to the workspace-level tests directory. This is intentional as visual regression
+/// tests are workspace-level integration tests, not crate-specific unit tests.
+/// The path is relative to ensure it works in different build configurations.
 fn get_reference_path(test_name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../../tests/visual_regression/reference")

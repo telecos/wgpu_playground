@@ -13,7 +13,7 @@ Visual regression tests compare rendered GPU output against known-good reference
 
 ## Reference Images
 
-Reference images are PNG files named after their corresponding test (e.g., `triangle_test.png`).
+Reference images are PNG files named after their corresponding test (e.g., `triangle.png`, `solid_quad.png`).
 
 ### Updating Reference Images
 

@@ -22,10 +22,10 @@ jobs:
     timeout-minutes: 60  # Protection against hanging builds
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      
+
       # Install Dawn build dependencies
       - name: Install Dawn dependencies
         run: |
@@ -34,7 +34,7 @@ jobs:
           cmake --version
           python3 --version
           ninja --version
-      
+
       # Cache Dawn build artifacts - this is the key optimization
       # First build: 20-30 minutes, subsequent builds: seconds
       - name: Cache Dawn build artifacts
@@ -50,28 +50,28 @@ jobs:
           key: dawn-${{ runner.os }}-${{ hashFiles('crates/wgpu_playground_core/build.rs') }}
           restore-keys: |
             dawn-${{ runner.os }}-
-      
+
       # Cache Rust dependencies separately
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
         with:
           shared-key: "dawn-cargo-deps-ubuntu"
           save-if: ${{ github.ref == 'refs/heads/main' }}
-      
+
       # Build with Dawn feature
       - name: Build with Dawn
         run: |
           echo "::notice::Building with Dawn feature enabled"
           cargo build --workspace --features dawn --release
-      
+
       # Run clippy with Dawn feature
       - name: Run clippy with Dawn
         run: cargo clippy --workspace --all-targets --features dawn -- -D warnings
-      
+
       # Run tests with Dawn feature
       - name: Run tests with Dawn
         run: cargo test --workspace --features dawn --lib
-      
+
       - name: Verify Dawn integration
         run: |
           # Check if Dawn was actually built or if fallback was used

@@ -952,4 +952,243 @@ mod tests {
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 2);
     }
+
+    // GUI Interaction Tests - Simulating User Workflows
+
+    #[test]
+    fn test_gui_interaction_resource_lifecycle() {
+        let mut panel = ResourceInspectorPanel::new();
+        
+        // User creates a buffer
+        panel.add_buffer(BufferInfo {
+            id: 1,
+            label: Some("vertex_buffer".to_string()),
+            size: 1024,
+            usage: BufferUsages::VERTEX | BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        assert_eq!(panel.resources.len(), 1);
+        
+        // User can view the resource
+        let resources = panel.filtered_resources();
+        assert_eq!(resources.len(), 1);
+        assert_eq!(resources[0].state(), ResourceState::Active);
+    }
+
+    #[test]
+    fn test_gui_interaction_filter_by_resource_type() {
+        let mut panel = ResourceInspectorPanel::new();
+        
+        // User creates different resources
+        panel.add_buffer(BufferInfo {
+            id: 1,
+            label: Some("buffer".to_string()),
+            size: 256,
+            usage: BufferUsages::VERTEX,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        
+        panel.add_texture(TextureInfo {
+            id: 1,
+            label: Some("texture".to_string()),
+            width: 256,
+            height: 256,
+            depth_or_array_layers: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm,
+            mip_level_count: 1,
+            sample_count: 1,
+            usage: TextureUsages::TEXTURE_BINDING,
+            state: ResourceState::Active,
+        });
+        
+        assert_eq!(panel.resources.len(), 2);
+        
+        // User can filter resources
+        panel.filter = ResourceFilter::Buffers;
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 1);
+        assert!(matches!(filtered[0], ResourceInfo::Buffer(_)));
+        
+        panel.filter = ResourceFilter::Textures;
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 1);
+        assert!(matches!(filtered[0], ResourceInfo::Texture(_)));
+    }
+
+    #[test]
+    fn test_gui_interaction_search_workflow() {
+        let mut panel = ResourceInspectorPanel::new();
+        
+        // User creates multiple buffers
+        panel.add_buffer(BufferInfo {
+            id: 1,
+            label: Some("vertex_buffer".to_string()),
+            size: 1024,
+            usage: BufferUsages::VERTEX,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        
+        panel.add_buffer(BufferInfo {
+            id: 2,
+            label: Some("index_buffer".to_string()),
+            size: 512,
+            usage: BufferUsages::INDEX,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        
+        panel.add_buffer(BufferInfo {
+            id: 3,
+            label: Some("uniform_data".to_string()),
+            size: 256,
+            usage: BufferUsages::UNIFORM,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        
+        // User searches for "vertex" (in label)
+        panel.search_query = "vertex".to_string();
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 1); // vertex_buffer
+        
+        // User searches for "uniform"
+        panel.search_query = "uniform".to_string();
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 1); // uniform_data
+        
+        // User searches for "buffer" (matches type name)
+        panel.search_query = "buffer".to_string();
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 3); // All buffers (type name match)
+        
+        // User clears search
+        panel.search_query = "".to_string();
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 3); // All buffers
+    }
+
+    #[test]
+    fn test_gui_interaction_clear_all() {
+        let mut panel = ResourceInspectorPanel::new();
+        
+        // User creates various resources
+        panel.add_buffer(BufferInfo {
+            id: 1,
+            label: Some("buffer".to_string()),
+            size: 256,
+            usage: BufferUsages::VERTEX,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        
+        panel.add_texture(TextureInfo {
+            id: 1,
+            label: Some("texture".to_string()),
+            width: 256,
+            height: 256,
+            depth_or_array_layers: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm,
+            mip_level_count: 1,
+            sample_count: 1,
+            usage: TextureUsages::TEXTURE_BINDING,
+            state: ResourceState::Active,
+        });
+        
+        panel.add_render_pipeline(RenderPipelineInfo {
+            id: 1,
+            label: Some("pipeline".to_string()),
+            vertex_entry_point: "vs_main".to_string(),
+            fragment_entry_point: Some("fs_main".to_string()),
+            state: ResourceState::Active,
+        });
+        
+        assert_eq!(panel.resources.len(), 3);
+        
+        // User clicks Clear All
+        panel.clear();
+        
+        // All resources should be gone
+        assert_eq!(panel.resources.len(), 0);
+    }
+
+    #[test]
+    fn test_gui_interaction_memory_tracking() {
+        let mut panel = ResourceInspectorPanel::new();
+        
+        // User creates a buffer and checks memory usage
+        panel.add_buffer(BufferInfo {
+            id: 1,
+            label: Some("large_buffer".to_string()),
+            size: 1048576, // 1 MB
+            usage: BufferUsages::STORAGE,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        
+        let total_memory = panel.total_memory_usage();
+        assert_eq!(total_memory, 1048576);
+        
+        // User creates a texture
+        panel.add_texture(TextureInfo {
+            id: 1,
+            label: Some("texture".to_string()),
+            width: 512,
+            height: 512,
+            depth_or_array_layers: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm, // 4 bytes per pixel
+            mip_level_count: 1,
+            sample_count: 1,
+            usage: TextureUsages::TEXTURE_BINDING,
+            state: ResourceState::Active,
+        });
+        
+        // Memory should include both resources
+        let new_total = panel.total_memory_usage();
+        assert!(new_total > 1048576); // Should be buffer + texture
+    }
+
+    #[test]
+    fn test_gui_interaction_hide_show_destroyed() {
+        let mut panel = ResourceInspectorPanel::new();
+        
+        // User creates buffers
+        panel.add_buffer(BufferInfo {
+            id: 1,
+            label: Some("active_buffer".to_string()),
+            size: 256,
+            usage: BufferUsages::VERTEX,
+            mapped_at_creation: false,
+            state: ResourceState::Active,
+        });
+        
+        panel.add_buffer(BufferInfo {
+            id: 2,
+            label: Some("destroyed_buffer".to_string()),
+            size: 256,
+            usage: BufferUsages::VERTEX,
+            mapped_at_creation: false,
+            state: ResourceState::Destroyed,
+        });
+        
+        // By default, destroyed resources hidden
+        panel.show_destroyed = false;
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 1);
+        
+        // User toggles show destroyed
+        panel.show_destroyed = true;
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 2);
+        
+        // User toggles it back off
+        panel.show_destroyed = false;
+        let filtered = panel.filtered_resources();
+        assert_eq!(filtered.len(), 1);
+    }
 }

@@ -569,4 +569,159 @@ mod tests {
         assert_eq!(panel.messages.len(), 1);
         assert_eq!(panel.messages[0].severity, Severity::Error);
     }
+
+    // GUI Interaction Tests - Simulating User Workflows
+
+    #[test]
+    fn test_gui_interaction_typical_user_workflow() {
+        let mut panel = ConsolePanel::new();
+        
+        // User starts app, sees initial messages
+        panel.info("WebGPU initialized");
+        panel.info("Adapter found: NVIDIA GeForce RTX");
+        assert_eq!(panel.messages.len(), 2);
+        
+        // User makes a mistake, sees error
+        panel.error("Shader compilation failed");
+        assert_eq!(panel.messages.len(), 3);
+        assert_eq!(panel.count_by_severity(Severity::Error), 1);
+        
+        // User toggles filter to show only errors
+        panel.set_filter(Some(Severity::Error));
+        let filtered = panel.filtered_messages();
+        assert_eq!(filtered.len(), 1);
+        
+        // User fixes error, sees success message
+        panel.info("Shader compiled successfully");
+        
+        // User clears filter to see all messages
+        panel.set_filter(None);
+        let filtered = panel.filtered_messages();
+        assert_eq!(filtered.len(), 4);
+        
+        // User clears console
+        panel.clear();
+        assert_eq!(panel.messages.len(), 0);
+    }
+
+    #[test]
+    fn test_gui_interaction_filter_cycling() {
+        let mut panel = ConsolePanel::new();
+        
+        // Add different message types
+        panel.info("Info message 1");
+        panel.warning("Warning message 1");
+        panel.error("Error message 1");
+        panel.info("Info message 2");
+        panel.warning("Warning message 2");
+        
+        // User cycles through filters
+        
+        // Show all
+        panel.set_filter(None);
+        assert_eq!(panel.filtered_messages().len(), 5);
+        
+        // Show only info
+        panel.set_filter(Some(Severity::Info));
+        assert_eq!(panel.filtered_messages().len(), 2);
+        
+        // Show only warnings
+        panel.set_filter(Some(Severity::Warning));
+        assert_eq!(panel.filtered_messages().len(), 2);
+        
+        // Show only errors
+        panel.set_filter(Some(Severity::Error));
+        assert_eq!(panel.filtered_messages().len(), 1);
+        
+        // Back to all
+        panel.set_filter(None);
+        assert_eq!(panel.filtered_messages().len(), 5);
+    }
+
+    #[test]
+    fn test_gui_interaction_message_selection() {
+        let mut panel = ConsolePanel::new();
+        
+        panel.info("Message 1");
+        panel.warning("Message 2");
+        panel.error("Message 3");
+        
+        // Verify messages are stored in order
+        assert_eq!(panel.messages.len(), 3);
+        assert_eq!(panel.messages[0].severity, Severity::Info);
+        assert_eq!(panel.messages[1].severity, Severity::Warning);
+        assert_eq!(panel.messages[2].severity, Severity::Error);
+    }
+
+    #[test]
+    fn test_gui_interaction_message_overflow() {
+        let mut panel = ConsolePanel::new();
+        panel.max_messages = 3;
+        
+        // User performs actions that generate many messages
+        panel.info("Message 1");
+        panel.info("Message 2");
+        panel.info("Message 3");
+        
+        // Panel should have 3 messages
+        assert_eq!(panel.messages.len(), 3);
+        
+        // Add another message, oldest should be removed
+        panel.info("Message 4");
+        assert_eq!(panel.messages.len(), 3);
+        assert_eq!(panel.messages[0].message, "Message 2");
+        assert_eq!(panel.messages[2].message, "Message 4");
+    }
+
+    #[test]
+    fn test_gui_interaction_clear_with_filter() {
+        let mut panel = ConsolePanel::new();
+        
+        // Add messages
+        panel.info("Info");
+        panel.warning("Warning");
+        panel.error("Error");
+        
+        // User sets filter
+        panel.set_filter(Some(Severity::Error));
+        assert_eq!(panel.filtered_messages().len(), 1);
+        
+        // User clears console
+        panel.clear();
+        
+        // Filter should still be set but no messages
+        assert_eq!(panel.messages.len(), 0);
+        assert_eq!(panel.filtered_messages().len(), 0);
+        
+        // Add new error
+        panel.error("New error");
+        
+        // Should be filtered correctly
+        assert_eq!(panel.filtered_messages().len(), 1);
+    }
+
+    #[test]
+    fn test_gui_interaction_multiple_errors_workflow() {
+        let mut panel = ConsolePanel::new();
+        
+        // Simulate a user encountering multiple errors
+        panel.error("Validation error in shader");
+        panel.error("Buffer size too small");
+        panel.warning("Performance warning: Large texture");
+        panel.error("Pipeline creation failed");
+        
+        // User filters to see only errors
+        panel.set_filter(Some(Severity::Error));
+        let errors = panel.filtered_messages();
+        assert_eq!(errors.len(), 3);
+        
+        // Verify all are errors
+        for (_, error) in &errors {
+            assert_eq!(error.severity, Severity::Error);
+        }
+        
+        // User clears errors to start fresh
+        panel.clear();
+        assert_eq!(panel.messages.len(), 0);
+    }
 }

@@ -257,6 +257,76 @@ The 3D cube was successfully rendered with:
   • Rotation animation over 5 frames
 ```
 
+#### Render-to-Texture Example
+
+A multi-pass rendering example demonstrating framebuffer usage:
+
+```bash
+cargo run --package wgpu_playground_examples --example render_to_texture
+```
+
+This example demonstrates:
+- Creating an offscreen texture as a framebuffer (RENDER_ATTACHMENT usage)
+- First render pass: Rendering a colorful triangle to the offscreen texture
+- Second render pass: Using the rendered texture as input to display on a fullscreen quad
+- Multi-pass rendering workflow
+- Texture sampling with bind groups
+- Proper texture usage flags for both rendering and sampling
+
+**Example output:**
+```
+=== Render-to-Texture Example ===
+
+This example demonstrates multi-pass rendering:
+  Pass 1: Render triangle to offscreen texture
+  Pass 2: Display texture on fullscreen quad
+
+Using adapter: NVIDIA GeForce RTX 3080
+Backend: Vulkan
+✓ GPU device created
+
+=== First Pass Setup (Render Triangle to Texture) ===
+✓ Triangle vertex buffer created (60 bytes)
+✓ Scene shader loaded and compiled
+✓ Scene render pipeline created
+✓ Offscreen texture created (512x512)
+  - Usage: RENDER_ATTACHMENT | TEXTURE_BINDING
+
+=== Second Pass Setup (Display Texture on Quad) ===
+✓ Quad vertex buffer created (96 bytes)
+✓ Texture sampler created
+✓ Display shader loaded and compiled
+✓ Bind group created (texture + sampler)
+✓ Display render pipeline created
+
+✓ Final output texture created (800x600)
+
+=== Executing Multi-Pass Rendering ===
+
+Pass 1: Rendering triangle to offscreen texture...
+  ✓ Triangle rendered to offscreen texture
+Pass 2: Displaying offscreen texture on quad...
+  ✓ Offscreen texture sampled and displayed on quad
+
+✓ Render commands submitted to GPU
+✓ Rendering complete
+
+=== Render-to-Texture Example Complete ===
+
+This example successfully demonstrated:
+  • Creating an offscreen texture as a framebuffer
+  • First pass: Rendering a triangle to the offscreen texture
+  • Second pass: Using the texture as input to render a textured quad
+  • Multi-pass rendering workflow
+  • Texture sampling with bind groups
+
+Key concepts:
+  - Offscreen texture usage: RENDER_ATTACHMENT | TEXTURE_BINDING
+  - First pass StoreOp::Store preserves rendered content
+  - Second pass samples the texture via bind group
+  - Two separate render pipelines for different passes
+```
+
 #### Compute-Render Buffer Sharing Example
 
 A comprehensive example demonstrating buffer sharing between compute and render pipelines:

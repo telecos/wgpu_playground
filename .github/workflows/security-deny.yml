@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run cargo deny
-        uses: EmbarkStudios/cargo-deny-action@v1
+        uses: EmbarkStudios/cargo-deny-action@v2
         with:
           rust-version: "1.85.0"
           command-arguments: "licenses bans sources"

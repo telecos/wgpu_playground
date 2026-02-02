@@ -86,7 +86,7 @@ fn shader_get_content(c: &mut Criterion) {
     c.bench_function("shader_source_code", |b| {
         let mut editor = ShaderEditor::new();
         editor.set_source_code(SIMPLE_SHADER.to_string());
-        
+
         b.iter(|| {
             let content = editor.source_code();
             black_box(content)

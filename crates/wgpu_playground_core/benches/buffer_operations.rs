@@ -4,11 +4,8 @@ use wgpu_playground_core::buffer::{BufferDescriptor, BufferUsages};
 fn buffer_descriptor_creation(c: &mut Criterion) {
     c.bench_function("buffer_descriptor_new", |b| {
         b.iter(|| {
-            let desc = BufferDescriptor::new(
-                Some("test_buffer"),
-                black_box(1024),
-                BufferUsages::VERTEX,
-            );
+            let desc =
+                BufferDescriptor::new(Some("test_buffer"), black_box(1024), BufferUsages::VERTEX);
             black_box(desc)
         })
     });
@@ -27,7 +24,8 @@ fn buffer_descriptor_with_usage(c: &mut Criterion) {
 fn buffer_validation(c: &mut Criterion) {
     c.bench_function("buffer_validation", |b| {
         b.iter(|| {
-            let desc = BufferDescriptor::new(Some("test_buffer"), black_box(1024), BufferUsages::VERTEX);
+            let desc =
+                BufferDescriptor::new(Some("test_buffer"), black_box(1024), BufferUsages::VERTEX);
             let result = desc.validate();
             black_box(result)
         })

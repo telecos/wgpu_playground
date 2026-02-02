@@ -39,7 +39,7 @@ fn test_triangle_rendering_workflow() {
         };
 
         // === SETUP PHASE ===
-        
+
         // Create triangle vertices
         let vertices = vec![
             Vertex::new([0.0, 0.5], [1.0, 0.0, 0.0]),   // Top - Red
@@ -83,13 +83,11 @@ fn fs_main() -> @location(0) vec4<f32> {
         let vertex_buffer_layout = wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<Vertex>() as u64,
             step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    format: wgpu::VertexFormat::Float32x2,
-                    offset: 0,
-                    shader_location: 0,
-                },
-            ],
+            attributes: &[wgpu::VertexAttribute {
+                format: wgpu::VertexFormat::Float32x2,
+                offset: 0,
+                shader_location: 0,
+            }],
         };
 
         // Create render pipeline
@@ -150,7 +148,7 @@ fn fs_main() -> @location(0) vec4<f32> {
         let texture_view = render_texture.create_view(&wgpu::TextureViewDescriptor::default());
 
         // === ENCODE PHASE ===
-        
+
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Test Command Encoder"),
         });
@@ -183,7 +181,7 @@ fn fs_main() -> @location(0) vec4<f32> {
         }
 
         // === SUBMIT PHASE ===
-        
+
         queue.submit(std::iter::once(encoder.finish()));
 
         // Wait for completion
@@ -204,7 +202,7 @@ fn test_compute_pass_workflow() {
         };
 
         // === SETUP PHASE ===
-        
+
         // Create compute shader
         let shader_source = r#"
 @group(0) @binding(0)
@@ -275,7 +273,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         });
 
         // === ENCODE PHASE ===
-        
+
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Test Compute Encoder"),
         });
@@ -288,11 +286,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
-            compute_pass.dispatch_workgroups((input_data.len() as u32 + 63) / 64, 1, 1);
+            compute_pass.dispatch_workgroups((input_data.len() as u32).div_ceil(64), 1, 1);
         }
 
         // === SUBMIT PHASE ===
-        
+
         queue.submit(std::iter::once(encoder.finish()));
 
         // Wait for completion
@@ -313,7 +311,7 @@ fn test_render_to_texture_workflow() {
         };
 
         // === SETUP PHASE ===
-        
+
         // Create shaders for first pass (triangle rendering)
         let first_pass_shader = r#"
 @vertex
@@ -416,11 +414,12 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create first pass pipeline
-        let first_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("First Pass Layout"),
-            bind_group_layouts: &[],
-            push_constant_ranges: &[],
-        });
+        let first_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("First Pass Layout"),
+                bind_group_layouts: &[],
+                push_constant_ranges: &[],
+            });
 
         let first_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("First Pass Pipeline"),
@@ -449,27 +448,28 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create bind group layout for second pass
-        let second_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("Second Pass Bind Group Layout"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
+        let second_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some("Second Pass Bind Group Layout"),
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: None,
                     },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ],
-        });
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+            });
 
         let second_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Second Pass Bind Group"),
@@ -487,11 +487,12 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create second pass pipeline
-        let second_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Second Pass Layout"),
-            bind_group_layouts: &[&second_bind_group_layout],
-            push_constant_ranges: &[],
-        });
+        let second_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Second Pass Layout"),
+                bind_group_layouts: &[&second_bind_group_layout],
+                push_constant_ranges: &[],
+            });
 
         let second_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Second Pass Pipeline"),
@@ -520,7 +521,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // === ENCODE PHASE ===
-        
+
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Multi-Pass Encoder"),
         });
@@ -571,7 +572,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         }
 
         // === SUBMIT PHASE ===
-        
+
         queue.submit(std::iter::once(encoder.finish()));
 
         // Wait for completion
@@ -592,7 +593,7 @@ fn test_instanced_rendering_workflow() {
         };
 
         // === SETUP PHASE ===
-        
+
         // Create shader with instancing support
         let shader_source = r#"
 struct InstanceInput {
@@ -637,9 +638,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         unsafe impl bytemuck::Zeroable for VertexData {}
 
         let vertices = vec![
-            VertexData { position: [0.0, 0.1, 0.0] },
-            VertexData { position: [-0.1, -0.1, 0.0] },
-            VertexData { position: [0.1, -0.1, 0.0] },
+            VertexData {
+                position: [0.0, 0.1, 0.0],
+            },
+            VertexData {
+                position: [-0.1, -0.1, 0.0],
+            },
+            VertexData {
+                position: [0.1, -0.1, 0.0],
+            },
         ];
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -758,7 +765,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         let texture_view = render_texture.create_view(&wgpu::TextureViewDescriptor::default());
 
         // === ENCODE PHASE ===
-        
+
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Instanced Encoder"),
         });
@@ -787,7 +794,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         }
 
         // === SUBMIT PHASE ===
-        
+
         queue.submit(std::iter::once(encoder.finish()));
 
         // Wait for completion
@@ -808,7 +815,7 @@ fn test_depth_testing_workflow() {
         };
 
         // === SETUP PHASE ===
-        
+
         // Create shader for 3D rendering
         let shader_source = r#"
 struct VertexOutput {
@@ -847,13 +854,31 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
         let vertices = vec![
             // First triangle (closer)
-            Vertex3D { position: [0.0, 0.5, 0.2], color: [1.0, 0.0, 0.0] },
-            Vertex3D { position: [-0.5, -0.5, 0.2], color: [1.0, 0.0, 0.0] },
-            Vertex3D { position: [0.5, -0.5, 0.2], color: [1.0, 0.0, 0.0] },
+            Vertex3D {
+                position: [0.0, 0.5, 0.2],
+                color: [1.0, 0.0, 0.0],
+            },
+            Vertex3D {
+                position: [-0.5, -0.5, 0.2],
+                color: [1.0, 0.0, 0.0],
+            },
+            Vertex3D {
+                position: [0.5, -0.5, 0.2],
+                color: [1.0, 0.0, 0.0],
+            },
             // Second triangle (farther)
-            Vertex3D { position: [0.0, 0.3, 0.8], color: [0.0, 0.0, 1.0] },
-            Vertex3D { position: [-0.3, -0.3, 0.8], color: [0.0, 0.0, 1.0] },
-            Vertex3D { position: [0.3, -0.3, 0.8], color: [0.0, 0.0, 1.0] },
+            Vertex3D {
+                position: [0.0, 0.3, 0.8],
+                color: [0.0, 0.0, 1.0],
+            },
+            Vertex3D {
+                position: [-0.3, -0.3, 0.8],
+                color: [0.0, 0.0, 1.0],
+            },
+            Vertex3D {
+                position: [0.3, -0.3, 0.8],
+                color: [0.0, 0.0, 1.0],
+            },
         ];
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -955,7 +980,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // === ENCODE PHASE ===
-        
+
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("3D Encoder"),
         });
@@ -990,7 +1015,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         }
 
         // === SUBMIT PHASE ===
-        
+
         queue.submit(std::iter::once(encoder.finish()));
 
         // Wait for completion

@@ -170,7 +170,9 @@ fn test_closure_creation() {
     
     assert_eq!(*counter.borrow(), 2);
     
-    // Don't forget the closure to prevent it from being dropped
+    // Intentionally leak the closure to prevent it from being dropped.
+    // This is necessary because JavaScript holds a reference to the closure,
+    // and dropping it would invalidate that reference.
     closure.forget();
 }
 
@@ -241,9 +243,10 @@ fn test_browser_specific_apis() {
     
     // Test location API
     let location = window.location();
-    let href = location.href().unwrap_or_default();
-    // In test environment, this might be about:blank or similar
-    assert!(!href.is_empty() || href.is_empty()); // Either is fine in test
+    // In test environment, href should be available (could be about:blank or a test URL)
+    let _href = location.href().expect("Should be able to get href");
+    
+    // Just verify we can access the location object - actual value varies by test environment
 }
 
 /// Test memory management with JsValue

@@ -371,6 +371,8 @@ fn test_canvas_event_listeners() {
         .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
         .expect("Should add event listener");
     
-    // Clean up
+    // Intentionally leak the closure to keep the event listener callback alive.
+    // The closure must persist because it's registered with the DOM and JavaScript
+    // holds a reference to it. Dropping it would invalidate the event listener.
     closure.forget();
 }

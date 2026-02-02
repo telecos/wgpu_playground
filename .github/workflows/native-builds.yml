@@ -42,7 +42,7 @@ jobs:
             mesa-vulkan-drivers \
             libvulkan1 \
             vulkan-tools \
-            libegl1-mesa \
+            libegl-mesa0 \
             libgl1-mesa-dri \
             libxcb-xfixes0-dev \
             libxcb1-dev \

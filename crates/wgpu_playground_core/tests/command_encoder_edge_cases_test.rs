@@ -32,7 +32,7 @@ fn test_buffer_copy_at_boundaries() {
         let mut encoder = CommandEncoderOps::new(&device, Some("Boundary Test"));
         // Copy exact buffer size
         encoder.copy_buffer_to_buffer(&src, 0, &dst, 0, 256);
-        
+
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
         device.poll(wgpu::Maintain::Wait);
@@ -83,7 +83,7 @@ fn test_buffer_copy_from_end() {
         let mut encoder = CommandEncoderOps::new(&device, Some("End Copy Test"));
         // Copy from the very end of the source buffer
         encoder.copy_buffer_to_buffer(&src, 256, &dst, 0, 256);
-        
+
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
         device.poll(wgpu::Maintain::Wait);
@@ -134,7 +134,7 @@ fn test_buffer_copy_to_end() {
         let mut encoder = CommandEncoderOps::new(&device, Some("End Copy Test"));
         // Copy to the very end of the destination buffer
         encoder.copy_buffer_to_buffer(&src, 0, &dst, 256, 256);
-        
+
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
         device.poll(wgpu::Maintain::Wait);
@@ -194,13 +194,13 @@ fn test_small_aligned_copies() {
         queue.write_buffer(&src, 0, &data);
 
         let mut encoder = CommandEncoderOps::new(&device, Some("Small Copy Test"));
-        
+
         // Copy several 4-byte chunks
         encoder.copy_buffer_to_buffer(&src, 0, &dst, 0, 4);
         encoder.copy_buffer_to_buffer(&src, 4, &dst, 4, 4);
         encoder.copy_buffer_to_buffer(&src, 8, &dst, 8, 4);
         encoder.copy_buffer_to_buffer(&src, 12, &dst, 12, 4);
-        
+
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
         device.poll(wgpu::Maintain::Wait);
@@ -234,7 +234,7 @@ fn test_large_buffer_copy() {
 
         // 1 MB buffer
         let size = 1024 * 1024;
-        
+
         let src = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Large Source"),
             size,
@@ -255,7 +255,7 @@ fn test_large_buffer_copy() {
 
         let mut encoder = CommandEncoderOps::new(&device, Some("Large Copy Test"));
         encoder.copy_buffer_to_buffer(&src, 0, &dst, 0, size);
-        
+
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
         device.poll(wgpu::Maintain::Wait);

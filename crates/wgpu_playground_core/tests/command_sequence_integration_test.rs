@@ -220,7 +220,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // Compute pass
         {
             let descriptor = ComputePassDescriptor::new().with_label("Compute Pass");
-            let mut compute_pass = ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
+            let mut compute_pass =
+                ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
             compute_pass.dispatch(64, 1, 1);
@@ -360,7 +361,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let storage_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Storage Buffer"),
             size: buffer_size,
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::COPY_DST,
+            usage: wgpu::BufferUsages::STORAGE
+                | wgpu::BufferUsages::COPY_SRC
+                | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
 
@@ -384,7 +387,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // First compute pass (increment by 1)
         {
             let descriptor = ComputePassDescriptor::new().with_label("Compute Pass 1");
-            let mut compute_pass = ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
+            let mut compute_pass =
+                ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
             compute_pass.dispatch(64, 1, 1);
@@ -393,7 +397,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // Second compute pass (increment by 1 again)
         {
             let descriptor = ComputePassDescriptor::new().with_label("Compute Pass 2");
-            let mut compute_pass = ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
+            let mut compute_pass =
+                ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
             compute_pass.dispatch(64, 1, 1);
@@ -526,7 +531,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // 2. Compute pass
         {
             let descriptor = ComputePassDescriptor::new().with_label("Compute");
-            let mut compute_pass = ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
+            let mut compute_pass =
+                ComputePassEncoder::begin(encoder.inner_mut(), &descriptor).unwrap();
             compute_pass.set_pipeline(&pipeline);
             compute_pass.set_bind_group(0, &bind_group, &[]);
             compute_pass.dispatch(64, 1, 1);

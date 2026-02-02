@@ -202,9 +202,9 @@ fn main() {
     // Define triangle vertices - rotated for better edge visibility
     // Using a thin triangle to emphasize aliasing artifacts
     let vertices = vec![
-        Vertex::new([0.0, 0.7], [1.0, 0.3, 0.3]),    // Top - Red
-        Vertex::new([-0.3, -0.5], [0.3, 1.0, 0.3]),  // Bottom-left - Green
-        Vertex::new([0.3, -0.5], [0.3, 0.3, 1.0]),   // Bottom-right - Blue
+        Vertex::new([0.0, 0.7], [1.0, 0.3, 0.3]),   // Top - Red
+        Vertex::new([-0.3, -0.5], [0.3, 1.0, 0.3]), // Bottom-left - Green
+        Vertex::new([0.3, -0.5], [0.3, 0.3, 1.0]),  // Bottom-right - Blue
     ];
 
     println!("Triangle geometry:");
@@ -284,12 +284,8 @@ fn main() {
     println!("--- Rendering WITH 4x MSAA (sample_count = 4) ---");
 
     let msaa_sample_count = 4;
-    let msaa_pipeline = create_pipeline(
-        &device,
-        &shader_module,
-        msaa_sample_count,
-        "MSAA Pipeline",
-    );
+    let msaa_pipeline =
+        create_pipeline(&device, &shader_module, msaa_sample_count, "MSAA Pipeline");
     println!(
         "✓ MSAA pipeline created (sample_count = {})",
         msaa_sample_count
@@ -323,7 +319,7 @@ fn main() {
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("MSAA Render Pass"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &msaa_view, // Render to MSAA texture
+                view: &msaa_view,                    // Render to MSAA texture
                 resolve_target: Some(&resolve_view), // Resolve to regular texture
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Clear(wgpu::Color {
@@ -357,7 +353,10 @@ fn main() {
     println!("    - Renders directly to a regular texture");
     println!("    - Shows jagged edges (aliasing artifacts)");
     println!();
-    println!("  • 4x MSAA rendering (sample_count = {}):", msaa_sample_count);
+    println!(
+        "  • 4x MSAA rendering (sample_count = {}):",
+        msaa_sample_count
+    );
     println!("    - Renders to a multisampled texture");
     println!("    - Uses resolve_target for automatic resolve operation");
     println!("    - Produces smooth edges (anti-aliasing)");

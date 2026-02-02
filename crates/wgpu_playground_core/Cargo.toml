@@ -14,7 +14,7 @@ dawn = []
 
 [dependencies]
 wgpu = { version = "22.1", features = ["wgsl"] }
-wgpu-core = "22.1"
+wgpu-core = "28.0"
 wgpu-types = "22.0"
 winit = "0.30"
 env_logger = "0.11"

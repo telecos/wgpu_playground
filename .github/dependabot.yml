@@ -30,11 +30,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-      build-dependencies:
-        dependency-type: "build"
-        update-types:
-          - "minor"
-          - "patch"
     # Add useful labels for filtering
     labels:
       - "dependencies"

@@ -60,9 +60,18 @@ cc = "1.2"
 [dev-dependencies]
 pollster = "0.3"
 serial_test = "3.0"
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[[bench]]
+name = "buffer_operations"
+harness = false
+
+[[bench]]
+name = "shader_compilation"
+harness = false
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

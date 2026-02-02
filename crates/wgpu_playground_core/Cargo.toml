@@ -13,7 +13,7 @@ description = "Core WebGPU functionality for wgpu_playground"
 dawn = []
 
 [dependencies]
-wgpu = { version = "22.1", features = ["wgsl"] }
+wgpu = { version = "28.0", features = ["wgsl"] }
 wgpu-core = "22.1"
 wgpu-types = "22.0"
 winit = "0.30"

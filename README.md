@@ -510,6 +510,31 @@ This project uses a Cargo workspace structure with the following crates:
 
 This is currently a skeleton/framework for the full application. See [PLAN.md](PLAN.md) for planned features and implementation roadmap.
 
+## Testing
+
+### Visual Regression Testing
+
+This project includes a visual regression testing framework to catch unintended visual changes in GPU rendering output. The framework:
+
+- Captures rendered GPU textures to PNG images
+- Compares captured output with reference images
+- Generates diff images highlighting discrepancies
+- Supports configurable comparison thresholds
+
+**Running Visual Regression Tests:**
+
+```bash
+# Run all visual regression tests
+cargo test --package wgpu_playground_core visual_regression
+
+# Generate or update reference images (do this on a system with GPU)
+UPDATE_VISUAL_REFERENCES=1 cargo test --package wgpu_playground_core visual_regression
+```
+
+**Note:** Visual regression tests require a GPU and will skip gracefully in headless/CI environments without GPU access.
+
+For detailed information about the visual regression framework, see [tests/visual_regression/reference/README.md](tests/visual_regression/reference/README.md).
+
 ## Code Coverage
 
 This project uses `cargo-llvm-cov` for code coverage reporting. See [COVERAGE.md](COVERAGE.md) for details on:
@@ -555,6 +580,7 @@ The documentation includes all public APIs for:
 
 ### Design Documents
 
+- **[VISUAL_REGRESSION_TESTING.md](docs/VISUAL_REGRESSION_TESTING.md)** - Complete guide to the visual regression testing framework, including examples, API reference, and best practices
 - **[SHADER_EDITOR.md](docs/SHADER_EDITOR.md)** - Complete guide to the WGSL Shader Editor including usage examples, tips, and API reference
 - **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them
 - **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu

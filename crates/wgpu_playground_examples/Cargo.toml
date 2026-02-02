@@ -7,7 +7,7 @@ description = "Examples for wgpu_playground"
 
 [dependencies]
 wgpu_playground_core = { path = "../wgpu_playground_core" }
-wgpu = { version = "22.1", features = ["wgsl"] }
+wgpu = { version = "28.0", features = ["wgsl"] }
 pollster = "0.4"
 env_logger = "0.11"
 log = "0.4"

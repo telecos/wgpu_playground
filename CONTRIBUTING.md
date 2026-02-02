@@ -243,6 +243,57 @@ cargo test test_buffer_creation
 - Focus on the code, not the person
 - Assume good intentions
 
+## Release Process
+
+Releases are automated through GitHub Actions. When a version tag is pushed, the CI pipeline automatically builds and publishes release artifacts.
+
+### Creating a Release
+
+1. **Update Version Numbers**: Update version in workspace `Cargo.toml`
+   ```bash
+   # Update version in Cargo.toml
+   version = "0.2.0"
+   ```
+
+2. **Commit Changes**:
+   ```bash
+   git commit -am "Bump version to 0.2.0"
+   git push
+   ```
+
+3. **Create and Push Tag**:
+   ```bash
+   git tag v0.2.0
+   git push origin v0.2.0
+   ```
+
+4. **Automated Build**: The release workflow automatically:
+   - Builds native binaries for:
+     - Linux (x86_64)
+     - Windows (x86_64)
+     - macOS (Intel and Apple Silicon)
+   - Creates WASM bundle for web deployment
+   - Generates documentation bundle
+   - Creates GitHub Release with all artifacts
+   - Publishes to GitHub Releases page
+
+### Release Artifacts
+
+The release workflow produces:
+- **Native Binaries**: Platform-specific executables (.tar.gz for Unix, .zip for Windows)
+- **WASM Bundle**: WebAssembly build with JavaScript bindings for web deployment
+- **Documentation**: Complete API documentation in HTML format
+
+### Pre-release Versions
+
+For beta or release candidate versions, use a tag with a suffix:
+```bash
+git tag v0.2.0-beta.1
+git push origin v0.2.0-beta.1
+```
+
+The release will be marked as a pre-release automatically.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the same license as the project (MIT).

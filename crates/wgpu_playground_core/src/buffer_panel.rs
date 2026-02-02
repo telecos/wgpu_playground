@@ -480,21 +480,21 @@ mod tests {
     #[test]
     fn test_gui_interaction_create_vertex_buffer_workflow() {
         let mut panel = BufferPanel::new();
-        
+
         // User types a label
         panel.label_input = "my_vertex_buffer".to_string();
-        
+
         // User types a size
         panel.size_input = "1024".to_string();
-        
+
         // User clicks VERTEX checkbox
         panel.usage_vertex = true;
-        
+
         // User validates
         let is_valid = panel.validate();
         assert!(is_valid);
         assert!(panel.validation_error.is_none());
-        
+
         // Verify final state
         assert_eq!(panel.descriptor.label(), Some("my_vertex_buffer"));
         assert_eq!(panel.descriptor.size(), 1024);
@@ -504,20 +504,20 @@ mod tests {
     #[test]
     fn test_gui_interaction_incremental_size_input() {
         let mut panel = BufferPanel::new();
-        
+
         // Simulate user typing size character by character
         panel.size_input = "1".to_string();
         panel.update_descriptor();
         assert_eq!(panel.descriptor.size(), 1);
-        
+
         panel.size_input = "12".to_string();
         panel.update_descriptor();
         assert_eq!(panel.descriptor.size(), 12);
-        
+
         panel.size_input = "128".to_string();
         panel.update_descriptor();
         assert_eq!(panel.descriptor.size(), 128);
-        
+
         panel.size_input = "1280".to_string();
         panel.update_descriptor();
         assert_eq!(panel.descriptor.size(), 1280);
@@ -526,18 +526,18 @@ mod tests {
     #[test]
     fn test_gui_interaction_error_then_fix() {
         let mut panel = BufferPanel::new();
-        
+
         // User makes an error - enters zero size
         panel.size_input = "0".to_string();
         panel.usage_uniform = true;
-        
+
         // Validation fails
         assert!(!panel.validate());
         assert!(panel.validation_error.is_some());
-        
+
         // User fixes the error
         panel.size_input = "256".to_string();
-        
+
         // Validation now succeeds
         assert!(panel.validate());
         assert!(panel.validation_error.is_none());
@@ -547,17 +547,17 @@ mod tests {
     fn test_gui_interaction_toggle_usage_flags() {
         let mut panel = BufferPanel::new();
         panel.size_input = "512".to_string();
-        
+
         // User selects STORAGE
         panel.usage_storage = true;
         panel.update_descriptor();
         assert!(panel.descriptor.usage().contains(BufferUsages::STORAGE));
-        
+
         // User also selects COPY_SRC
         panel.usage_copy_src = true;
         panel.update_descriptor();
         assert!(panel.descriptor.usage().contains(BufferUsages::COPY_SRC));
-        
+
         // User deselects COPY_DST
         panel.usage_copy_dst = false;
         panel.update_descriptor();
@@ -569,12 +569,12 @@ mod tests {
         let mut panel = BufferPanel::new();
         panel.size_input = "256".to_string();
         panel.usage_map_write = true;
-        
+
         // User toggles mapped_at_creation on
         panel.mapped_at_creation = true;
         panel.update_descriptor();
         assert!(panel.descriptor.mapped_at_creation());
-        
+
         // User toggles it off
         panel.mapped_at_creation = false;
         panel.update_descriptor();
@@ -585,17 +585,17 @@ mod tests {
     #[allow(unused_assignments)]
     fn test_gui_interaction_reset_workflow() {
         let mut panel = BufferPanel::new();
-        
+
         // User makes changes
         panel.label_input = "test_buffer".to_string();
         panel.size_input = "2048".to_string();
         panel.usage_vertex = true;
         panel.usage_uniform = true;
         panel.mapped_at_creation = true;
-        
+
         // User clicks Reset (simulated by creating new instance)
         panel = BufferPanel::new();
-        
+
         // Everything back to defaults
         assert_eq!(panel.label_input, "");
         assert_eq!(panel.size_input, "256");
@@ -609,18 +609,22 @@ mod tests {
     fn test_gui_interaction_invalid_then_valid_usage() {
         let mut panel = BufferPanel::new();
         panel.size_input = "256".to_string();
-        
+
         // User selects MAP_READ and MAP_WRITE (invalid)
         panel.usage_map_read = true;
         panel.usage_map_write = true;
         panel.usage_copy_dst = false;
-        
+
         assert!(!panel.validate());
-        assert!(panel.validation_error.as_ref().unwrap().contains("MAP_READ and MAP_WRITE"));
-        
+        assert!(panel
+            .validation_error
+            .as_ref()
+            .unwrap()
+            .contains("MAP_READ and MAP_WRITE"));
+
         // User deselects MAP_WRITE
         panel.usage_map_write = false;
-        
+
         // Now valid
         assert!(panel.validate());
         assert!(panel.validation_error.is_none());

@@ -958,7 +958,7 @@ mod tests {
     #[test]
     fn test_gui_interaction_resource_lifecycle() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         // User creates a buffer
         panel.add_buffer(BufferInfo {
             id: 1,
@@ -969,7 +969,7 @@ mod tests {
             state: ResourceState::Active,
         });
         assert_eq!(panel.resources.len(), 1);
-        
+
         // User can view the resource
         let resources = panel.filtered_resources();
         assert_eq!(resources.len(), 1);
@@ -979,7 +979,7 @@ mod tests {
     #[test]
     fn test_gui_interaction_filter_by_resource_type() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         // User creates different resources
         panel.add_buffer(BufferInfo {
             id: 1,
@@ -989,7 +989,7 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Active,
         });
-        
+
         panel.add_texture(TextureInfo {
             id: 1,
             label: Some("texture".to_string()),
@@ -1003,15 +1003,15 @@ mod tests {
             usage: TextureUsages::TEXTURE_BINDING,
             state: ResourceState::Active,
         });
-        
+
         assert_eq!(panel.resources.len(), 2);
-        
+
         // User can filter resources
         panel.filter = ResourceFilter::Buffers;
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 1);
         assert!(matches!(filtered[0], ResourceInfo::Buffer(_)));
-        
+
         panel.filter = ResourceFilter::Textures;
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 1);
@@ -1021,7 +1021,7 @@ mod tests {
     #[test]
     fn test_gui_interaction_search_workflow() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         // User creates multiple buffers
         panel.add_buffer(BufferInfo {
             id: 1,
@@ -1031,7 +1031,7 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Active,
         });
-        
+
         panel.add_buffer(BufferInfo {
             id: 2,
             label: Some("index_buffer".to_string()),
@@ -1040,7 +1040,7 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Active,
         });
-        
+
         panel.add_buffer(BufferInfo {
             id: 3,
             label: Some("uniform_data".to_string()),
@@ -1049,22 +1049,22 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Active,
         });
-        
+
         // User searches for "vertex" (in label)
         panel.search_query = "vertex".to_string();
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 1); // vertex_buffer
-        
+
         // User searches for "uniform"
         panel.search_query = "uniform".to_string();
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 1); // uniform_data
-        
+
         // User searches for "buffer" (matches type name)
         panel.search_query = "buffer".to_string();
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 3); // All buffers (type name match)
-        
+
         // User clears search
         panel.search_query = "".to_string();
         let filtered = panel.filtered_resources();
@@ -1074,7 +1074,7 @@ mod tests {
     #[test]
     fn test_gui_interaction_clear_all() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         // User creates various resources
         panel.add_buffer(BufferInfo {
             id: 1,
@@ -1084,7 +1084,7 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Active,
         });
-        
+
         panel.add_texture(TextureInfo {
             id: 1,
             label: Some("texture".to_string()),
@@ -1098,7 +1098,7 @@ mod tests {
             usage: TextureUsages::TEXTURE_BINDING,
             state: ResourceState::Active,
         });
-        
+
         panel.add_render_pipeline(RenderPipelineInfo {
             id: 1,
             label: Some("pipeline".to_string()),
@@ -1106,12 +1106,12 @@ mod tests {
             fragment_entry_point: Some("fs_main".to_string()),
             state: ResourceState::Active,
         });
-        
+
         assert_eq!(panel.resources.len(), 3);
-        
+
         // User clicks Clear All
         panel.clear();
-        
+
         // All resources should be gone
         assert_eq!(panel.resources.len(), 0);
     }
@@ -1119,7 +1119,7 @@ mod tests {
     #[test]
     fn test_gui_interaction_memory_tracking() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         // User creates a buffer and checks memory usage
         panel.add_buffer(BufferInfo {
             id: 1,
@@ -1129,10 +1129,10 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Active,
         });
-        
+
         let total_memory = panel.total_memory_usage();
         assert_eq!(total_memory, 1048576);
-        
+
         // User creates a texture
         panel.add_texture(TextureInfo {
             id: 1,
@@ -1147,7 +1147,7 @@ mod tests {
             usage: TextureUsages::TEXTURE_BINDING,
             state: ResourceState::Active,
         });
-        
+
         // Memory should include both resources
         let new_total = panel.total_memory_usage();
         assert!(new_total > 1048576); // Should be buffer + texture
@@ -1156,7 +1156,7 @@ mod tests {
     #[test]
     fn test_gui_interaction_hide_show_destroyed() {
         let mut panel = ResourceInspectorPanel::new();
-        
+
         // User creates buffers
         panel.add_buffer(BufferInfo {
             id: 1,
@@ -1166,7 +1166,7 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Active,
         });
-        
+
         panel.add_buffer(BufferInfo {
             id: 2,
             label: Some("destroyed_buffer".to_string()),
@@ -1175,17 +1175,17 @@ mod tests {
             mapped_at_creation: false,
             state: ResourceState::Destroyed,
         });
-        
+
         // By default, destroyed resources hidden
         panel.show_destroyed = false;
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 1);
-        
+
         // User toggles show destroyed
         panel.show_destroyed = true;
         let filtered = panel.filtered_resources();
         assert_eq!(filtered.len(), 2);
-        
+
         // User toggles it back off
         panel.show_destroyed = false;
         let filtered = panel.filtered_resources();

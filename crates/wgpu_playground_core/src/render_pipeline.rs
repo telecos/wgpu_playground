@@ -1250,7 +1250,7 @@ impl RenderPipelineDescriptor {
             multisample: self.multisample.to_wgpu(),
             fragment: fragment_module.as_ref().map(|module| wgpu::FragmentState {
                 module,
-                entry_point: &self.fragment_entry_point,
+                entry_point: Some(&self.fragment_entry_point),
                 compilation_options: Default::default(),
                 targets: &fragment_targets,
             }),

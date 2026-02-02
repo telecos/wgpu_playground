@@ -181,7 +181,7 @@ impl CommandEncoderOps {
     /// # let texture: &wgpu::Texture = todo!();
     /// let mut encoder = CommandEncoderOps::new(device, Some("Buffer to Texture"));
     /// encoder.copy_buffer_to_texture(
-    ///     wgpu::ImageCopyBuffer {
+    ///     wgpu::TexelCopyBufferInfo {
     ///         buffer,
     ///         layout: wgpu::ImageDataLayout {
     ///             offset: 0,
@@ -204,7 +204,7 @@ impl CommandEncoderOps {
     /// ```
     pub fn copy_buffer_to_texture(
         &mut self,
-        source: ImageCopyBuffer,
+        source: TexelCopyBufferInfo<'_>,
         destination: TexelCopyTextureInfo,
         copy_size: Extent3d,
     ) {
@@ -249,7 +249,7 @@ impl CommandEncoderOps {
     ///         origin: wgpu::Origin3d::ZERO,
     ///         aspect: wgpu::TextureAspect::All,
     ///     },
-    ///     wgpu::ImageCopyBuffer {
+    ///     wgpu::TexelCopyBufferInfo {
     ///         buffer,
     ///         layout: wgpu::ImageDataLayout {
     ///             offset: 0,

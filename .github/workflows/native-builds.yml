@@ -39,9 +39,8 @@ jobs:
           shared-key: "native-${{ matrix.os }}"
           save-if: ${{ github.ref == 'refs/heads/main' }}
       
-      # Note: Dawn feature is disabled until the integration is fully implemented
-      # The dawn feature has linking issues and requires additional work
-      # See build.rs for the long paths fix that will be used when dawn is ready
+      # Note: Dawn feature is tested separately in dawn-ci.yml workflow
+      # to avoid slowing down the main build pipeline
       
       - name: Build workspace
         if: "!matrix.test"

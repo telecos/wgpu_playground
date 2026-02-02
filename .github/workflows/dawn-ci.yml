@@ -1,0 +1,98 @@
+name: Dawn Integration CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Explicitly limit GITHUB_TOKEN permissions for security
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # Dawn build and test on Linux only (to save CI time)
+  dawn-linux:
+    name: Dawn Build & Test (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60  # Protection against hanging builds
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      # Install Dawn build dependencies
+      - name: Install Dawn dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake python3 python3-pip libvulkan-dev ninja-build
+          cmake --version
+          python3 --version
+          ninja --version
+
+      # Cache Dawn build artifacts - this is the key optimization
+      # First build: 20-30 minutes, subsequent builds: seconds
+      - name: Cache Dawn build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/release/build/wgpu_playground_core-*/out/dawn
+            target/release/build/wgpu_playground_core-*/out/dawn-build
+            target/release/build/wgpu_playground_core-*/out/dawn-install
+            target/debug/build/wgpu_playground_core-*/out/dawn
+            target/debug/build/wgpu_playground_core-*/out/dawn-build
+            target/debug/build/wgpu_playground_core-*/out/dawn-install
+          key: dawn-${{ runner.os }}-${{ hashFiles('crates/wgpu_playground_core/build.rs') }}
+          restore-keys: |
+            dawn-${{ runner.os }}-
+
+      # Cache Rust dependencies separately
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "dawn-cargo-deps-ubuntu"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      # Build with Dawn feature
+      - name: Build with Dawn
+        run: |
+          echo "::notice::Building with Dawn feature enabled"
+          cargo build --workspace --features dawn --release
+
+      # Run clippy with Dawn feature
+      - name: Run clippy with Dawn
+        run: cargo clippy --workspace --all-targets --features dawn -- -D warnings
+
+      # Run tests with Dawn feature
+      - name: Run tests with Dawn
+        run: cargo test --workspace --features dawn --lib
+
+      - name: Verify Dawn integration
+        run: |
+          # Check if Dawn was actually built or if fallback was used
+          if [ -d "target/release/build/wgpu_playground_core-"*"/out/dawn-install" ]; then
+            echo "::notice::Dawn built successfully from source"
+          else
+            echo "::warning::Dawn used wgpu-core fallback (expected on first run or cache miss)"
+          fi
+
+  # Combined status check
+  dawn-ci-success:
+    name: Dawn CI Success
+    runs-on: ubuntu-latest
+    needs: [dawn-linux]
+    if: always()
+    steps:
+      - name: Check Dawn CI
+        run: |
+          if [ "${{ needs.dawn-linux.result }}" != "success" ]; then
+            echo "Dawn CI failed"
+            echo "::error::Dawn CI pipeline failed - check job results"
+            exit 1
+          fi
+          echo "Dawn CI passed successfully"

@@ -158,9 +158,9 @@ fn main() {
 
     // Create triangle vertices for first pass
     let triangle_vertices = vec![
-        ColorVertex::new([0.0, 0.6], [1.0, 0.0, 0.0]),    // Top - Red
-        ColorVertex::new([-0.5, -0.3], [0.0, 1.0, 0.0]),  // Bottom-left - Green
-        ColorVertex::new([0.5, -0.3], [0.0, 0.0, 1.0]),   // Bottom-right - Blue
+        ColorVertex::new([0.0, 0.6], [1.0, 0.0, 0.0]), // Top - Red
+        ColorVertex::new([-0.5, -0.3], [0.0, 1.0, 0.0]), // Bottom-left - Green
+        ColorVertex::new([0.5, -0.3], [0.0, 0.0, 1.0]), // Bottom-right - Blue
     ];
 
     let triangle_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

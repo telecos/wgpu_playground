@@ -57,7 +57,7 @@ fn test_triangle_rendering_workflow() {
         // Create shader module
         let shader_source = r#"
 @vertex
-fn vs_main(@location(0) position: vec2<f32>, @location(1) color: vec3<f32>) -> @builtin(position) vec4<f32> {
+fn vs_main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
     return vec4<f32>(position, 0.0, 1.0);
 }
 
@@ -88,11 +88,6 @@ fn fs_main() -> @location(0) vec4<f32> {
                     format: wgpu::VertexFormat::Float32x2,
                     offset: 0,
                     shader_location: 0,
-                },
-                wgpu::VertexAttribute {
-                    format: wgpu::VertexFormat::Float32x3,
-                    offset: std::mem::size_of::<[f32; 2]>() as u64,
-                    shader_location: 1,
                 },
             ],
         };
@@ -196,9 +191,6 @@ fn fs_main() -> @location(0) vec4<f32> {
             submission_index: None,
             timeout: None,
         });
-
-        // Workflow completed successfully if we reached here
-        assert!(true, "Triangle rendering workflow completed successfully");
     });
 }
 
@@ -308,9 +300,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             submission_index: None,
             timeout: None,
         });
-
-        // Workflow completed successfully if we reached here
-        assert!(true, "Compute pass workflow completed successfully");
     });
 }
 
@@ -590,9 +579,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             submission_index: None,
             timeout: None,
         });
-
-        // Workflow completed successfully if we reached here
-        assert!(true, "Render-to-texture workflow completed successfully");
     });
 }
 
@@ -809,9 +795,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             submission_index: None,
             timeout: None,
         });
-
-        // Workflow completed successfully if we reached here
-        assert!(true, "Instanced rendering workflow completed successfully");
     });
 }
 
@@ -1015,8 +998,5 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             submission_index: None,
             timeout: None,
         });
-
-        // Workflow completed successfully if we reached here
-        assert!(true, "Depth testing workflow completed successfully");
     });
 }

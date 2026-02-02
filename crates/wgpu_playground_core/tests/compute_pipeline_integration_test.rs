@@ -250,3 +250,341 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         "Failed to create compute pipeline with uniform buffer"
     );
 }
+
+// ============================================================================
+// Invalid Configuration Tests
+// ============================================================================
+
+#[test]
+fn test_compute_pipeline_invalid_shader_syntax() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    // Invalid WGSL syntax
+    let invalid_shader = r#"
+@compute @workgroup_size(8)
+fn main( this is completely invalid {
+    let x = undefined syntax;
+}
+    "#;
+
+    let shader_result = ShaderModule::from_source(invalid_shader, Some("invalid_syntax"));
+
+    // Shader creation should fail
+    assert!(
+        shader_result.is_err(),
+        "Expected shader creation to fail with syntax error"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_nonexistent_entry_point() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    let (device, _queue) = device_queue.unwrap();
+
+    let shader_source = r#"
+@compute @workgroup_size(1)
+fn compute_main() {
+    // The actual function is named compute_main
+}
+"#;
+
+    let shader = ShaderModule::from_source(shader_source, Some("test_shader")).unwrap();
+
+    // Try to use a non-existent entry point
+    let descriptor = ComputePipelineDescriptor::new(Some("wrong_entry"))
+        .with_shader(shader)
+        .with_entry_point("main"); // Wrong! Should be "compute_main"
+
+    let pipeline = descriptor.create_pipeline(&device);
+
+    // Pipeline creation should fail
+    assert!(
+        pipeline.is_err(),
+        "Expected pipeline creation to fail with non-existent entry point"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_missing_workgroup_size() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    // Shader missing @workgroup_size attribute
+    let shader_source = r#"
+@compute
+fn main() {
+    // Missing @workgroup_size attribute
+}
+"#;
+
+    let shader_result = ShaderModule::from_source(shader_source, Some("no_workgroup"));
+
+    // Shader creation should fail - workgroup_size is required
+    assert!(
+        shader_result.is_err(),
+        "Expected shader creation to fail without workgroup_size"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_invalid_workgroup_size() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    let (device, _queue) = device_queue.unwrap();
+
+    // Workgroup size exceeds limits (WebGPU guarantees 256 invocations minimum,
+    // but 1024x1024x1024 = 1,073,741,824 far exceeds any device's maximum)
+    let shader_source = r#"
+@compute @workgroup_size(1024, 1024, 1024)
+fn main() {
+    // Workgroup size way too large - exceeds maxComputeInvocationsPerWorkgroup
+}
+"#;
+
+    let shader_result = ShaderModule::from_source(shader_source, Some("huge_workgroup"));
+
+    if let Ok(shader) = shader_result {
+        let descriptor = ComputePipelineDescriptor::new(Some("huge_pipeline"))
+            .with_shader(shader)
+            .with_entry_point("main");
+
+        let pipeline = descriptor.create_pipeline(&device);
+
+        // Pipeline creation should fail due to exceeding workgroup size limits
+        assert!(
+            pipeline.is_err(),
+            "Expected pipeline creation to fail with excessive workgroup size"
+        );
+    }
+}
+
+#[test]
+fn test_compute_pipeline_zero_workgroup_size() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    // Zero workgroup size is invalid
+    let shader_source = r#"
+@compute @workgroup_size(0)
+fn main() {
+    // Invalid: workgroup size cannot be zero
+}
+"#;
+
+    let shader_result = ShaderModule::from_source(shader_source, Some("zero_workgroup"));
+
+    // Shader creation should fail
+    assert!(
+        shader_result.is_err(),
+        "Expected shader creation to fail with zero workgroup size"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_undefined_variable() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    // Shader with undefined variable reference
+    let shader_source = r#"
+@compute @workgroup_size(1)
+fn main() {
+    let x = undefined_variable;
+}
+"#;
+
+    let shader_result = ShaderModule::from_source(shader_source, Some("undefined_var"));
+
+    // Shader creation should fail
+    assert!(
+        shader_result.is_err(),
+        "Expected shader creation to fail with undefined variable"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_type_mismatch() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    // Shader with type mismatch
+    let shader_source = r#"
+@compute @workgroup_size(1)
+fn main() {
+    let x: f32 = vec4<f32>(1.0, 2.0, 3.0, 4.0);
+}
+"#;
+
+    let shader_result = ShaderModule::from_source(shader_source, Some("type_mismatch"));
+
+    // Shader creation should fail
+    assert!(
+        shader_result.is_err(),
+        "Expected shader creation to fail with type mismatch"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_buffer_binding_mismatch() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    let (device, _queue) = device_queue.unwrap();
+
+    // Shader expects a storage buffer
+    let shader_source = r#"
+@group(0) @binding(0)
+var<storage, read_write> data: array<f32>;
+
+@compute @workgroup_size(64)
+fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    data[global_id.x] = f32(global_id.x);
+}
+"#;
+
+    let shader = ShaderModule::from_source(shader_source, Some("storage_shader")).unwrap();
+
+    // Create a bind group layout with uniform buffer instead of storage
+    let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("wrong_layout"),
+        entries: &[wgpu::BindGroupLayoutEntry {
+            binding: 0,
+            visibility: wgpu::ShaderStages::COMPUTE,
+            ty: wgpu::BindingType::Buffer {
+                ty: wgpu::BufferBindingType::Uniform, // Wrong! Shader expects Storage
+                has_dynamic_offset: false,
+                min_binding_size: None,
+            },
+            count: None,
+        }],
+    });
+
+    let pipeline_layout_descriptor = PipelineLayoutDescriptor::new(Some("wrong_pipeline_layout"))
+        .with_bind_group_layout(&bind_group_layout);
+
+    let pipeline_layout = pipeline_layout_descriptor.create_layout(&device).unwrap();
+
+    let descriptor = ComputePipelineDescriptor::new(Some("mismatched_binding"))
+        .with_shader(shader)
+        .with_entry_point("main")
+        .with_layout(pipeline_layout);
+
+    let pipeline = descriptor.create_pipeline(&device);
+
+    // Pipeline creation should fail due to binding type mismatch
+    assert!(
+        pipeline.is_err(),
+        "Expected pipeline creation to fail with binding type mismatch"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_missing_binding() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    let (device, _queue) = device_queue.unwrap();
+
+    // Shader expects binding at @group(0) @binding(0)
+    let shader_source = r#"
+@group(0) @binding(0)
+var<storage, read_write> data: array<f32>;
+
+@compute @workgroup_size(64)
+fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    data[global_id.x] = f32(global_id.x);
+}
+"#;
+
+    let shader = ShaderModule::from_source(shader_source, Some("needs_binding")).unwrap();
+
+    // Create pipeline layout with no bindings
+    let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("empty_layout"),
+        entries: &[], // No bindings!
+    });
+
+    let pipeline_layout_descriptor = PipelineLayoutDescriptor::new(Some("empty_pipeline_layout"))
+        .with_bind_group_layout(&bind_group_layout);
+
+    let pipeline_layout = pipeline_layout_descriptor.create_layout(&device).unwrap();
+
+    let descriptor = ComputePipelineDescriptor::new(Some("missing_binding"))
+        .with_shader(shader)
+        .with_entry_point("main")
+        .with_layout(pipeline_layout);
+
+    let pipeline = descriptor.create_pipeline(&device);
+
+    // Pipeline creation should fail - shader requires binding that doesn't exist
+    assert!(
+        pipeline.is_err(),
+        "Expected pipeline creation to fail with missing binding"
+    );
+}
+
+#[test]
+fn test_compute_pipeline_wrong_shader_stage() {
+    let device_queue = pollster::block_on(create_test_device());
+    if device_queue.is_none() {
+        eprintln!("Skipping test: could not create wgpu device");
+        return;
+    }
+
+    let (device, _queue) = device_queue.unwrap();
+
+    // Vertex shader instead of compute shader
+    let shader_source = r#"
+@vertex
+fn main(@builtin(vertex_index) index: u32) -> @builtin(position) vec4<f32> {
+    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}
+"#;
+
+    let shader_result = ShaderModule::from_source(shader_source, Some("vertex_not_compute"));
+
+    if let Ok(shader) = shader_result {
+        let descriptor = ComputePipelineDescriptor::new(Some("wrong_stage"))
+            .with_shader(shader)
+            .with_entry_point("main");
+
+        let pipeline = descriptor.create_pipeline(&device);
+
+        // Pipeline creation should fail - not a compute shader
+        assert!(
+            pipeline.is_err(),
+            "Expected pipeline creation to fail when using vertex shader for compute pipeline"
+        );
+    }
+}

@@ -13,15 +13,15 @@ description = "Core WebGPU functionality for wgpu_playground"
 dawn = []
 
 [dependencies]
-wgpu = { version = "22.1", features = ["wgsl"] }
+wgpu = { version = "28.0", features = ["wgsl"] }
 wgpu-core = "28.0"
-wgpu-types = "22.0"
+wgpu-types = "28.0"
 winit = "0.30"
 env_logger = "0.11"
 log = "0.4"
-egui = "0.29"
-egui-wgpu = "0.29"
-egui_plot = "0.29"
+egui = "0.33"
+egui-wgpu = "0.33"
+egui_plot = "0.34"
 bytemuck = { version = "1.14", features = ["derive"] }
 futures-channel = "0.3"
 image = { version = "0.25", default-features = false, features = ["png"] }

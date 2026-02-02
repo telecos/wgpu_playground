@@ -138,15 +138,15 @@ pub async fn capture_texture(
     });
 
     encoder.copy_texture_to_buffer(
-        wgpu::ImageCopyTexture {
+        wgpu::TexelCopyTextureInfo {
             texture,
             mip_level: 0,
             origin: wgpu::Origin3d::ZERO,
             aspect: wgpu::TextureAspect::All,
         },
-        wgpu::ImageCopyBuffer {
+        wgpu::TexelCopyBufferInfo {
             buffer: &buffer,
-            layout: wgpu::ImageDataLayout {
+            layout: wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(padded_bytes_per_row),
                 rows_per_image: Some(height),
@@ -164,7 +164,10 @@ pub async fn capture_texture(
         sender.send(result).ok();
     });
 
-    device.poll(wgpu::Maintain::Wait);
+    device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
     receiver
         .await
         .map_err(|_| VisualRegressionError::CaptureError("Failed to receive map result".into()))?

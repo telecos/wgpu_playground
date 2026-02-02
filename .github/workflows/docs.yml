@@ -65,7 +65,7 @@ jobs:
         run: touch target/doc/.nojekyll
       
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: documentation
           path: target/doc

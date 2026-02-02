@@ -461,6 +461,23 @@ See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
 
 ## Documentation
 
+### API Documentation
+
+API documentation is automatically generated from source code and published to GitHub Pages:
+
+- **Online**: Visit the [GitHub Pages documentation](https://telecos.github.io/wgpu_playground/) for the latest API reference
+- **Local**: Generate and view documentation locally:
+  ```bash
+  cargo doc --workspace --all-features --no-deps --open
+  ```
+
+The documentation includes all public APIs for:
+- `wgpu_playground_core` - Core WebGPU functionality and rendering primitives
+- `wgpu_playground_gui` - GUI application and user interface components
+- `wgpu_playground_examples` - Example programs and usage demonstrations
+
+### Design Documents
+
 - **[SHADER_EDITOR.md](docs/SHADER_EDITOR.md)** - Complete guide to the WGSL Shader Editor including usage examples, tips, and API reference
 - **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them
 - **[GUI_FRAMEWORK_EVALUATION.md](GUI_FRAMEWORK_EVALUATION.md)** - Detailed evaluation and rationale for selecting egui as the GUI framework, including comparison with iced and imgui-wgpu

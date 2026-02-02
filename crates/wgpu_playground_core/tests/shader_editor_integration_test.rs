@@ -59,7 +59,7 @@ fn test_shader_editor_set_valid_shader() {
 fn test_shader_editor_compile_with_device() {
     // This test requires a GPU device
     pollster::block_on(async {
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             ..Default::default()
         });
@@ -73,21 +73,20 @@ fn test_shader_editor_compile_with_device() {
             .await;
 
         // Skip test if no GPU is available
-        let Some(adapter) = adapter else {
+        let Ok(adapter) = adapter else {
             eprintln!("Skipping test: No GPU adapter available");
             return;
         };
 
         let device_result = adapter
-            .request_device(
-                &wgpu::DeviceDescriptor {
-                    required_features: wgpu::Features::empty(),
-                    required_limits: wgpu::Limits::default(),
-                    label: Some("Test Device"),
-                    memory_hints: Default::default(),
-                },
-                None,
-            )
+            .request_device(&wgpu::DeviceDescriptor {
+                required_features: wgpu::Features::empty(),
+                required_limits: wgpu::Limits::default(),
+                label: Some("Test Device"),
+                memory_hints: Default::default(),
+                experimental_features: Default::default(),
+                trace: Default::default(),
+            })
             .await;
 
         let Ok((device, _queue)) = device_result else {

@@ -605,6 +605,37 @@ UPDATE_VISUAL_REFERENCES=1 cargo test --package wgpu_playground_core visual_regr
 
 For detailed information about the visual regression framework, see [tests/visual_regression/reference/README.md](tests/visual_regression/reference/README.md).
 
+## Performance Benchmarking
+
+This project includes performance benchmarks to track and monitor the performance of critical code paths:
+
+- **Criterion.rs Integration**: High-quality statistical benchmarking with HTML reports
+- **Automated CI Runs**: Weekly scheduled benchmarks and on-demand execution
+- **Baseline Comparison**: Automatic comparison against main branch to detect regressions
+- **Historical Tracking**: Long-term storage of benchmark results for trend analysis
+
+**Running Benchmarks:**
+
+```bash
+# Run all benchmarks
+cargo bench
+
+# Run specific benchmark suite
+cargo bench --bench buffer_operations
+cargo bench --bench shader_compilation
+
+# View detailed HTML reports
+open target/criterion/report/index.html
+```
+
+**CI Integration:**
+- Benchmarks run automatically every Monday at 00:00 UTC
+- Manual triggers available via GitHub Actions
+- Results stored as artifacts for 90 days
+- PR comments show performance comparison with main branch
+
+For detailed information about the benchmarking system, see [docs/BENCHMARKING.md](docs/BENCHMARKING.md) and [crates/wgpu_playground_core/benches/README.md](crates/wgpu_playground_core/benches/README.md).
+
 ## Code Coverage
 
 This project uses `cargo-llvm-cov` for code coverage reporting. See [COVERAGE.md](COVERAGE.md) for details on:

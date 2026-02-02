@@ -1,0 +1,234 @@
+name: Performance Benchmarks
+
+# Run benchmarks on schedule and allow manual triggering
+on:
+  # Run weekly on Monday at 00:00 UTC
+  schedule:
+    - cron: '0 0 * * 1'
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      compare_to_baseline:
+        description: 'Compare results to baseline (main branch)'
+        type: boolean
+        default: true
+  # Run on PRs only when benchmark files are changed
+  pull_request:
+    paths:
+      - 'crates/**/benches/**'
+      - '.github/workflows/benchmarks.yml'
+
+# Explicitly limit permissions for security
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  benchmark:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Fetch all history for baseline comparison
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "cargo-bench"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      # Install criterion for HTML report generation
+      - name: Install benchmark tools
+        run: cargo install cargo-criterion || true
+
+      # Run benchmarks on current branch
+      - name: Run benchmarks (current branch)
+        run: |
+          cd crates/wgpu_playground_core
+          cargo bench --bench buffer_operations -- --save-baseline current
+          cargo bench --bench shader_compilation -- --save-baseline current
+
+      # Fetch baseline from main branch for comparison
+      - name: Checkout baseline (main branch)
+        if: github.ref != 'refs/heads/main' && (github.event.inputs.compare_to_baseline == 'true' || github.event_name == 'schedule')
+        run: |
+          git fetch origin main:main
+          git checkout main
+          cd crates/wgpu_playground_core
+          cargo bench --bench buffer_operations -- --save-baseline baseline
+          cargo bench --bench shader_compilation -- --save-baseline baseline
+          git checkout -
+
+      # Compare current results against baseline
+      - name: Compare with baseline
+        if: github.ref != 'refs/heads/main' && (github.event.inputs.compare_to_baseline == 'true' || github.event_name == 'schedule')
+        run: |
+          cd crates/wgpu_playground_core
+          echo "## Benchmark Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Comparing current branch against main baseline..." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run benchmarks with baseline comparison
+          cargo bench --bench buffer_operations -- --baseline baseline > buffer_comparison.txt || true
+          cargo bench --bench shader_compilation -- --baseline baseline > shader_comparison.txt || true
+
+          # Add results to summary
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat buffer_comparison.txt shader_comparison.txt >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      # Generate benchmark report
+      - name: Generate benchmark report
+        run: |
+          echo "## Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Benchmarks completed successfully. Results have been saved." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check if criterion reports exist
+          if [ -d "target/criterion" ]; then
+            echo "### Available Benchmark Reports:" >> $GITHUB_STEP_SUMMARY
+            find target/criterion -name "index.html" | while read file; do
+              benchmark_name=$(echo $file | sed 's|target/criterion/||' | sed 's|/report/index.html||')
+              echo "- $benchmark_name" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+      # Upload benchmark results as artifacts
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: benchmark-results-${{ github.run_number }}
+          path: |
+            target/criterion/
+            crates/wgpu_playground_core/buffer_comparison.txt
+            crates/wgpu_playground_core/shader_comparison.txt
+          retention-days: 90
+          if-no-files-found: warn
+
+      # Store baseline on main branch
+      - name: Store baseline (main branch only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v6
+        with:
+          name: benchmark-baseline-${{ github.sha }}
+          path: target/criterion/
+          retention-days: 365
+
+      # Check for performance regressions
+      - name: Detect performance regressions
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "## Performance Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Simple regression detection - check if any benchmark is >10% slower
+          regression_found=false
+
+          if [ -f "crates/wgpu_playground_core/buffer_comparison.txt" ]; then
+            # Parse comparison output for significant changes
+            if grep -q "Performance has regressed" crates/wgpu_playground_core/buffer_comparison.txt || \
+               grep -q "Performance has regressed" crates/wgpu_playground_core/shader_comparison.txt; then
+              regression_found=true
+              echo "⚠️ **Performance regression detected!**" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "Some benchmarks show significant performance degradation." >> $GITHUB_STEP_SUMMARY
+              echo "Please review the benchmark comparison above." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ No significant performance regressions detected." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "ℹ️ No baseline comparison available." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Don't fail the workflow on regression, just warn
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Note: Benchmark results are informational and do not fail the build." >> $GITHUB_STEP_SUMMARY
+
+      # Post benchmark results as a comment (for PRs)
+      - name: Comment benchmark results on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let comment = '## 📊 Benchmark Results\n\n';
+            comment += 'Benchmarks have been run for this PR.\n\n';
+
+            // Try to read comparison files
+            const bufferFile = 'crates/wgpu_playground_core/buffer_comparison.txt';
+            const shaderFile = 'crates/wgpu_playground_core/shader_comparison.txt';
+
+            if (fs.existsSync(bufferFile) || fs.existsSync(shaderFile)) {
+              comment += '### Comparison with main branch\n\n';
+              comment += '<details><summary>Click to see detailed results</summary>\n\n```\n';
+
+              if (fs.existsSync(bufferFile)) {
+                comment += fs.readFileSync(bufferFile, 'utf8');
+              }
+              if (fs.existsSync(shaderFile)) {
+                comment += fs.readFileSync(shaderFile, 'utf8');
+              }
+
+              comment += '```\n</details>\n\n';
+            }
+
+            comment += '\n📦 Full benchmark reports are available in the workflow artifacts.\n';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Visualize benchmark trends (only on main branch)
+  visualize-trends:
+    name: Visualize Benchmark Trends
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'schedule'
+    needs: benchmark
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download recent benchmark results
+        uses: actions/download-artifact@v7
+        with:
+          pattern: benchmark-results-*
+          path: benchmark-history
+          merge-multiple: true
+
+      - name: Generate trend visualization
+        run: |
+          echo "## 📈 Benchmark Trends" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Benchmark history has been collected from recent runs." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Count available benchmark runs
+          if [ -d "benchmark-history" ]; then
+            run_count=$(find benchmark-history -name "estimates.json" | wc -l)
+            echo "Found $run_count benchmark data points." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "ℹ️ For detailed trend analysis, download the benchmark-results artifacts." >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload trend data
+        uses: actions/upload-artifact@v6
+        with:
+          name: benchmark-trends-${{ github.run_number }}
+          path: benchmark-history/
+          retention-days: 365

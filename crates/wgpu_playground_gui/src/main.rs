@@ -124,12 +124,12 @@ impl AppState {
         );
 
         let egui_renderer = egui_wgpu::Renderer::new(
-            &device, 
-            surface_config.format, 
+            &device,
+            surface_config.format,
             egui_wgpu::RendererOptions {
                 msaa_samples: 1,
                 ..Default::default()
-            }
+            },
         );
 
         let playground_app = PlaygroundApp::new(&adapter, &device, &queue);

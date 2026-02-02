@@ -36,7 +36,10 @@ fn test_encoder_finish() {
         let _submission_index = queue.submit(std::iter::once(command_buffer));
 
         // Poll to ensure completion
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -74,7 +77,10 @@ fn test_copy_buffer_to_buffer() {
 
         // Submit and wait
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify the copy by mapping the destination buffer
         let buffer_slice = dst_buffer.slice(..);
@@ -82,7 +88,10 @@ fn test_copy_buffer_to_buffer() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -126,7 +135,10 @@ fn test_copy_buffer_with_offset() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify the copy
         let buffer_slice = dst_buffer.slice(128..256);
@@ -134,7 +146,10 @@ fn test_copy_buffer_with_offset() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -207,7 +222,10 @@ fn test_copy_buffer_to_texture() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -291,7 +309,10 @@ fn test_copy_texture_to_buffer() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify the copy
         let buffer_slice = buffer.slice(..);
@@ -299,7 +320,10 @@ fn test_copy_texture_to_buffer() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -396,7 +420,10 @@ fn test_copy_texture_to_texture() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify by reading back the destination texture
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
@@ -431,14 +458,20 @@ fn test_copy_texture_to_texture() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         let buffer_slice = buffer.slice(..);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -490,7 +523,10 @@ fn test_multiple_copy_commands() {
         let command_buffer = encoder.finish();
 
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify the copies
         let buffer_slice = buffer3.slice(..);
@@ -498,7 +534,10 @@ fn test_multiple_copy_commands() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -556,7 +595,10 @@ fn test_copy_buffer_helper() {
         // Use the helper function
         let command_buffer = copy_buffer(&device, &src_buffer, 0, &dst_buffer, 0, 256);
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify the copy
         let buffer_slice = dst_buffer.slice(..);
@@ -564,7 +606,10 @@ fn test_copy_buffer_helper() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -613,6 +658,9 @@ fn test_submit_multiple_encoders() {
 
         // Submit all command buffers at once
         queue.submit([cmd1, cmd2, cmd3]);
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }

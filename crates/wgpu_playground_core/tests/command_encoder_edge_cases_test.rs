@@ -35,14 +35,20 @@ fn test_buffer_copy_at_boundaries() {
 
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         let buffer_slice = dst.slice(..);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -86,14 +92,20 @@ fn test_buffer_copy_from_end() {
 
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         let buffer_slice = dst.slice(..);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -137,14 +149,20 @@ fn test_buffer_copy_to_end() {
 
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         let buffer_slice = dst.slice(..);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -203,14 +221,20 @@ fn test_small_aligned_copies() {
 
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         let buffer_slice = dst.slice(0..16);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let result = buffer_slice.get_mapped_range();
@@ -258,7 +282,10 @@ fn test_large_buffer_copy() {
 
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify a sample of the data
         let buffer_slice = dst.slice(0..1024);
@@ -266,7 +293,10 @@ fn test_large_buffer_copy() {
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let result = buffer_slice.get_mapped_range();
@@ -314,14 +344,20 @@ fn test_overlapping_encoder_submissions() {
 
         // Submit both command buffers together
         queue.submit([cmd1, cmd2]);
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         let buffer_slice = buffer2.slice(..);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
@@ -428,7 +464,10 @@ fn test_texture_copy_with_mip_levels() {
 
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -516,7 +555,10 @@ fn test_texture_to_texture_same_format() {
 
         let command_buffer = encoder.finish();
         queue.submit(std::iter::once(command_buffer));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         // Verify by reading back
         let readback = device.create_buffer(&wgpu::BufferDescriptor {
@@ -550,14 +592,20 @@ fn test_texture_to_texture_same_format() {
         );
 
         queue.submit(std::iter::once(encoder2.finish()));
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
 
         let buffer_slice = readback.slice(0..64);
         let (tx, rx) = futures_channel::oneshot::channel();
         buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
             tx.send(result).unwrap();
         });
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
         rx.await.unwrap().unwrap();
 
         let result = buffer_slice.get_mapped_range();

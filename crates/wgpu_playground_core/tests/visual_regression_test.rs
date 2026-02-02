@@ -8,8 +8,8 @@ mod common;
 use common::create_test_device;
 use wgpu::util::DeviceExt;
 use wgpu_playground_core::assert_visual_match;
-use wgpu_playground_core::visual_regression::*;
 use wgpu_playground_core::visual_regression::test_utils::*;
+use wgpu_playground_core::visual_regression::*;
 
 /// Vertex structure for simple rendering tests
 #[repr(C)]
@@ -288,7 +288,7 @@ fn test_visual_regression_triangle() {
             "triangle",
             &device,
             &queue,
-            |device, queue| render_triangle(device, queue),
+            render_triangle,
             ComparisonConfig::default(),
         )
         .await;
@@ -320,7 +320,7 @@ fn test_visual_regression_solid_quad() {
             "solid_quad",
             &device,
             &queue,
-            |device, queue| render_solid_quad(device, queue),
+            render_solid_quad,
             ComparisonConfig::default(),
         )
         .await;

@@ -192,7 +192,10 @@ fn test_render_bundle_execution() {
         queue.submit(std::iter::once(command_buffer));
 
         // Wait for the GPU to finish
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -269,6 +272,9 @@ fn test_render_bundle_multiple_execution() {
         queue.submit(std::iter::once(command_buffer));
 
         // Wait for the GPU to finish
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }

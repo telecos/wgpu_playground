@@ -1,7 +1,7 @@
 use std::fmt;
 use wgpu::{
-    CommandBuffer, CommandEncoder, CommandEncoderDescriptor, Device, Extent3d,
-    TexelCopyBufferInfo, TexelCopyTextureInfo,
+    CommandBuffer, CommandEncoder, CommandEncoderDescriptor, Device, Extent3d, TexelCopyBufferInfo,
+    TexelCopyTextureInfo,
 };
 
 /// Alignment requirement for buffer copy operations

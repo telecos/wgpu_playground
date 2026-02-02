@@ -4,11 +4,7 @@ use super::*;
 use wgpu::{Device, Queue};
 
 /// Helper to create a simple colored render target for testing
-pub fn create_test_render_target(
-    device: &Device,
-    width: u32,
-    height: u32,
-) -> wgpu::Texture {
+pub fn create_test_render_target(device: &Device, width: u32, height: u32) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some("Visual Test Render Target"),
         size: wgpu::Extent3d {

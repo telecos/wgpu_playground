@@ -107,7 +107,10 @@ fn test_write_buffer_operation() {
         queue_ops.write_buffer(&buffer, 0, bytemuck::cast_slice(&data));
 
         // Poll the device to ensure the operation completes
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -133,7 +136,10 @@ fn test_write_buffer_typed_helper() {
         write_buffer_typed(&queue, &buffer, 0, &data);
 
         // Poll the device to ensure the operation completes
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -157,7 +163,10 @@ fn test_submit_command_buffer() {
         let _submission_index = queue_ops.submit(std::iter::once(command_buffer));
 
         // Poll the device to ensure the operation completes
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -179,7 +188,10 @@ fn test_submit_single_helper() {
         let _submission_index = submit_single(&queue, command_buffer);
 
         // Poll the device to ensure the operation completes
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -234,7 +246,10 @@ fn test_write_texture_operation() {
         );
 
         // Poll the device to ensure the operation completes
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -271,7 +286,10 @@ fn test_multiple_buffer_writes() {
         queue_ops.write_buffer(&buffer2, 0, bytemuck::cast_slice(&data2));
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -300,7 +318,10 @@ fn test_submit_multiple_command_buffers() {
         let _submission_index = queue_ops.submit([command_buffer1, command_buffer2]);
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -330,7 +351,10 @@ fn test_buffer_write_with_offset() {
         queue_ops.write_buffer(&buffer, 64, bytemuck::cast_slice(&data2));
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -377,7 +401,10 @@ fn test_copy_texture_to_texture_basic() {
         );
 
         // Poll the device to ensure the operation completes
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -422,7 +449,10 @@ fn test_copy_texture_to_texture_with_queue_ops() {
         );
 
         // Poll the device to ensure the operation completes
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -510,7 +540,10 @@ fn test_copy_texture_with_different_mip_levels() {
         );
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -556,7 +589,10 @@ fn test_copy_texture_with_array_layers() {
         );
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -610,7 +646,10 @@ fn test_copy_texture_with_specific_array_layer() {
         );
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -679,7 +718,10 @@ fn test_copy_texture_with_depth_aspect() {
         );
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -729,7 +771,10 @@ fn test_copy_texture_partial_region() {
         );
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }
 
@@ -775,6 +820,9 @@ fn test_copy_texture_3d() {
         );
 
         // Poll the device to ensure operations complete
-        let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        let _ = device.poll(wgpu::PollType::Wait {
+            submission_index: None,
+            timeout: None,
+        });
     });
 }

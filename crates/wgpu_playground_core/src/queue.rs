@@ -1,4 +1,4 @@
-use wgpu::{CommandBuffer, Device, Extent3d, Queue, TexelCopyTextureInfo, TexelCopyBufferLayout};
+use wgpu::{CommandBuffer, Device, Extent3d, Queue, TexelCopyBufferLayout, TexelCopyTextureInfo};
 
 /// Error types for queue operations
 ///

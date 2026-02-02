@@ -104,10 +104,10 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
 fn create_cube_vertices() -> Vec<Vertex> {
     vec![
         // Front face (z = 0.5)
-        Vertex::new([-0.5, -0.5, 0.5]),  // 0: bottom-left-front
-        Vertex::new([0.5, -0.5, 0.5]),   // 1: bottom-right-front
-        Vertex::new([0.5, 0.5, 0.5]),    // 2: top-right-front
-        Vertex::new([-0.5, 0.5, 0.5]),   // 3: top-left-front
+        Vertex::new([-0.5, -0.5, 0.5]), // 0: bottom-left-front
+        Vertex::new([0.5, -0.5, 0.5]),  // 1: bottom-right-front
+        Vertex::new([0.5, 0.5, 0.5]),   // 2: top-right-front
+        Vertex::new([-0.5, 0.5, 0.5]),  // 3: top-left-front
         // Back face (z = -0.5)
         Vertex::new([-0.5, -0.5, -0.5]), // 4: bottom-left-back
         Vertex::new([0.5, -0.5, -0.5]),  // 5: bottom-right-back
@@ -132,26 +132,26 @@ fn create_cube_indices() -> Vec<u16> {
 /// Create instance data for multiple cubes in a grid pattern
 fn create_instances() -> Vec<InstanceData> {
     let mut instances = Vec::new();
-    
+
     // Create a 5x5 grid of cubes with varying properties
     for x in 0..5 {
         for z in 0..5 {
             let pos_x = (x as f32 - 2.0) * 2.5;
             let pos_z = (z as f32 - 2.0) * 2.5;
-            
+
             // Vary rotation based on position
             let rotation = (x as f32 + z as f32) * 0.3;
-            
+
             // Vary scale slightly
             let scale = 0.5 + ((x + z) as f32 * 0.05);
-            
+
             // Create a color gradient across the grid
             let color = [
-                x as f32 / 4.0,           // Red increases with x
-                0.5,                       // Constant green
-                z as f32 / 4.0,           // Blue increases with z
+                x as f32 / 4.0, // Red increases with x
+                0.5,            // Constant green
+                z as f32 / 4.0, // Blue increases with z
             ];
-            
+
             instances.push(InstanceData::new(
                 [pos_x, 0.0, pos_z],
                 rotation,
@@ -160,7 +160,7 @@ fn create_instances() -> Vec<InstanceData> {
             ));
         }
     }
-    
+
     instances
 }
 
@@ -168,18 +168,13 @@ fn create_instances() -> Vec<InstanceData> {
 fn create_view_proj_matrix(aspect_ratio: f32) -> Mat4 {
     // View matrix: camera positioned to see the grid
     let view = Mat4::look_at_rh(
-        Vec3::new(0.0, 8.0, 12.0),   // camera position (above and back)
-        Vec3::new(0.0, 0.0, 0.0),    // look at center
-        Vec3::new(0.0, 1.0, 0.0),    // up vector
+        Vec3::new(0.0, 8.0, 12.0), // camera position (above and back)
+        Vec3::new(0.0, 0.0, 0.0),  // look at center
+        Vec3::new(0.0, 1.0, 0.0),  // up vector
     );
 
     // Projection matrix: perspective
-    let projection = Mat4::perspective_rh(
-        45.0_f32.to_radians(),
-        aspect_ratio,
-        0.1,
-        100.0,
-    );
+    let projection = Mat4::perspective_rh(45.0_f32.to_radians(), aspect_ratio, 0.1, 100.0);
 
     projection * view
 }
@@ -241,7 +236,11 @@ fn main() {
 
     println!("Base cube geometry:");
     println!("  {} vertices", vertices.len());
-    println!("  {} indices ({} triangles)", indices.len(), indices.len() / 3);
+    println!(
+        "  {} indices ({} triangles)",
+        indices.len(),
+        indices.len() / 3
+    );
     println!();
 
     // Create instance data
@@ -293,7 +292,7 @@ fn main() {
     let width = 800;
     let height = 600;
     let aspect_ratio = width as f32 / height as f32;
-    
+
     let view_proj = create_view_proj_matrix(aspect_ratio);
     let uniforms = Uniforms {
         view_proj: view_proj.to_cols_array_2d(),
@@ -304,7 +303,10 @@ fn main() {
         contents: bytemuck::cast_slice(&[uniforms]),
         usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
     });
-    println!("✓ Uniform buffer created ({} bytes)", std::mem::size_of::<Uniforms>());
+    println!(
+        "✓ Uniform buffer created ({} bytes)",
+        std::mem::size_of::<Uniforms>()
+    );
 
     // Create bind group layout
     let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -369,7 +371,10 @@ fn main() {
             // Instance color (with padding offset)
             wgpu::VertexAttribute {
                 format: wgpu::VertexFormat::Float32x3,
-                offset: (std::mem::size_of::<[f32; 3]>() + std::mem::size_of::<f32>() + std::mem::size_of::<f32>() + std::mem::size_of::<[f32; 3]>()) as u64,
+                offset: (std::mem::size_of::<[f32; 3]>()
+                    + std::mem::size_of::<f32>()
+                    + std::mem::size_of::<f32>()
+                    + std::mem::size_of::<[f32; 3]>()) as u64,
                 shader_location: 4,
             },
         ],
@@ -475,14 +480,17 @@ fn main() {
         render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
         render_pass.set_vertex_buffer(1, instance_buffer.slice(..));
         render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-        
+
         // Draw all instances with a single draw call!
         render_pass.draw_indexed(0..indices.len() as u32, 0, 0..instances.len() as u32);
-        
+
         println!("✓ Render pass configured");
         println!("  - Clear color: dark blue (0.1, 0.1, 0.15)");
         println!("  - Drawing {} instances with 1 draw call", instances.len());
-        println!("  - Total triangles: {}", indices.len() / 3 * instances.len());
+        println!(
+            "  - Total triangles: {}",
+            indices.len() / 3 * instances.len()
+        );
     }
 
     // Submit commands
@@ -495,7 +503,10 @@ fn main() {
 
     println!("=== Instanced Rendering Example Complete ===");
     println!("\nSuccessfully demonstrated instanced rendering with:");
-    println!("  • {} cube instances rendered in a single draw call", instances.len());
+    println!(
+        "  • {} cube instances rendered in a single draw call",
+        instances.len()
+    );
     println!("  • Per-instance attributes:");
     println!("    - Position (3D translation)");
     println!("    - Rotation (around Y axis)");
@@ -548,7 +559,7 @@ mod tests {
     fn test_create_instances() {
         let instances = create_instances();
         assert_eq!(instances.len(), 25); // 5x5 grid
-        
+
         // Verify each instance has valid data
         for instance in instances.iter() {
             // Scale should be in reasonable range

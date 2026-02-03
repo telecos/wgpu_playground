@@ -261,7 +261,7 @@ pub enum SamplerBindingType {
 /// let access = StorageTextureAccess::ReadWrite;
 /// // Both read and write in same shader
 /// // Use for image processing, accumulation
-/// // Requires TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES
+/// // Note: Device and format support required
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StorageTextureAccess {

@@ -334,7 +334,7 @@ impl PrimitiveTopology {
 /// use wgpu_playground_core::render_pipeline::CullMode;
 ///
 /// let cull_mode = CullMode::Back;
-/// // Improves performance by ~50% for closed meshes
+/// // Can significantly improve performance for closed meshes
 /// // Most common setting for 3D models
 /// ```
 ///
@@ -856,7 +856,8 @@ impl DepthStencilState {
 ///
 /// # Notes
 ///
-/// - `count` must be 1, 2, 4, or 8 (device-dependent)
+/// - Common sample counts are 1, 2, 4, or 8 (device-dependent)
+/// - Query device limits to determine supported sample counts
 /// - Requires a multisampled texture as render target
 /// - Higher counts improve quality but reduce performance
 #[derive(Debug, Clone, Copy)]

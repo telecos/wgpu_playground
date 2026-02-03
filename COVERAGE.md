@@ -1,5 +1,7 @@
 # Code Coverage
 
+[![Coverage](https://codecov.io/gh/telecos/wgpu_playground/branch/main/graph/badge.svg)](https://codecov.io/gh/telecos/wgpu_playground)
+
 This project uses [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) for code coverage reporting.
 
 ## Running Coverage Locally
@@ -88,10 +90,45 @@ The following paths are excluded from coverage reports:
 
 ## Viewing Coverage in CI
 
+### Codecov Dashboard
+
+The easiest way to view coverage is through the [Codecov dashboard](https://codecov.io/gh/telecos/wgpu_playground):
+
+- View overall project coverage trends
+- See coverage by file and directory
+- Compare coverage between branches
+- View coverage on pull requests with inline annotations
+
+### CI Artifacts
+
+You can also download HTML coverage reports from GitHub Actions:
+
 1. Go to the "Actions" tab in the GitHub repository
 2. Click on a workflow run
 3. Scroll to "Artifacts" section
 4. Download "coverage-report" artifact
 5. Extract and open `index.html` in a browser
 
-Alternatively, view coverage on [Codecov](https://codecov.io) (if configured).
+## Codecov Setup
+
+### For Repository Maintainers
+
+To enable Codecov uploads, the `CODECOV_TOKEN` secret must be configured in the repository:
+
+1. Sign up at [codecov.io](https://codecov.io) (free for public repositories)
+2. Add the repository to Codecov
+3. Copy the upload token from the Codecov repository settings
+4. Add the token to GitHub repository secrets:
+   - Go to repository Settings → Secrets and variables → Actions
+   - Create a new secret named `CODECOV_TOKEN`
+   - Paste the token value
+
+The coverage workflow will automatically upload results to Codecov on every push to `main` and on pull requests.
+
+### Coverage Badge
+
+The coverage badge is automatically updated by Codecov and displayed in the README:
+
+```markdown
+[![Coverage](https://codecov.io/gh/telecos/wgpu_playground/branch/main/graph/badge.svg)](https://codecov.io/gh/telecos/wgpu_playground)
+```

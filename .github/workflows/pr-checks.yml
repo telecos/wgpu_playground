@@ -191,7 +191,7 @@ jobs:
             exit 1
           fi
           echo "✅ All PR checks passed successfully"
-          
+
       - name: Generate summary
         if: always()
         run: |

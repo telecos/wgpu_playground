@@ -69,6 +69,58 @@ pub enum BindingType {
 }
 
 /// Texture sample type for sampled textures
+///
+/// Defines how texture data is interpreted when sampled in a shader.
+///
+/// # Examples
+///
+/// Filterable float texture (most common):
+/// ```
+/// use wgpu_playground_core::bind_group::TextureSampleType;
+///
+/// let sample_type = TextureSampleType::Float { filterable: true };
+/// // Use for color textures with linear/trilinear filtering
+/// // Formats: Rgba8Unorm, Rgba16Float, etc.
+/// ```
+///
+/// Non-filterable float texture (HDR formats):
+/// ```
+/// use wgpu_playground_core::bind_group::TextureSampleType;
+///
+/// let sample_type = TextureSampleType::Float { filterable: false };
+/// // Use for high-precision formats that don't support filtering
+/// // Formats: Rgba32Float, R32Float
+/// ```
+///
+/// Signed integer texture:
+/// ```
+/// use wgpu_playground_core::bind_group::TextureSampleType;
+///
+/// let sample_type = TextureSampleType::Sint;
+/// // Use for signed integer textures
+/// // Formats: Rgba32Sint, R32Sint
+/// // Sampled as ivec4 in shaders
+/// ```
+///
+/// Unsigned integer texture:
+/// ```
+/// use wgpu_playground_core::bind_group::TextureSampleType;
+///
+/// let sample_type = TextureSampleType::Uint;
+/// // Use for unsigned integer textures
+/// // Formats: Rgba32Uint, R32Uint
+/// // Sampled as uvec4 in shaders
+/// ```
+///
+/// Depth texture:
+/// ```
+/// use wgpu_playground_core::bind_group::TextureSampleType;
+///
+/// let sample_type = TextureSampleType::Depth;
+/// // Use for depth textures
+/// // Formats: Depth32Float, Depth24Plus
+/// // Sampled as float in shaders
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TextureSampleType {
     /// Floating point texture
@@ -82,6 +134,50 @@ pub enum TextureSampleType {
 }
 
 /// Texture view dimension
+///
+/// Defines the dimensionality of a texture view for binding.
+///
+/// # Examples
+///
+/// 2D texture (most common):
+/// ```
+/// use wgpu_playground_core::bind_group::TextureViewDimension;
+///
+/// let dimension = TextureViewDimension::D2;
+/// // Standard 2D textures (albedo, normal maps, etc.)
+/// ```
+///
+/// 1D texture (gradients, lookup tables):
+/// ```
+/// use wgpu_playground_core::bind_group::TextureViewDimension;
+///
+/// let dimension = TextureViewDimension::D1;
+/// // One-dimensional textures (color ramps, 1D noise)
+/// ```
+///
+/// 2D array texture:
+/// ```
+/// use wgpu_playground_core::bind_group::TextureViewDimension;
+///
+/// let dimension = TextureViewDimension::D2Array;
+/// // Array of 2D textures (texture atlases, animation frames)
+/// ```
+///
+/// Cube map texture:
+/// ```
+/// use wgpu_playground_core::bind_group::TextureViewDimension;
+///
+/// let dimension = TextureViewDimension::Cube;
+/// // Cube maps for skyboxes, environment mapping
+/// ```
+///
+/// 3D texture (volume data):
+/// ```
+/// use wgpu_playground_core::bind_group::TextureViewDimension;
+///
+/// let dimension = TextureViewDimension::D3;
+/// // 3D textures for volumes, voxels, 3D noise
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TextureViewDimension {
     D1,
@@ -93,6 +189,37 @@ pub enum TextureViewDimension {
 }
 
 /// Sampler binding type
+///
+/// Defines the type of sampler for texture sampling operations.
+///
+/// # Examples
+///
+/// Filtering sampler (linear/trilinear):
+/// ```
+/// use wgpu_playground_core::bind_group::SamplerBindingType;
+///
+/// let sampler_type = SamplerBindingType::Filtering;
+/// // Use for smooth texture sampling with interpolation
+/// // Supports minFilter/magFilter/mipmapFilter
+/// ```
+///
+/// Non-filtering sampler (nearest neighbor):
+/// ```
+/// use wgpu_playground_core::bind_group::SamplerBindingType;
+///
+/// let sampler_type = SamplerBindingType::NonFiltering;
+/// // Samples exact texel values without interpolation
+/// // Use for pixel-perfect rendering, data textures
+/// ```
+///
+/// Comparison sampler (for shadow mapping):
+/// ```
+/// use wgpu_playground_core::bind_group::SamplerBindingType;
+///
+/// let sampler_type = SamplerBindingType::Comparison;
+/// // Compares sampled depth value with reference
+/// // Used for percentage-closer filtering (PCF) shadows
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SamplerBindingType {
     /// Filtering sampler
@@ -104,6 +231,38 @@ pub enum SamplerBindingType {
 }
 
 /// Storage texture access mode
+///
+/// Defines how a storage texture can be accessed in compute or fragment shaders.
+///
+/// # Examples
+///
+/// Write-only storage texture (compute output):
+/// ```
+/// use wgpu_playground_core::bind_group::StorageTextureAccess;
+///
+/// let access = StorageTextureAccess::WriteOnly;
+/// // Common for compute shader outputs
+/// // Use image2D in GLSL, texture_storage_2d in WGSL
+/// ```
+///
+/// Read-only storage texture (data input):
+/// ```
+/// use wgpu_playground_core::bind_group::StorageTextureAccess;
+///
+/// let access = StorageTextureAccess::ReadOnly;
+/// // Read texture data without sampling
+/// // Direct texel access in compute shaders
+/// ```
+///
+/// Read-write storage texture (in-place modification):
+/// ```
+/// use wgpu_playground_core::bind_group::StorageTextureAccess;
+///
+/// let access = StorageTextureAccess::ReadWrite;
+/// // Both read and write in same shader
+/// // Use for image processing, accumulation
+/// // Note: Device and format support required
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StorageTextureAccess {
     /// Write-only access
@@ -612,10 +771,27 @@ impl<'a> BindGroupDescriptor<'a> {
     /// Add multiple binding entries to the bind group
     ///
     /// # Arguments
+    ///
     /// * `entries` - A slice of bind group entries to add
     ///
     /// # Returns
+    ///
     /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::{BindGroupDescriptor, BindGroupEntry, BufferBinding, BindingResource};
+    /// # fn example(layout: &wgpu::BindGroupLayout, uniform_buf: &wgpu::Buffer, storage_buf: &wgpu::Buffer) {
+    /// let entries = vec![
+    ///     BindGroupEntry::new(0, BindingResource::Buffer(BufferBinding::entire(uniform_buf))),
+    ///     BindGroupEntry::new(1, BindingResource::Buffer(BufferBinding::entire(storage_buf))),
+    /// ];
+    ///
+    /// let descriptor = BindGroupDescriptor::new(Some("my_bind_group"), layout)
+    ///     .with_entries(&entries);
+    /// # }
+    /// ```
     pub fn with_entries(mut self, entries: &[BindGroupEntry<'a>]) -> Self
     where
         BindGroupEntry<'a>: Clone,
@@ -646,7 +822,25 @@ impl<'a> BindGroupDescriptor<'a> {
     /// - Empty entry list
     ///
     /// # Returns
+    ///
     /// Ok(()) if valid, Err with BindGroupError if invalid
+    ///
+    /// # Errors
+    ///
+    /// - `BindGroupError::InvalidBinding` if entry list is empty
+    /// - `BindGroupError::DuplicateBinding` if multiple entries use the same binding number
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use wgpu_playground_core::bind_group::{BindGroupDescriptor, BindGroupEntry, BufferBinding, BindingResource};
+    /// # fn example(layout: &wgpu::BindGroupLayout, buffer: &wgpu::Buffer) {
+    /// let descriptor = BindGroupDescriptor::new(Some("bind_group"), layout)
+    ///     .with_entry(BindGroupEntry::new(0, BindingResource::Buffer(BufferBinding::entire(buffer))));
+    ///
+    /// assert!(descriptor.validate().is_ok());
+    /// # }
+    /// ```
     pub fn validate(&self) -> Result<(), BindGroupError> {
         if self.entries.is_empty() {
             return Err(BindGroupError::InvalidBinding(
@@ -670,12 +864,19 @@ impl<'a> BindGroupDescriptor<'a> {
     /// This method validates the descriptor and creates the actual bind group.
     ///
     /// # Arguments
+    ///
     /// * `device` - The wgpu device to create the bind group on
     ///
     /// # Returns
+    ///
     /// A Result containing the BindGroup or a BindGroupError
     ///
+    /// # Errors
+    ///
+    /// Returns a `BindGroupError` if validation fails (see `validate()` for details)
+    ///
     /// # Examples
+    ///
     /// ```no_run
     /// use wgpu_playground_core::bind_group::{BindGroupDescriptor, BindGroupEntry, BufferBinding, BindingResource};
     /// # async fn example(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, buffer: &wgpu::Buffer) {

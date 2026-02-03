@@ -8,7 +8,7 @@ This document summarizes the comprehensive PR check workflow implementation for 
 
 ### 1. PR Checks Workflow (`.github/workflows/pr-checks.yml`)
 
-A comprehensive GitHub Actions workflow that runs on every pull request to the `main` branch. The workflow includes:
+A streamlined GitHub Actions workflow that runs on every pull request to the `main` branch. The workflow is optimized for speed by running all checks sequentially in a single job, avoiding the overhead of multiple parallel jobs.
 
 #### Automated PR Labeling
 - **Size labels**: Automatically labels PRs based on the number of lines changed
@@ -32,25 +32,29 @@ A comprehensive GitHub Actions workflow that runs on every pull request to the `
   - `assets`: Asset changes
   - `security`: Security-related changes
 
-#### Required Status Checks
-All PRs must pass the following checks before merging:
+#### Combined Status Check
+The workflow runs all checks sequentially in a single job for maximum efficiency:
 
-1. **Format Check**: Ensures code is formatted with `rustfmt`
+1. **Format Check**: Ensures code is formatted with `rustfmt` (fast-fail)
    - Command: `cargo fmt --all -- --check`
 
-2. **Lint Check (Clippy)**: Ensures code quality
+2. **Lint Check (Clippy)**: Ensures code quality and compiles the code (fast-fail)
    - Command: `cargo clippy --workspace --all-targets -- -D warnings`
 
-3. **Build Check**: Ensures project builds successfully
+3. **Build Verification**: Verifies project builds (uses cached compilation from clippy)
    - Command: `cargo build --workspace --all-targets`
 
-4. **Test Check**: Ensures all tests pass
+4. **Test Execution**: Ensures all tests pass
    - Commands: `cargo nextest run --workspace --all-targets` and `cargo test --workspace --doc`
 
-5. **Security Check**: Ensures dependencies meet security and license policies
+5. **Security Audit**: Ensures dependencies meet security and license policies
    - Commands: `cargo deny check` and `cargo audit`
 
-6. **PR Checks Summary**: Overall status that ensures all checks pass
+**Performance Benefits:**
+- Single job reduces GitHub Actions runner startup overhead (~30s per job)
+- Shared compilation cache between clippy and build steps
+- Fast-fail on format and lint issues before running expensive tests
+- Estimated ~2-3x faster than parallel job approach
 
 ### 2. Labeler Configuration (`.github/labeler.yml`)
 

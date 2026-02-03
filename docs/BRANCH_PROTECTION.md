@@ -13,12 +13,7 @@ Branch protection rules enforce quality standards by requiring specific checks t
 The following status checks should be required to pass before merging:
 
 #### From `PR Checks` workflow (`.github/workflows/pr-checks.yml`):
-- **PR Checks Summary** - Overall summary check that ensures all PR checks pass
-- **Format Check** - Ensures code is properly formatted with `rustfmt`
-- **Lint Check (Clippy)** - Ensures code passes Clippy lints
-- **Build Check** - Ensures the project builds successfully
-- **Test Check** - Ensures all tests pass
-- **Security Check** - Ensures dependencies meet security and license policies
+- **PR Checks** - Combined check that runs all validation in a single job (format, lint, build, tests, security)
 
 #### From `CI` workflow (`.github/workflows/ci.yml`):
 - **CI Success** - Overall CI pipeline success check
@@ -35,13 +30,8 @@ Apply the following settings to the `main` branch:
 #### 2. Require Status Checks to Pass
 - **Require branches to be up to date before merging**: ✅ Enabled
 - **Required status checks**:
-  - `PR Checks Summary`
+  - `PR Checks`
   - `CI Success`
-  - `Format Check`
-  - `Lint Check (Clippy)`
-  - `Build Check`
-  - `Test Check`
-  - `Security Check`
 
 #### 3. Require Conversation Resolution
 - **Require conversation resolution before merging**: ✅ Enabled
@@ -77,13 +67,8 @@ Apply the following settings to the `main` branch:
 gh api repos/{owner}/{repo}/branches/main/protection \
   --method PUT \
   --field required_status_checks[strict]=true \
-  --field required_status_checks[contexts][]=PR Checks Summary \
-  --field required_status_checks[contexts][]=CI Success \
-  --field required_status_checks[contexts][]=Format Check \
-  --field required_status_checks[contexts][]=Lint Check (Clippy) \
-  --field required_status_checks[contexts][]=Build Check \
-  --field required_status_checks[contexts][]=Test Check \
-  --field required_status_checks[contexts][]=Security Check \
+  --field required_status_checks[contexts][]="PR Checks" \
+  --field required_status_checks[contexts][]="CI Success" \
   --field enforce_admins=true \
   --field required_pull_request_reviews[dismiss_stale_reviews]=true \
   --field required_pull_request_reviews[required_approving_review_count]=1 \
@@ -103,13 +88,8 @@ resource "github_branch_protection" "main" {
   required_status_checks {
     strict = true
     contexts = [
-      "PR Checks Summary",
-      "CI Success",
-      "Format Check",
-      "Lint Check (Clippy)",
-      "Build Check",
-      "Test Check",
-      "Security Check"
+      "PR Checks",
+      "CI Success"
     ]
   }
 

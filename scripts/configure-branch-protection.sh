@@ -44,13 +44,8 @@ echo -e "${YELLOW}Configuring branch protection rules...${NC}"
 
 # Required status checks
 REQUIRED_CHECKS=(
-    "PR Checks Summary"
+    "PR Checks"
     "CI Success"
-    "Format Check"
-    "Lint Check (Clippy)"
-    "Build Check"
-    "Test Check"
-    "Security Check"
 )
 
 echo ""
@@ -66,13 +61,8 @@ gh api \
   repos/${REPO}/branches/main/protection \
   --method PUT \
   --field required_status_checks[strict]=true \
-  --field required_status_checks[contexts][]="PR Checks Summary" \
+  --field required_status_checks[contexts][]="PR Checks" \
   --field required_status_checks[contexts][]="CI Success" \
-  --field required_status_checks[contexts][]="Format Check" \
-  --field required_status_checks[contexts][]="Lint Check (Clippy)" \
-  --field required_status_checks[contexts][]="Build Check" \
-  --field required_status_checks[contexts][]="Test Check" \
-  --field required_status_checks[contexts][]="Security Check" \
   --field enforce_admins=true \
   --field required_pull_request_reviews[dismiss_stale_reviews]=true \
   --field required_pull_request_reviews[required_approving_review_count]=1 \

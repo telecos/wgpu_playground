@@ -237,11 +237,41 @@ impl BufferDescriptor {
 
     /// Set whether the buffer should be mapped at creation
     ///
+    /// When a buffer is mapped at creation, it can be immediately written to
+    /// without an additional map operation. This is useful for uploading initial data.
+    ///
     /// # Arguments
+    ///
     /// * `mapped` - Whether to map the buffer at creation
     ///
     /// # Returns
+    ///
     /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// Create and immediately write to a buffer:
+    /// ```no_run
+    /// use wgpu_playground_core::buffer::{BufferDescriptor, BufferUsages};
+    /// # fn example(device: &wgpu::Device) {
+    /// let descriptor = BufferDescriptor::new(
+    ///     Some("vertex_buffer"),
+    ///     256,
+    ///     BufferUsages::VERTEX | BufferUsages::COPY_DST
+    /// ).with_mapped_at_creation(true);
+    ///
+    /// let buffer = descriptor.create_buffer(device).unwrap();
+    /// // Buffer is now mapped and ready for writing
+    /// // Use buffer.slice(..).get_mapped_range_mut() to write data
+    /// // Then buffer.unmap() when done
+    /// # }
+    /// ```
+    ///
+    /// # Notes
+    ///
+    /// - The buffer starts in a mapped state after creation
+    /// - You must call `unmap()` before using the buffer in GPU operations
+    /// - More efficient than creating then mapping when you have data to upload
     pub fn with_mapped_at_creation(mut self, mapped: bool) -> Self {
         self.mapped_at_creation = mapped;
         self

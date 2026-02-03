@@ -251,6 +251,42 @@ impl VertexBufferLayout {
 }
 
 /// Primitive topology type
+///
+/// Defines how vertices are assembled into geometric primitives.
+///
+/// # Examples
+///
+/// Standard triangle rendering:
+/// ```
+/// use wgpu_playground_core::render_pipeline::PrimitiveTopology;
+///
+/// let topology = PrimitiveTopology::TriangleList;
+/// // Vertices [0,1,2,3,4,5] form triangles: (0,1,2) and (3,4,5)
+/// ```
+///
+/// Efficient triangle strip (shares vertices):
+/// ```
+/// use wgpu_playground_core::render_pipeline::PrimitiveTopology;
+///
+/// let topology = PrimitiveTopology::TriangleStrip;
+/// // Vertices [0,1,2,3,4] form triangles: (0,1,2), (1,2,3), (2,3,4)
+/// ```
+///
+/// Line rendering:
+/// ```
+/// use wgpu_playground_core::render_pipeline::PrimitiveTopology;
+///
+/// let topology = PrimitiveTopology::LineList;
+/// // Vertices [0,1,2,3] form lines: (0,1) and (2,3)
+/// ```
+///
+/// Point cloud rendering:
+/// ```
+/// use wgpu_playground_core::render_pipeline::PrimitiveTopology;
+///
+/// let topology = PrimitiveTopology::PointList;
+/// // Each vertex is rendered as a point
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PrimitiveTopology {
     /// Each group of 3 vertices forms a triangle
@@ -279,6 +315,36 @@ impl PrimitiveTopology {
 }
 
 /// Face culling mode
+///
+/// Determines which triangle faces are culled (discarded) during rasterization.
+/// Culling improves performance by not rendering invisible back faces.
+///
+/// # Examples
+///
+/// No culling (render both sides):
+/// ```
+/// use wgpu_playground_core::render_pipeline::CullMode;
+///
+/// let cull_mode = CullMode::None;
+/// // Useful for: foliage, glass, two-sided materials
+/// ```
+///
+/// Back-face culling (standard for solid objects):
+/// ```
+/// use wgpu_playground_core::render_pipeline::CullMode;
+///
+/// let cull_mode = CullMode::Back;
+/// // Improves performance by ~50% for closed meshes
+/// // Most common setting for 3D models
+/// ```
+///
+/// Front-face culling (for inverted geometry):
+/// ```
+/// use wgpu_playground_core::render_pipeline::CullMode;
+///
+/// let cull_mode = CullMode::Front;
+/// // Useful for: skyboxes, inside-out rendering
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CullMode {
     /// No culling
@@ -301,6 +367,34 @@ impl CullMode {
 }
 
 /// Front face winding order
+///
+/// Defines which winding order (clockwise or counter-clockwise) is considered
+/// the front face of a triangle. Used with face culling to determine visibility.
+///
+/// # Examples
+///
+/// Counter-clockwise (OpenGL/WebGPU default):
+/// ```
+/// use wgpu_playground_core::render_pipeline::FrontFace;
+///
+/// let front_face = FrontFace::Ccw;
+/// // Vertices wound counter-clockwise are front-facing
+/// // Most common for models exported from 3D software
+/// ```
+///
+/// Clockwise (DirectX convention):
+/// ```
+/// use wgpu_playground_core::render_pipeline::FrontFace;
+///
+/// let front_face = FrontFace::Cw;
+/// // Vertices wound clockwise are front-facing
+/// ```
+///
+/// # Notes
+///
+/// This interacts with CullMode:
+/// - CullMode::Back + FrontFace::Ccw = culls clockwise triangles
+/// - CullMode::Front + FrontFace::Ccw = culls counter-clockwise triangles
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FrontFace {
     /// Clockwise winding
@@ -386,6 +480,45 @@ impl Default for PrimitiveState {
 }
 
 /// Depth/stencil comparison function
+///
+/// Comparison function used for depth testing and stencil testing.
+/// Returns whether the test passes based on comparing incoming value with stored value.
+///
+/// # Examples
+///
+/// Standard depth testing (closer objects win):
+/// ```
+/// use wgpu_playground_core::render_pipeline::CompareFunction;
+///
+/// let depth_compare = CompareFunction::Less;
+/// // Fragment passes if its depth < stored depth
+/// // Renders front-to-back correctly
+/// ```
+///
+/// Reverse depth testing (for reverse-Z):
+/// ```
+/// use wgpu_playground_core::render_pipeline::CompareFunction;
+///
+/// let depth_compare = CompareFunction::Greater;
+/// // Used with reversed depth buffer for better precision
+/// ```
+///
+/// Equality testing:
+/// ```
+/// use wgpu_playground_core::render_pipeline::CompareFunction;
+///
+/// let stencil_compare = CompareFunction::Equal;
+/// // Pass only if stencil value exactly matches reference
+/// // Useful for masking specific regions
+/// ```
+///
+/// Always pass (disable testing):
+/// ```
+/// use wgpu_playground_core::render_pipeline::CompareFunction;
+///
+/// let compare = CompareFunction::Always;
+/// // All fragments pass (effectively disables the test)
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CompareFunction {
     /// Never pass
@@ -423,6 +556,46 @@ impl CompareFunction {
 }
 
 /// Stencil operation
+///
+/// Defines what happens to the stencil buffer value when a stencil test passes or fails.
+///
+/// # Examples
+///
+/// Stencil masking (mark rendered areas):
+/// ```
+/// use wgpu_playground_core::render_pipeline::StencilOperation;
+///
+/// let operation = StencilOperation::Replace;
+/// // Write reference value to stencil buffer
+/// // Common for creating stencil masks
+/// ```
+///
+/// Count overlapping draws (with wrapping):
+/// ```
+/// use wgpu_playground_core::render_pipeline::StencilOperation;
+///
+/// let operation = StencilOperation::IncrementWrap;
+/// // Increment stencil, wrapping at max value
+/// // Useful for counting overlapping geometry
+/// ```
+///
+/// Invert stencil bits:
+/// ```
+/// use wgpu_playground_core::render_pipeline::StencilOperation;
+///
+/// let operation = StencilOperation::Invert;
+/// // Bitwise NOT operation on stencil value
+/// // Useful for toggling stencil regions
+/// ```
+///
+/// Preserve existing stencil:
+/// ```
+/// use wgpu_playground_core::render_pipeline::StencilOperation;
+///
+/// let operation = StencilOperation::Keep;
+/// // Don't modify stencil buffer
+/// // Use when you only want to test, not write
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StencilOperation {
     /// Keep the current stencil value
@@ -501,6 +674,46 @@ impl Default for StencilFaceState {
 }
 
 /// Depth/stencil state configuration
+///
+/// Configures depth testing, depth writing, and stencil operations for a render pipeline.
+///
+/// # Examples
+///
+/// Basic depth testing (most common):
+/// ```
+/// use wgpu_playground_core::render_pipeline::DepthStencilState;
+///
+/// let depth_state = DepthStencilState::new(wgpu::TextureFormat::Depth24Plus)
+///     .with_depth_write_enabled(true);
+/// // Enables standard depth testing with Less comparison
+/// ```
+///
+/// Read-only depth testing (for transparency):
+/// ```
+/// use wgpu_playground_core::render_pipeline::{DepthStencilState, CompareFunction};
+///
+/// let depth_state = DepthStencilState::new(wgpu::TextureFormat::Depth24Plus)
+///     .with_depth_write_enabled(false)
+///     .with_depth_compare(CompareFunction::LessEqual);
+/// // Test against depth but don't write (for transparent objects)
+/// ```
+///
+/// Stencil masking:
+/// ```
+/// use wgpu_playground_core::render_pipeline::{DepthStencilState, StencilFaceState, StencilOperation, CompareFunction};
+///
+/// let stencil = StencilFaceState {
+///     compare: CompareFunction::Always,
+///     fail_op: StencilOperation::Keep,
+///     depth_fail_op: StencilOperation::Keep,
+///     pass_op: StencilOperation::Replace,
+/// };
+///
+/// let depth_state = DepthStencilState::new(wgpu::TextureFormat::Depth24PlusStencil8)
+///     .with_stencil_front(stencil)
+///     .with_stencil_back(stencil);
+/// // Write to stencil buffer for masking
+/// ```
 #[derive(Debug, Clone)]
 pub struct DepthStencilState {
     /// Texture format for depth/stencil
@@ -598,6 +811,54 @@ impl DepthStencilState {
 }
 
 /// Multisample state configuration
+///
+/// Configures multisampling anti-aliasing (MSAA) for smoother edges.
+///
+/// # Examples
+///
+/// No multisampling (default):
+/// ```
+/// use wgpu_playground_core::render_pipeline::MultisampleState;
+///
+/// let msaa = MultisampleState::new();
+/// // 1 sample per pixel (no MSAA)
+/// ```
+///
+/// 4x MSAA (balanced quality/performance):
+/// ```
+/// use wgpu_playground_core::render_pipeline::MultisampleState;
+///
+/// let msaa = MultisampleState::new()
+///     .with_count(4);
+/// // 4 samples per pixel, common for games
+/// ```
+///
+/// 4x MSAA with alpha to coverage (for foliage):
+/// ```
+/// use wgpu_playground_core::render_pipeline::MultisampleState;
+///
+/// let msaa = MultisampleState::new()
+///     .with_count(4)
+///     .with_alpha_to_coverage_enabled(true);
+/// // Converts alpha values to sample coverage
+/// // Useful for rendering vegetation, fences, etc.
+/// ```
+///
+/// Sample masking (custom sample pattern):
+/// ```
+/// use wgpu_playground_core::render_pipeline::MultisampleState;
+///
+/// let msaa = MultisampleState::new()
+///     .with_count(4)
+///     .with_mask(0b1010); // Use samples 1 and 3 only
+/// // Advanced: control which samples are used
+/// ```
+///
+/// # Notes
+///
+/// - `count` must be 1, 2, 4, or 8 (device-dependent)
+/// - Requires a multisampled texture as render target
+/// - Higher counts improve quality but reduce performance
 #[derive(Debug, Clone, Copy)]
 pub struct MultisampleState {
     /// Number of samples per pixel
@@ -1008,42 +1269,175 @@ impl RenderPipelineDescriptor {
     }
 
     /// Add a vertex buffer layout
+    ///
+    /// # Arguments
+    ///
+    /// * `layout` - The vertex buffer layout to add
+    ///
+    /// # Returns
+    ///
+    /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::{RenderPipelineDescriptor, VertexBufferLayout, VertexStepMode, VertexAttribute, VertexFormat};
+    ///
+    /// let layout = VertexBufferLayout::new(20, VertexStepMode::Vertex)
+    ///     .with_attribute(VertexAttribute::new(0, VertexFormat::Float32x3, 0))
+    ///     .with_attribute(VertexAttribute::new(1, VertexFormat::Float32x2, 12));
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("pipeline"))
+    ///     .with_vertex_buffer(layout);
+    /// ```
     pub fn with_vertex_buffer(mut self, layout: VertexBufferLayout) -> Self {
         self.vertex_buffers.push(layout);
         self
     }
 
     /// Add multiple vertex buffer layouts
+    ///
+    /// # Arguments
+    ///
+    /// * `layouts` - Slice of vertex buffer layouts to add
+    ///
+    /// # Returns
+    ///
+    /// Self for method chaining
     pub fn with_vertex_buffers(mut self, layouts: &[VertexBufferLayout]) -> Self {
         self.vertex_buffers.extend_from_slice(layouts);
         self
     }
 
     /// Set the primitive state
+    ///
+    /// # Arguments
+    ///
+    /// * `primitive` - The primitive state configuration
+    ///
+    /// # Returns
+    ///
+    /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::{RenderPipelineDescriptor, PrimitiveState, PrimitiveTopology, CullMode};
+    ///
+    /// let primitive = PrimitiveState::new()
+    ///     .with_topology(PrimitiveTopology::TriangleList)
+    ///     .with_cull_mode(CullMode::Back);
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("pipeline"))
+    ///     .with_primitive(primitive);
+    /// ```
     pub fn with_primitive(mut self, primitive: PrimitiveState) -> Self {
         self.primitive = primitive;
         self
     }
 
     /// Set the depth/stencil state
+    ///
+    /// # Arguments
+    ///
+    /// * `depth_stencil` - The depth/stencil state configuration
+    ///
+    /// # Returns
+    ///
+    /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::{RenderPipelineDescriptor, DepthStencilState};
+    ///
+    /// let depth = DepthStencilState::new(wgpu::TextureFormat::Depth24Plus)
+    ///     .with_depth_write_enabled(true);
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("pipeline"))
+    ///     .with_depth_stencil(depth);
+    /// ```
     pub fn with_depth_stencil(mut self, depth_stencil: DepthStencilState) -> Self {
         self.depth_stencil = Some(depth_stencil);
         self
     }
 
     /// Set the multisample state
+    ///
+    /// # Arguments
+    ///
+    /// * `multisample` - The multisample state configuration
+    ///
+    /// # Returns
+    ///
+    /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::{RenderPipelineDescriptor, MultisampleState};
+    ///
+    /// let msaa = MultisampleState::new().with_count(4);
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("pipeline"))
+    ///     .with_multisample(msaa);
+    /// ```
     pub fn with_multisample(mut self, multisample: MultisampleState) -> Self {
         self.multisample = multisample;
         self
     }
 
     /// Add a fragment target
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - The color target state for a render target
+    ///
+    /// # Returns
+    ///
+    /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::{RenderPipelineDescriptor, ColorTargetState, BlendState};
+    ///
+    /// let target = ColorTargetState::new(wgpu::TextureFormat::Bgra8UnormSrgb)
+    ///     .with_blend(BlendState::alpha_blending());
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("pipeline"))
+    ///     .with_fragment_target(target);
+    /// ```
     pub fn with_fragment_target(mut self, target: ColorTargetState) -> Self {
         self.fragment_targets.push(target);
         self
     }
 
     /// Add multiple fragment targets
+    ///
+    /// # Arguments
+    ///
+    /// * `targets` - Slice of color target states for multiple render targets (MRT)
+    ///
+    /// # Returns
+    ///
+    /// Self for method chaining
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::render_pipeline::{RenderPipelineDescriptor, ColorTargetState};
+    ///
+    /// let targets = vec![
+    ///     ColorTargetState::new(wgpu::TextureFormat::Rgba16Float), // Albedo
+    ///     ColorTargetState::new(wgpu::TextureFormat::Rgba16Float), // Normal
+    ///     ColorTargetState::new(wgpu::TextureFormat::Rgba16Float), // Position
+    /// ];
+    ///
+    /// let descriptor = RenderPipelineDescriptor::new(Some("gbuffer"))
+    ///     .with_fragment_targets(&targets);
+    /// // Multi-render target for deferred rendering
+    /// ```
     pub fn with_fragment_targets(mut self, targets: &[ColorTargetState]) -> Self {
         self.fragment_targets.extend_from_slice(targets);
         self

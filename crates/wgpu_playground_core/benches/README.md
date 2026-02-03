@@ -2,6 +2,8 @@
 
 This directory contains performance benchmarks for the wgpu_playground_core crate using [Criterion.rs](https://github.com/bheisler/criterion.rs).
 
+> **Note**: Benchmarks measure CPU-bound operations only. GPU operations should be tested through integration tests.
+
 ## Available Benchmarks
 
 ### buffer_operations.rs

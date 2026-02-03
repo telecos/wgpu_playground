@@ -54,7 +54,8 @@ The workflow runs all checks sequentially in a single job for maximum efficiency
 - Single job reduces GitHub Actions runner startup overhead (~30s per job)
 - Shared compilation cache between clippy and build steps
 - Fast-fail on format and lint issues before running expensive tests
-- Estimated ~2-3x faster than parallel job approach
+- Reduces GitHub Actions compute minutes by ~60% (sequential vs parallel)
+- Wall-clock time similar to parallel jobs for small PRs, but more efficient resource usage
 
 ### 2. Labeler Configuration (`.github/labeler.yml`)
 

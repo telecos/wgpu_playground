@@ -1,5 +1,9 @@
 # wgpu_playground
 
+[![CI](https://github.com/telecos/wgpu_playground/workflows/CI/badge.svg)](https://github.com/telecos/wgpu_playground/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/telecos/wgpu_playground/branch/main/graph/badge.svg)](https://codecov.io/gh/telecos/wgpu_playground)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Repository for experimenting WebGPU capabilities in Rust
 
 ## Quick Start
@@ -679,14 +683,20 @@ For detailed information about the benchmarking system, see [docs/BENCHMARKING.m
 
 ## Code Coverage
 
-This project uses `cargo-llvm-cov` for code coverage reporting. See [COVERAGE.md](COVERAGE.md) for details on:
+[![Coverage](https://codecov.io/gh/telecos/wgpu_playground/branch/main/graph/badge.svg)](https://codecov.io/gh/telecos/wgpu_playground)
+
+This project uses `cargo-llvm-cov` for code coverage reporting with automated uploads to [Codecov](https://codecov.io/gh/telecos/wgpu_playground).
+
+**Coverage Targets:**
+- Overall project coverage: **70%** (with 2% threshold)
+- New code (patches): **60%** (with 5% threshold)
+
+See [COVERAGE.md](COVERAGE.md) for details on:
 
 - Running coverage locally
-- Coverage thresholds and targets
+- Coverage thresholds and configuration
 - CI integration
 - Viewing coverage reports
-
-Current coverage: 62% (see CI artifacts for detailed reports)
 
 ## Continuous Integration
 

@@ -89,6 +89,7 @@ This `docs/` directory also contains various design documents:
 - **[WEBGPU_IMPLEMENTATIONS.md](WEBGPU_IMPLEMENTATIONS.md)** - WebGPU implementations (wgpu vs Dawn) and architecture
 - **[BENCHMARKING.md](BENCHMARKING.md)** - Performance benchmarking system and guidelines
 - **[CI_TESTING.md](CI_TESTING.md)** - Continuous integration testing documentation
+- **[BRANCH_PROTECTION.md](BRANCH_PROTECTION.md)** - Branch protection rules and PR workflow
 - **[architecture.md](architecture.md)** - System architecture and design
 
 #### Implementation Notes

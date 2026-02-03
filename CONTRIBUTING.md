@@ -222,6 +222,10 @@ cargo test test_buffer_creation
 
 ## Pull Request Guidelines
 
+### PR Workflow
+
+Pull requests are automatically validated by comprehensive PR checks. See [docs/BRANCH_PROTECTION.md](docs/BRANCH_PROTECTION.md) for detailed information about the PR workflow and branch protection rules.
+
 ### Before Submitting
 - [ ] Code compiles without errors
 - [ ] All tests pass
@@ -229,6 +233,42 @@ cargo test test_buffer_creation
 - [ ] No clippy warnings
 - [ ] Documentation is updated
 - [ ] Commit messages are clear
+- [ ] Security checks pass (`cargo deny check` and `cargo audit`)
+
+### Automated PR Checks
+
+All PRs are automatically checked for:
+- **Format Check**: Code formatting with `rustfmt`
+- **Lint Check**: Code quality with Clippy
+- **Build Check**: Successful compilation
+- **Test Check**: All tests passing
+- **Security Check**: Dependency security and license compliance
+
+PRs are also automatically labeled based on:
+- **Size**: `size/xs`, `size/s`, `size/m`, `size/l`, `size/xl`
+- **Type**: `documentation`, `dependencies`, `ci/cd`, `core`, `gui`, `examples`, `tests`, etc.
+
+### Running Checks Locally
+
+Before pushing, run all checks locally:
+
+```bash
+# Format code
+cargo fmt --all
+
+# Run lints
+cargo clippy --workspace --all-targets -- -D warnings
+
+# Build project
+cargo build --workspace --all-targets
+
+# Run tests
+cargo test --workspace
+
+# Check security
+cargo deny check
+cargo audit
+```
 
 ### PR Description Should Include
 - What feature/fix is implemented

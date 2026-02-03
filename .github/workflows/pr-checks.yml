@@ -1,0 +1,144 @@
+name: PR Checks
+
+# This workflow runs comprehensive checks on pull requests to ensure quality and consistency
+# It combines all required status checks and provides automated PR labeling
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches:
+      - main
+
+# Limit permissions for security
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # PR Labeling - automatically label PRs based on changes
+  label-pr:
+    name: Label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Label PR by size
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size/xs'
+          xs_max_size: 10
+          s_label: 'size/s'
+          s_max_size: 100
+          m_label: 'size/m'
+          m_max_size: 500
+          l_label: 'size/l'
+          l_max_size: 1000
+          xl_label: 'size/xl'
+          fail_if_xl: false
+
+      - name: Label PR by file type
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+  # Combined check job - runs all checks in sequence for efficiency
+  pr-checks:
+    name: PR Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "cargo-deps-pr"
+          save-if: false
+
+      # Fast fail: Format check (fastest check)
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      # Fast fail: Clippy (also compiles the code)
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      # Build check (already compiled by clippy, so this is fast)
+      - name: Verify build
+        run: cargo build --workspace --all-targets
+
+      # Install test dependencies only when needed
+      - name: Install software rendering dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            mesa-vulkan-drivers \
+            libvulkan1 \
+            vulkan-tools \
+            libegl-mesa0 \
+            libgl1-mesa-dri \
+            libxcb-xfixes0-dev \
+            libxcb1-dev \
+            libx11-dev
+
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@nextest
+
+      # Run tests
+      - name: Run tests
+        run: cargo nextest run --workspace --all-targets
+
+      - name: Run doc tests
+        run: cargo test --workspace --doc
+
+      # Security checks (run last as they're independent)
+      - name: Run cargo deny
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          rust-version: "1.85.0"
+          command-arguments: "licenses bans sources"
+
+      - name: Run cargo audit
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generate summary
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## PR Checks Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ All PR checks completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some PR checks failed - see details above" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Checks performed:" >> $GITHUB_STEP_SUMMARY
+          echo "- Format check (rustfmt)" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint check (clippy)" >> $GITHUB_STEP_SUMMARY
+          echo "- Build verification" >> $GITHUB_STEP_SUMMARY
+          echo "- Test suite (unit + integration + doc tests)" >> $GITHUB_STEP_SUMMARY
+          echo "- Security audit (cargo deny + cargo audit)" >> $GITHUB_STEP_SUMMARY
+

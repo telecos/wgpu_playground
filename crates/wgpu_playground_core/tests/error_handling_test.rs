@@ -217,9 +217,9 @@ mod error_handling_tests {
     fn test_out_of_bounds_buffer_size() {
         // Test that buffer size larger than reasonable limits would be caught
         // This tests the validation logic for extreme buffer sizes
-        let max_size = u64::MAX;
+        let u64_max_size = u64::MAX;
         let descriptor =
-            BufferDescriptor::new(Some("huge_buffer"), max_size, BufferUsages::UNIFORM);
+            BufferDescriptor::new(Some("huge_buffer"), u64_max_size, BufferUsages::UNIFORM);
 
         // The validation should pass (size validation only checks for zero)
         // The actual GPU would reject this during creation
@@ -229,53 +229,43 @@ mod error_handling_tests {
     #[test]
     fn test_buffer_usage_combinations() {
         // Test various valid usage combinations
-        let test_cases = vec![
+        let valid_usages = vec![
             (
                 BufferUsages::VERTEX | BufferUsages::COPY_DST,
-                true,
                 "vertex+copy_dst",
             ),
             (
                 BufferUsages::INDEX | BufferUsages::COPY_DST,
-                true,
                 "index+copy_dst",
             ),
             (
                 BufferUsages::UNIFORM | BufferUsages::COPY_DST,
-                true,
                 "uniform+copy_dst",
             ),
             (
                 BufferUsages::STORAGE | BufferUsages::COPY_SRC | BufferUsages::COPY_DST,
-                true,
                 "storage+copy",
             ),
             (
                 BufferUsages::INDIRECT | BufferUsages::COPY_DST,
-                true,
                 "indirect+copy_dst",
             ),
             (
                 BufferUsages::MAP_READ | BufferUsages::COPY_DST,
-                true,
                 "map_read+copy_dst",
             ),
             (
                 BufferUsages::MAP_WRITE | BufferUsages::COPY_SRC,
-                true,
                 "map_write+copy_src",
             ),
         ];
 
-        for (usage, should_pass, label) in test_cases {
+        for (usage, label) in valid_usages {
             let descriptor = BufferDescriptor::new(Some(label), 256, usage);
-            let result = descriptor.validate();
-            assert_eq!(
-                result.is_ok(),
-                should_pass,
-                "Usage combination {} should {} validation",
-                label,
-                if should_pass { "pass" } else { "fail" }
+            assert!(
+                descriptor.validate().is_ok(),
+                "Usage combination {} should be valid",
+                label
             );
         }
     }

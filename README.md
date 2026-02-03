@@ -2,6 +2,14 @@
 
 Repository for experimenting WebGPU capabilities in Rust
 
+## Quick Start
+
+New to wgpu_playground? Get started quickly:
+
+📖 **[Quick Start Guide](docs/QUICK_START.md)** - Get up and running in 5 minutes
+
+📚 **[User Guide](docs/USER_GUIDE.md)** - Comprehensive guide with tutorials and workflows
+
 ## Overview
 
 This is an interactive tool for experimenting with the wgpu crate's WebGPU API capabilities. It provides a graphical user interface built with egui that allows you to explore and test various WebGPU features including rendering pipelines, compute shaders, and ML inferencing operations.
@@ -697,6 +705,17 @@ See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
 
 ## Documentation
 
+### User Documentation
+
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get up and running in 5 minutes
+- **[User Guide](docs/USER_GUIDE.md)** - Comprehensive guide covering:
+  - Installation and setup
+  - GUI navigation and usage
+  - Creating buffers, textures, and samplers
+  - Writing and compiling shaders
+  - Step-by-step tutorials for rendering triangles, textured quads, and compute shaders
+  - Common workflows and troubleshooting
+
 ### API Documentation
 
 API documentation is automatically generated from source code and published to GitHub Pages:
@@ -714,6 +733,8 @@ The documentation includes all public APIs for:
 
 ### Design Documents
 
+- **[USER_GUIDE.md](docs/USER_GUIDE.md)** - Comprehensive end-user documentation with tutorials and workflows
+- **[QUICK_START.md](docs/QUICK_START.md)** - Quick start guide for new users
 - **[VISUAL_REGRESSION_TESTING.md](docs/VISUAL_REGRESSION_TESTING.md)** - Complete guide to the visual regression testing framework, including examples, API reference, and best practices
 - **[SHADER_EDITOR.md](docs/SHADER_EDITOR.md)** - Complete guide to the WGSL Shader Editor including usage examples, tips, and API reference
 - **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them

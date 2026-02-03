@@ -725,6 +725,13 @@ See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
   - Writing and compiling shaders
   - Step-by-step tutorials for rendering triangles, textured quads, and compute shaders
   - Common workflows and troubleshooting
+- **[WGSL Shader Guide](docs/WGSL_SHADER_GUIDE.md)** - Complete guide to writing WGSL shaders:
+  - Shader structure and anatomy (vertex, fragment, compute)
+  - Data types, vectors, matrices, and structs
+  - Built-in functions and operations
+  - Uniforms, bindings, and resource management
+  - Debugging techniques and best practices
+  - Common patterns and real-world examples
 
 ### API Documentation
 
@@ -745,6 +752,7 @@ The documentation includes all public APIs for:
 
 - **[USER_GUIDE.md](docs/USER_GUIDE.md)** - Comprehensive end-user documentation with tutorials and workflows
 - **[QUICK_START.md](docs/QUICK_START.md)** - Quick start guide for new users
+- **[WGSL_SHADER_GUIDE.md](docs/WGSL_SHADER_GUIDE.md)** - Complete guide to writing WGSL shaders including structure, built-in functions, and debugging
 - **[VISUAL_REGRESSION_TESTING.md](docs/VISUAL_REGRESSION_TESTING.md)** - Complete guide to the visual regression testing framework, including examples, API reference, and best practices
 - **[SHADER_EDITOR.md](docs/SHADER_EDITOR.md)** - Complete guide to the WGSL Shader Editor including usage examples, tips, and API reference
 - **[WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md)** - Guide to WebGPU implementations (wgpu vs Dawn), architecture, and how to switch between them

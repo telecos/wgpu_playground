@@ -76,6 +76,7 @@ This `docs/` directory also contains various design documents:
 #### User-Facing Documentation
 - **[USER_GUIDE.md](USER_GUIDE.md)** - Comprehensive end-user guide covering GUI usage, workflows, and tutorials
 - **[QUICK_START.md](QUICK_START.md)** - Quick start guide to get running in 5 minutes
+- **[WGSL_SHADER_GUIDE.md](WGSL_SHADER_GUIDE.md)** - Complete guide to writing WGSL shaders, including structure, built-in functions, and debugging
 - **[SHADER_EDITOR.md](SHADER_EDITOR.md)** - Complete guide to the WGSL Shader Editor
 - **[VISUAL_REGRESSION_TESTING.md](VISUAL_REGRESSION_TESTING.md)** - Guide to the visual regression testing framework
 

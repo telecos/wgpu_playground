@@ -17,6 +17,24 @@ These guides cover:
 - Step-by-step tutorials for common tasks
 - Troubleshooting common issues
 
+## Developer Documentation
+
+Contributing to the project? Start here:
+
+- **[DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)** - Complete developer guide covering:
+  - Development environment setup
+  - Project architecture and design patterns
+  - Development workflows and common tasks
+  - Debugging and troubleshooting
+  - Performance considerations
+  - IDE setup and recommended tools
+
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines covering:
+  - Coding standards and style guide
+  - Testing requirements
+  - Pull request process
+  - Release process
+
 ## API Documentation
 
 The project's API documentation is automatically generated from source code using `cargo doc` and published to GitHub Pages.

@@ -14,6 +14,14 @@ New to wgpu_playground? Get started quickly:
 
 📚 **[User Guide](docs/USER_GUIDE.md)** - Comprehensive guide with tutorials and workflows
 
+## Contributing
+
+Want to contribute to wgpu_playground?
+
+🛠️ **[Developer Guide](DEVELOPER_GUIDE.md)** - Complete developer guide with architecture, workflows, and debugging
+
+📝 **[Contributing Guidelines](CONTRIBUTING.md)** - Contribution process, coding standards, and PR requirements
+
 ## Overview
 
 This is an interactive tool for experimenting with the wgpu crate's WebGPU API capabilities. It provides a graphical user interface built with egui that allows you to explore and test various WebGPU features including rendering pipelines, compute shaders, and ML inferencing operations.

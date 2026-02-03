@@ -9,6 +9,10 @@ New to wgpu_playground? Start here:
 - **[QUICK_START.md](QUICK_START.md)** - Get up and running in 5 minutes
 - **[USER_GUIDE.md](USER_GUIDE.md)** - Comprehensive user guide with tutorials, workflows, and troubleshooting
 
+### Try the Live Demo
+
+🚀 **[WebGPU Demo](https://telecos.github.io/wgpu_playground/demo/)** - Try wgpu_playground in your browser (requires WebGPU support)
+
 These guides cover:
 - Installation and setup
 - GUI navigation and usage
@@ -80,6 +84,8 @@ This `docs/` directory also contains various design documents:
 - **[VISUAL_REGRESSION_TESTING.md](VISUAL_REGRESSION_TESTING.md)** - Guide to the visual regression testing framework
 
 #### Technical Documentation
+- **[WASM_DEMO_DEPLOYMENT.md](WASM_DEMO_DEPLOYMENT.md)** - WebAssembly demo deployment guide and troubleshooting
+- **[WASM_TESTING.md](WASM_TESTING.md)** - Testing WebAssembly builds
 - **[WEBGPU_IMPLEMENTATIONS.md](WEBGPU_IMPLEMENTATIONS.md)** - WebGPU implementations (wgpu vs Dawn) and architecture
 - **[BENCHMARKING.md](BENCHMARKING.md)** - Performance benchmarking system and guidelines
 - **[CI_TESTING.md](CI_TESTING.md)** - Continuous integration testing documentation

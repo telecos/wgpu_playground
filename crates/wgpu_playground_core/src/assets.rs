@@ -103,8 +103,7 @@ pub fn load_string_from_path(_path: &Path) -> Result<String, std::io::Error> {
     // For web builds, we would use fetch API
     // This is a placeholder implementation
     // In a real implementation, this would need to be async and use web_sys
-    Err(std::io::Error::new(
-        std::io::ErrorKind::Other,
+    Err(std::io::Error::other(
         "Synchronous file loading not supported on web - use async loading",
     ))
 }
@@ -128,8 +127,7 @@ pub fn load_binary_from_path(path: &Path) -> Result<Vec<u8>, std::io::Error> {
 pub fn load_binary_from_path(_path: &Path) -> Result<Vec<u8>, std::io::Error> {
     // For web builds, we would use fetch API
     // This is a placeholder implementation
-    Err(std::io::Error::new(
-        std::io::ErrorKind::Other,
+    Err(std::io::Error::other(
         "Synchronous file loading not supported on web - use async loading",
     ))
 }

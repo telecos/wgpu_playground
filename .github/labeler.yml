@@ -34,8 +34,6 @@ configuration:
       - '*.toml'
       - '*.yml'
       - '*.yaml'
-      - '.github/**/*.yml'
-      - '.github/**/*.yaml'
 
 # Core library changes
 core:

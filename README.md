@@ -27,6 +27,8 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 
+**📊 For a comprehensive overview of WebGPU API feature coverage, see [WebGPU API Coverage](docs/WEBGPU_API_COVERAGE.md)**
+
 ## User Interface
 
 The application provides a tabbed interface with six main sections:
@@ -743,6 +745,7 @@ The documentation includes all public APIs for:
 
 ### Design Documents
 
+- **[WEBGPU_API_COVERAGE.md](docs/WEBGPU_API_COVERAGE.md)** - Comprehensive mapping of WebGPU API features to playground implementation with implementation status
 - **[USER_GUIDE.md](docs/USER_GUIDE.md)** - Comprehensive end-user documentation with tutorials and workflows
 - **[QUICK_START.md](docs/QUICK_START.md)** - Quick start guide for new users
 - **[VISUAL_REGRESSION_TESTING.md](docs/VISUAL_REGRESSION_TESTING.md)** - Complete guide to the visual regression testing framework, including examples, API reference, and best practices

@@ -240,7 +240,7 @@ The demo page should include appropriate CSP headers:
 ```html
 <meta http-equiv="Content-Security-Policy" 
       content="default-src 'self'; 
-               script-src 'self' 'wasm-unsafe-eval'; 
+               script-src 'self' 'wasm-eval'; 
                style-src 'self' 'unsafe-inline';">
 ```
 

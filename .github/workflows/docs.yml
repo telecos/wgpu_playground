@@ -225,7 +225,7 @@ jobs:
       - name: List deployment contents
         run: |
           echo "Deployment structure:"
-          find deployment -type f -name "*.html" -o -name "*.wasm" | head -20
+          find deployment -type f \( -name "*.html" -o -name "*.wasm" \) | head -20
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

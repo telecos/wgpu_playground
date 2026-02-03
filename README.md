@@ -2,6 +2,14 @@
 
 Repository for experimenting WebGPU capabilities in Rust
 
+## 🚀 Try the Demo
+
+Experience wgpu_playground directly in your browser:
+
+**[Try the WebGPU Demo](https://telecos.github.io/wgpu_playground/demo/)**
+
+*Requires a browser with WebGPU support (Chrome 113+, Edge 113+, or Safari with WebGPU enabled)*
+
 ## Quick Start
 
 New to wgpu_playground? Get started quickly:

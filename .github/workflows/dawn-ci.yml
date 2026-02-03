@@ -30,10 +30,30 @@ jobs:
       - name: Install Dawn dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake python3 python3-pip libvulkan-dev ninja-build
+          sudo apt-get install -y \
+            cmake \
+            python3 \
+            python3-pip \
+            libvulkan-dev \
+            ninja-build \
+            mesa-vulkan-drivers \
+            libvulkan1 \
+            vulkan-tools \
+            libegl-mesa0 \
+            libgl1-mesa-dri \
+            libxcb-xfixes0-dev \
+            libxcb1-dev \
+            libx11-dev
           cmake --version
           python3 --version
           ninja --version
+      
+      - name: Verify Vulkan software rendering
+        run: |
+          # Check if Vulkan is available (should use software adapter)
+          vulkaninfo --summary || echo "Vulkan info not available"
+          # Set environment to prefer software rendering
+          echo "VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json" >> $GITHUB_ENV
 
       # Cache Dawn build artifacts - this is the key optimization
       # First build: 20-30 minutes, subsequent builds: seconds

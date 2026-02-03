@@ -5,15 +5,26 @@
 
 use wgpu::{Adapter, Device, Instance, Queue};
 
+/// Detects if we are running in a headless/CI environment.
+///
+/// Returns true if the CI environment variable is set or if WGPU_HEADLESS is set.
+fn is_headless_environment() -> bool {
+    std::env::var("CI").is_ok() || std::env::var("WGPU_HEADLESS").is_ok()
+}
+
 /// Creates a test device and queue for integration testing.
 ///
 /// This function attempts to create a wgpu instance, request an adapter,
 /// and then request a device with default features and limits.
 ///
+/// In headless/CI environments (detected via CI or WGPU_HEADLESS environment variables),
+/// this function will attempt to use a software adapter (force_fallback_adapter: true)
+/// to enable testing without a physical GPU.
+///
 /// # Returns
 ///
 /// Returns `Some((Device, Queue))` if successful, or `None` if no GPU adapter
-/// is available (e.g., in headless environments or CI without GPU support).
+/// is available (e.g., in headless environments without software rendering support).
 ///
 /// # Example
 ///
@@ -28,15 +39,25 @@ use wgpu::{Adapter, Device, Instance, Queue};
 /// # }
 /// ```
 pub async fn create_test_device() -> Option<(Device, Queue)> {
+    let is_headless = is_headless_environment();
+
+    // In headless environments, prefer software rendering backends
+    let backends = if is_headless {
+        // Try Vulkan first (with software rendering), then GL as fallback
+        wgpu::Backends::VULKAN | wgpu::Backends::GL
+    } else {
+        wgpu::Backends::all()
+    };
+
     let instance = Instance::new(&wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
+        backends,
         ..Default::default()
     });
 
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
+            force_fallback_adapter: is_headless,
             compatible_surface: None,
         })
         .await
@@ -67,15 +88,23 @@ pub async fn create_test_device() -> Option<(Device, Queue)> {
 /// the requested features, or `None` otherwise.
 #[allow(dead_code)]
 pub async fn create_test_device_with_features(features: wgpu::Features) -> Option<(Device, Queue)> {
+    let is_headless = is_headless_environment();
+
+    let backends = if is_headless {
+        wgpu::Backends::VULKAN | wgpu::Backends::GL
+    } else {
+        wgpu::Backends::all()
+    };
+
     let instance = Instance::new(&wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
+        backends,
         ..Default::default()
     });
 
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
+            force_fallback_adapter: is_headless,
             compatible_surface: None,
         })
         .await
@@ -111,15 +140,23 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
 /// the requested limits, or `None` otherwise.
 #[allow(dead_code)]
 pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Device, Queue)> {
+    let is_headless = is_headless_environment();
+
+    let backends = if is_headless {
+        wgpu::Backends::VULKAN | wgpu::Backends::GL
+    } else {
+        wgpu::Backends::all()
+    };
+
     let instance = Instance::new(&wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
+        backends,
         ..Default::default()
     });
 
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
+            force_fallback_adapter: is_headless,
             compatible_surface: None,
         })
         .await
@@ -146,15 +183,23 @@ pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Dev
 /// adapter is available.
 #[allow(dead_code)]
 pub async fn create_test_instance_and_adapter() -> Option<(Instance, Adapter)> {
+    let is_headless = is_headless_environment();
+
+    let backends = if is_headless {
+        wgpu::Backends::VULKAN | wgpu::Backends::GL
+    } else {
+        wgpu::Backends::all()
+    };
+
     let instance = Instance::new(&wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::all(),
+        backends,
         ..Default::default()
     });
 
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::default(),
-            force_fallback_adapter: false,
+            force_fallback_adapter: is_headless,
             compatible_surface: None,
         })
         .await

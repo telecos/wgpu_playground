@@ -64,6 +64,27 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       
+      - name: Install software rendering dependencies for headless GPU testing
+        run: |
+          sudo apt-get update
+          # Install Mesa software rendering (lavapipe for Vulkan, llvmpipe for OpenGL) for headless GPU testing
+          sudo apt-get install -y \
+            mesa-vulkan-drivers \
+            libvulkan1 \
+            vulkan-tools \
+            libegl-mesa0 \
+            libgl1-mesa-dri \
+            libxcb-xfixes0-dev \
+            libxcb1-dev \
+            libx11-dev
+      
+      - name: Verify Vulkan software rendering
+        run: |
+          # Check if Vulkan is available (should use software adapter)
+          vulkaninfo --summary || echo "Vulkan info not available"
+          # Set environment to prefer software rendering
+          echo "VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json" >> $GITHUB_ENV
+      
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
         with:

@@ -173,9 +173,11 @@ When adding new tests:
    ```
 
 3. **GPU Tests** - Handle missing GPU gracefully:
-   - Tests should skip (not fail) when no GPU is available
-   - Use the `create_test_device()` helper from `common` module
-   - Always check for `None` and skip the test in headless environments
+   - Tests automatically use software rendering in CI/headless environments
+   - Use the `create_test_device()` helper from `common` module which handles environment detection
+   - Always check for `None` and skip the test gracefully when no adapter is available
+   - The test framework automatically sets `force_fallback_adapter: true` in CI environments
+   - To test headless mode locally: `WGPU_HEADLESS=1 cargo test` or `CI=1 cargo test`
 
 ### Running Tests
 
@@ -188,6 +190,11 @@ cargo test --workspace --lib
 
 # Run only integration tests
 cargo test --workspace --test '*'
+
+# Test in headless mode (uses software rendering)
+WGPU_HEADLESS=1 cargo test --workspace
+# or
+CI=1 cargo test --workspace
 
 # Run tests for a specific crate
 cargo test -p wgpu_playground_core

@@ -1,0 +1,95 @@
+# PR Labeler Configuration
+# This file defines rules for automatically labeling PRs based on changed files
+# See: https://github.com/actions/labeler
+
+# Documentation changes
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+      - 'README*'
+      - 'CONTRIBUTING*'
+      - 'LICENSE*'
+
+# Dependency updates
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/dependabot.yml'
+
+# CI/CD changes
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**/*'
+      - '.github/actions/**/*'
+
+# Configuration files
+configuration:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.toml'
+      - '*.yml'
+      - '*.yaml'
+      - '.github/**/*.yml'
+      - '.github/**/*.yaml'
+
+# Core library changes
+core:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'crates/wgpu_playground_core/**/*'
+
+# GUI changes
+gui:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'crates/wgpu_playground_gui/**/*'
+
+# Examples
+examples:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'crates/wgpu_playground_examples/**/*'
+
+# Tests
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/tests/**/*'
+      - '**/*_test.rs'
+      - 'tests/**/*'
+
+# Benchmarks
+benchmarks:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/benches/**/*'
+      - '**/*_bench.rs'
+
+# Shaders
+shaders:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.wgsl'
+      - 'assets/shaders/**/*'
+
+# Assets
+assets:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'assets/**/*'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+
+# Security
+security:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'audit.toml'
+      - 'deny.toml'
+      - '.github/workflows/security-*.yml'

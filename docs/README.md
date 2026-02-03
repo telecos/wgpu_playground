@@ -1,6 +1,21 @@
 # wgpu_playground Documentation
 
-This directory contains design documents and implementation notes for the wgpu_playground project.
+This directory contains design documents, implementation notes, and user guides for the wgpu_playground project.
+
+## User Documentation
+
+New to wgpu_playground? Start here:
+
+- **[QUICK_START.md](QUICK_START.md)** - Get up and running in 5 minutes
+- **[USER_GUIDE.md](USER_GUIDE.md)** - Comprehensive user guide with tutorials, workflows, and troubleshooting
+
+These guides cover:
+- Installation and setup
+- GUI navigation and usage
+- Creating buffers, textures, and samplers
+- Writing and compiling shaders
+- Step-by-step tutorials for common tasks
+- Troubleshooting common issues
 
 ## API Documentation
 
@@ -58,9 +73,22 @@ The published documentation includes:
 
 This `docs/` directory also contains various design documents:
 
+#### User-Facing Documentation
+- **[USER_GUIDE.md](USER_GUIDE.md)** - Comprehensive end-user guide covering GUI usage, workflows, and tutorials
+- **[QUICK_START.md](QUICK_START.md)** - Quick start guide to get running in 5 minutes
+- **[SHADER_EDITOR.md](SHADER_EDITOR.md)** - Complete guide to the WGSL Shader Editor
+- **[VISUAL_REGRESSION_TESTING.md](VISUAL_REGRESSION_TESTING.md)** - Guide to the visual regression testing framework
+
+#### Technical Documentation
+- **[WEBGPU_IMPLEMENTATIONS.md](WEBGPU_IMPLEMENTATIONS.md)** - WebGPU implementations (wgpu vs Dawn) and architecture
+- **[BENCHMARKING.md](BENCHMARKING.md)** - Performance benchmarking system and guidelines
+- **[CI_TESTING.md](CI_TESTING.md)** - Continuous integration testing documentation
+- **[architecture.md](architecture.md)** - System architecture and design
+
+#### Implementation Notes
 - UI mockups and design specifications
 - Implementation notes and summaries
-- Architecture documentation
 - Integration guides
+- Feature-specific documentation
 
 These documents complement the API documentation and provide high-level context for the project's design decisions.

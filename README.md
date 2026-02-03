@@ -703,6 +703,23 @@ See [docs/CI_TESTING.md](docs/CI_TESTING.md) for detailed information on:
 - Test reporting and failure notifications
 - Performance characteristics and troubleshooting
 
+### Pull Request Workflow
+
+All pull requests are automatically validated through comprehensive PR checks:
+
+- **Format Check**: Ensures code is properly formatted with `rustfmt`
+- **Lint Check**: Code quality validation with Clippy
+- **Build Check**: Ensures project builds successfully
+- **Test Check**: All tests must pass
+- **Security Check**: Dependency security and license compliance
+- **Automated Labeling**: PRs are labeled by size and type of changes
+
+See [docs/BRANCH_PROTECTION.md](docs/BRANCH_PROTECTION.md) for:
+- Complete PR workflow documentation
+- Branch protection configuration
+- Status check requirements
+- Troubleshooting guide
+
 ## Documentation
 
 ### User Documentation

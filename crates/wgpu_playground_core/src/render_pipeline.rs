@@ -839,19 +839,19 @@ impl DepthStencilState {
 ///
 /// let msaa = MultisampleState::new()
 ///     .with_count(4)
-///     .with_alpha_to_coverage_enabled(true);
+///     .with_alpha_to_coverage(true);
 /// // Converts alpha values to sample coverage
 /// // Useful for rendering vegetation, fences, etc.
 /// ```
 ///
-/// Sample masking (custom sample pattern):
+/// Custom configuration (direct field access):
 /// ```
 /// use wgpu_playground_core::render_pipeline::MultisampleState;
 ///
-/// let msaa = MultisampleState::new()
-///     .with_count(4)
-///     .with_mask(0b1010); // Use samples 1 and 3 only
-/// // Advanced: control which samples are used
+/// let mut msaa = MultisampleState::new()
+///     .with_count(4);
+/// msaa.mask = 0b1010; // Use samples 1 and 3 only
+/// // Advanced: control which samples are used via direct field access
 /// ```
 ///
 /// # Notes

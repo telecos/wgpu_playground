@@ -96,7 +96,7 @@ The wgpu_playground interface consists of:
 
 ### Available Tabs
 
-The application provides 18 specialized tabs organized by functionality:
+The application provides 19 specialized tabs organized by functionality:
 
 #### GPU Setup Tabs
 

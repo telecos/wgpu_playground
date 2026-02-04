@@ -16,6 +16,8 @@ use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
 use wgpu_playground_core::resource_inspector::ResourceInspectorPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
+use wgpu_playground_core::settings_panel::SettingsPanel;
+use wgpu_playground_core::state::Theme;
 use wgpu_playground_core::texture_panel::TexturePanel;
 
 pub struct PlaygroundApp {
@@ -38,6 +40,7 @@ pub struct PlaygroundApp {
     resource_inspector_panel: ResourceInspectorPanel,
     performance_panel: PerformancePanel,
     command_recording_panel: CommandRecordingPanel,
+    settings_panel: SettingsPanel,
     selected_tab: Tab,
     // Collapsible section states
     setup_section_open: bool,
@@ -71,6 +74,7 @@ enum Tab {
     ResourceInspector,
     Performance,
     CommandRecording,
+    Settings,
 }
 
 impl PlaygroundApp {
@@ -100,6 +104,7 @@ impl PlaygroundApp {
             resource_inspector_panel: ResourceInspectorPanel::new(),
             performance_panel: PerformancePanel::new(),
             command_recording_panel: CommandRecordingPanel::new(),
+            settings_panel: SettingsPanel::new(),
             selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
             // Initialize section states - Rendering open by default
             setup_section_open: false,
@@ -345,6 +350,11 @@ impl PlaygroundApp {
                             Tab::Performance,
                             "  Performance",
                         );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::Settings,
+                            "  Settings",
+                        );
                     });
                 }
             });
@@ -371,13 +381,38 @@ impl PlaygroundApp {
             Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
             Tab::Performance => self.performance_panel.ui(ui),
             Tab::CommandRecording => self.command_recording_panel.ui(ui),
+            Tab::Settings => {
+                if let Some(new_theme) = self.settings_panel.ui(ui) {
+                    // Apply the theme change
+                    Self::apply_theme(ctx, new_theme);
+                    // Save the state with the new theme
+                    let filename = self.save_load_filename.clone();
+                    let path = std::path::Path::new(&filename);
+                    if let Err(e) = self.save_state_to_file(path) {
+                        log::warn!("Failed to save theme preference: {}", e);
+                    }
+                }
+            }
         });
+    }
+
+    /// Apply a theme to the egui context
+    fn apply_theme(ctx: &egui::Context, theme: Theme) {
+        match theme {
+            Theme::Light => {
+                ctx.set_visuals(egui::Visuals::light());
+            }
+            Theme::Dark => {
+                ctx.set_visuals(egui::Visuals::dark());
+            }
+        }
     }
 
     /// Export the current playground state
     pub fn export_state(&self) -> wgpu_playground_core::state::PlaygroundState {
         wgpu_playground_core::state::PlaygroundState {
             version: "1.0".to_string(),
+            theme: self.settings_panel.get_theme(),
             buffer_panel: Some(self.buffer_panel.export_state()),
             texture_panel: Some(self.texture_panel.export_state()),
             sampler_panel: Some(self.sampler_panel.export_state()),
@@ -391,6 +426,9 @@ impl PlaygroundApp {
 
     /// Import state into the playground
     pub fn import_state(&mut self, state: &wgpu_playground_core::state::PlaygroundState) {
+        // Import theme preference
+        self.settings_panel.set_theme(state.theme);
+        
         if let Some(buffer_state) = &state.buffer_panel {
             self.buffer_panel.import_state(buffer_state);
         }

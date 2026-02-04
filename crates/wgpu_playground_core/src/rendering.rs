@@ -802,7 +802,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             if let Some(idx) = self.selected_example {
                 let example_id = self.examples[idx].id;
                 let example_name = self.examples[idx].name;
-                
+
                 ui.heading(format!("🎨 {}", example_name));
                 ui.separator();
                 ui.add_space(5.0);
@@ -827,10 +827,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                             self.camera_rotation_y += delta.x * 0.01;
                             self.camera_rotation_x -= delta.y * 0.01;
                             // Clamp rotation_x to avoid gimbal lock
-                            self.camera_rotation_x = self.camera_rotation_x.clamp(
-                                -std::f32::consts::PI / 2.0,
-                                std::f32::consts::PI / 2.0,
-                            );
+                            self.camera_rotation_x = self
+                                .camera_rotation_x
+                                .clamp(-std::f32::consts::PI / 2.0, std::f32::consts::PI / 2.0);
                         }
 
                         // Mouse wheel for zoom
@@ -951,26 +950,25 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     ui.add_space(10.0);
 
                     // Run button (only for rendering examples)
-                    if example_category == ExampleCategory::Rendering {
-                        if ui
+                    if example_category == ExampleCategory::Rendering
+                        && ui
                             .button(if self.is_example_running {
                                 "⏹ Stop Example"
                             } else {
                                 "▶ Run Example"
                             })
                             .clicked()
-                        {
-                            if self.is_example_running {
-                                self.is_example_running = false;
-                                self.render_state = RenderState::None;
-                            } else {
-                                self.is_example_running = true;
-                                // Create render state based on example
-                                if example_id == "triangle" {
-                                    self.create_triangle_render_state(device, queue);
-                                } else if example_id == "cube" {
-                                    self.create_cube_render_state(device, queue);
-                                }
+                    {
+                        if self.is_example_running {
+                            self.is_example_running = false;
+                            self.render_state = RenderState::None;
+                        } else {
+                            self.is_example_running = true;
+                            // Create render state based on example
+                            if example_id == "triangle" {
+                                self.create_triangle_render_state(device, queue);
+                            } else if example_id == "cube" {
+                                self.create_cube_render_state(device, queue);
                             }
                         }
                     }

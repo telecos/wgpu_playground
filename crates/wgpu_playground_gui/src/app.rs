@@ -131,8 +131,8 @@ impl PlaygroundApp {
 
                 // Setup Section
                 ui.push_id("setup_section", |ui| {
-                    let header_response = ui
-                        .selectable_label(self.setup_section_open, "⚙️ Setup & Configuration");
+                    let header_response =
+                        ui.selectable_label(self.setup_section_open, "⚙️ Setup & Configuration");
                     if header_response.clicked() {
                         self.setup_section_open = !self.setup_section_open;
                     }
@@ -150,15 +150,19 @@ impl PlaygroundApp {
                             Tab::DeviceConfig,
                             "  Device Config",
                         );
-                        ui.selectable_value(&mut self.selected_tab, Tab::DeviceInfo, "  Device Info");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::DeviceInfo,
+                            "  Device Info",
+                        );
                     });
                 }
                 ui.add_space(3.0);
 
                 // Rendering Section
                 ui.push_id("rendering_section", |ui| {
-                    let header_response = ui
-                        .selectable_label(self.rendering_section_open, "🎨 Rendering & Graphics");
+                    let header_response =
+                        ui.selectable_label(self.rendering_section_open, "🎨 Rendering & Graphics");
                     if header_response.clicked() {
                         self.rendering_section_open = !self.rendering_section_open;
                     }
@@ -166,7 +170,11 @@ impl PlaygroundApp {
 
                 if self.rendering_section_open {
                     ui.indent("rendering_indent", |ui| {
-                        ui.selectable_value(&mut self.selected_tab, Tab::Rendering, "  Examples & Preview");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::Rendering,
+                            "  Examples & Preview",
+                        );
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::RenderPipelineConfig,
@@ -177,7 +185,11 @@ impl PlaygroundApp {
                             Tab::RenderPassConfig,
                             "  Render Pass",
                         );
-                        ui.selectable_value(&mut self.selected_tab, Tab::DrawCommand, "  Draw Commands");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::DrawCommand,
+                            "  Draw Commands",
+                        );
                     });
                 }
                 ui.add_space(3.0);
@@ -193,7 +205,11 @@ impl PlaygroundApp {
 
                 if self.compute_section_open {
                     ui.indent("compute_indent", |ui| {
-                        ui.selectable_value(&mut self.selected_tab, Tab::Compute, "  Compute Panel");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::Compute,
+                            "  Compute Panel",
+                        );
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::ComputePipelineConfig,
@@ -219,11 +235,7 @@ impl PlaygroundApp {
 
                 if self.resources_section_open {
                     ui.indent("resources_indent", |ui| {
-                        ui.selectable_value(
-                            &mut self.selected_tab,
-                            Tab::BufferConfig,
-                            "  Buffers",
-                        );
+                        ui.selectable_value(&mut self.selected_tab, Tab::BufferConfig, "  Buffers");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::TextureConfig,
@@ -270,7 +282,11 @@ impl PlaygroundApp {
                             "  Command Recording",
                         );
                         ui.selectable_value(&mut self.selected_tab, Tab::Console, "  Console");
-                        ui.selectable_value(&mut self.selected_tab, Tab::Performance, "  Performance");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::Performance,
+                            "  Performance",
+                        );
                     });
                 }
             });

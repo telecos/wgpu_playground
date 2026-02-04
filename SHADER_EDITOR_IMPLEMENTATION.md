@@ -73,13 +73,22 @@ Successfully implemented a comprehensive WGSL shader editor for the WebGPU Playg
     - Tips row explaining WGSL basics
     - Usage guidance for vertex, fragment, and compute shaders
 
+12. **Hot Reload Capability** (Native platforms only)
+    - Automatic file watching for shader changes
+    - Real-time reload when shader files are modified on disk
+    - Toggle control to enable/disable hot reload
+    - Visual indicator showing hot reload status
+    - Non-blocking file system monitoring
+    - Only active when a file is loaded (not for inline shaders)
+
 ## Testing
 
-### Test Coverage: 727 Total Tests ✅
+### Test Coverage: 732 Total Tests ✅
 
 **Shader Editor Specific:**
 - 9 unit tests in `shader_editor.rs`
 - 9 integration tests in `shader_editor_integration_test.rs`
+- 5 hot reload tests in `shader_hot_reload_test.rs`
 
 **Unit Tests:**
 1. `test_shader_editor_new` - Editor initialization
@@ -252,6 +261,91 @@ editor.ui(ui, Some(&device));
 - ✅ macOS (tested in CI)  
 - ✅ Windows (tested in CI)
 - ✅ All wgpu backends (Vulkan, Metal, DX12, OpenGL)
+
+## Hot Reload Feature
+
+### Overview
+
+The hot reload feature automatically detects changes to shader files on disk and reloads them in real-time, enabling a seamless development workflow. This feature is particularly useful when editing shaders in an external editor while the application is running.
+
+### How It Works
+
+1. **File Watching**: When a shader file is loaded, the shader editor starts monitoring the file for changes using the `notify` crate
+2. **Change Detection**: The file watcher detects when the shader file is modified, created, or saved
+3. **Automatic Reload**: The shader source is automatically reloaded from disk when changes are detected
+4. **UI Update**: The editor updates the displayed code and requests a UI repaint
+
+### Usage
+
+1. Load a shader file using the "📁 Load" button or "📚 Load Example" button
+2. The hot reload toggle (🔥 Hot Reload) will be visible in the options section
+3. Hot reload is enabled by default when a file is loaded
+4. Edit the shader file in your favorite external editor (VS Code, Vim, etc.)
+5. Save the file - changes will automatically appear in the shader editor
+6. Toggle hot reload off if you want to disable automatic reloading
+
+### Platform Support
+
+- ✅ **Native platforms** (Linux, macOS, Windows): Full support
+- ❌ **WASM/Web**: Not available (file system access is limited in browsers)
+
+### Implementation Details
+
+**Modules:**
+- `shader_watcher.rs`: File system watcher using the `notify` crate
+- `shader.rs`: Shader reload functionality via `ShaderModule::reload()`
+- `shader_editor.rs`: UI integration and automatic reload on file changes
+
+**Key Features:**
+- Non-blocking: File watching runs in a separate thread
+- Efficient: Only monitors the shader directory, not the entire file system
+- Safe: Uses the same path validation as regular file loading
+- Debounced: Handles multiple rapid file system events gracefully
+
+### Testing
+
+Comprehensive tests in `tests/shader_hot_reload_test.rs`:
+- `test_shader_watcher_detects_changes`: Verifies file change detection
+- `test_shader_module_reload`: Tests shader content reload
+- `test_shader_module_reload_inline_shader`: Ensures inline shaders are not reloaded
+- `test_shader_module_reload_with_same_content`: Verifies no-op for unchanged files
+- `test_shader_watcher_multiple_files`: Tests multiple file monitoring
+
+All tests use the `serial_test` crate to prevent race conditions when accessing shared test files.
+
+## API Example
+
+```rust
+use wgpu_playground_core::shader_editor::ShaderEditor;
+use wgpu_playground_core::shader_watcher::ShaderWatcher;
+use wgpu_playground_core::shader::ShaderModule;
+
+// Create editor with hot reload enabled
+let mut editor = ShaderEditor::new();
+
+// Load a shader file - hot reload starts automatically
+editor.load_from_file("example.wgsl");
+
+// Edit the file externally and save...
+// The editor will automatically detect and reload changes
+
+// Manually reload a shader module
+let mut shader = ShaderModule::from_file("example.wgsl", Some("my_shader"))?;
+// ... edit the file ...
+if shader.reload()? {
+    println!("Shader was reloaded with new content");
+}
+
+// Create a standalone watcher
+let watcher = ShaderWatcher::new()?;
+// In your update loop:
+for event in watcher.poll_all() {
+    println!("Shader '{}' changed", event.filename);
+}
+
+// Render UI with hot reload control visible
+editor.ui(ui, Some(&device));
+```
 
 ## Future Enhancements
 

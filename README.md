@@ -72,6 +72,7 @@ The application provides a tabbed interface with six main sections:
      - Inline editing and validation
      - Real-time compilation with error reporting
      - Load example shaders or write your own
+     - **Hot Reload**: Automatically reload and update shaders when files change on disk (native platforms only)
    - Render pipeline configuration (planned)
    - Buffer and vertex data management (planned)
    - Texture operations and sampling (planned)

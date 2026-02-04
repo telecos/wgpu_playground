@@ -286,12 +286,14 @@ fn load_gltf(path: &Path) -> Result<ModelData, ModelLoadError> {
                 .unwrap_or_else(|| vec![[0.0, 0.0]; positions.len()]);
             
             // Build vertices
+            // Note: normals and tex_coords are guaranteed to be the same length as positions
+            // due to the unwrap_or_else fallbacks above that create default arrays
             let mut vertices = Vec::new();
             for i in 0..positions.len() {
                 vertices.push(ModelVertex::new(
                     positions[i],
-                    normals.get(i).copied().unwrap_or([0.0, 1.0, 0.0]),
-                    tex_coords.get(i).copied().unwrap_or([0.0, 0.0]),
+                    normals[i],
+                    tex_coords[i],
                 ));
             }
             

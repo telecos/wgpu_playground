@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>wgpu_playground - WebGPU Demo</title>
     <style>
         * {
@@ -128,6 +131,107 @@
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 5px;
+            }
+
+            .header p {
+                font-size: 1em;
+            }
+
+            .header {
+                padding: 15px 10px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .demo-container {
+                padding: 15px;
+                max-width: 100%;
+            }
+
+            #canvas {
+                height: 300px;
+                border-width: 1px;
+            }
+
+            .footer {
+                padding: 15px 10px;
+                font-size: 0.9em;
+            }
+
+            .footer a {
+                display: inline-block;
+                margin: 5px;
+            }
+
+            .info {
+                padding: 15px;
+                font-size: 0.9em;
+            }
+
+            .info h3 {
+                font-size: 1.1em;
+            }
+
+            .info p {
+                font-size: 0.85em;
+            }
+
+            #status {
+                padding: 10px;
+                font-size: 0.8em;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .demo-container {
+                padding: 10px;
+            }
+
+            #canvas {
+                height: 250px;
+            }
+
+            .info {
+                padding: 10px;
+            }
+        }
+
+        /* Touch-friendly buttons and interactive elements */
+        @media (pointer: coarse) {
+            button, a {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px 20px;
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            #canvas {
+                height: 400px;
+            }
+
+            .container {
+                padding: 10px 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -159,6 +263,9 @@
                 <p style="margin-top: 10px;">
                     <strong>Requirements:</strong> A browser with WebGPU support (Chrome 113+, Edge 113+, Safari Technology Preview*, or Firefox Nightly*).
                 </p>
+                <p style="margin-top: 5px;">
+                    <strong>Mobile Support:</strong> Touch controls enabled for mobile devices. Use single finger to pan/drag and two fingers to pinch-zoom.
+                </p>
                 <p style="margin-top: 5px; font-size: 0.9em; color: #666;">
                     <em>* Requires manual enablement in browser settings</em>
                 </p>
@@ -177,6 +284,76 @@
     <script type="module">
         import init, * as wasm from './pkg/wgpu_playground_core.js';
 
+        // Touch controls state
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let lastTouchDistance = 0;
+
+        // Initialize touch controls for canvas
+        function initTouchControls() {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) return;
+
+            // Prevent default touch behaviors on canvas
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+            console.log('Touch controls initialized');
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touches = e.touches;
+            
+            if (touches.length === 1) {
+                // Single touch - record starting position
+                touchStartX = touches[0].clientX;
+                touchStartY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                // Two fingers - pinch to zoom
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touches = e.touches;
+
+            if (touches.length === 1) {
+                // Single touch - pan/drag
+                const deltaX = touches[0].clientX - touchStartX;
+                const deltaY = touches[0].clientY - touchStartY;
+                
+                // Log touch movement for debugging
+                if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                    console.log(`Touch move: dx=${deltaX}, dy=${deltaY}`);
+                }
+                
+                touchStartX = touches[0].clientX;
+                touchStartY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                // Two fingers - pinch to zoom
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (lastTouchDistance > 0) {
+                    const scale = distance / lastTouchDistance;
+                    console.log(`Pinch scale: ${scale}`);
+                }
+                
+                lastTouchDistance = distance;
+            }
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            lastTouchDistance = 0;
+        }
+
         async function loadDemo() {
             try {
                 // Check for WebGPU support
@@ -191,14 +368,22 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
 
+                // Initialize touch controls after canvas is visible
+                initTouchControls();
+
                 // Update status
                 const statusEl = document.getElementById('status');
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                
                 statusEl.innerHTML = `
                     ✅ <strong>WebGPU initialized successfully!</strong><br>
-                    <small>Ready to explore GPU rendering capabilities.</small>
+                    <small>Ready to explore GPU rendering capabilities.</small><br>
+                    <small>Device: ${isMobile ? 'Mobile' : 'Desktop'} | Touch: ${touchSupport ? 'Enabled' : 'Disabled'}</small>
                 `;
 
                 console.log('wgpu_playground WASM module loaded successfully');
+                console.log(`Mobile device: ${isMobile}, Touch support: ${touchSupport}`);
 
                 // TODO: Initialize your WASM application here
                 // For example: wasm.run_app();

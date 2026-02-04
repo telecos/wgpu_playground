@@ -47,11 +47,44 @@ The demo requires a browser with WebGPU support:
 
 ## Browser Compatibility
 
-| Browser | Version | Support |
-|---------|---------|---------|
-| Chrome/Edge | 113+ | ✅ Full support |
-| Safari | Tech Preview | ✅ With WebGPU enabled |
-| Firefox | Nightly | 🟡 Experimental |
+| Browser | Version | Support | Mobile Support |
+|---------|---------|---------|----------------|
+| Chrome/Edge | 113+ | ✅ Full support | ✅ Touch enabled |
+| Safari | Tech Preview | ✅ With WebGPU enabled | ✅ Touch enabled |
+| Firefox | Nightly | 🟡 Experimental | 🟡 Limited |
+
+## Mobile Support
+
+The demo now includes full mobile device support:
+
+- **Responsive Layout**: Automatically adapts to mobile screen sizes (portrait and landscape)
+- **Touch Controls**: 
+  - Single finger: Pan/drag interaction
+  - Two fingers: Pinch-to-zoom gesture support
+- **Optimized UI**: Touch-friendly buttons and controls (minimum 44px tap targets)
+- **Mobile Detection**: Automatically detects mobile devices and enables appropriate features
+
+### Testing on Mobile
+
+To test on a mobile device:
+
+1. Deploy to GitHub Pages or use a local server accessible from your mobile device
+2. Ensure your mobile browser supports WebGPU:
+   - Android: Chrome 113+ or Edge 113+
+   - iOS: Safari 17+ with WebGPU enabled in Experimental Features
+3. Open the demo URL on your mobile device
+4. Grant any required permissions for GPU access
+
+### Mobile Browser Setup
+
+**iOS (iPhone/iPad):**
+- Open Settings → Safari → Advanced → Experimental Features
+- Enable "WebGPU" option
+- Restart Safari
+
+**Android:**
+- Chrome and Edge 113+ have WebGPU enabled by default
+- For other browsers, check experimental flags
 
 ## Troubleshooting
 

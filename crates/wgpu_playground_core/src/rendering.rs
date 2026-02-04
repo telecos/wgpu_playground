@@ -1204,11 +1204,12 @@ mod tests {
     fn test_rendering_panel_new_without_device() {
         let panel = RenderingPanel::new_without_device();
         assert_eq!(panel.examples.len(), 4);
-        assert_eq!(panel.selected_example, None);
+        assert_eq!(panel.selected_example, Some(0)); // First example is auto-selected
         assert!(!panel.show_source_code);
         assert_eq!(panel.category_filter, None);
         assert!(!panel.is_example_running);
         assert!(!panel.show_shader_editor);
+        assert!(panel.first_render); // First render flag should be true initially
     }
 
     #[test]

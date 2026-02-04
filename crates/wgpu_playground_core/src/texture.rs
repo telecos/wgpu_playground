@@ -622,13 +622,18 @@ pub async fn export_texture_to_bytes(
     let buffer_slice = buffer.slice(..);
     let (sender, receiver) = futures_channel::oneshot::channel();
     buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
-        let _ = sender.send(result);
+        if sender.send(result).is_err() {
+            log::warn!("Buffer mapping receiver was dropped");
+        }
     });
 
-    let _ = device.poll(wgpu::PollType::Wait {
+    if let Err(e) = device.poll(wgpu::PollType::Wait {
         submission_index: None,
         timeout: None,
-    });
+    }) {
+        log::error!("Device poll failed during texture export: {:?}", e);
+        return Err(format!("Device poll failed: {:?}", e));
+    }
 
     receiver
         .await

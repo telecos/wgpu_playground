@@ -117,7 +117,32 @@ A live summary panel displays the current configuration including:
 - Sample count
 - List of selected usage flags
 
-### 7. Actions
+### 7. Texture Loading from Files (NEW)
+Load textures from image files with support for drag-and-drop:
+- **📂 Load Image**: Load PNG, JPEG, and other image formats
+- **🗑️ Clear Loaded Image**: Remove the currently loaded texture data
+- **Drag & Drop Support**: Drag image files directly onto the application window
+- **Automatic Dimension Detection**: Image dimensions are automatically applied to Width/Height fields
+- **Format Support**: PNG, JPEG, and other formats supported by the image crate
+
+#### Supported Image Formats
+- PNG (Portable Network Graphics)
+- JPEG/JPG (Joint Photographic Experts Group)
+- Additional formats supported by the `image` crate
+
+#### Usage
+1. Click **📂 Load Image** button or drag-and-drop an image file onto the application window
+2. The image will be decoded and its dimensions automatically populated in the Width and Height fields
+3. The loaded texture data is stored and ready for texture creation
+4. Use **🗑️ Clear Loaded Image** to remove the loaded data
+
+### 8. Texture Export (NEW)
+Export textures to image files:
+- **Export to PNG**: Save texture data as PNG format
+- **Async Operation**: Uses GPU buffer mapping for efficient data retrieval
+- **Programmatic API**: Available via `export_texture_to_bytes()` function
+
+### 9. Actions
 Three action buttons are provided:
 - **🔍 Validate**: Check if the current configuration is valid
 - **✨ Create Texture**: Validate and create the texture (shows success message)
@@ -149,7 +174,31 @@ pub struct TexturePanel {
     usage_render_attachment: bool,
     validation_error: Option<String>,
     success_message: Option<String>,
+    loaded_texture_data: Option<Vec<u8>>,        // NEW
+    loaded_texture_dimensions: Option<(u32, u32)>, // NEW
+    file_load_message: Option<String>,           // NEW
 }
+```
+
+### New Functions for Texture Loading/Export
+
+```rust
+// Load texture from image bytes
+pub fn load_texture_from_bytes(
+    device: &Device,
+    queue: &wgpu::Queue,
+    bytes: &[u8],
+    label: Option<&str>,
+) -> Result<(Texture, u32, u32), String>
+
+// Export texture to PNG bytes
+pub async fn export_texture_to_bytes(
+    device: &Device,
+    queue: &wgpu::Queue,
+    texture: &Texture,
+    width: u32,
+    height: u32,
+) -> Result<Vec<u8>, String>
 ```
 
 ### Integration

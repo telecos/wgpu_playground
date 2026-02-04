@@ -200,7 +200,7 @@ fn test_url_encoding_integration() {
     // Create a complex state
     let state = PlaygroundState {
         version: "1.0".to_string(),
-        theme: Theme::default(),
+        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "shared_buffer".to_string(),
             size: "4096".to_string(),
@@ -271,7 +271,7 @@ fn test_url_encoding_integration() {
 fn test_shareable_url_generation_integration() {
     let state = PlaygroundState {
         version: "1.0".to_string(),
-        theme: Theme::default(),
+        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "url_buffer".to_string(),
             size: "2048".to_string(),
@@ -352,7 +352,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
     let state = PlaygroundState {
         version: "1.0".to_string(),
-        theme: Theme::default(),
+        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: None,
         texture_panel: None,
         sampler_panel: None,
@@ -388,7 +388,7 @@ fn test_url_parameter_extraction() {
     // Test extracting state from various URL formats
     let state = PlaygroundState {
         version: "1.0".to_string(),
-        theme: Theme::default(),
+        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "test".to_string(),
             size: "1024".to_string(),

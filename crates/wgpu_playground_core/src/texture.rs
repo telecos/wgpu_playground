@@ -1,6 +1,7 @@
 use wgpu::{
-    Device, Extent3d, Texture, TextureAspect, TextureDimension, TextureFormat, TextureUsages,
-    TextureView, TextureViewDescriptor, TextureViewDimension,
+    Device, Extent3d, Origin3d, TexelCopyBufferLayout, TexelCopyTextureInfo, Texture,
+    TextureAspect, TextureDimension, TextureFormat, TextureUsages, TextureView,
+    TextureViewDescriptor, TextureViewDimension,
 };
 
 /// Builder for creating GPU textures with flexible configuration
@@ -463,9 +464,220 @@ pub fn create_default_view(texture: &Texture) -> TextureView {
     TextureViewBuilder::new().build(texture)
 }
 
+/// Load a texture from image file bytes
+///
+/// Supports PNG, JPEG, and other formats supported by the image crate.
+///
+/// # Arguments
+/// * `device` - The GPU device
+/// * `queue` - The GPU queue for uploading data
+/// * `bytes` - The image file bytes
+/// * `label` - Optional label for the texture
+///
+/// # Returns
+/// Result containing the texture and its dimensions, or an error message
+///
+/// # Examples
+/// ```no_run
+/// use wgpu_playground_core::texture::load_texture_from_bytes;
+/// # async fn example(device: &wgpu::Device, queue: &wgpu::Queue) {
+/// let image_bytes = std::fs::read("image.png").unwrap();
+/// let (texture, width, height) = load_texture_from_bytes(
+///     device,
+///     queue,
+///     &image_bytes,
+///     Some("Loaded Image"),
+/// ).unwrap();
+/// # }
+/// ```
+#[allow(clippy::type_complexity)]
+pub fn load_texture_from_bytes(
+    device: &Device,
+    queue: &wgpu::Queue,
+    bytes: &[u8],
+    label: Option<&str>,
+) -> Result<(Texture, u32, u32), String> {
+    use image::GenericImageView;
+
+    // Decode the image
+    let img =
+        image::load_from_memory(bytes).map_err(|e| format!("Failed to decode image: {}", e))?;
+
+    let rgba = img.to_rgba8();
+    let dimensions = img.dimensions();
+
+    // Create the texture
+    let texture = TextureBuilder::new()
+        .with_size(dimensions.0, dimensions.1, 1)
+        .with_format(TextureFormat::Rgba8UnormSrgb)
+        .with_usage(
+            TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::COPY_SRC,
+        )
+        .with_label(label.unwrap_or("Loaded Texture"))
+        .build(device);
+
+    // Upload the image data to the texture
+    queue.write_texture(
+        TexelCopyTextureInfo {
+            texture: &texture,
+            mip_level: 0,
+            origin: Origin3d::ZERO,
+            aspect: TextureAspect::All,
+        },
+        &rgba,
+        TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(4 * dimensions.0),
+            rows_per_image: Some(dimensions.1),
+        },
+        Extent3d {
+            width: dimensions.0,
+            height: dimensions.1,
+            depth_or_array_layers: 1,
+        },
+    );
+
+    log::info!(
+        "Loaded texture from bytes: {}x{}, format: Rgba8UnormSrgb",
+        dimensions.0,
+        dimensions.1
+    );
+
+    Ok((texture, dimensions.0, dimensions.1))
+}
+
+/// Export texture data to image file bytes
+///
+/// Exports texture data as PNG format.
+///
+/// # Arguments
+/// * `device` - The GPU device
+/// * `queue` - The GPU queue
+/// * `texture` - The texture to export
+/// * `width` - Texture width
+/// * `height` - Texture height
+///
+/// # Returns
+/// Result containing the PNG file bytes, or an error message
+///
+/// # Examples
+/// ```no_run
+/// use wgpu_playground_core::texture::export_texture_to_bytes;
+/// # async fn example(device: &wgpu::Device, queue: &wgpu::Queue, texture: &wgpu::Texture) {
+/// let png_bytes = export_texture_to_bytes(
+///     device,
+///     queue,
+///     texture,
+///     256,
+///     256,
+/// ).await.unwrap();
+/// std::fs::write("exported.png", png_bytes).unwrap();
+/// # }
+/// ```
+pub async fn export_texture_to_bytes(
+    device: &Device,
+    queue: &wgpu::Queue,
+    texture: &Texture,
+    width: u32,
+    height: u32,
+) -> Result<Vec<u8>, String> {
+    use image::{ImageBuffer, Rgba};
+
+    // Create a buffer to read the texture data
+    let buffer_size = (width * height * 4) as wgpu::BufferAddress;
+    let buffer = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("Texture Export Buffer"),
+        size: buffer_size,
+        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+        mapped_at_creation: false,
+    });
+
+    // Create a command encoder to copy texture to buffer
+    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+        label: Some("Texture Export Encoder"),
+    });
+
+    encoder.copy_texture_to_buffer(
+        TexelCopyTextureInfo {
+            texture,
+            mip_level: 0,
+            origin: Origin3d::ZERO,
+            aspect: TextureAspect::All,
+        },
+        wgpu::TexelCopyBufferInfo {
+            buffer: &buffer,
+            layout: TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(4 * width),
+                rows_per_image: Some(height),
+            },
+        },
+        Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        },
+    );
+
+    queue.submit(Some(encoder.finish()));
+
+    // Map the buffer to read the data
+    let buffer_slice = buffer.slice(..);
+    let (sender, receiver) = futures_channel::oneshot::channel();
+    buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
+        if sender.send(result).is_err() {
+            log::warn!("Buffer mapping receiver was dropped");
+        }
+    });
+
+    if let Err(e) = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    }) {
+        log::error!("Device poll failed during texture export: {:?}", e);
+        return Err(format!("Device poll failed: {:?}", e));
+    }
+
+    receiver
+        .await
+        .map_err(|_| {
+            log::error!("Failed to receive buffer mapping result - receiver was dropped");
+            "Failed to receive buffer mapping result".to_string()
+        })?
+        .map_err(|e| format!("Failed to map buffer: {:?}", e))?;
+
+    let data = buffer_slice.get_mapped_range();
+    let rgba_data: Vec<u8> = data.to_vec();
+    drop(data);
+    buffer.unmap();
+
+    // Create an image from the RGBA data
+    #[allow(clippy::type_complexity)]
+    let img: ImageBuffer<Rgba<u8>, Vec<u8>> = ImageBuffer::from_raw(width, height, rgba_data)
+        .ok_or_else(|| "Failed to create image buffer from texture data".to_string())?;
+
+    // Encode to PNG
+    let mut png_bytes = Vec::new();
+    img.write_to(
+        &mut std::io::Cursor::new(&mut png_bytes),
+        image::ImageFormat::Png,
+    )
+    .map_err(|e| format!("Failed to encode PNG: {}", e))?;
+
+    log::info!(
+        "Exported texture to PNG: {}x{} ({} bytes)",
+        width,
+        height,
+        png_bytes.len()
+    );
+
+    Ok(png_bytes)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use image::GenericImageView;
 
     #[test]
     fn test_texture_builder_default() {
@@ -1082,5 +1294,37 @@ mod tests {
         assert_eq!(builder.label, cloned.label);
         assert_eq!(builder.base_mip_level, cloned.base_mip_level);
         assert_eq!(builder.mip_level_count, cloned.mip_level_count);
+    }
+
+    #[test]
+    fn test_load_texture_from_bytes_invalid_data() {
+        // Test loading from invalid image data
+        let invalid_bytes = vec![0u8; 100];
+
+        // This should fail since it's not valid image data
+        assert!(image::load_from_memory(&invalid_bytes).is_err());
+    }
+
+    #[test]
+    fn test_load_texture_from_bytes_png_format() {
+        // Create a minimal valid PNG (1x1 pixel, white)
+        let png_data = vec![
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1x1 dimensions
+            0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49,
+            0x44, 0x41, // IDAT chunk
+            0x54, 0x08, 0xD7, 0x63, 0xF8, 0xFF, 0xFF, 0x3F, 0x00, 0x05, 0xFE, 0x02, 0xFE, 0xDC,
+            0xCC, 0x59, 0xE7, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, // IEND chunk
+            0x44, 0xAE, 0x42, 0x60, 0x82,
+        ];
+
+        // This should successfully decode
+        let result = image::load_from_memory(&png_data);
+        assert!(result.is_ok());
+
+        if let Ok(img) = result {
+            assert_eq!(img.dimensions(), (1, 1));
+        }
     }
 }

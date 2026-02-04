@@ -1,3 +1,4 @@
+use image::GenericImageView;
 use wgpu::{TextureDimension, TextureFormat, TextureUsages};
 
 /// UI panel for creating and configuring GPU textures
@@ -28,6 +29,12 @@ pub struct TexturePanel {
     validation_error: Option<String>,
     /// Success message
     success_message: Option<String>,
+    /// Loaded texture data (bytes)
+    loaded_texture_data: Option<Vec<u8>>,
+    /// Loaded texture dimensions
+    loaded_texture_dimensions: Option<(u32, u32)>,
+    /// File load message
+    file_load_message: Option<String>,
 }
 
 impl Default for TexturePanel {
@@ -55,6 +62,9 @@ impl TexturePanel {
             usage_render_attachment: false,
             validation_error: None,
             success_message: None,
+            loaded_texture_data: None,
+            loaded_texture_dimensions: None,
+            file_load_message: None,
         }
     }
 
@@ -181,6 +191,46 @@ impl TexturePanel {
             usage |= TextureUsages::RENDER_ATTACHMENT;
         }
         usage
+    }
+
+    /// Handle file loading from bytes
+    pub fn load_from_bytes(&mut self, bytes: Vec<u8>) {
+        // Try to decode the image to get dimensions
+        match image::load_from_memory(&bytes) {
+            Ok(img) => {
+                let dimensions = img.dimensions();
+                self.loaded_texture_data = Some(bytes);
+                self.loaded_texture_dimensions = Some(dimensions);
+                self.width_input = dimensions.0.to_string();
+                self.height_input = dimensions.1.to_string();
+                self.file_load_message = Some(format!(
+                    "✓ Image loaded successfully: {}x{} pixels",
+                    dimensions.0, dimensions.1
+                ));
+                self.validation_error = None;
+            }
+            Err(e) => {
+                self.file_load_message = None;
+                self.validation_error = Some(format!("Failed to load image: {}", e));
+            }
+        }
+    }
+
+    /// Clear loaded texture data
+    pub fn clear_loaded_texture(&mut self) {
+        self.loaded_texture_data = None;
+        self.loaded_texture_dimensions = None;
+        self.file_load_message = None;
+    }
+
+    /// Get loaded texture data
+    pub fn get_loaded_texture_data(&self) -> Option<&Vec<u8>> {
+        self.loaded_texture_data.as_ref()
+    }
+
+    /// Get loaded texture dimensions
+    pub fn get_loaded_texture_dimensions(&self) -> Option<(u32, u32)> {
+        self.loaded_texture_dimensions
     }
 
     /// Render the texture configuration UI
@@ -349,6 +399,52 @@ impl TexturePanel {
                             "Texture can be used as a render attachment",
                         );
                     });
+            });
+
+            ui.add_space(15.0);
+
+            // File Loading Section
+            ui.group(|ui| {
+                ui.heading("📁 Load Texture from File");
+                ui.label("Load image files (PNG, JPEG) to create textures.");
+                ui.add_space(5.0);
+
+                ui.horizontal(|ui| {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    {
+                        if ui.button("📂 Load Image...").clicked() {
+                            self.file_load_message = Some("Drag and drop an image file onto this window to load it.".to_string());
+                        }
+                    }
+
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        if ui.button("📂 Load Image...").clicked() {
+                            self.file_load_message = Some("Drag and drop an image file onto the browser window to load it.".to_string());
+                        }
+                    }
+
+                    if self.loaded_texture_data.is_some()
+                        && ui.button("🗑️ Clear Loaded Image").clicked()
+                    {
+                        self.clear_loaded_texture();
+                    }
+                });
+
+                ui.add_space(5.0);
+
+                // Display file load message or loaded texture info
+                if let Some(msg) = &self.file_load_message {
+                    ui.colored_label(egui::Color32::GREEN, msg);
+                }
+
+                if let Some((width, height)) = self.loaded_texture_dimensions {
+                    ui.label(format!("📐 Loaded image: {} x {} pixels", width, height));
+                    ui.label("Image dimensions have been applied to Width and Height fields.");
+                }
+
+                ui.add_space(5.0);
+                ui.label("💡 Tip: Drag and drop image files onto the application window to load them.");
             });
 
             ui.add_space(15.0);
@@ -675,5 +771,70 @@ mod tests {
 
         panel.selected_dimension = TextureDimension::D3;
         assert_eq!(panel.selected_dimension, TextureDimension::D3);
+    }
+
+    #[test]
+    fn test_load_from_bytes_valid_png() {
+        let mut panel = TexturePanel::new();
+
+        // Create a minimal valid PNG (1x1 pixel, white)
+        let png_data = vec![
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48,
+            0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00,
+            0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54, 0x08,
+            0xD7, 0x63, 0xF8, 0xFF, 0xFF, 0x3F, 0x00, 0x05, 0xFE, 0x02, 0xFE, 0xDC, 0xCC, 0x59,
+            0xE7, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+        ];
+
+        panel.load_from_bytes(png_data);
+
+        // Should have loaded successfully
+        assert!(panel.loaded_texture_data.is_some());
+        assert!(panel.loaded_texture_dimensions.is_some());
+        assert_eq!(panel.loaded_texture_dimensions, Some((1, 1)));
+        assert_eq!(panel.width_input, "1");
+        assert_eq!(panel.height_input, "1");
+        assert!(panel.file_load_message.is_some());
+        assert!(panel.validation_error.is_none());
+    }
+
+    #[test]
+    fn test_load_from_bytes_invalid_data() {
+        let mut panel = TexturePanel::new();
+        let invalid_data = vec![0u8; 100];
+
+        panel.load_from_bytes(invalid_data);
+
+        // Should have failed to load
+        assert!(panel.loaded_texture_data.is_none());
+        assert!(panel.loaded_texture_dimensions.is_none());
+        assert!(panel.file_load_message.is_none());
+        assert!(panel.validation_error.is_some());
+    }
+
+    #[test]
+    fn test_clear_loaded_texture() {
+        let mut panel = TexturePanel::new();
+
+        // First load some data
+        let png_data = vec![
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48,
+            0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00,
+            0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54, 0x08,
+            0xD7, 0x63, 0xF8, 0xFF, 0xFF, 0x3F, 0x00, 0x05, 0xFE, 0x02, 0xFE, 0xDC, 0xCC, 0x59,
+            0xE7, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+        ];
+        panel.load_from_bytes(png_data);
+
+        // Verify it's loaded
+        assert!(panel.loaded_texture_data.is_some());
+
+        // Clear it
+        panel.clear_loaded_texture();
+
+        // Should be cleared
+        assert!(panel.loaded_texture_data.is_none());
+        assert!(panel.loaded_texture_dimensions.is_none());
+        assert!(panel.file_load_message.is_none());
     }
 }

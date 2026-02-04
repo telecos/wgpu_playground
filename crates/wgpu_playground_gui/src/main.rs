@@ -340,9 +340,16 @@ impl ApplicationHandler for App {
                 if let Ok(bytes) = std::fs::read(&path) {
                     // Check if it's an image file by extension
                     if let Some(ext) = path.extension() {
-                        let ext_str = ext.to_str().unwrap_or("").to_lowercase();
-                        if ext_str == "png" || ext_str == "jpg" || ext_str == "jpeg" {
-                            state.playground_app.handle_dropped_image(bytes);
+                        match ext.to_str() {
+                            Some(ext_str) => {
+                                let ext_lower = ext_str.to_lowercase();
+                                if ext_lower == "png" || ext_lower == "jpg" || ext_lower == "jpeg" {
+                                    state.playground_app.handle_dropped_image(bytes);
+                                }
+                            }
+                            None => {
+                                log::warn!("Dropped file has invalid UTF-8 extension: {:?}", path);
+                            }
                         }
                     }
                 }

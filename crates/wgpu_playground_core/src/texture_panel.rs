@@ -413,15 +413,14 @@ impl TexturePanel {
                     #[cfg(not(target_arch = "wasm32"))]
                     {
                         if ui.button("📂 Load Image...").clicked() {
-                            // For native platforms, we'll show a message about drag-and-drop
-                            self.file_load_message = Some("Drag and drop an image file onto this window, or use file system access in your application.".to_string());
+                            self.file_load_message = Some("Drag and drop an image file onto this window to load it.".to_string());
                         }
                     }
 
                     #[cfg(target_arch = "wasm32")]
                     {
                         if ui.button("📂 Load Image...").clicked() {
-                            self.file_load_message = Some("File loading in browser - use drag and drop or file upload in your application.".to_string());
+                            self.file_load_message = Some("Drag and drop an image file onto the browser window to load it.".to_string());
                         }
                     }
 

@@ -622,7 +622,7 @@ pub async fn export_texture_to_bytes(
     let buffer_slice = buffer.slice(..);
     let (sender, receiver) = futures_channel::oneshot::channel();
     buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
-        sender.send(result).unwrap();
+        let _ = sender.send(result);
     });
 
     let _ = device.poll(wgpu::PollType::Wait {
@@ -632,7 +632,10 @@ pub async fn export_texture_to_bytes(
 
     receiver
         .await
-        .map_err(|_| "Failed to receive buffer mapping result".to_string())?
+        .map_err(|_| {
+            log::error!("Failed to receive buffer mapping result - receiver was dropped");
+            "Failed to receive buffer mapping result".to_string()
+        })?
         .map_err(|e| format!("Failed to map buffer: {:?}", e))?;
 
     let data = buffer_slice.get_mapped_range();

@@ -13,12 +13,16 @@ pub struct ShaderChangeEvent {
 
 /// A shader file watcher that monitors shader directory for changes
 /// 
-/// This is only available on native platforms (not WASM)
+/// This is only available on native platforms (not WASM).
+/// On WASM platforms, the watcher can be created but will not detect any changes.
 #[cfg(not(target_arch = "wasm32"))]
 pub struct ShaderWatcher {
     _watcher: notify::RecommendedWatcher,
     receiver: Arc<Mutex<Receiver<ShaderChangeEvent>>>,
 }
+
+/// Type alias for the result type returned by ShaderWatcher operations
+type WatcherResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 #[cfg(not(target_arch = "wasm32"))]
 impl ShaderWatcher {
@@ -37,7 +41,7 @@ impl ShaderWatcher {
     ///     println!("Shader changed: {}", event.filename);
     /// }
     /// ```
-    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new() -> WatcherResult<Self> {
         use notify::{Watcher, RecursiveMode, Event, EventKind};
         
         let (tx, rx) = channel();
@@ -111,12 +115,17 @@ impl ShaderWatcher {
 }
 
 // WASM stub implementation
+/// WASM stub that provides the same API but without file watching functionality
 #[cfg(target_arch = "wasm32")]
 pub struct ShaderWatcher;
 
 #[cfg(target_arch = "wasm32")]
 impl ShaderWatcher {
-    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    /// Create a new shader watcher (WASM stub - does nothing)
+    /// 
+    /// On WASM, this creates a stub that never reports any file changes
+    /// since file system access is not available in browsers.
+    pub fn new() -> WatcherResult<Self> {
         Ok(Self)
     }
     

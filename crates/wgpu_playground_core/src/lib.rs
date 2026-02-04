@@ -35,6 +35,7 @@ pub mod rendering;
 pub mod resource_inspector;
 pub mod sampler;
 pub mod sampler_panel;
+pub mod settings_panel;
 pub mod shader;
 pub mod shader_editor;
 pub mod shader_watcher;

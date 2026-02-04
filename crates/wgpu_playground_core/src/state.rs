@@ -133,11 +133,22 @@ pub struct BindGroupLayoutPanelState {
     // Additional bind group layout configuration fields can be added here
 }
 
+/// UI theme preference
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub enum Theme {
+    Light,
+    #[default]
+    Dark,
+}
+
 /// Complete serializable playground state
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlaygroundState {
     /// Version of the state format for backward compatibility
     pub version: String,
+    /// UI theme preference
+    #[serde(default)]
+    pub theme: Theme,
     /// Buffer panel state
     pub buffer_panel: Option<BufferPanelState>,
     /// Texture panel state
@@ -160,6 +171,7 @@ impl Default for PlaygroundState {
     fn default() -> Self {
         Self {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: None,
             texture_panel: None,
             sampler_panel: None,
@@ -213,6 +225,7 @@ mod tests {
     fn test_state_serialization() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "test_buffer".to_string(),
                 size: "1024".to_string(),
@@ -257,6 +270,7 @@ mod tests {
     fn test_shader_editor_state_serialization() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: None,
             texture_panel: None,
             sampler_panel: None,

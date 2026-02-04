@@ -160,8 +160,8 @@ impl PlaygroundApp {
                     log::info!("State saved to {}", filename);
                 }
             }
-            
-            // Ctrl+O or Cmd+O: Load state  
+
+            // Ctrl+O or Cmd+O: Load state
             if i.modifiers.command && i.key_pressed(egui::Key::O) {
                 let filename = self.save_load_filename.clone();
                 let path = std::path::Path::new(&filename);
@@ -199,9 +199,11 @@ impl PlaygroundApp {
                     // File operations
                     ui.label("File:");
 
-                    if ui.button("💾 Save State")
+                    if ui
+                        .button("💾 Save State")
                         .on_hover_text("Save current playground state to a file (Ctrl+S)")
-                        .clicked() {
+                        .clicked()
+                    {
                         let filename = self.save_load_filename.clone();
                         let path = std::path::Path::new(&filename);
                         match self.save_state_to_file(path) {
@@ -215,9 +217,11 @@ impl PlaygroundApp {
                         }
                     }
 
-                    if ui.button("📂 Load State")
+                    if ui
+                        .button("📂 Load State")
                         .on_hover_text("Load playground state from a file (Ctrl+O)")
-                        .clicked() {
+                        .clicked()
+                    {
                         let filename = self.save_load_filename.clone();
                         let path = std::path::Path::new(&filename);
                         match self.load_state_from_file(path) {
@@ -235,7 +239,8 @@ impl PlaygroundApp {
                         egui::TextEdit::singleline(&mut self.save_load_filename)
                             .desired_width(200.0)
                             .hint_text("filename.json"),
-                    ).on_hover_text("Enter filename for save/load operations");
+                    )
+                    .on_hover_text("Enter filename for save/load operations");
                 });
             });
 
@@ -256,9 +261,13 @@ impl PlaygroundApp {
             ui.horizontal(|ui| {
                 ui.label("Share:");
 
-                if ui.button("🔗 Generate Share Link")
-                    .on_hover_text("Generate a shareable URL with your current playground configuration")
-                    .clicked() {
+                if ui
+                    .button("🔗 Generate Share Link")
+                    .on_hover_text(
+                        "Generate a shareable URL with your current playground configuration",
+                    )
+                    .clicked()
+                {
                     // Get current base URL (for native, use localhost; for web, use window.location)
                     let base_url = if cfg!(target_arch = "wasm32") {
                         "https://telecos.github.io/wgpu_playground/demo"
@@ -279,9 +288,12 @@ impl PlaygroundApp {
                     }
                 }
 
-                if !self.share_url.is_empty() && ui.button("📋 Copy to Clipboard")
-                    .on_hover_text("Copy the generated share link to clipboard")
-                    .clicked() {
+                if !self.share_url.is_empty()
+                    && ui
+                        .button("📋 Copy to Clipboard")
+                        .on_hover_text("Copy the generated share link to clipboard")
+                        .clicked()
+                {
                     ctx.copy_text(self.share_url.clone());
                     self.share_message = Some("✓ Copied to clipboard!".to_string());
                 }
@@ -316,14 +328,14 @@ impl PlaygroundApp {
         egui::SidePanel::left("sidebar").show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("Navigation");
-                
+
                 // Platform-appropriate shortcut hint
                 let shortcut_modifier = if cfg!(target_os = "macos") {
                     "Cmd"
                 } else {
                     "Ctrl"
                 };
-                
+
                 ui.label(format!("Quick navigation: {shortcut_modifier}+1-6"))
                     .on_hover_text(format!(
                         "Keyboard shortcuts:\n{0}+1: Rendering\n{0}+2: Compute\n{0}+3: Buffers\n{0}+4: Textures\n{0}+5: Console\n{0}+6: Settings",

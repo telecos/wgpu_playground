@@ -439,6 +439,7 @@ mod tests {
     fn test_url_encoding_with_buffer_state() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "vertex_buffer".to_string(),
                 size: "2048".to_string(),
@@ -492,6 +493,7 @@ fn fs_main() -> @location(0) vec4<f32> {
 
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: None,
             texture_panel: None,
             sampler_panel: None,
@@ -519,6 +521,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     fn test_shareable_url_generation() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "test".to_string(),
                 size: "1024".to_string(),
@@ -593,6 +596,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     fn test_complex_state_roundtrip() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "complex_buffer".to_string(),
                 size: "4096".to_string(),

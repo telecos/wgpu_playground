@@ -1,5 +1,5 @@
-use crate::model_loader::{load_model_from_file, ModelData};
 use crate::assets;
+use crate::model_loader::{load_model_from_file, ModelData};
 use egui::{Color32, RichText};
 use wgpu::Device;
 
@@ -8,12 +8,12 @@ pub struct ModelLoaderPanel {
     // Input state
     filename_input: String,
     selected_format: ModelFormat,
-    
+
     // Loaded model data
     current_model: Option<ModelData>,
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: Option<wgpu::Buffer>,
-    
+
     // UI feedback
     status_message: Option<StatusMessage>,
 }
@@ -128,12 +128,12 @@ impl ModelLoaderPanel {
         ui.collapsing("Help & Examples", |ui| {
             ui.label("Place your model files in the assets/models/ directory.");
             ui.add_space(5.0);
-            
+
             ui.label(RichText::new("Supported formats:").strong());
             ui.label("• Wavefront OBJ (.obj) - Simple mesh format with material support");
             ui.label("• glTF 2.0 (.gltf, .glb) - Modern format with full PBR material support");
             ui.add_space(5.0);
-            
+
             ui.label(RichText::new("Example filenames:").strong());
             ui.label("• cube.obj");
             ui.label("• character.gltf");
@@ -166,7 +166,7 @@ impl ModelLoaderPanel {
                             text: format!("Successfully loaded model: {}", self.filename_input),
                             is_error: false,
                         });
-                        
+
                         self.vertex_buffer = Some(vertex_buffer);
                         self.index_buffer = Some(index_buffer);
                         self.current_model = Some(model);
@@ -198,10 +198,7 @@ impl ModelLoaderPanel {
             ui.label(format!("Meshes: {}", model.meshes.len()));
             ui.label(format!("Total Vertices: {}", model.vertex_count));
             ui.label(format!("Total Indices: {}", model.index_count));
-            ui.label(format!(
-                "Triangles: {}",
-                model.index_count / 3
-            ));
+            ui.label(format!("Triangles: {}", model.index_count / 3));
         });
 
         ui.add_space(5.0);
@@ -210,9 +207,9 @@ impl ModelLoaderPanel {
             ui.group(|ui| {
                 ui.label(RichText::new("Materials").strong());
                 ui.label(format!("Material Count: {}", model.materials.len()));
-                
+
                 ui.add_space(5.0);
-                
+
                 egui::ScrollArea::vertical()
                     .max_height(200.0)
                     .show(ui, |ui| {
@@ -225,18 +222,18 @@ impl ModelLoaderPanel {
                                     material.diffuse_color[2],
                                     material.diffuse_color[3]
                                 ));
-                                
+
                                 if let Some(tex) = &material.diffuse_texture {
                                     ui.label(format!("Diffuse Texture: {}", tex));
                                 }
-                                
+
                                 if let Some(spec) = &material.specular_color {
                                     ui.label(format!(
                                         "Specular Color: [{:.2}, {:.2}, {:.2}]",
                                         spec[0], spec[1], spec[2]
                                     ));
                                 }
-                                
+
                                 if let Some(shininess) = material.shininess {
                                     ui.label(format!("Shininess: {:.2}", shininess));
                                 }
@@ -252,7 +249,7 @@ impl ModelLoaderPanel {
         if !model.meshes.is_empty() {
             ui.group(|ui| {
                 ui.label(RichText::new("Mesh Details").strong());
-                
+
                 egui::ScrollArea::vertical()
                     .max_height(200.0)
                     .show(ui, |ui| {
@@ -261,7 +258,7 @@ impl ModelLoaderPanel {
                                 ui.label(format!("Vertices: {}", mesh.vertices.len()));
                                 ui.label(format!("Indices: {}", mesh.indices.len()));
                                 ui.label(format!("Triangles: {}", mesh.indices.len() / 3));
-                                
+
                                 if let Some(mat_idx) = mesh.material_index {
                                     if let Some(material) = model.materials.get(mat_idx) {
                                         ui.label(format!("Material: {}", material.name));

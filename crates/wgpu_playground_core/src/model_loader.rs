@@ -1,6 +1,6 @@
 use std::path::Path;
-use wgpu::{Buffer, Device};
 use wgpu::util::DeviceExt;
+use wgpu::{Buffer, Device};
 
 /// Errors that can occur during model loading
 #[derive(Debug)]
@@ -103,35 +103,37 @@ impl ModelData {
         // Flatten all vertices from all meshes
         let mut all_vertices = Vec::new();
         let mut all_indices = Vec::new();
-        
+
         for mesh in &self.meshes {
             let vertex_offset = all_vertices.len() as u32;
             all_vertices.extend_from_slice(&mesh.vertices);
-            
+
             // Adjust indices for the current vertex offset
             for &index in &mesh.indices {
                 all_indices.push(index + vertex_offset);
             }
         }
-        
+
         if all_vertices.is_empty() {
-            return Err(ModelLoadError::MissingData("No vertices in model".to_string()));
+            return Err(ModelLoadError::MissingData(
+                "No vertices in model".to_string(),
+            ));
         }
-        
+
         // Create vertex buffer
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Model Vertex Buffer"),
             contents: bytemuck::cast_slice(&all_vertices),
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
-        
+
         // Create index buffer
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Model Index Buffer"),
             contents: bytemuck::cast_slice(&all_indices),
             usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
         });
-        
+
         Ok((vertex_buffer, index_buffer))
     }
 }
@@ -142,7 +144,7 @@ pub fn load_model_from_file(path: &Path) -> Result<ModelData, ModelLoadError> {
         .extension()
         .and_then(|e| e.to_str())
         .ok_or_else(|| ModelLoadError::UnsupportedFormat("No file extension".to_string()))?;
-    
+
     match extension.to_lowercase().as_str() {
         "obj" => load_obj(path),
         "gltf" | "glb" => load_gltf(path),
@@ -164,10 +166,10 @@ fn load_obj(path: &Path) -> Result<ModelData, ModelLoadError> {
         },
     )
     .map_err(|e| ModelLoadError::ParseError(format!("Failed to load OBJ: {}", e)))?;
-    
+
     let mut meshes = Vec::new();
     let mut model_materials = Vec::new();
-    
+
     // Load materials
     if let Ok(mats) = materials {
         for mat in mats {
@@ -185,14 +187,14 @@ fn load_obj(path: &Path) -> Result<ModelData, ModelLoadError> {
             });
         }
     }
-    
+
     let mut total_vertices = 0;
     let mut total_indices = 0;
-    
+
     for model in models {
         let mesh = &model.mesh;
         let mut vertices = Vec::new();
-        
+
         // Build vertices
         for i in 0..mesh.positions.len() / 3 {
             let position = [
@@ -200,7 +202,7 @@ fn load_obj(path: &Path) -> Result<ModelData, ModelLoadError> {
                 mesh.positions[i * 3 + 1],
                 mesh.positions[i * 3 + 2],
             ];
-            
+
             let normal = if !mesh.normals.is_empty() {
                 [
                     mesh.normals[i * 3],
@@ -210,26 +212,26 @@ fn load_obj(path: &Path) -> Result<ModelData, ModelLoadError> {
             } else {
                 [0.0, 1.0, 0.0] // Default normal
             };
-            
+
             let tex_coords = if !mesh.texcoords.is_empty() {
                 [mesh.texcoords[i * 2], mesh.texcoords[i * 2 + 1]]
             } else {
                 [0.0, 0.0] // Default UVs
             };
-            
+
             vertices.push(ModelVertex::new(position, normal, tex_coords));
         }
-        
+
         total_vertices += vertices.len() as u32;
         total_indices += mesh.indices.len() as u32;
-        
+
         meshes.push(Mesh {
             vertices,
             indices: mesh.indices.clone(),
             material_index: mesh.material_id,
         });
     }
-    
+
     Ok(ModelData {
         meshes,
         materials: model_materials,
@@ -242,15 +244,15 @@ fn load_obj(path: &Path) -> Result<ModelData, ModelLoadError> {
 fn load_gltf(path: &Path) -> Result<ModelData, ModelLoadError> {
     let (document, buffers, _images) = gltf::import(path)
         .map_err(|e| ModelLoadError::ParseError(format!("Failed to load glTF: {}", e)))?;
-    
+
     let mut meshes = Vec::new();
     let mut materials = Vec::new();
-    
+
     // Load materials
     for material in document.materials() {
         let pbr = material.pbr_metallic_roughness();
         let base_color = pbr.base_color_factor();
-        
+
         materials.push(Material {
             name: "material".to_string(), // gltf 1.4 doesn't expose name directly
             diffuse_color: base_color,
@@ -261,55 +263,51 @@ fn load_gltf(path: &Path) -> Result<ModelData, ModelLoadError> {
             shininess: None,
         });
     }
-    
+
     let mut total_vertices = 0;
     let mut total_indices = 0;
-    
+
     // Load meshes
     for mesh in document.meshes() {
         for primitive in mesh.primitives() {
             let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()]));
-            
+
             // Read positions
             let positions: Vec<[f32; 3]> = reader
                 .read_positions()
                 .ok_or_else(|| ModelLoadError::MissingData("Missing positions".to_string()))?
                 .collect();
-            
+
             // Read normals (or generate default)
             let normals: Vec<[f32; 3]> = reader
                 .read_normals()
                 .map(|iter| iter.collect())
                 .unwrap_or_else(|| vec![[0.0, 1.0, 0.0]; positions.len()]);
-            
+
             // Read texture coordinates (or generate default)
             let tex_coords: Vec<[f32; 2]> = reader
                 .read_tex_coords(0)
                 .map(|iter| iter.into_f32().collect())
                 .unwrap_or_else(|| vec![[0.0, 0.0]; positions.len()]);
-            
+
             // Build vertices
             // Note: normals and tex_coords are guaranteed to be the same length as positions
             // due to the unwrap_or_else fallbacks above that create default arrays
             let mut vertices = Vec::new();
             for i in 0..positions.len() {
-                vertices.push(ModelVertex::new(
-                    positions[i],
-                    normals[i],
-                    tex_coords[i],
-                ));
+                vertices.push(ModelVertex::new(positions[i], normals[i], tex_coords[i]));
             }
-            
+
             // Read indices
             let indices: Vec<u32> = reader
                 .read_indices()
                 .ok_or_else(|| ModelLoadError::MissingData("Missing indices".to_string()))?
                 .into_u32()
                 .collect();
-            
+
             total_vertices += vertices.len() as u32;
             total_indices += indices.len() as u32;
-            
+
             meshes.push(Mesh {
                 vertices,
                 indices,
@@ -317,7 +315,7 @@ fn load_gltf(path: &Path) -> Result<ModelData, ModelLoadError> {
             });
         }
     }
-    
+
     Ok(ModelData {
         meshes,
         materials,

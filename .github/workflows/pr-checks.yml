@@ -107,12 +107,12 @@ jobs:
 
       # Run tests
       - name: Run tests
-        run: cargo nextest run --workspace --all-targets --test-threads=4
         timeout-minutes: 30
+        run: cargo nextest run --workspace --all-targets --test-threads=4
 
       - name: Run doc tests
-        run: cargo test --workspace --doc
         timeout-minutes: 15
+        run: cargo test --workspace --doc
 
       # Security checks (run last as they're independent)
       - name: Run cargo deny

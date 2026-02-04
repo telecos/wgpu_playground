@@ -265,7 +265,7 @@ impl PlaygroundState {
     ///
     /// # Arguments
     ///
-    /// * `base_url` - The base URL of the application (e.g., "https://example.com/demo")
+    /// * `base_url` - The base URL of the application (e.g., <https://example.com/demo>)
     ///
     /// # Examples
     ///

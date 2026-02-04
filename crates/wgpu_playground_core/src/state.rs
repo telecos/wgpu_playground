@@ -13,6 +13,19 @@
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
+/// UI Theme preference
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Theme {
+    Light,
+    Dark,
+}
+
+impl Default for Theme {
+    fn default() -> Self {
+        Self::Light
+    }
+}
+
 /// Serializable version of BufferPanel state
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BufferPanelState {
@@ -138,6 +151,9 @@ pub struct BindGroupLayoutPanelState {
 pub struct PlaygroundState {
     /// Version of the state format for backward compatibility
     pub version: String,
+    /// UI theme preference
+    #[serde(default)]
+    pub theme: Theme,
     /// Buffer panel state
     pub buffer_panel: Option<BufferPanelState>,
     /// Texture panel state
@@ -160,6 +176,7 @@ impl Default for PlaygroundState {
     fn default() -> Self {
         Self {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: None,
             texture_panel: None,
             sampler_panel: None,

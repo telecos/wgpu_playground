@@ -16,6 +16,7 @@ use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
 use wgpu_playground_core::resource_inspector::ResourceInspectorPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
+use wgpu_playground_core::state::Theme;
 use wgpu_playground_core::texture_panel::TexturePanel;
 
 pub struct PlaygroundApp {
@@ -42,6 +43,8 @@ pub struct PlaygroundApp {
     // State save/load UI fields
     save_load_filename: String,
     save_load_message: Option<String>,
+    // Theme preference
+    theme: Theme,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -65,6 +68,7 @@ enum Tab {
     ResourceInspector,
     Performance,
     CommandRecording,
+    Settings,
 }
 
 impl PlaygroundApp {
@@ -97,6 +101,7 @@ impl PlaygroundApp {
             selected_tab: Tab::AdapterSelection,
             save_load_filename: "playground_state.json".to_string(),
             save_load_message: None,
+            theme: Theme::default(),
         }
     }
 
@@ -107,6 +112,12 @@ impl PlaygroundApp {
         queue: &wgpu::Queue,
         renderer: &mut egui_wgpu::Renderer,
     ) {
+        // Apply theme based on preference
+        match self.theme {
+            Theme::Light => ctx.set_visuals(egui::Visuals::light()),
+            Theme::Dark => ctx.set_visuals(egui::Visuals::dark()),
+        }
+
         // Update performance metrics each frame
         self.performance_panel.update();
 
@@ -244,6 +255,8 @@ impl PlaygroundApp {
                 Tab::CommandRecording,
                 "📹 Command Recording",
             );
+            ui.separator();
+            ui.selectable_value(&mut self.selected_tab, Tab::Settings, "⚙️ Settings");
         });
 
         // Main canvas area
@@ -267,6 +280,47 @@ impl PlaygroundApp {
             Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
             Tab::Performance => self.performance_panel.ui(ui),
             Tab::CommandRecording => self.command_recording_panel.ui(ui),
+            Tab::Settings => self.settings_ui(ui),
+        });
+    }
+
+    /// Settings panel UI
+    fn settings_ui(&mut self, ui: &mut egui::Ui) {
+        ui.heading("⚙️ Settings");
+        ui.separator();
+
+        ui.add_space(10.0);
+
+        ui.group(|ui| {
+            ui.heading("🎨 Theme");
+            ui.add_space(5.0);
+
+            ui.label("Select UI theme:");
+            ui.add_space(5.0);
+
+            let mut theme_changed = false;
+
+            ui.horizontal(|ui| {
+                if ui
+                    .selectable_value(&mut self.theme, Theme::Light, "☀️ Light")
+                    .clicked()
+                {
+                    theme_changed = true;
+                }
+                if ui
+                    .selectable_value(&mut self.theme, Theme::Dark, "🌙 Dark")
+                    .clicked()
+                {
+                    theme_changed = true;
+                }
+            });
+
+            if theme_changed {
+                ui.label("Theme will be applied immediately");
+            }
+
+            ui.add_space(5.0);
+            ui.label("💡 Tip: Your theme preference is saved with the playground state.");
         });
     }
 
@@ -274,6 +328,7 @@ impl PlaygroundApp {
     pub fn export_state(&self) -> wgpu_playground_core::state::PlaygroundState {
         wgpu_playground_core::state::PlaygroundState {
             version: "1.0".to_string(),
+            theme: self.theme,
             buffer_panel: Some(self.buffer_panel.export_state()),
             texture_panel: Some(self.texture_panel.export_state()),
             sampler_panel: Some(self.sampler_panel.export_state()),
@@ -287,6 +342,9 @@ impl PlaygroundApp {
 
     /// Import state into the playground
     pub fn import_state(&mut self, state: &wgpu_playground_core::state::PlaygroundState) {
+        // Import theme preference
+        self.theme = state.theme;
+        
         if let Some(buffer_state) = &state.buffer_panel {
             self.buffer_panel.import_state(buffer_state);
         }

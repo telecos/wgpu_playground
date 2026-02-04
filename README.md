@@ -40,6 +40,7 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Device Information**: View detailed information about your GPU, including adapter info, device limits, and supported features
 - **Device Configuration**: Configure device features and limits before device creation
 - **Buffer Configuration**: Create and configure GPU buffers with custom parameters including size, usage flags, and mapping options
+- **Texture Loading & Export**: Load textures from image files (PNG, JPEG) with drag-and-drop support and export textures to PNG format
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 - **Code Export**: Generate standalone Rust projects from your playground configuration with one click

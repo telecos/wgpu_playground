@@ -314,6 +314,44 @@ impl BufferPanel {
         ui.checkbox(value, label).on_hover_text(tooltip);
         ui.end_row();
     }
+
+    /// Export the current state to a serializable format
+    pub fn export_state(&self) -> crate::state::BufferPanelState {
+        crate::state::BufferPanelState {
+            label: self.label_input.clone(),
+            size: self.size_input.clone(),
+            usage_vertex: self.usage_vertex,
+            usage_index: self.usage_index,
+            usage_uniform: self.usage_uniform,
+            usage_storage: self.usage_storage,
+            usage_indirect: self.usage_indirect,
+            usage_copy_src: self.usage_copy_src,
+            usage_copy_dst: self.usage_copy_dst,
+            usage_map_read: self.usage_map_read,
+            usage_map_write: self.usage_map_write,
+            usage_query_resolve: self.usage_query_resolve,
+            mapped_at_creation: self.mapped_at_creation,
+        }
+    }
+
+    /// Import state from a serializable format
+    pub fn import_state(&mut self, state: &crate::state::BufferPanelState) {
+        self.label_input = state.label.clone();
+        self.size_input = state.size.clone();
+        self.usage_vertex = state.usage_vertex;
+        self.usage_index = state.usage_index;
+        self.usage_uniform = state.usage_uniform;
+        self.usage_storage = state.usage_storage;
+        self.usage_indirect = state.usage_indirect;
+        self.usage_copy_src = state.usage_copy_src;
+        self.usage_copy_dst = state.usage_copy_dst;
+        self.usage_map_read = state.usage_map_read;
+        self.usage_map_write = state.usage_map_write;
+        self.usage_query_resolve = state.usage_query_resolve;
+        self.mapped_at_creation = state.mapped_at_creation;
+        self.validation_error = None;
+        self.success_message = None;
+    }
 }
 
 #[cfg(test)]

@@ -132,7 +132,35 @@ impl AppState {
             },
         );
 
-        let playground_app = PlaygroundApp::new(&adapter, &device, &queue);
+        let mut playground_app = PlaygroundApp::new(&adapter, &device, &queue);
+
+        // Try to load state from URL if present (mainly for WASM/web builds)
+        playground_app.try_load_from_browser_url();
+
+        // Try to load saved state and apply theme
+        let state_path = std::path::Path::new("playground_state.json");
+        let (playground_app, initial_theme) = if state_path.exists() {
+            match wgpu_playground_core::state::PlaygroundState::load_from_file(state_path) {
+                Ok(state) => {
+                    let theme = state.theme;
+                    let mut app = playground_app;
+                    app.import_state(&state);
+                    log::info!("Loaded saved state with theme: {:?}", theme);
+                    (app, Some(theme))
+                }
+                Err(e) => {
+                    log::warn!("Failed to load saved state: {}", e);
+                    (playground_app, None)
+                }
+            }
+        } else {
+            (playground_app, None)
+        };
+
+        // Apply the theme if we loaded one
+        if let Some(theme) = initial_theme {
+            PlaygroundApp::apply_theme(&egui_ctx, theme);
+        }
 
         Self {
             window,

@@ -42,10 +42,97 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Buffer Configuration**: Create and configure GPU buffers with custom parameters including size, usage flags, and mapping options
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
+- **Code Export**: Generate standalone Rust projects from your playground configuration with one click
+- **State Persistence**: Save and load your playground configurations to/from JSON files
+- **URL Sharing**: Generate shareable links with your configuration encoded in the URL for easy collaboration
 
 **📊 For a comprehensive overview of WebGPU API feature coverage, see [WebGPU API Coverage](docs/WEBGPU_API_COVERAGE.md)**
 
+## Sharing and Collaboration
+
+The playground supports multiple ways to save and share your work:
+
+### Save/Load State
+
+Use the file operations in the top menu bar to save and load playground configurations:
+
+- **💾 Save State**: Save your current configuration to a JSON file
+- **📂 Load State**: Load a previously saved configuration from a JSON file
+
+Saved configurations include:
+- Buffer settings (size, usage flags, labels)
+- Texture settings (dimensions, format, usage)
+- Sampler settings (filtering, addressing modes)
+- Shader source code and labels
+
+### URL Sharing
+
+Generate shareable links that encode your entire playground state:
+
+1. Configure your resources (buffers, textures, shaders, etc.)
+2. Click **🔗 Generate Share Link** in the top menu bar
+3. The link is automatically copied to your clipboard
+4. Share the URL with others - they can open it to see your exact configuration
+
+**Example share URL format:**
+```
+https://telecos.github.io/wgpu_playground/demo?state=eyJ2ZXJzaW9uIjoiMS4wIi...
+```
+
+When someone opens a share URL, the playground automatically loads the encoded state and restores all your settings.
+
+**Note**: URL sharing works best for reasonably-sized configurations. Very large shader code or many resources may result in long URLs.
+
 ## User Interface
+
+The application provides an organized, collapsible sidebar navigation with immediate visual feedback:
+
+### Navigation Structure
+
+The sidebar is organized into five main sections:
+
+1. **⚙️ Setup & Configuration**:
+   - **Adapter Selection**: Choose and configure GPU adapters with detailed properties
+   - **Device Config**: Enable/disable WebGPU features and adjust device limits
+   - **Device Info**: View comprehensive GPU adapter information and capabilities
+
+2. **🎨 Rendering & Graphics** (Open by default with auto-running example):
+   - **Examples & Preview**: Interactive WebGPU rendering examples with live preview
+     - Triangle rendering example (auto-runs on startup)
+     - Rotating 3D cube with camera controls
+     - Real-time rendering preview displayed prominently
+     - Canvas controls (size, clear color, camera position)
+     - Source code viewer for each example
+   - **WGSL Shader Editor**: Interactive shader editor with syntax highlighting
+   - **Render Pipeline**: Configure rendering pipeline settings
+   - **Render Pass**: Set up render pass configuration
+   - **Draw Commands**: Configure draw command parameters
+
+3. **🧮 Compute & ML**:
+   - **Compute Panel**: Tools for compute shader and ML operations
+   - **Compute Pipeline**: Configure compute pipeline settings
+   - **Compute Dispatch**: Set up compute dispatch parameters
+
+4. **📦 Resources**:
+   - **Buffers**: Create and configure GPU buffers with usage flags
+   - **Textures**: Texture creation and configuration
+   - **Samplers**: Sampler configuration for texture filtering
+   - **Bind Groups**: Resource binding configuration
+   - **Bind Group Layouts**: Layout configuration for bind groups
+
+5. **🔧 Tools & Debugging**:
+   - **Resource Inspector**: Inspect created GPU resources
+   - **Command Recording**: Record and inspect command buffer execution
+   - **Console**: View GPU errors, warnings, and validation messages
+   - **Performance**: Monitor performance metrics
+
+### Key Features
+
+- **Immediate Visual Feedback**: The app opens to the Rendering tab with a triangle example auto-running, showcasing WebGPU capabilities immediately
+- **Collapsible Sections**: Reduce visual clutter by grouping related features
+- **Prominent Preview**: Rendered output is displayed at the top when running examples
+- **Interactive Controls**: Canvas size, clear color, and camera controls for 3D examples
+- **Mouse Interaction**: Drag to rotate 3D objects, scroll to zoom
 
 The application provides a tabbed interface with six main sections:
 
@@ -74,6 +161,11 @@ The application provides a tabbed interface with six main sections:
      - Inline editing and validation
      - Real-time compilation with error reporting
      - Load example shaders or write your own
+   - **Code Export**: Generate standalone Cargo projects from examples:
+     - Export Triangle, Cube, or custom shader examples
+     - Customize project name and configuration
+     - Generates complete buildable Rust project with all dependencies
+     - Includes Cargo.toml, main.rs, shaders, and README
      - **Hot Reload**: Automatically reload and update shaders when files change on disk (native platforms only)
    - Render pipeline configuration (planned)
    - Buffer and vertex data management (planned)

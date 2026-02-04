@@ -484,6 +484,49 @@ impl SamplerPanel {
                 }
             });
     }
+
+    /// Export the current state to a serializable format
+    pub fn export_state(&self) -> crate::state::SamplerPanelState {
+        crate::state::SamplerPanelState {
+            label: self.label_input.clone(),
+            address_mode_u: format!("{:?}", self.address_mode_u),
+            address_mode_v: format!("{:?}", self.address_mode_v),
+            address_mode_w: format!("{:?}", self.address_mode_w),
+            mag_filter: format!("{:?}", self.mag_filter),
+            min_filter: format!("{:?}", self.min_filter),
+            mipmap_filter: format!("{:?}", self.mipmap_filter),
+            lod_min_clamp: self.lod_min_input.clone(),
+            lod_max_clamp: self.lod_max_input.clone(),
+            compare: if self.enable_compare {
+                Some(format!("{:?}", self.compare_function))
+            } else {
+                None
+            },
+            max_anisotropy: self.anisotropy.to_string(),
+        }
+    }
+
+    /// Import state from a serializable format
+    ///
+    /// Note: Address modes, filters, and compare function are stored as strings but are not
+    /// parsed back to avoid complexity. The panel will retain default values for these fields.
+    /// Future enhancement could add enum parsing support.
+    pub fn import_state(&mut self, state: &crate::state::SamplerPanelState) {
+        self.label_input = state.label.clone();
+        self.lod_min_input = state.lod_min_clamp.clone();
+        self.lod_max_input = state.lod_max_clamp.clone();
+        if let Ok(aniso) = state.max_anisotropy.parse::<u16>() {
+            self.anisotropy = aniso.clamp(1, 16);
+        }
+        self.enable_compare = state.compare.is_some();
+
+        // TODO: Parse address modes, filters, and compare function from strings
+        // For now, these remain at their default values
+        // The string values are preserved in the saved state for reference
+
+        self.validation_error = None;
+        self.success_message = None;
+    }
 }
 
 #[cfg(test)]

@@ -221,9 +221,12 @@ impl ShaderModule {
                                 "Shader source cannot be empty".to_string(),
                             ));
                         }
-                        
+
                         if new_source != self.source {
-                            log::info!("Shader source changed, updating ({} bytes)", new_source.len());
+                            log::info!(
+                                "Shader source changed, updating ({} bytes)",
+                                new_source.len()
+                            );
                             self.source = new_source;
                             Ok(true)
                         } else {

@@ -155,10 +155,16 @@ fn fs_main() -> @location(0) vec4<f32> {
                 for event in watcher.poll_all() {
                     // Check if the changed file matches our current file
                     // Compare just the filename, as file_path may just be a filename or a full path
-                    if event.filename == self.file_path || 
-                       std::path::Path::new(&self.file_path).file_name()
-                           .and_then(|n| n.to_str()) == Some(&event.filename) {
-                        log::info!("Hot reload: Shader file '{}' changed, reloading...", event.filename);
+                    if event.filename == self.file_path
+                        || std::path::Path::new(&self.file_path)
+                            .file_name()
+                            .and_then(|n| n.to_str())
+                            == Some(&event.filename)
+                    {
+                        log::info!(
+                            "Hot reload: Shader file '{}' changed, reloading...",
+                            event.filename
+                        );
                         let path = self.file_path.clone();
                         self.load_from_file(&path);
                         ui.ctx().request_repaint(); // Request UI repaint
@@ -263,7 +269,7 @@ fn fs_main() -> @location(0) vec4<f32> {
         // Options
         ui.horizontal(|ui| {
             ui.checkbox(&mut self.show_line_numbers, "Show line numbers");
-            
+
             // Hot reload toggle
             if self.shader_watcher.is_some() {
                 ui.separator();
@@ -272,7 +278,10 @@ fn fs_main() -> @location(0) vec4<f32> {
                 } else {
                     "🔥 Hot Reload: OFF"
                 };
-                if ui.checkbox(&mut self.hot_reload_enabled, hot_reload_label).changed() {
+                if ui
+                    .checkbox(&mut self.hot_reload_enabled, hot_reload_label)
+                    .changed()
+                {
                     if self.hot_reload_enabled {
                         log::info!("Hot reload enabled");
                     } else {

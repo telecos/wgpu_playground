@@ -10,6 +10,7 @@ use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
+use wgpu_playground_core::model_loader_panel::ModelLoaderPanel;
 use wgpu_playground_core::performance_panel::PerformancePanel;
 use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
@@ -34,6 +35,7 @@ pub struct PlaygroundApp {
     bind_group_panel: BindGroupPanel,
     bind_group_layout_panel: BindGroupLayoutPanel,
     render_pipeline_panel: RenderPipelinePanel,
+    model_loader_panel: ModelLoaderPanel,
     console_panel: ConsolePanel,
     draw_command_panel: DrawCommandPanel,
     render_pass_panel: RenderPassPanel,
@@ -78,6 +80,7 @@ enum Tab {
     Performance,
     CommandRecording,
     Settings,
+    ModelLoader,
 }
 
 impl PlaygroundApp {
@@ -101,6 +104,7 @@ impl PlaygroundApp {
             bind_group_panel: BindGroupPanel::new(),
             bind_group_layout_panel: BindGroupLayoutPanel::new(),
             render_pipeline_panel: RenderPipelinePanel::new(),
+            model_loader_panel: ModelLoaderPanel::new(),
             console_panel,
             draw_command_panel: DrawCommandPanel::new(),
             render_pass_panel: RenderPassPanel::new(),
@@ -372,6 +376,11 @@ impl PlaygroundApp {
                         );
                         ui.selectable_value(
                             &mut self.selected_tab,
+                            Tab::ModelLoader,
+                            "  3D Models",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
                             Tab::BindGroupConfig,
                             "  Bind Groups",
                         );
@@ -426,6 +435,7 @@ impl PlaygroundApp {
             Tab::BufferConfig => self.buffer_panel.ui(ui),
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
             Tab::TextureConfig => self.texture_panel.ui(ui),
+            Tab::ModelLoader => self.model_loader_panel.show(ui, device),
             Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
             Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
             Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),

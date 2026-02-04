@@ -298,26 +298,10 @@ impl PlaygroundApp {
             ui.label("Select UI theme:");
             ui.add_space(5.0);
 
-            let mut theme_changed = false;
-
             ui.horizontal(|ui| {
-                if ui
-                    .selectable_value(&mut self.theme, Theme::Light, "☀️ Light")
-                    .clicked()
-                {
-                    theme_changed = true;
-                }
-                if ui
-                    .selectable_value(&mut self.theme, Theme::Dark, "🌙 Dark")
-                    .clicked()
-                {
-                    theme_changed = true;
-                }
+                ui.selectable_value(&mut self.theme, Theme::Light, "☀️ Light");
+                ui.selectable_value(&mut self.theme, Theme::Dark, "🌙 Dark");
             });
-
-            if theme_changed {
-                ui.label("Theme will be applied immediately");
-            }
 
             ui.add_space(5.0);
             ui.label("💡 Tip: Your theme preference is saved with the playground state.");

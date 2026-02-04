@@ -222,7 +222,7 @@ impl PipelineDebugger {
     }
 
     /// Render shader information
-    fn render_shaders(&mut self, ui: &mut egui::Ui, shaders: &[ShaderInfo]) {
+    fn render_shaders(&self, ui: &mut egui::Ui, shaders: &[ShaderInfo], selected_shader_index: &mut usize) {
         ui.group(|ui| {
             ui.heading("Shaders");
             
@@ -230,10 +230,10 @@ impl PipelineDebugger {
             ui.horizontal(|ui| {
                 for (i, shader) in shaders.iter().enumerate() {
                     if ui.selectable_label(
-                        self.selected_shader_index == i,
+                        *selected_shader_index == i,
                         format!("{} ({})", shader.stage.as_str(), shader.entry_point)
                     ).clicked() {
-                        self.selected_shader_index = i;
+                        *selected_shader_index = i;
                     }
                 }
             });
@@ -241,7 +241,7 @@ impl PipelineDebugger {
             ui.separator();
 
             // Display selected shader source
-            if let Some(shader) = shaders.get(self.selected_shader_index) {
+            if let Some(shader) = shaders.get(*selected_shader_index) {
                 ui.label(format!("Entry Point: {}", shader.entry_point));
                 ui.separator();
                 
@@ -260,7 +260,7 @@ impl PipelineDebugger {
     }
 
     /// Render validation messages
-    fn render_validation(&mut self, ui: &mut egui::Ui, messages: &[ValidationMessage]) {
+    fn render_validation(&self, ui: &mut egui::Ui, messages: &[ValidationMessage], show_all_messages: &mut bool) {
         ui.group(|ui| {
             ui.horizontal(|ui| {
                 ui.heading("Validation Messages");
@@ -281,7 +281,7 @@ impl PipelineDebugger {
                 }
             });
 
-            ui.checkbox(&mut self.show_all_messages, "Show all messages");
+            ui.checkbox(show_all_messages, "Show all messages");
             ui.separator();
 
             if messages.is_empty() {
@@ -291,7 +291,7 @@ impl PipelineDebugger {
                     .max_height(200.0)
                     .show(ui, |ui| {
                         for msg in messages {
-                            if self.show_all_messages || msg.severity == ValidationSeverity::Error {
+                            if *show_all_messages || msg.severity == ValidationSeverity::Error {
                                 ui.horizontal(|ui| {
                                     ui.label(msg.severity.icon());
                                     ui.colored_label(msg.severity.color(), &msg.message);
@@ -314,19 +314,27 @@ impl PipelineDebugger {
             ui.separator();
         }
 
-        if let Some(info) = &self.debug_info.clone() {
+        if let Some(info) = self.debug_info.as_ref() {
+            // Make local copies of mutable state
+            let mut selected_shader = self.selected_shader_index;
+            let mut show_all = self.show_all_messages;
+            
             // Configuration
             self.render_config(ui, &info.config);
             ui.add_space(10.0);
 
             // Shaders
             if !info.shaders.is_empty() {
-                self.render_shaders(ui, &info.shaders);
+                self.render_shaders(ui, &info.shaders, &mut selected_shader);
                 ui.add_space(10.0);
             }
 
             // Validation messages
-            self.render_validation(ui, &info.validation_messages);
+            self.render_validation(ui, &info.validation_messages, &mut show_all);
+            
+            // Update state
+            self.selected_shader_index = selected_shader;
+            self.show_all_messages = show_all;
         } else if self.error_message.is_none() {
             ui.label("Select a pipeline from the Resource Inspector to debug it");
         }

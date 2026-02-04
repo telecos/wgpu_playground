@@ -1128,11 +1128,12 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         };
 
         // Create output directory in user's home directory
-        let output_path = if let Some(home_dir) = dirs::home_dir() {
-            home_dir.join(&self.export_project_name)
-        } else {
-            std::path::PathBuf::from(&self.export_project_name)
-        };
+        let output_path =
+            if let Ok(home_dir) = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")) {
+                std::path::PathBuf::from(home_dir).join(&self.export_project_name)
+            } else {
+                std::path::PathBuf::from(&self.export_project_name)
+            };
 
         // Configure the code generator
         let config = CodeGenConfig::new(self.export_project_name.clone())

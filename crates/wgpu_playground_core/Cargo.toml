@@ -25,7 +25,6 @@ egui_plot = "0.34"
 bytemuck = { version = "1.14", features = ["derive"] }
 futures-channel = "0.3"
 image = { version = "0.25", default-features = false, features = ["png"] }
-dirs = "5.0"
 
 # Dawn FFI bindings (optional) - currently using custom bindings
 # dawn-sys has compatibility issues on Linux, so we build our own

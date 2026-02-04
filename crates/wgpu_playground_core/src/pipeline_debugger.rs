@@ -169,7 +169,7 @@ impl PipelineDebugger {
     }
 
     /// Count validation messages by severity
-    fn count_messages_by_severity(&self, severity: ValidationSeverity) -> usize {
+    pub fn count_messages_by_severity(&self, severity: ValidationSeverity) -> usize {
         self.debug_info
             .as_ref()
             .map(|info| {

@@ -1,6 +1,7 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
 use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
+use wgpu_playground_core::buffer_inspector::BufferInspector;
 use wgpu_playground_core::buffer_panel::BufferPanel;
 use wgpu_playground_core::command_recording_panel::CommandRecordingPanel;
 use wgpu_playground_core::compute::ComputePanel;
@@ -11,6 +12,7 @@ use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
 use wgpu_playground_core::performance_panel::PerformancePanel;
+use wgpu_playground_core::pipeline_debugger::PipelineDebugger;
 use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
@@ -18,6 +20,7 @@ use wgpu_playground_core::resource_inspector::ResourceInspectorPanel;
 use wgpu_playground_core::sampler_panel::SamplerPanel;
 use wgpu_playground_core::settings_panel::SettingsPanel;
 use wgpu_playground_core::state::Theme;
+use wgpu_playground_core::texture_inspector::TextureInspector;
 use wgpu_playground_core::texture_panel::TexturePanel;
 
 pub struct PlaygroundApp {
@@ -38,6 +41,9 @@ pub struct PlaygroundApp {
     draw_command_panel: DrawCommandPanel,
     render_pass_panel: RenderPassPanel,
     resource_inspector_panel: ResourceInspectorPanel,
+    buffer_inspector: BufferInspector,
+    texture_inspector: TextureInspector,
+    pipeline_debugger: PipelineDebugger,
     performance_panel: PerformancePanel,
     command_recording_panel: CommandRecordingPanel,
     settings_panel: SettingsPanel,
@@ -75,6 +81,9 @@ enum Tab {
     Compute,
     Console,
     ResourceInspector,
+    BufferInspector,
+    TextureInspector,
+    PipelineDebugger,
     Performance,
     CommandRecording,
     Settings,
@@ -105,6 +114,9 @@ impl PlaygroundApp {
             draw_command_panel: DrawCommandPanel::new(),
             render_pass_panel: RenderPassPanel::new(),
             resource_inspector_panel: ResourceInspectorPanel::new(),
+            buffer_inspector: BufferInspector::new(),
+            texture_inspector: TextureInspector::new(),
+            pipeline_debugger: PipelineDebugger::new(),
             performance_panel: PerformancePanel::new(),
             command_recording_panel: CommandRecordingPanel::new(),
             settings_panel: SettingsPanel::new(),
@@ -402,6 +414,21 @@ impl PlaygroundApp {
                         );
                         ui.selectable_value(
                             &mut self.selected_tab,
+                            Tab::BufferInspector,
+                            "  Buffer Inspector",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::TextureInspector,
+                            "  Texture Inspector",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::PipelineDebugger,
+                            "  Pipeline Debugger",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
                             Tab::CommandRecording,
                             "  Command Recording",
                         );
@@ -436,6 +463,9 @@ impl PlaygroundApp {
             Tab::Compute => self.compute_panel.ui(ui),
             Tab::Console => self.console_panel.ui(ui),
             Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
+            Tab::BufferInspector => self.buffer_inspector.ui(ui),
+            Tab::TextureInspector => self.texture_inspector.ui(ui),
+            Tab::PipelineDebugger => self.pipeline_debugger.ui(ui),
             Tab::Performance => self.performance_panel.ui(ui),
             Tab::CommandRecording => self.command_recording_panel.ui(ui),
             Tab::Settings => {

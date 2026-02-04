@@ -100,6 +100,11 @@ impl TextureInspector {
         self.selected_mip_level = level;
     }
 
+    /// Get the current mip level
+    pub fn get_mip_level(&self) -> u32 {
+        self.selected_mip_level
+    }
+
     /// Set the array layer to display
     pub fn set_array_layer(&mut self, layer: u32) {
         self.selected_array_layer = layer;
@@ -108,6 +113,11 @@ impl TextureInspector {
     /// Set zoom level
     pub fn set_zoom(&mut self, zoom: f32) {
         self.zoom_level = zoom.max(0.1).min(10.0);
+    }
+
+    /// Get zoom level
+    pub fn get_zoom(&self) -> f32 {
+        self.zoom_level
     }
 
     /// Convert texture data to egui color image

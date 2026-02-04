@@ -359,7 +359,7 @@ Your GPU must support one of the following graphics APIs:
 
 For running the WebAssembly demo in a browser:
 - **Chrome/Edge**: Version 113 or newer (WebGPU enabled by default)
-- **Safari**: Technology Preview or Safari 17+ with WebGPU enabled in Experimental Features
+- **Safari**: Technology Preview, or Safari 17+ with WebGPU enabled in Experimental Features (Settings → Safari → Advanced → Experimental Features)
 - **Firefox**: Nightly build with WebGPU enabled in `about:config`
 
 ## Installation

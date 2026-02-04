@@ -148,6 +148,48 @@ impl PlaygroundApp {
         // Update performance metrics each frame
         self.performance_panel.update();
 
+        // Keyboard shortcuts for accessibility
+        ctx.input(|i| {
+            // Ctrl+S or Cmd+S: Save state
+            if i.modifiers.command && i.key_pressed(egui::Key::S) {
+                let filename = self.save_load_filename.clone();
+                let path = std::path::Path::new(&filename);
+                if let Err(e) = self.save_state_to_file(path) {
+                    log::error!("Failed to save state: {}", e);
+                } else {
+                    log::info!("State saved to {}", filename);
+                }
+            }
+            
+            // Ctrl+O or Cmd+O: Load state  
+            if i.modifiers.command && i.key_pressed(egui::Key::O) {
+                let filename = self.save_load_filename.clone();
+                let path = std::path::Path::new(&filename);
+                if let Err(e) = self.load_state_from_file(path) {
+                    log::error!("Failed to load state: {}", e);
+                } else {
+                    log::info!("State loaded from {}", filename);
+                }
+            }
+
+            // Ctrl+1-9: Quick navigation to tabs
+            if i.modifiers.command {
+                if i.key_pressed(egui::Key::Num1) {
+                    self.selected_tab = Tab::Rendering;
+                } else if i.key_pressed(egui::Key::Num2) {
+                    self.selected_tab = Tab::Compute;
+                } else if i.key_pressed(egui::Key::Num3) {
+                    self.selected_tab = Tab::BufferConfig;
+                } else if i.key_pressed(egui::Key::Num4) {
+                    self.selected_tab = Tab::TextureConfig;
+                } else if i.key_pressed(egui::Key::Num5) {
+                    self.selected_tab = Tab::Console;
+                } else if i.key_pressed(egui::Key::Num6) {
+                    self.selected_tab = Tab::Settings;
+                }
+            }
+        });
+
         // Menu bar at the top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.horizontal(|ui| {
@@ -157,7 +199,9 @@ impl PlaygroundApp {
                     // File operations
                     ui.label("File:");
 
-                    if ui.button("💾 Save State").clicked() {
+                    if ui.button("💾 Save State")
+                        .on_hover_text("Save current playground state to a file (Ctrl+S)")
+                        .clicked() {
                         let filename = self.save_load_filename.clone();
                         let path = std::path::Path::new(&filename);
                         match self.save_state_to_file(path) {
@@ -171,7 +215,9 @@ impl PlaygroundApp {
                         }
                     }
 
-                    if ui.button("📂 Load State").clicked() {
+                    if ui.button("📂 Load State")
+                        .on_hover_text("Load playground state from a file (Ctrl+O)")
+                        .clicked() {
                         let filename = self.save_load_filename.clone();
                         let path = std::path::Path::new(&filename);
                         match self.load_state_from_file(path) {
@@ -189,7 +235,7 @@ impl PlaygroundApp {
                         egui::TextEdit::singleline(&mut self.save_load_filename)
                             .desired_width(200.0)
                             .hint_text("filename.json"),
-                    );
+                    ).on_hover_text("Enter filename for save/load operations");
                 });
             });
 
@@ -210,7 +256,9 @@ impl PlaygroundApp {
             ui.horizontal(|ui| {
                 ui.label("Share:");
 
-                if ui.button("🔗 Generate Share Link").clicked() {
+                if ui.button("🔗 Generate Share Link")
+                    .on_hover_text("Generate a shareable URL with your current playground configuration")
+                    .clicked() {
                     // Get current base URL (for native, use localhost; for web, use window.location)
                     let base_url = if cfg!(target_arch = "wasm32") {
                         "https://telecos.github.io/wgpu_playground/demo"
@@ -231,7 +279,9 @@ impl PlaygroundApp {
                     }
                 }
 
-                if !self.share_url.is_empty() && ui.button("📋 Copy to Clipboard").clicked() {
+                if !self.share_url.is_empty() && ui.button("📋 Copy to Clipboard")
+                    .on_hover_text("Copy the generated share link to clipboard")
+                    .clicked() {
                     ctx.copy_text(self.share_url.clone());
                     self.share_message = Some("✓ Copied to clipboard!".to_string());
                 }
@@ -266,13 +316,15 @@ impl PlaygroundApp {
         egui::SidePanel::left("sidebar").show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("Navigation");
+                ui.label("Use Ctrl+1-6 for quick navigation").on_hover_text("Keyboard shortcuts:\nCtrl+1: Rendering\nCtrl+2: Compute\nCtrl+3: Buffers\nCtrl+4: Textures\nCtrl+5: Console\nCtrl+6: Settings");
                 ui.separator();
                 ui.add_space(5.0);
 
                 // Setup Section
                 ui.push_id("setup_section", |ui| {
                     let header_response =
-                        ui.selectable_label(self.setup_section_open, "⚙️ Setup & Configuration");
+                        ui.selectable_label(self.setup_section_open, "⚙️ Setup & Configuration")
+                            .on_hover_text("Configure GPU adapter and device settings");
                     if header_response.clicked() {
                         self.setup_section_open = !self.setup_section_open;
                     }
@@ -284,17 +336,17 @@ impl PlaygroundApp {
                             &mut self.selected_tab,
                             Tab::AdapterSelection,
                             "  Adapter Selection",
-                        );
+                        ).on_hover_text("Choose and configure GPU adapters");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::DeviceConfig,
                             "  Device Config",
-                        );
+                        ).on_hover_text("Enable/disable WebGPU features and adjust device limits");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::DeviceInfo,
                             "  Device Info",
-                        );
+                        ).on_hover_text("View comprehensive GPU adapter information");
                     });
                 }
                 ui.add_space(3.0);
@@ -302,7 +354,8 @@ impl PlaygroundApp {
                 // Rendering Section
                 ui.push_id("rendering_section", |ui| {
                     let header_response =
-                        ui.selectable_label(self.rendering_section_open, "🎨 Rendering & Graphics");
+                        ui.selectable_label(self.rendering_section_open, "🎨 Rendering & Graphics")
+                            .on_hover_text("Graphics rendering examples and pipeline configuration (Ctrl+1)");
                     if header_response.clicked() {
                         self.rendering_section_open = !self.rendering_section_open;
                     }
@@ -314,22 +367,22 @@ impl PlaygroundApp {
                             &mut self.selected_tab,
                             Tab::Rendering,
                             "  Examples & Preview",
-                        );
+                        ).on_hover_text("View rendering examples and live preview");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::RenderPipelineConfig,
                             "  Render Pipeline",
-                        );
+                        ).on_hover_text("Configure render pipeline and shaders");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::RenderPassConfig,
                             "  Render Pass",
-                        );
+                        ).on_hover_text("Configure render pass settings");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::DrawCommand,
                             "  Draw Commands",
-                        );
+                        ).on_hover_text("Configure and execute draw commands");
                     });
                 }
                 ui.add_space(3.0);
@@ -337,7 +390,8 @@ impl PlaygroundApp {
                 // Compute Section
                 ui.push_id("compute_section", |ui| {
                     let header_response =
-                        ui.selectable_label(self.compute_section_open, "🧮 Compute & ML");
+                        ui.selectable_label(self.compute_section_open, "🧮 Compute & ML")
+                            .on_hover_text("Compute shader operations and ML inferencing (Ctrl+2)");
                     if header_response.clicked() {
                         self.compute_section_open = !self.compute_section_open;
                     }
@@ -349,17 +403,17 @@ impl PlaygroundApp {
                             &mut self.selected_tab,
                             Tab::Compute,
                             "  Compute Panel",
-                        );
+                        ).on_hover_text("Explore compute shader operations");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::ComputePipelineConfig,
                             "  Compute Pipeline",
-                        );
+                        ).on_hover_text("Configure compute pipeline and shaders");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::ComputeDispatch,
                             "  Compute Dispatch",
-                        );
+                        ).on_hover_text("Configure and dispatch compute operations");
                     });
                 }
                 ui.add_space(3.0);
@@ -367,7 +421,8 @@ impl PlaygroundApp {
                 // Resources Section
                 ui.push_id("resources_section", |ui| {
                     let header_response =
-                        ui.selectable_label(self.resources_section_open, "📦 Resources");
+                        ui.selectable_label(self.resources_section_open, "📦 Resources")
+                            .on_hover_text("Manage GPU resources (buffers, textures, samplers)");
                     if header_response.clicked() {
                         self.resources_section_open = !self.resources_section_open;
                     }
@@ -375,32 +430,33 @@ impl PlaygroundApp {
 
                 if self.resources_section_open {
                     ui.indent("resources_indent", |ui| {
-                        ui.selectable_value(&mut self.selected_tab, Tab::BufferConfig, "  Buffers");
+                        ui.selectable_value(&mut self.selected_tab, Tab::BufferConfig, "  Buffers")
+                            .on_hover_text("Create and configure GPU buffers (Ctrl+3)");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::TextureConfig,
                             "  Textures",
-                        );
+                        ).on_hover_text("Load and configure textures from images (Ctrl+4)");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::SamplerConfig,
                             "  Samplers",
-                        );
+                        ).on_hover_text("Configure texture sampling modes");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::ModelLoader,
                             "  3D Models",
-                        );
+                        ).on_hover_text("Load and view 3D models");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::BindGroupConfig,
                             "  Bind Groups",
-                        );
+                        ).on_hover_text("Create bind groups for shader resources");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::BindGroupLayoutConfig,
                             "  Bind Group Layouts",
-                        );
+                        ).on_hover_text("Define bind group layouts");
                     });
                 }
                 ui.add_space(3.0);
@@ -408,7 +464,8 @@ impl PlaygroundApp {
                 // Tools Section
                 ui.push_id("tools_section", |ui| {
                     let header_response =
-                        ui.selectable_label(self.tools_section_open, "🔧 Tools & Debugging");
+                        ui.selectable_label(self.tools_section_open, "🔧 Tools & Debugging")
+                            .on_hover_text("Debugging tools, console, and performance monitoring");
                     if header_response.clicked() {
                         self.tools_section_open = !self.tools_section_open;
                     }
@@ -420,34 +477,36 @@ impl PlaygroundApp {
                             &mut self.selected_tab,
                             Tab::ResourceInspector,
                             "  Resource Inspector",
-                        );
+                        ).on_hover_text("Inspect all GPU resources");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::BufferInspector,
                             "  Buffer Inspector",
-                        );
+                        ).on_hover_text("View and inspect buffer contents");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::TextureInspector,
                             "  Texture Inspector",
-                        );
+                        ).on_hover_text("View and inspect texture data");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::PipelineDebugger,
                             "  Pipeline Debugger",
-                        );
+                        ).on_hover_text("Debug render and compute pipelines");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::CommandRecording,
                             "  Command Recording",
-                        );
-                        ui.selectable_value(&mut self.selected_tab, Tab::Console, "  Console");
+                        ).on_hover_text("Record and replay GPU commands");
+                        ui.selectable_value(&mut self.selected_tab, Tab::Console, "  Console")
+                            .on_hover_text("View GPU errors and validation messages (Ctrl+5)");
                         ui.selectable_value(
                             &mut self.selected_tab,
                             Tab::Performance,
                             "  Performance",
-                        );
-                        ui.selectable_value(&mut self.selected_tab, Tab::Settings, "  Settings");
+                        ).on_hover_text("Monitor GPU performance metrics");
+                        ui.selectable_value(&mut self.selected_tab, Tab::Settings, "  Settings")
+                            .on_hover_text("Application settings and preferences (Ctrl+6)");
                     });
                 }
             });

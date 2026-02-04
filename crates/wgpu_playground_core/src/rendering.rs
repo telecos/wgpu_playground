@@ -1116,6 +1116,16 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         );
     }
 
+    /// Export the shader editor state
+    pub fn export_shader_editor_state(&self) -> crate::state::ShaderEditorState {
+        self.shader_editor.export_state()
+    }
+
+    /// Import shader editor state
+    pub fn import_shader_editor_state(&mut self, state: &crate::state::ShaderEditorState) {
+        self.shader_editor.import_state(state);
+    }
+
     /// Export the current configuration to a standalone Rust project
     fn export_to_standalone_project(&mut self, example_id: &str, shader_source: &str) {
         use crate::code_generator::{CodeGenConfig, CodeGenerator, ExampleType};

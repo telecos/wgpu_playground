@@ -39,6 +39,9 @@ pub struct PlaygroundApp {
     performance_panel: PerformancePanel,
     command_recording_panel: CommandRecordingPanel,
     selected_tab: Tab,
+    // State save/load UI fields
+    save_load_filename: String,
+    save_load_message: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -92,6 +95,8 @@ impl PlaygroundApp {
             performance_panel: PerformancePanel::new(),
             command_recording_panel: CommandRecordingPanel::new(),
             selected_tab: Tab::AdapterSelection,
+            save_load_filename: "playground_state.json".to_string(),
+            save_load_message: None,
         }
     }
 
@@ -107,7 +112,60 @@ impl PlaygroundApp {
 
         // Menu bar at the top
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
-            ui.heading("🎮 WebGPU Playground");
+            ui.horizontal(|ui| {
+                ui.heading("🎮 WebGPU Playground");
+
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    // File operations
+                    ui.label("File:");
+
+                    if ui.button("💾 Save State").clicked() {
+                        let filename = self.save_load_filename.clone();
+                        let path = std::path::Path::new(&filename);
+                        match self.save_state_to_file(path) {
+                            Ok(_) => {
+                                self.save_load_message =
+                                    Some(format!("✓ State saved to {}", filename));
+                            }
+                            Err(e) => {
+                                self.save_load_message = Some(format!("✗ Failed to save: {}", e));
+                            }
+                        }
+                    }
+
+                    if ui.button("📂 Load State").clicked() {
+                        let filename = self.save_load_filename.clone();
+                        let path = std::path::Path::new(&filename);
+                        match self.load_state_from_file(path) {
+                            Ok(_) => {
+                                self.save_load_message =
+                                    Some(format!("✓ State loaded from {}", filename));
+                            }
+                            Err(e) => {
+                                self.save_load_message = Some(format!("✗ Failed to load: {}", e));
+                            }
+                        }
+                    }
+
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.save_load_filename)
+                            .desired_width(200.0)
+                            .hint_text("filename.json"),
+                    );
+                });
+            });
+
+            // Show save/load message if any
+            if let Some(msg) = &self.save_load_message {
+                ui.colored_label(
+                    if msg.starts_with("✓") {
+                        egui::Color32::GREEN
+                    } else {
+                        egui::Color32::RED
+                    },
+                    msg,
+                );
+            }
         });
 
         // Sidebar on the left
@@ -210,6 +268,55 @@ impl PlaygroundApp {
             Tab::Performance => self.performance_panel.ui(ui),
             Tab::CommandRecording => self.command_recording_panel.ui(ui),
         });
+    }
+
+    /// Export the current playground state
+    pub fn export_state(&self) -> wgpu_playground_core::state::PlaygroundState {
+        wgpu_playground_core::state::PlaygroundState {
+            version: "1.0".to_string(),
+            buffer_panel: Some(self.buffer_panel.export_state()),
+            texture_panel: Some(self.texture_panel.export_state()),
+            sampler_panel: Some(self.sampler_panel.export_state()),
+            shader_editor: Some(self.rendering_panel.export_shader_editor_state()),
+            render_pipeline_panel: None, // TODO: Add when RenderPipelinePanel has export_state
+            compute_pipeline_panel: None, // TODO: Add when ComputePipelinePanel has export_state
+            bind_group_panel: None,      // TODO: Add when BindGroupPanel has export_state
+            bind_group_layout_panel: None, // TODO: Add when BindGroupLayoutPanel has export_state
+        }
+    }
+
+    /// Import state into the playground
+    pub fn import_state(&mut self, state: &wgpu_playground_core::state::PlaygroundState) {
+        if let Some(buffer_state) = &state.buffer_panel {
+            self.buffer_panel.import_state(buffer_state);
+        }
+        if let Some(texture_state) = &state.texture_panel {
+            self.texture_panel.import_state(texture_state);
+        }
+        if let Some(sampler_state) = &state.sampler_panel {
+            self.sampler_panel.import_state(sampler_state);
+        }
+        if let Some(shader_state) = &state.shader_editor {
+            self.rendering_panel
+                .import_shader_editor_state(shader_state);
+        }
+        // TODO: Import other panel states when available
+    }
+
+    /// Save the current state to a file
+    pub fn save_state_to_file(&self, path: &std::path::Path) -> Result<(), std::io::Error> {
+        let state = self.export_state();
+        state.save_to_file(path)?;
+        log::info!("Playground state saved to {:?}", path);
+        Ok(())
+    }
+
+    /// Load state from a file
+    pub fn load_state_from_file(&mut self, path: &std::path::Path) -> Result<(), std::io::Error> {
+        let state = wgpu_playground_core::state::PlaygroundState::load_from_file(path)?;
+        self.import_state(&state);
+        log::info!("Playground state loaded from {:?}", path);
+        Ok(())
     }
 }
 

@@ -3395,6 +3395,8 @@ dependencies = [
  "log",
  "notify",
  "pollster 0.3.0",
+ "serde",
+ "serde_json",
  "serial_test",
  "wasm-bindgen",
  "wasm-bindgen-futures",

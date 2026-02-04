@@ -21,6 +21,7 @@ jobs:
   fmt:
     name: Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       
@@ -36,6 +37,7 @@ jobs:
   clippy:
     name: Clippy Lints
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
       
@@ -58,6 +60,7 @@ jobs:
   test-linux:
     name: Tests (Linux)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
       
@@ -117,6 +120,7 @@ jobs:
   test-other-platforms:
     name: Platform Tests - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -142,6 +146,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
       
@@ -162,6 +167,7 @@ jobs:
   test-report:
     name: Test Report
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [test-linux]
     if: always()
     permissions:
@@ -202,6 +208,7 @@ jobs:
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [fmt, clippy, test-linux, test-other-platforms, build]
     if: always()
     steps:

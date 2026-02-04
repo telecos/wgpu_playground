@@ -42,6 +42,9 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Buffer Configuration**: Create and configure GPU buffers with custom parameters including size, usage flags, and mapping options
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
+- **Code Export**: Generate standalone Rust projects from your playground configuration with one click
+
+**📊 For a comprehensive overview of WebGPU API feature coverage, see [WebGPU API Coverage](docs/WEBGPU_API_COVERAGE.md)**
 
 ## User Interface
 
@@ -93,6 +96,61 @@ The sidebar is organized into five main sections:
 - **Prominent Preview**: Rendered output is displayed at the top when running examples
 - **Interactive Controls**: Canvas size, clear color, and camera controls for 3D examples
 - **Mouse Interaction**: Drag to rotate 3D objects, scroll to zoom
+
+The application provides a tabbed interface with six main sections:
+
+1. **Adapter Selection Tab**: Choose and configure GPU adapters:
+   - View all available GPU adapters with detailed properties
+   - Select adapter by name, vendor, device type, and backend
+   - Configure power preference (None, Low Power, High Performance)
+   - Filter adapters by backend (Vulkan, Metal, DX12, OpenGL, etc.)
+
+2. **Device Config Tab**: Configure device settings:
+   - Enable/disable WebGPU features (texture compression, shader features, etc.)
+   - Adjust device limits to your needs
+   - View adapter capabilities and constraints
+
+3. **Device Info Tab**: Displays comprehensive information about your GPU adapter, including:
+   - Adapter details (name, vendor, backend)
+   - Device limits (texture dimensions, buffer sizes, workgroup limits, etc.)
+   - Supported features
+
+4. **Rendering Tab**: Provides tools for experimenting with rendering APIs:
+   - **Example Gallery**: Browse and explore WebGPU shader examples with descriptions and source code
+   - **WGSL Shader Editor**: Interactive shader editor with:
+     - Syntax highlighting for WGSL keywords, types, and functions
+     - Line numbers for easier code navigation
+     - File loading from assets/shaders directory
+     - Inline editing and validation
+     - Real-time compilation with error reporting
+     - Load example shaders or write your own
+   - **Code Export**: Generate standalone Cargo projects from examples:
+     - Export Triangle, Cube, or custom shader examples
+     - Customize project name and configuration
+     - Generates complete buildable Rust project with all dependencies
+     - Includes Cargo.toml, main.rs, shaders, and README
+     - **Hot Reload**: Automatically reload and update shaders when files change on disk (native platforms only)
+   - Render pipeline configuration (planned)
+   - Buffer and vertex data management (planned)
+   - Texture operations and sampling (planned)
+   - Render pass configuration (planned)
+   - Advanced rendering techniques (planned)
+
+5. **Buffer Config Tab**: Create and configure GPU buffers:
+   - Set buffer size with validation
+   - Select usage flags via checkboxes (VERTEX, INDEX, UNIFORM, STORAGE, INDIRECT, COPY_SRC, COPY_DST, MAP_READ, MAP_WRITE, QUERY_RESOLVE)
+   - Optional label for debugging
+   - Mapped-at-creation option
+   - Real-time validation with error messages
+   - Configuration summary display
+
+6. **Compute/ML Tab**: Tools for compute shader and ML operations (planned features):
+   - Compute pipeline setup
+   - Storage buffer management
+   - Matrix operations
+   - Convolution and pooling operations
+   - Neural network layer implementations
+   - Performance profiling
 
 ## Building and Running
 
@@ -783,6 +841,7 @@ The documentation includes all public APIs for:
 
 ### Design Documents
 
+- **[WEBGPU_API_COVERAGE.md](docs/WEBGPU_API_COVERAGE.md)** - Comprehensive mapping of WebGPU API features to playground implementation with implementation status
 - **[USER_GUIDE.md](docs/USER_GUIDE.md)** - Comprehensive end-user documentation with tutorials and workflows
 - **[QUICK_START.md](docs/QUICK_START.md)** - Quick start guide for new users
 - **[WGSL_SHADER_GUIDE.md](docs/WGSL_SHADER_GUIDE.md)** - Complete guide to writing WGSL shaders including structure, built-in functions, and debugging

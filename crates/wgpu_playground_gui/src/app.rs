@@ -273,9 +273,9 @@ impl PlaygroundApp {
         wgpu_playground_core::state::PlaygroundState {
             version: "1.0".to_string(),
             buffer_panel: Some(self.buffer_panel.export_state()),
-            texture_panel: None, // TODO: Add when TexturePanel has export_state
-            sampler_panel: None, // TODO: Add when SamplerPanel has export_state
-            shader_editor: None, // TODO: Add when accessible from app
+            texture_panel: Some(self.texture_panel.export_state()),
+            sampler_panel: Some(self.sampler_panel.export_state()),
+            shader_editor: None, // TODO: Add when accessible from rendering_panel
             render_pipeline_panel: None, // TODO: Add when RenderPipelinePanel has export_state
             compute_pipeline_panel: None, // TODO: Add when ComputePipelinePanel has export_state
             bind_group_panel: None, // TODO: Add when BindGroupPanel has export_state
@@ -287,6 +287,12 @@ impl PlaygroundApp {
     pub fn import_state(&mut self, state: &wgpu_playground_core::state::PlaygroundState) {
         if let Some(buffer_state) = &state.buffer_panel {
             self.buffer_panel.import_state(buffer_state);
+        }
+        if let Some(texture_state) = &state.texture_panel {
+            self.texture_panel.import_state(texture_state);
+        }
+        if let Some(sampler_state) = &state.sampler_panel {
+            self.sampler_panel.import_state(sampler_state);
         }
         // TODO: Import other panel states when available
     }

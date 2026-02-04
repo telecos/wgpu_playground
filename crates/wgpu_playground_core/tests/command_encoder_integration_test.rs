@@ -273,8 +273,8 @@ fn test_copy_texture_to_buffer() {
             mapped_at_creation: false,
         });
 
-        // Write test data to texture
-        let test_data = vec![128u8; 1024]; // Padded to match bytes_per_row alignment
+        // Write test data to texture (tightly packed - no padding needed for write_texture)
+        let test_data = vec![128u8; 64]; // 4x4 RGBA = 64 bytes of actual texture data
         queue.write_texture(
             wgpu::TexelCopyTextureInfo {
                 texture: &texture,
@@ -339,12 +339,14 @@ fn test_copy_texture_to_buffer() {
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
-        // Check first pixel in first row
+        // Check first byte of first pixel
         assert_eq!(data[0], 128);
-        // Check last pixel in first row (offset 12, since pixels are 4 bytes each: 3*4=12)
+        // Check first byte of last pixel in first row (3 pixels * 4 bytes = offset 12)
         assert_eq!(data[12], 128);
-        // Check first pixel in last row (row 3, offset 256*3)
+        // Check first byte of first pixel in last row (row starts at 256*3 = 768)
         assert_eq!(data[768], 128);
+        // Check first byte of last pixel in last row (768 + 12 = 780)
+        assert_eq!(data[780], 128);
         drop(data);
         buffer.unmap();
     });

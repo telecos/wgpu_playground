@@ -1077,13 +1077,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     ui.add_space(10.0);
                     ui.separator();
                     ui.label(egui::RichText::new("💾 Export to Standalone Project").strong());
-                    ui.label("Generate a complete Cargo project that you can build and run separately.");
-                    
+                    ui.label(
+                        "Generate a complete Cargo project that you can build and run separately.",
+                    );
+
                     ui.horizontal(|ui| {
                         ui.label("Project name:");
                         ui.text_edit_singleline(&mut self.export_project_name);
                     });
-                    
+
                     if ui.button("📦 Export Project").clicked() {
                         self.export_to_standalone_project(example_id, example_source_code);
                     }
@@ -1117,30 +1119,30 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     /// Export the current configuration to a standalone Rust project
     fn export_to_standalone_project(&mut self, example_id: &str, shader_source: &str) {
         use crate::code_generator::{CodeGenConfig, CodeGenerator, ExampleType};
-        
+
         // Determine example type
         let example_type = match example_id {
             "triangle" => ExampleType::Triangle,
             "cube" => ExampleType::Cube,
             _ => ExampleType::Custom,
         };
-        
+
         // Create output directory in user's home directory
         let output_path = if let Some(home_dir) = dirs::home_dir() {
             home_dir.join(&self.export_project_name)
         } else {
             std::path::PathBuf::from(&self.export_project_name)
         };
-        
+
         // Configure the code generator
         let config = CodeGenConfig::new(self.export_project_name.clone())
             .with_shader(shader_source.to_string())
             .with_example_type(example_type)
             .with_canvas_size(self.canvas_width, self.canvas_height)
             .with_clear_color(self.clear_color);
-        
+
         let generator = CodeGenerator::new(config);
-        
+
         // Generate the project
         match generator.generate(&output_path) {
             Ok(_) => {
@@ -1151,10 +1153,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 log::info!("Project exported successfully to: {:?}", output_path);
             }
             Err(e) => {
-                self.export_status_message = Some((
-                    format!("❌ Error exporting project: {}", e),
-                    false,
-                ));
+                self.export_status_message =
+                    Some((format!("❌ Error exporting project: {}", e), false));
                 log::error!("Failed to export project: {}", e);
             }
         }

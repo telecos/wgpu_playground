@@ -153,7 +153,7 @@ impl CodeGenerator {
 
     /// Get default shader source
     fn get_default_shader_source(&self) -> &str {
-        self.config.shader_source.as_ref().map(|s| s.as_str()).unwrap_or(
+        self.config.shader_source.as_deref().unwrap_or(
             "struct VertexInput {\n\
                 @location(0) position: vec3<f32>,\n\
                 @location(1) color: vec3<f32>,\n\
@@ -182,7 +182,7 @@ impl CodeGenerator {
     /// Generate triangle example main.rs
     fn generate_triangle_main(&self) -> String {
         let shader_source = self.get_default_shader_source();
-        
+
         format!(
             "use std::sync::Arc;\n\
             use winit::{{\n    \
@@ -566,7 +566,7 @@ mod tests {
     #[test]
     fn test_generate_project_structure() {
         let temp_dir = std::env::temp_dir().join("wgpu_test_project");
-        
+
         // Clean up if exists
         let _ = fs::remove_dir_all(&temp_dir);
 

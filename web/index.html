@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>wgpu_playground - WebGPU Demo</title>
     <style>
         * {
@@ -128,6 +131,107 @@
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 5px;
+            }
+
+            .header p {
+                font-size: 1em;
+            }
+
+            .header {
+                padding: 15px 10px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .demo-container {
+                padding: 15px;
+                max-width: 100%;
+            }
+
+            #canvas {
+                height: 300px;
+                border-width: 1px;
+            }
+
+            .footer {
+                padding: 15px 10px;
+                font-size: 0.9em;
+            }
+
+            .footer a {
+                display: inline-block;
+                margin: 5px;
+            }
+
+            .info {
+                padding: 15px;
+                font-size: 0.9em;
+            }
+
+            .info h3 {
+                font-size: 1.1em;
+            }
+
+            .info p {
+                font-size: 0.85em;
+            }
+
+            #status {
+                padding: 10px;
+                font-size: 0.8em;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .demo-container {
+                padding: 10px;
+            }
+
+            #canvas {
+                height: 250px;
+            }
+
+            .info {
+                padding: 10px;
+            }
+        }
+
+        /* Touch-friendly buttons and interactive elements */
+        @media (pointer: coarse) {
+            button, a {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px 20px;
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            #canvas {
+                height: 400px;
+            }
+
+            .container {
+                padding: 10px 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -147,7 +251,7 @@
 
             <div id="app-container" style="display: none;">
                 <canvas id="canvas"></canvas>
-                <div id="status"></div>
+                <div id="status" aria-live="polite" aria-atomic="true"></div>
             </div>
 
             <div class="info">
@@ -158,6 +262,9 @@
                 </p>
                 <p style="margin-top: 10px;">
                     <strong>Requirements:</strong> A browser with WebGPU support (Chrome 113+, Edge 113+, Safari Technology Preview*, or Firefox Nightly*).
+                </p>
+                <p style="margin-top: 5px;">
+                    <strong>Mobile Support:</strong> Touch controls enabled for mobile devices. Use single finger to pan/drag and two fingers to pinch-zoom.
                 </p>
                 <p style="margin-top: 5px; font-size: 0.9em; color: #666;">
                     <em>* Requires manual enablement in browser settings</em>
@@ -177,6 +284,79 @@
     <script type="module">
         import init, * as wasm from './pkg/wgpu_playground_core.js';
 
+        // Touch controls - encapsulated state
+        const touchState = {
+            startX: 0,
+            startY: 0,
+            lastDistance: 0
+        };
+
+        // Touch gesture thresholds
+        const MIN_ZOOM_DISTANCE = 10; // Minimum pixel distance to calculate zoom (prevents extreme sensitivity)
+
+        // Initialize touch controls for canvas
+        function initTouchControls() {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) return;
+
+            // Prevent default touch behaviors on canvas
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touches = e.touches;
+            
+            if (touches.length === 1) {
+                // Single touch - record starting position
+                touchState.startX = touches[0].clientX;
+                touchState.startY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                // Two fingers - pinch to zoom
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                touchState.lastDistance = Math.sqrt(dx * dx + dy * dy);
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touches = e.touches;
+
+            if (touches.length === 1) {
+                // Single touch - pan/drag
+                const deltaX = touches[0].clientX - touchState.startX;
+                const deltaY = touches[0].clientY - touchState.startY;
+                
+                // TODO: Pass deltaX/deltaY to WASM app for camera/view manipulation
+                // Example: wasm.handle_pan(deltaX, deltaY);
+                
+                touchState.startX = touches[0].clientX;
+                touchState.startY = touches[0].clientY;
+            } else if (touches.length === 2) {
+                // Two fingers - pinch to zoom
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Use minimum threshold to prevent extreme zoom from small movements
+                if (touchState.lastDistance > MIN_ZOOM_DISTANCE) {
+                    const scale = distance / touchState.lastDistance;
+                    // TODO: Pass scale to WASM app for zoom manipulation
+                    // Example: wasm.handle_zoom(scale);
+                }
+                
+                touchState.lastDistance = distance;
+            }
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            touchState.lastDistance = 0;
+        }
+
         async function loadDemo() {
             try {
                 // Check for WebGPU support
@@ -191,14 +371,20 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
 
+                // Initialize touch controls after canvas is visible
+                initTouchControls();
+
                 // Update status
                 const statusEl = document.getElementById('status');
+                // Use feature detection instead of user agent sniffing
+                const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints >= 1;
+                const isSmallTouchDevice = touchSupport && window.matchMedia('(max-width: 768px)').matches;
+                
                 statusEl.innerHTML = `
                     ✅ <strong>WebGPU initialized successfully!</strong><br>
-                    <small>Ready to explore GPU rendering capabilities.</small>
+                    <small>Ready to explore GPU rendering capabilities.</small><br>
+                    <small>Device: ${isSmallTouchDevice ? 'Mobile' : 'Desktop'} | Touch: ${touchSupport ? 'Enabled' : 'Disabled'}</small>
                 `;
-
-                console.log('wgpu_playground WASM module loaded successfully');
 
                 // TODO: Initialize your WASM application here
                 // For example: wasm.run_app();

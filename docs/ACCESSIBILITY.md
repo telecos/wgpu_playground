@@ -10,8 +10,9 @@ wgpu_playground has been designed with accessibility in mind, following WCAG 2.1
 
 ### Semantic HTML
 - Proper HTML5 semantic elements (`<header>`, `<main>`, `<footer>`, `<nav>`)
-- Appropriate heading hierarchy (h1, h2, h3)
+- Appropriate heading hierarchy (h1 for page title, h2 for section headings)
 - Descriptive page title and meta description for SEO and screen readers
+- Language attribute (`lang="en"`) on HTML element
 
 ### ARIA Labels and Roles
 - **Skip Navigation Link**: Allows keyboard users to skip directly to main content
@@ -24,12 +25,12 @@ wgpu_playground has been designed with accessibility in mind, following WCAG 2.1
 ### Keyboard Navigation
 The web interface supports full keyboard navigation:
 
-- **Tab**: Navigate between interactive elements
+- **Tab/Shift+Tab**: Navigate between interactive elements
 - **Enter/Space**: Activate canvas interaction mode
-- **Escape**: Exit canvas interaction mode
-- **H**: Show keyboard shortcuts help
+- **Escape**: Exit canvas interaction mode or close help modal
+- **H**: Show/hide keyboard shortcuts help modal
 
-When the canvas receives focus, screen readers announce available keyboard shortcuts.
+When the canvas receives focus, screen readers announce available keyboard shortcuts. The help modal provides a comprehensive list of available keyboard shortcuts and can be accessed at any time.
 
 ### Focus Indicators
 - High-contrast focus indicators (3px solid yellow outline with 2px offset)
@@ -44,11 +45,12 @@ All text and interactive elements meet WCAG AA standards (4.5:1 contrast ratio):
 - Border colors: Higher contrast variants for better visibility
 
 ### Screen Reader Support
-- `lang="en"` attribute on HTML element
-- Descriptive meta tags
+- `lang="en"` attribute on HTML element for proper language identification
+- Descriptive meta tags for page context
 - ARIA live regions for dynamic content updates
 - Hidden decorative elements (`aria-hidden="true"` on separators)
 - Screen reader only content with `.sr-only` class
+- Modal dialogs with proper ARIA attributes (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`)
 
 ## Desktop Application (egui) Accessibility
 

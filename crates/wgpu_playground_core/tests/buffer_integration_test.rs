@@ -589,6 +589,10 @@ fn test_buffer_zero_initialization() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_overwrite_data() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
@@ -624,6 +628,10 @@ fn test_buffer_overwrite_data() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_large_data_transfer() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
@@ -674,6 +682,10 @@ fn test_buffer_large_data_transfer() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_multiple_map_unmap_cycles() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
@@ -707,6 +719,10 @@ fn test_buffer_multiple_map_unmap_cycles() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_map_write_modify_read() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {

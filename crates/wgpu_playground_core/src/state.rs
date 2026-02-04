@@ -230,6 +230,7 @@ mod tests {
     fn test_state_serialization() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "test_buffer".to_string(),
                 size: "1024".to_string(),
@@ -274,6 +275,7 @@ mod tests {
     fn test_shader_editor_state_serialization() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::default(),
             buffer_panel: None,
             texture_panel: None,
             sampler_panel: None,

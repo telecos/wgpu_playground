@@ -313,7 +313,7 @@
     </footer>
 
     <!-- Keyboard help modal -->
-    <div id="help-modal" class="help-modal" role="dialog" aria-labelledby="help-modal-title" aria-modal="true">
+    <div id="help-modal" class="help-modal" role="dialog" aria-labelledby="help-modal-title" aria-describedby="help-modal-instructions" aria-modal="true">
         <div class="help-modal-content">
             <div class="help-modal-header">
                 <h2 id="help-modal-title">Keyboard Shortcuts</h2>
@@ -322,12 +322,12 @@
             <ul>
                 <li><kbd>H</kbd>: Show/hide this help</li>
                 <li><kbd>Enter</kbd> or <kbd>Space</kbd>: Activate canvas interaction</li>
-                <li><kbd>Escape</kbd>: Exit canvas interaction</li>
+                <li><kbd>Escape</kbd>: Exit canvas interaction or close this help</li>
                 <li><kbd>Tab</kbd>: Navigate between elements</li>
                 <li><kbd>Shift+Tab</kbd>: Navigate backwards between elements</li>
             </ul>
-            <p style="margin-top: 20px; color: #666; font-size: 0.9em;">
-                Press <kbd>Escape</kbd> or click the Close button to dismiss this help.
+            <p id="help-modal-instructions" style="margin-top: 20px; color: #666; font-size: 0.9em;">
+                Press <kbd>Escape</kbd> or click the Close button to dismiss this help. You can also click outside this dialog to close it.
             </p>
         </div>
     </div>
@@ -395,21 +395,33 @@
             canvas.addEventListener('keydown', function(event) {
                 // Announce canvas interaction to screen readers
                 const statusEl = document.getElementById('status');
+                const helpModal = document.getElementById('help-modal');
                 
                 switch(event.key) {
                     case 'Enter':
-                    case ' ':
                         // Activate canvas interaction
+                        event.preventDefault();
                         console.log('Canvas activated with keyboard');
                         statusEl.setAttribute('aria-live', 'polite');
                         statusEl.textContent = 'Canvas interaction mode activated. Press Escape to exit.';
                         break;
+                    case ' ':
+                        // Activate canvas interaction (only when canvas has focus)
+                        if (document.activeElement === canvas) {
+                            event.preventDefault();
+                            console.log('Canvas activated with keyboard');
+                            statusEl.setAttribute('aria-live', 'polite');
+                            statusEl.textContent = 'Canvas interaction mode activated. Press Escape to exit.';
+                        }
+                        break;
                     case 'Escape':
-                        // Exit canvas interaction
-                        console.log('Canvas interaction exited');
-                        statusEl.setAttribute('aria-live', 'polite');
-                        statusEl.textContent = 'Canvas interaction mode exited.';
-                        canvas.blur();
+                        // Exit canvas interaction (only if modal is not open)
+                        if (helpModal.style.display !== 'block') {
+                            console.log('Canvas interaction exited');
+                            statusEl.setAttribute('aria-live', 'polite');
+                            statusEl.textContent = 'Canvas interaction mode exited.';
+                            canvas.blur();
+                        }
                         break;
                     case 'h':
                     case 'H':

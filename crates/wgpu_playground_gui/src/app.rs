@@ -316,7 +316,19 @@ impl PlaygroundApp {
         egui::SidePanel::left("sidebar").show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("Navigation");
-                ui.label("Use Ctrl+1-6 for quick navigation").on_hover_text("Keyboard shortcuts:\nCtrl+1: Rendering\nCtrl+2: Compute\nCtrl+3: Buffers\nCtrl+4: Textures\nCtrl+5: Console\nCtrl+6: Settings");
+                
+                // Platform-appropriate shortcut hint
+                let shortcut_modifier = if cfg!(target_os = "macos") {
+                    "Cmd"
+                } else {
+                    "Ctrl"
+                };
+                
+                ui.label(format!("Quick navigation: {shortcut_modifier}+1-6"))
+                    .on_hover_text(format!(
+                        "Keyboard shortcuts:\n{0}+1: Rendering\n{0}+2: Compute\n{0}+3: Buffers\n{0}+4: Textures\n{0}+5: Console\n{0}+6: Settings",
+                        shortcut_modifier
+                    ));
                 ui.separator();
                 ui.add_space(5.0);
 

@@ -215,7 +215,7 @@ impl CodeGenerator {
                 async fn new(window: Arc<Window>) -> Self {{\n        \
                     let size = window.inner_size();\n\
                     \n        \
-                    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {{\n            \
+                    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {{\n            \
                         backends: wgpu::Backends::all(),\n            \
                         ..Default::default()\n        \
                     }});\n\
@@ -240,8 +240,7 @@ impl CodeGenerator {
                                 memory_hints: Default::default(),\n                    \
                                 experimental_features: Default::default(),\n                    \
                                 trace: wgpu::Trace::Off,\n                \
-                            }},\n                \
-                            None,\n            \
+                            }}\n            \
                         )\n            \
                         .await\n            \
                         .unwrap();\n\
@@ -390,7 +389,8 @@ impl CodeGenerator {
                                         a: {:.2},\n                        \
                                     }}),\n                        \
                                     store: wgpu::StoreOp::Store,\n                    \
-                                }},\n                \
+                                }},\n                    \
+                                depth_slice: None,\n                \
                             }})],\n                \
                             depth_stencil_attachment: None,\n                \
                             occlusion_query_set: None,\n                \

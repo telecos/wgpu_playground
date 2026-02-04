@@ -565,6 +565,13 @@ impl PlaygroundApp {
     pub fn try_load_from_browser_url(&mut self) {
         // No-op for native builds - URL state loading only works in browser
     }
+
+    /// Handle dropped image file
+    pub fn handle_dropped_image(&mut self, bytes: Vec<u8>) {
+        self.texture_panel.load_from_bytes(bytes);
+        // Switch to texture tab to show the loaded texture
+        self.selected_tab = Tab::TextureConfig;
+    }
 }
 
 #[cfg(test)]

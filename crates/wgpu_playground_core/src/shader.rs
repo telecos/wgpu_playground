@@ -49,6 +49,8 @@ pub struct ShaderModule {
     source: String,
     /// Optional label for debugging
     label: Option<String>,
+    /// Track the original source type for reloading
+    source_type: ShaderSource,
 }
 
 impl ShaderModule {
@@ -79,6 +81,7 @@ impl ShaderModule {
     /// ```
     pub fn new(source: ShaderSource, label: Option<&str>) -> Result<Self, ShaderError> {
         log::debug!("Loading shader: label={:?}", label);
+        let source_type = source.clone();
         let source_code = match source {
             ShaderSource::Inline(code) => {
                 if code.trim().is_empty() {
@@ -108,6 +111,7 @@ impl ShaderModule {
         Ok(Self {
             source: source_code,
             label: label.map(String::from),
+            source_type,
         })
     }
 
@@ -187,6 +191,58 @@ impl ShaderModule {
         });
         log::trace!("Shader module created successfully");
         module
+    }
+
+    /// Reload the shader source from its original source
+    ///
+    /// For file-based shaders, this reloads from disk.
+    /// For inline shaders, this is a no-op.
+    ///
+    /// # Returns
+    /// Ok(true) if the shader was reloaded, Ok(false) if no reload was needed,
+    /// or Err if reloading failed
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use wgpu_playground_core::shader::ShaderModule;
+    ///
+    /// let mut shader = ShaderModule::from_file("example.wgsl", Some("example")).unwrap();
+    /// // ... shader file is modified ...
+    /// shader.reload().unwrap();
+    /// ```
+    pub fn reload(&mut self) -> Result<bool, ShaderError> {
+        match &self.source_type {
+            ShaderSource::File(filename) => {
+                log::info!("Reloading shader from file: {}", filename);
+                match crate::assets::load_shader(filename) {
+                    Ok(new_source) => {
+                        if new_source.trim().is_empty() {
+                            log::error!("Reloaded shader source is empty");
+                            return Err(ShaderError::InvalidSource(
+                                "Shader source cannot be empty".to_string(),
+                            ));
+                        }
+                        
+                        if new_source != self.source {
+                            log::info!("Shader source changed, updating ({} bytes)", new_source.len());
+                            self.source = new_source;
+                            Ok(true)
+                        } else {
+                            log::debug!("Shader source unchanged");
+                            Ok(false)
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("Failed to reload shader from file '{}': {}", filename, e);
+                        Err(e.into())
+                    }
+                }
+            }
+            ShaderSource::Inline(_) => {
+                log::debug!("Inline shader, no reload needed");
+                Ok(false)
+            }
+        }
     }
 }
 

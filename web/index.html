@@ -298,8 +298,6 @@
             canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
             canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
             canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-            console.log('Touch controls initialized');
         }
 
         function handleTouchStart(e) {
@@ -327,11 +325,6 @@
                 const deltaX = touches[0].clientX - touchStartX;
                 const deltaY = touches[0].clientY - touchStartY;
                 
-                // Log touch movement for debugging
-                if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-                    console.log(`Touch move: dx=${deltaX}, dy=${deltaY}`);
-                }
-                
                 touchStartX = touches[0].clientX;
                 touchStartY = touches[0].clientY;
             } else if (touches.length === 2) {
@@ -342,7 +335,7 @@
                 
                 if (lastTouchDistance > 0) {
                     const scale = distance / lastTouchDistance;
-                    console.log(`Pinch scale: ${scale}`);
+                    // TODO: Apply scale transformation to canvas
                 }
                 
                 lastTouchDistance = distance;
@@ -373,17 +366,15 @@
 
                 // Update status
                 const statusEl = document.getElementById('status');
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                // Use feature detection instead of user agent sniffing
                 const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                const isMobileDevice = touchSupport && window.matchMedia('(max-width: 768px)').matches;
                 
                 statusEl.innerHTML = `
                     ✅ <strong>WebGPU initialized successfully!</strong><br>
                     <small>Ready to explore GPU rendering capabilities.</small><br>
-                    <small>Device: ${isMobile ? 'Mobile' : 'Desktop'} | Touch: ${touchSupport ? 'Enabled' : 'Disabled'}</small>
+                    <small>Device: ${isMobileDevice ? 'Mobile' : 'Desktop'} | Touch: ${touchSupport ? 'Enabled' : 'Disabled'}</small>
                 `;
-
-                console.log('wgpu_playground WASM module loaded successfully');
-                console.log(`Mobile device: ${isMobile}, Touch support: ${touchSupport}`);
 
                 // TODO: Initialize your WASM application here
                 // For example: wasm.run_app();

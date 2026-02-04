@@ -493,7 +493,11 @@ The project includes several standalone command-line examples that demonstrate s
 
 **List all examples:**
 ```bash
-cargo run --package wgpu_playground_examples --bin --list
+# List example files
+ls crates/wgpu_playground_examples/examples/
+
+# Or view in cargo package metadata
+cargo tree -p wgpu_playground_examples
 ```
 
 **Run specific examples:**
@@ -501,17 +505,26 @@ cargo run --package wgpu_playground_examples --bin --list
 # Basic triangle rendering
 cargo run --package wgpu_playground_examples --example triangle
 
-# Texture mapping with samplers
-cargo run --package wgpu_playground_examples --bin texture_mapping
-
 # 3D rotating cube
-cargo run --package wgpu_playground_examples --bin rotating_cube
+cargo run --package wgpu_playground_examples --example rotating_cube
 
 # Render to texture
-cargo run --package wgpu_playground_examples --bin render_to_texture
+cargo run --package wgpu_playground_examples --example render_to_texture
 
 # Compute shader example
-cargo run --package wgpu_playground_examples --bin compute_render_buffer_sharing
+cargo run --package wgpu_playground_examples --example compute_render_sharing
+
+# Instanced rendering
+cargo run --package wgpu_playground_examples --example instanced_rendering
+
+# Multisampling anti-aliasing
+cargo run --package wgpu_playground_examples --example multisampling
+
+# Backend selection
+cargo run --package wgpu_playground_examples --example backend_selection
+
+# Error handling patterns
+cargo run --package wgpu_playground_examples --example error_handling
 ```
 
 Each example includes detailed output explaining what operations are being performed and their results.

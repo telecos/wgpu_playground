@@ -291,6 +291,9 @@
             lastDistance: 0
         };
 
+        // Touch gesture thresholds
+        const MIN_ZOOM_DISTANCE = 10; // Minimum pixel distance to calculate zoom (prevents extreme sensitivity)
+
         // Initialize touch controls for canvas
         function initTouchControls() {
             const canvas = document.getElementById('canvas');
@@ -338,8 +341,8 @@
                 const dy = touches[0].clientY - touches[1].clientY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                // Minimum threshold to prevent extreme zoom from small movements
-                if (touchState.lastDistance > 10) {
+                // Use minimum threshold to prevent extreme zoom from small movements
+                if (touchState.lastDistance > MIN_ZOOM_DISTANCE) {
                     const scale = distance / touchState.lastDistance;
                     // TODO: Pass scale to WASM app for zoom manipulation
                     // Example: wasm.handle_zoom(scale);

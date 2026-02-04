@@ -325,6 +325,9 @@
                 const deltaX = touches[0].clientX - touchStartX;
                 const deltaY = touches[0].clientY - touchStartY;
                 
+                // TODO: Pass deltaX/deltaY to WASM app for camera/view manipulation
+                // Example: wasm.handle_pan(deltaX, deltaY);
+                
                 touchStartX = touches[0].clientX;
                 touchStartY = touches[0].clientY;
             } else if (touches.length === 2) {
@@ -335,7 +338,8 @@
                 
                 if (lastTouchDistance > 0) {
                     const scale = distance / lastTouchDistance;
-                    // TODO: Apply scale transformation to canvas
+                    // TODO: Pass scale to WASM app for zoom manipulation
+                    // Example: wasm.handle_zoom(scale);
                 }
                 
                 lastTouchDistance = distance;

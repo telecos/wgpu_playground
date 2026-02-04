@@ -1,11 +1,11 @@
 /// Playground state serialization module
-/// 
+///
 /// This module provides serialization support for the playground state,
 /// allowing users to save and load their work. It includes serializable
 /// versions of panel configurations and conversion methods.
-/// 
+///
 /// # Limitations
-/// 
+///
 /// Some enum values (TextureFormat, TextureDimension, AddressMode, FilterMode, etc.)
 /// are serialized as strings but not parsed back during import to avoid complexity.
 /// These fields will retain their default values when loading state.
@@ -180,8 +180,7 @@ impl PlaygroundState {
 
     /// Save the state to a JSON file
     pub fn save_to_file(&self, path: &Path) -> Result<(), std::io::Error> {
-        let json = serde_json::to_string_pretty(self)
-            .map_err(std::io::Error::other)?;
+        let json = serde_json::to_string_pretty(self).map_err(std::io::Error::other)?;
         std::fs::write(path, json)?;
         log::info!("Saved playground state to {:?}", path);
         Ok(())
@@ -190,8 +189,7 @@ impl PlaygroundState {
     /// Load state from a JSON file
     pub fn load_from_file(path: &Path) -> Result<Self, std::io::Error> {
         let json = std::fs::read_to_string(path)?;
-        let state: Self = serde_json::from_str(&json)
-            .map_err(std::io::Error::other)?;
+        let state: Self = serde_json::from_str(&json).map_err(std::io::Error::other)?;
         log::info!("Loaded playground state from {:?}", path);
         Ok(state)
     }
@@ -275,7 +273,7 @@ mod tests {
 
         let json = state.to_json().unwrap();
         let loaded_state = PlaygroundState::from_json(&json).unwrap();
-        
+
         assert!(loaded_state.shader_editor.is_some());
         let shader = loaded_state.shader_editor.unwrap();
         assert_eq!(shader.source_code, "@vertex fn main() {}");
@@ -288,7 +286,7 @@ mod tests {
         let state = PlaygroundState::new();
         let json = state.to_json().unwrap();
         let loaded_state = PlaygroundState::from_json(&json).unwrap();
-        
+
         assert_eq!(loaded_state.version, "1.0");
         assert!(loaded_state.buffer_panel.is_none());
         assert!(loaded_state.texture_panel.is_none());

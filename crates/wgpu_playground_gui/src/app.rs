@@ -114,45 +114,47 @@ impl PlaygroundApp {
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading("🎮 WebGPU Playground");
-                
+
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     // File operations
                     ui.label("File:");
-                    
+
                     if ui.button("💾 Save State").clicked() {
                         let filename = self.save_load_filename.clone();
                         let path = std::path::Path::new(&filename);
                         match self.save_state_to_file(path) {
                             Ok(_) => {
-                                self.save_load_message = Some(format!("✓ State saved to {}", filename));
+                                self.save_load_message =
+                                    Some(format!("✓ State saved to {}", filename));
                             }
                             Err(e) => {
                                 self.save_load_message = Some(format!("✗ Failed to save: {}", e));
                             }
                         }
                     }
-                    
+
                     if ui.button("📂 Load State").clicked() {
                         let filename = self.save_load_filename.clone();
                         let path = std::path::Path::new(&filename);
                         match self.load_state_from_file(path) {
                             Ok(_) => {
-                                self.save_load_message = Some(format!("✓ State loaded from {}", filename));
+                                self.save_load_message =
+                                    Some(format!("✓ State loaded from {}", filename));
                             }
                             Err(e) => {
                                 self.save_load_message = Some(format!("✗ Failed to load: {}", e));
                             }
                         }
                     }
-                    
+
                     ui.add(
                         egui::TextEdit::singleline(&mut self.save_load_filename)
                             .desired_width(200.0)
-                            .hint_text("filename.json")
+                            .hint_text("filename.json"),
                     );
                 });
             });
-            
+
             // Show save/load message if any
             if let Some(msg) = &self.save_load_message {
                 ui.colored_label(
@@ -161,7 +163,7 @@ impl PlaygroundApp {
                     } else {
                         egui::Color32::RED
                     },
-                    msg
+                    msg,
                 );
             }
         });
@@ -278,7 +280,7 @@ impl PlaygroundApp {
             shader_editor: Some(self.rendering_panel.export_shader_editor_state()),
             render_pipeline_panel: None, // TODO: Add when RenderPipelinePanel has export_state
             compute_pipeline_panel: None, // TODO: Add when ComputePipelinePanel has export_state
-            bind_group_panel: None, // TODO: Add when BindGroupPanel has export_state
+            bind_group_panel: None,      // TODO: Add when BindGroupPanel has export_state
             bind_group_layout_panel: None, // TODO: Add when BindGroupLayoutPanel has export_state
         }
     }
@@ -295,7 +297,8 @@ impl PlaygroundApp {
             self.sampler_panel.import_state(sampler_state);
         }
         if let Some(shader_state) = &state.shader_editor {
-            self.rendering_panel.import_shader_editor_state(shader_state);
+            self.rendering_panel
+                .import_shader_editor_state(shader_state);
         }
         // TODO: Import other panel states when available
     }

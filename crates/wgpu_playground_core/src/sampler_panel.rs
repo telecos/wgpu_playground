@@ -507,7 +507,7 @@ impl SamplerPanel {
     }
 
     /// Import state from a serializable format
-    /// 
+    ///
     /// Note: Address modes, filters, and compare function are stored as strings but are not
     /// parsed back to avoid complexity. The panel will retain default values for these fields.
     /// Future enhancement could add enum parsing support.
@@ -519,11 +519,11 @@ impl SamplerPanel {
             self.anisotropy = aniso.clamp(1, 16);
         }
         self.enable_compare = state.compare.is_some();
-        
+
         // TODO: Parse address modes, filters, and compare function from strings
         // For now, these remain at their default values
         // The string values are preserved in the saved state for reference
-        
+
         self.validation_error = None;
         self.success_message = None;
     }

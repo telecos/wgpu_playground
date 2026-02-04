@@ -1,7 +1,6 @@
 /// Demonstration of save/load functionality
-/// 
+///
 /// This test demonstrates how the playground state can be saved to and loaded from JSON files.
-
 use wgpu_playground_core::state::{
     BufferPanelState, PlaygroundState, SamplerPanelState, ShaderEditorState, TexturePanelState,
 };
@@ -117,8 +116,7 @@ fn fs_main() -> @location(0) vec4<f32> {
 
     // 5. Load from file
     println!("5. Loading state from file...");
-    let loaded_state =
-        PlaygroundState::load_from_file(&save_path).expect("Failed to load state");
+    let loaded_state = PlaygroundState::load_from_file(&save_path).expect("Failed to load state");
     println!("   ✓ State loaded successfully");
     println!();
 
@@ -131,7 +129,10 @@ fn fs_main() -> @location(0) vec4<f32> {
         assert_eq!(buffer.label, "vertex_buffer");
         assert_eq!(buffer.size, "4096");
         assert!(buffer.usage_vertex);
-        println!("   ✓ Buffer panel: {} ({} bytes)", buffer.label, buffer.size);
+        println!(
+            "   ✓ Buffer panel: {} ({} bytes)",
+            buffer.label, buffer.size
+        );
     }
 
     if let Some(texture) = &loaded_state.texture_panel {
@@ -147,13 +148,20 @@ fn fs_main() -> @location(0) vec4<f32> {
     if let Some(sampler) = &loaded_state.sampler_panel {
         assert_eq!(sampler.label, "linear_sampler");
         assert_eq!(sampler.mag_filter, "Linear");
-        println!("   ✓ Sampler panel: {} ({})", sampler.label, sampler.mag_filter);
+        println!(
+            "   ✓ Sampler panel: {} ({})",
+            sampler.label, sampler.mag_filter
+        );
     }
 
     if let Some(shader) = &loaded_state.shader_editor {
         assert_eq!(shader.label, "triangle_shader");
         assert!(shader.source_code.contains("@vertex"));
-        println!("   ✓ Shader editor: {} ({} bytes)", shader.label, shader.source_code.len());
+        println!(
+            "   ✓ Shader editor: {} ({} bytes)",
+            shader.label,
+            shader.source_code.len()
+        );
     }
     println!();
 

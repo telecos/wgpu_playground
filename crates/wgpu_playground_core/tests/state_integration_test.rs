@@ -1,6 +1,8 @@
-/// Integration test for state save/load functionality
-use wgpu_playground_core::state::{BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState};
 use std::fs;
+/// Integration test for state save/load functionality
+use wgpu_playground_core::state::{
+    BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState,
+};
 
 #[test]
 fn test_save_and_load_state() {
@@ -60,19 +62,21 @@ fn test_save_and_load_state() {
     // Save state to a temp file
     let temp_dir = std::env::temp_dir();
     let test_file = temp_dir.join("test_playground_state.json");
-    
+
     // Save the state
-    state.save_to_file(&test_file).expect("Failed to save state");
-    
+    state
+        .save_to_file(&test_file)
+        .expect("Failed to save state");
+
     // Verify file exists
     assert!(test_file.exists(), "State file was not created");
-    
+
     // Load the state back
     let loaded_state = PlaygroundState::load_from_file(&test_file).expect("Failed to load state");
-    
+
     // Verify the loaded state matches
     assert_eq!(loaded_state.version, "1.0");
-    
+
     // Verify buffer panel
     assert!(loaded_state.buffer_panel.is_some());
     let buffer = loaded_state.buffer_panel.unwrap();
@@ -81,7 +85,7 @@ fn test_save_and_load_state() {
     assert!(buffer.usage_vertex);
     assert!(buffer.usage_uniform);
     assert!(buffer.usage_copy_src);
-    
+
     // Verify texture panel
     assert!(loaded_state.texture_panel.is_some());
     let texture = loaded_state.texture_panel.unwrap();
@@ -90,14 +94,14 @@ fn test_save_and_load_state() {
     assert_eq!(texture.height, "512");
     assert!(texture.usage_texture_binding);
     assert!(texture.usage_render_attachment);
-    
+
     // Verify sampler panel
     assert!(loaded_state.sampler_panel.is_some());
     let sampler = loaded_state.sampler_panel.unwrap();
     assert_eq!(sampler.label, "test_sampler");
     assert_eq!(sampler.mag_filter, "Linear");
     assert_eq!(sampler.min_filter, "Linear");
-    
+
     // Clean up
     fs::remove_file(test_file).ok();
 }
@@ -132,7 +136,7 @@ fn test_json_serialization_format() {
 
     // Convert to JSON
     let json = state.to_json().expect("Failed to serialize to JSON");
-    
+
     // Verify JSON contains expected fields
     assert!(json.contains("\"version\""));
     assert!(json.contains("\"1.0\""));
@@ -141,7 +145,7 @@ fn test_json_serialization_format() {
     assert!(json.contains("\"1024\""));
     assert!(json.contains("\"usage_vertex\": true"));
     assert!(json.contains("\"usage_copy_dst\": true"));
-    
+
     // Verify it can be parsed back
     let parsed = PlaygroundState::from_json(&json).expect("Failed to parse JSON");
     assert_eq!(parsed.version, "1.0");
@@ -179,11 +183,11 @@ fn test_partial_state_loading() {
 
     let json = state.to_json().expect("Failed to serialize");
     let loaded = PlaygroundState::from_json(&json).expect("Failed to parse");
-    
+
     assert!(loaded.buffer_panel.is_none());
     assert!(loaded.texture_panel.is_some());
     assert!(loaded.sampler_panel.is_none());
-    
+
     let texture = loaded.texture_panel.unwrap();
     assert_eq!(texture.label, "only_texture");
 }

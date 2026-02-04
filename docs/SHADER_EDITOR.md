@@ -104,6 +104,7 @@ The shader editor is accessible from the **Rendering** tab in the main applicati
 ## WGSL Resources
 
 For learning WGSL syntax:
+- **[WGSL Shader Guide](WGSL_SHADER_GUIDE.md)** - Comprehensive guide to writing WGSL shaders (included in this repository)
 - [WGSL Specification](https://www.w3.org/TR/WGSL/)
 - [WebGPU Fundamentals - WGSL](https://webgpufundamentals.org/webgpu/lessons/webgpu-wgsl.html)
 - [wgpu Tutorial](https://sotrh.github.io/learn-wgpu/)

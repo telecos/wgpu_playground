@@ -48,12 +48,12 @@ fn cleanup_test_shader() {
 #[cfg(not(target_arch = "wasm32"))]
 fn test_shader_watcher_detects_changes() {
     // Create a test shader file
-    let initial_content = r#"
+    let initial_content = r"
 @vertex
 fn vs_main() -> @builtin(position) vec4<f32> {
     return vec4<f32>(0.0, 0.0, 0.0, 1.0);
 }
-"#;
+";
 
     create_test_shader(initial_content);
 
@@ -64,12 +64,12 @@ fn vs_main() -> @builtin(position) vec4<f32> {
     thread::sleep(Duration::from_millis(200));
 
     // Modify the shader file
-    let modified_content = r#"
+    let modified_content = r"
 @vertex
 fn vs_main() -> @builtin(position) vec4<f32> {
     return vec4<f32>(1.0, 1.0, 1.0, 1.0);
 }
-"#;
+";
     update_test_shader(modified_content);
 
     // Wait for the watcher to detect the change
@@ -85,8 +85,7 @@ fn vs_main() -> @builtin(position) vec4<f32> {
     let found_change = events.iter().any(|e| e.filename == "test_hot_reload.wgsl");
     assert!(
         found_change,
-        "Expected to detect change to test_hot_reload.wgsl, but got events: {:?}",
-        events
+        "Expected to detect change to test_hot_reload.wgsl, but got events: {events:?}"
     );
 }
 
@@ -107,8 +106,7 @@ fn test_shader_module_reload() {
     let initial_source = shader.source();
     assert!(
         initial_source.contains("vec4<f32>(1.0, 0.0, 0.0, 1.0)"),
-        "Initial shader should contain red color, got: {:?}",
-        initial_source
+        "Initial shader should contain red color, got: {initial_source:?}"
     );
 
     // Modify the file - green color instead of red
@@ -126,8 +124,7 @@ fn test_shader_module_reload() {
     let reloaded_source = shader.source();
     assert!(
         reloaded_source.contains("vec4<f32>(0.0, 1.0, 0.0, 1.0)"),
-        "Expected shader content to change after reload to green, got: {:?}",
-        reloaded_source
+        "Expected shader content to change after reload to green, got: {reloaded_source:?}"
     );
 }
 
@@ -154,12 +151,12 @@ fn test_shader_module_reload_inline_shader() {
 #[cfg(not(target_arch = "wasm32"))]
 fn test_shader_module_reload_with_same_content() {
     // Create a test shader file
-    let content = r#"
+    let content = r"
 @compute @workgroup_size(1)
 fn cs_main() {
     // Do nothing
 }
-"#;
+";
 
     create_test_shader(content);
 
@@ -223,7 +220,6 @@ fn test_shader_watcher_multiple_files() {
 
     assert!(
         shader1_changed || shader2_changed,
-        "Expected to detect changes to at least one test shader, got events: {:?}",
-        events
+        "Expected to detect changes to at least one test shader, got events: {events:?}"
     );
 }

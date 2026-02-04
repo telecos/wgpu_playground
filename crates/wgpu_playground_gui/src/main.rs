@@ -335,6 +335,18 @@ impl ApplicationHandler for App {
                 Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
                 Err(e) => eprintln!("Surface error: {:?}", e),
             },
+            WindowEvent::DroppedFile(path) => {
+                // Handle file drop
+                if let Ok(bytes) = std::fs::read(&path) {
+                    // Check if it's an image file by extension
+                    if let Some(ext) = path.extension() {
+                        let ext_str = ext.to_str().unwrap_or("").to_lowercase();
+                        if ext_str == "png" || ext_str == "jpg" || ext_str == "jpeg" {
+                            state.playground_app.handle_dropped_image(bytes);
+                        }
+                    }
+                }
+            }
             _ => {}
         }
     }

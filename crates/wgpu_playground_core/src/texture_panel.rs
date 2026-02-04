@@ -28,6 +28,12 @@ pub struct TexturePanel {
     validation_error: Option<String>,
     /// Success message
     success_message: Option<String>,
+    /// Loaded texture data (bytes)
+    loaded_texture_data: Option<Vec<u8>>,
+    /// Loaded texture dimensions
+    loaded_texture_dimensions: Option<(u32, u32)>,
+    /// File load message
+    file_load_message: Option<String>,
 }
 
 impl Default for TexturePanel {
@@ -55,6 +61,9 @@ impl TexturePanel {
             usage_render_attachment: false,
             validation_error: None,
             success_message: None,
+            loaded_texture_data: None,
+            loaded_texture_dimensions: None,
+            file_load_message: None,
         }
     }
 
@@ -181,6 +190,46 @@ impl TexturePanel {
             usage |= TextureUsages::RENDER_ATTACHMENT;
         }
         usage
+    }
+
+    /// Handle file loading from bytes
+    pub fn load_from_bytes(&mut self, bytes: Vec<u8>) {
+        // Try to decode the image to get dimensions
+        match image::load_from_memory(&bytes) {
+            Ok(img) => {
+                let dimensions = img.dimensions();
+                self.loaded_texture_data = Some(bytes);
+                self.loaded_texture_dimensions = Some(dimensions);
+                self.width_input = dimensions.0.to_string();
+                self.height_input = dimensions.1.to_string();
+                self.file_load_message = Some(format!(
+                    "✓ Image loaded successfully: {}x{} pixels",
+                    dimensions.0, dimensions.1
+                ));
+                self.validation_error = None;
+            }
+            Err(e) => {
+                self.file_load_message = None;
+                self.validation_error = Some(format!("Failed to load image: {}", e));
+            }
+        }
+    }
+
+    /// Clear loaded texture data
+    pub fn clear_loaded_texture(&mut self) {
+        self.loaded_texture_data = None;
+        self.loaded_texture_dimensions = None;
+        self.file_load_message = None;
+    }
+
+    /// Get loaded texture data
+    pub fn get_loaded_texture_data(&self) -> Option<&Vec<u8>> {
+        self.loaded_texture_data.as_ref()
+    }
+
+    /// Get loaded texture dimensions
+    pub fn get_loaded_texture_dimensions(&self) -> Option<(u32, u32)> {
+        self.loaded_texture_dimensions
     }
 
     /// Render the texture configuration UI
@@ -349,6 +398,53 @@ impl TexturePanel {
                             "Texture can be used as a render attachment",
                         );
                     });
+            });
+
+            ui.add_space(15.0);
+
+            // File Loading Section
+            ui.group(|ui| {
+                ui.heading("📁 Load Texture from File");
+                ui.label("Load image files (PNG, JPEG) to create textures.");
+                ui.add_space(5.0);
+
+                ui.horizontal(|ui| {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    {
+                        if ui.button("📂 Load Image...").clicked() {
+                            // For native platforms, we'll show a message about drag-and-drop
+                            self.file_load_message = Some("Drag and drop an image file onto this window, or use file system access in your application.".to_string());
+                        }
+                    }
+
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        if ui.button("📂 Load Image...").clicked() {
+                            self.file_load_message = Some("File loading in browser - use drag and drop or file upload in your application.".to_string());
+                        }
+                    }
+
+                    if self.loaded_texture_data.is_some() {
+                        if ui.button("🗑️ Clear Loaded Image").clicked() {
+                            self.clear_loaded_texture();
+                        }
+                    }
+                });
+
+                ui.add_space(5.0);
+
+                // Display file load message or loaded texture info
+                if let Some(msg) = &self.file_load_message {
+                    ui.colored_label(egui::Color32::GREEN, msg);
+                }
+
+                if let Some((width, height)) = self.loaded_texture_dimensions {
+                    ui.label(format!("📐 Loaded image: {} x {} pixels", width, height));
+                    ui.label("Image dimensions have been applied to Width and Height fields.");
+                }
+
+                ui.add_space(5.0);
+                ui.label("💡 Tip: Drag and drop image files onto the application window to load them.");
             });
 
             ui.add_space(15.0);

@@ -421,6 +421,23 @@ fn fs_main() -> @location(0) vec4<f32> {
 
         result
     }
+
+    /// Export the current state to a serializable format
+    pub fn export_state(&self) -> crate::state::ShaderEditorState {
+        crate::state::ShaderEditorState {
+            source_code: self.source_code.clone(),
+            label: self.label.clone(),
+            file_path: self.file_path.clone(),
+        }
+    }
+
+    /// Import state from a serializable format
+    pub fn import_state(&mut self, state: &crate::state::ShaderEditorState) {
+        self.source_code = state.source_code.clone();
+        self.label = state.label.clone();
+        self.file_path = state.file_path.clone();
+        self.compilation_result = CompilationResult::NotCompiled;
+    }
 }
 
 #[cfg(test)]

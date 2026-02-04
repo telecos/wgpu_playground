@@ -90,6 +90,9 @@ pub struct RenderingPanel {
     camera_distance: f32,
     camera_rotation_x: f32,
     camera_rotation_y: f32,
+    // Code export
+    export_project_name: String,
+    export_status_message: Option<(String, bool)>, // (message, is_success)
 }
 
 impl Default for RenderingPanel {
@@ -124,6 +127,8 @@ impl RenderingPanel {
             camera_distance: 3.0,
             camera_rotation_x: 0.0,
             camera_rotation_y: 0.0,
+            export_project_name: "wgpu_standalone".to_string(),
+            export_status_message: None,
         }
     }
 
@@ -1067,6 +1072,33 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                             ))
                         });
                     }
+
+                    // Export to standalone project button
+                    ui.add_space(10.0);
+                    ui.separator();
+                    ui.label(egui::RichText::new("💾 Export to Standalone Project").strong());
+                    ui.label(
+                        "Generate a complete Cargo project that you can build and run separately.",
+                    );
+
+                    ui.horizontal(|ui| {
+                        ui.label("Project name:");
+                        ui.text_edit_singleline(&mut self.export_project_name);
+                    });
+
+                    if ui.button("📦 Export Project").clicked() {
+                        self.export_to_standalone_project(example_id, example_source_code);
+                    }
+
+                    // Show export status message
+                    if let Some((message, is_success)) = &self.export_status_message {
+                        ui.add_space(5.0);
+                        if *is_success {
+                            ui.colored_label(egui::Color32::from_rgb(100, 255, 100), message);
+                        } else {
+                            ui.colored_label(egui::Color32::RED, message);
+                        }
+                    }
                 } else {
                     ui.colored_label(
                         egui::Color32::GRAY,
@@ -1092,6 +1124,51 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     /// Import shader editor state
     pub fn import_shader_editor_state(&mut self, state: &crate::state::ShaderEditorState) {
         self.shader_editor.import_state(state);
+    }
+
+    /// Export the current configuration to a standalone Rust project
+    fn export_to_standalone_project(&mut self, example_id: &str, shader_source: &str) {
+        use crate::code_generator::{CodeGenConfig, CodeGenerator, ExampleType};
+
+        // Determine example type
+        let example_type = match example_id {
+            "triangle" => ExampleType::Triangle,
+            "cube" => ExampleType::Cube,
+            _ => ExampleType::Custom,
+        };
+
+        // Create output directory in user's home directory
+        let output_path =
+            if let Ok(home_dir) = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")) {
+                std::path::PathBuf::from(home_dir).join(&self.export_project_name)
+            } else {
+                std::path::PathBuf::from(&self.export_project_name)
+            };
+
+        // Configure the code generator
+        let config = CodeGenConfig::new(self.export_project_name.clone())
+            .with_shader(shader_source.to_string())
+            .with_example_type(example_type)
+            .with_canvas_size(self.canvas_width, self.canvas_height)
+            .with_clear_color(self.clear_color);
+
+        let generator = CodeGenerator::new(config);
+
+        // Generate the project
+        match generator.generate(&output_path) {
+            Ok(_) => {
+                self.export_status_message = Some((
+                    format!("✅ Success! Project exported to: {}", output_path.display()),
+                    true,
+                ));
+                log::info!("Project exported successfully to: {:?}", output_path);
+            }
+            Err(e) => {
+                self.export_status_message =
+                    Some((format!("❌ Error exporting project: {}", e), false));
+                log::error!("Failed to export project: {}", e);
+            }
+        }
     }
 }
 

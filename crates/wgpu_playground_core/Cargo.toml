@@ -28,6 +28,10 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
+# File watching for shader hot reload (native only)
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+notify = { version = "7.0", default-features = false, features = ["macos_kqueue"] }
+
 # Dawn FFI bindings (optional) - currently using custom bindings
 # dawn-sys has compatibility issues on Linux, so we build our own
 # dawn-sys = { version = "1.0", optional = true }

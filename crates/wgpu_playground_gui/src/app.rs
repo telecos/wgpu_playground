@@ -397,7 +397,7 @@ impl PlaygroundApp {
     }
 
     /// Apply a theme to the egui context
-    fn apply_theme(ctx: &egui::Context, theme: Theme) {
+    pub fn apply_theme(ctx: &egui::Context, theme: Theme) {
         match theme {
             Theme::Light => {
                 ctx.set_visuals(egui::Visuals::light());
@@ -406,6 +406,11 @@ impl PlaygroundApp {
                 ctx.set_visuals(egui::Visuals::dark());
             }
         }
+    }
+
+    /// Get the current theme
+    pub fn get_current_theme(&self) -> Theme {
+        self.settings_panel.get_theme()
     }
 
     /// Export the current playground state

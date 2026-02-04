@@ -433,7 +433,7 @@ impl PlaygroundApp {
     pub fn import_state(&mut self, state: &wgpu_playground_core::state::PlaygroundState) {
         // Import theme preference
         self.settings_panel.set_theme(state.theme);
-        
+
         if let Some(buffer_state) = &state.buffer_panel {
             self.buffer_panel.import_state(buffer_state);
         }

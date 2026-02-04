@@ -133,7 +133,7 @@ impl AppState {
         );
 
         let playground_app = PlaygroundApp::new(&adapter, &device, &queue);
-        
+
         // Try to load saved state and apply theme
         let state_path = std::path::Path::new("playground_state.json");
         let (playground_app, initial_theme) = if state_path.exists() {
@@ -153,7 +153,7 @@ impl AppState {
         } else {
             (playground_app, None)
         };
-        
+
         // Apply the theme if we loaded one
         if let Some(theme) = initial_theme {
             PlaygroundApp::apply_theme(&egui_ctx, theme);

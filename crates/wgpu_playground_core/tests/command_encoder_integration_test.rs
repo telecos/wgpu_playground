@@ -268,7 +268,7 @@ fn test_copy_texture_to_buffer() {
         // Create a buffer for readback
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Readback Buffer"),
-            size: 1024, // 256 bytes/row * 4 rows (padded for alignment)
+            size: 1024, // 256 bytes/row (with padding) * 4 rows
             usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
             mapped_at_creation: false,
         });
@@ -285,7 +285,7 @@ fn test_copy_texture_to_buffer() {
             &test_data,
             wgpu::TexelCopyBufferLayout {
                 offset: 0,
-                bytes_per_row: Some(256), // Minimum 256-byte alignment required
+                bytes_per_row: Some(256), // WebGPU COPY_BYTES_PER_ROW_ALIGNMENT requirement
                 rows_per_image: Some(4),
             },
             wgpu::Extent3d {
@@ -308,7 +308,7 @@ fn test_copy_texture_to_buffer() {
                 buffer: &buffer,
                 layout: wgpu::TexelCopyBufferLayout {
                     offset: 0,
-                    bytes_per_row: Some(256), // Minimum 256-byte alignment required
+                    bytes_per_row: Some(256), // WebGPU COPY_BYTES_PER_ROW_ALIGNMENT requirement
                     rows_per_image: Some(4),
                 },
             },

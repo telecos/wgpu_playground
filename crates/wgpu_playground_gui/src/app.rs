@@ -275,7 +275,7 @@ impl PlaygroundApp {
             buffer_panel: Some(self.buffer_panel.export_state()),
             texture_panel: Some(self.texture_panel.export_state()),
             sampler_panel: Some(self.sampler_panel.export_state()),
-            shader_editor: None, // TODO: Add when accessible from rendering_panel
+            shader_editor: Some(self.rendering_panel.export_shader_editor_state()),
             render_pipeline_panel: None, // TODO: Add when RenderPipelinePanel has export_state
             compute_pipeline_panel: None, // TODO: Add when ComputePipelinePanel has export_state
             bind_group_panel: None, // TODO: Add when BindGroupPanel has export_state
@@ -293,6 +293,9 @@ impl PlaygroundApp {
         }
         if let Some(sampler_state) = &state.sampler_panel {
             self.sampler_panel.import_state(sampler_state);
+        }
+        if let Some(shader_state) = &state.shader_editor {
+            self.rendering_panel.import_shader_editor_state(shader_state);
         }
         // TODO: Import other panel states when available
     }

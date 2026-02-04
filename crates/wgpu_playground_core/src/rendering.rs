@@ -1083,6 +1083,16 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             "💡 Tip: Select a rendering example and click 'Run Example' to see it in action!",
         );
     }
+
+    /// Export the shader editor state
+    pub fn export_shader_editor_state(&self) -> crate::state::ShaderEditorState {
+        self.shader_editor.export_state()
+    }
+
+    /// Import shader editor state
+    pub fn import_shader_editor_state(&mut self, state: &crate::state::ShaderEditorState) {
+        self.shader_editor.import_state(state);
+    }
 }
 
 // Matrix math utilities

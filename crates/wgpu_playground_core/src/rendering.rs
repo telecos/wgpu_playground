@@ -92,7 +92,7 @@ pub struct RenderingPanel {
     camera_rotation_y: f32,
     // Code export
     export_project_name: String,
-    export_status_message: Option<String>,
+    export_status_message: Option<(String, bool)>, // (message, is_success)
 }
 
 impl Default for RenderingPanel {
@@ -1089,9 +1089,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     }
 
                     // Show export status message
-                    if let Some(ref message) = self.export_status_message {
+                    if let Some((message, is_success)) = &self.export_status_message {
                         ui.add_space(5.0);
-                        if message.contains("Success") {
+                        if *is_success {
                             ui.colored_label(egui::Color32::from_rgb(100, 255, 100), message);
                         } else {
                             ui.colored_label(egui::Color32::RED, message);
@@ -1144,14 +1144,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         // Generate the project
         match generator.generate(&output_path) {
             Ok(_) => {
-                self.export_status_message = Some(format!(
-                    "✅ Success! Project exported to: {}",
-                    output_path.display()
+                self.export_status_message = Some((
+                    format!("✅ Success! Project exported to: {}", output_path.display()),
+                    true,
                 ));
                 log::info!("Project exported successfully to: {:?}", output_path);
             }
             Err(e) => {
-                self.export_status_message = Some(format!("❌ Error exporting project: {}", e));
+                self.export_status_message = Some((
+                    format!("❌ Error exporting project: {}", e),
+                    false,
+                ));
                 log::error!("Failed to export project: {}", e);
             }
         }

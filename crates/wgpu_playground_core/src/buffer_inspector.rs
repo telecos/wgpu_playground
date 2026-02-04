@@ -339,8 +339,8 @@ mod tests {
     #[test]
     fn test_format_float32() {
         let mut inspector = BufferInspector::new();
-        // 3.14159 as little-endian f32
-        let bytes = 3.14159f32.to_le_bytes();
+        // PI as little-endian f32
+        let bytes = std::f32::consts::PI.to_le_bytes();
         inspector.load_data(bytes.to_vec());
         inspector.set_format(DataFormat::Float32);
         let formatted = inspector.format_data();

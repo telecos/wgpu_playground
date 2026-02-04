@@ -3,7 +3,6 @@
 /// These tests verify that the buffer inspector, texture inspector,
 /// and pipeline debugger work correctly together with the rest of
 /// the playground infrastructure.
-
 #[cfg(test)]
 mod buffer_inspector_tests {
     use wgpu_playground_core::buffer_inspector::{BufferInspector, DataFormat};

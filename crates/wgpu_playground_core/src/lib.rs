@@ -21,6 +21,8 @@ pub mod draw_command_panel;
 pub mod error;
 pub mod examples;
 pub mod implementation;
+pub mod model_loader;
+pub mod model_loader_panel;
 pub mod performance_metrics;
 pub mod performance_panel;
 pub mod pipeline_layout;

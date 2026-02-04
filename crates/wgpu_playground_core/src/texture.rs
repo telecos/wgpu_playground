@@ -1,6 +1,7 @@
 use wgpu::{
     Device, Extent3d, Texture, TextureAspect, TextureDimension, TextureFormat, TextureUsages,
-    TextureView, TextureViewDescriptor, TextureViewDimension,
+    TextureView, TextureViewDescriptor, TextureViewDimension, Origin3d, TexelCopyTextureInfo,
+    TexelCopyBufferLayout,
 };
 
 /// Builder for creating GPU textures with flexible configuration
@@ -514,14 +515,14 @@ pub fn load_texture_from_bytes(
 
     // Upload the image data to the texture
     queue.write_texture(
-        wgpu::ImageCopyTexture {
+        TexelCopyTextureInfo {
             texture: &texture,
             mip_level: 0,
-            origin: wgpu::Origin3d::ZERO,
+            origin: Origin3d::ZERO,
             aspect: TextureAspect::All,
         },
         &rgba,
-        wgpu::ImageDataLayout {
+        TexelCopyBufferLayout {
             offset: 0,
             bytes_per_row: Some(4 * dimensions.0),
             rows_per_image: Some(dimensions.1),
@@ -594,15 +595,15 @@ pub async fn export_texture_to_bytes(
     });
 
     encoder.copy_texture_to_buffer(
-        wgpu::ImageCopyTexture {
+        TexelCopyTextureInfo {
             texture,
             mip_level: 0,
-            origin: wgpu::Origin3d::ZERO,
+            origin: Origin3d::ZERO,
             aspect: TextureAspect::All,
         },
-        wgpu::ImageCopyBuffer {
+        wgpu::TexelCopyBufferInfo {
             buffer: &buffer,
-            layout: wgpu::ImageDataLayout {
+            layout: TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(4 * width),
                 rows_per_image: Some(height),
@@ -624,7 +625,10 @@ pub async fn export_texture_to_bytes(
         sender.send(result).unwrap();
     });
 
-    device.poll(wgpu::Maintain::Wait);
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
 
     receiver
         .await

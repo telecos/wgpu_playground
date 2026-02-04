@@ -1,4 +1,5 @@
 use wgpu::{TextureDimension, TextureFormat, TextureUsages};
+use image::GenericImageView;
 
 /// UI panel for creating and configuring GPU textures
 pub struct TexturePanel {

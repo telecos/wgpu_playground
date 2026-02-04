@@ -834,7 +834,7 @@ fn test_buffer_empty_write() {
 
         // Write empty slice (should not crash)
         queue.write_buffer(&buffer, 0, &[]);
-        
+
         // No need to poll when writing empty data - no work was submitted
 
         // Verify buffer is still zero-initialized

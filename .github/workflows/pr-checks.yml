@@ -60,6 +60,7 @@ jobs:
   pr-checks:
     name: PR Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -106,10 +107,12 @@ jobs:
 
       # Run tests
       - name: Run tests
-        run: cargo nextest run --workspace --all-targets
+        run: cargo nextest run --workspace --all-targets --test-threads=4
+        timeout-minutes: 30
 
       - name: Run doc tests
         run: cargo test --workspace --doc
+        timeout-minutes: 15
 
       # Security checks (run last as they're independent)
       - name: Run cargo deny

@@ -185,7 +185,7 @@ impl PipelineDebugger {
     fn render_config(&self, ui: &mut egui::Ui, config: &PipelineConfig) {
         ui.group(|ui| {
             ui.heading("Pipeline Configuration");
-            
+
             egui::Grid::new("pipeline_config")
                 .num_columns(2)
                 .spacing([10.0, 3.0])
@@ -207,11 +207,19 @@ impl PipelineDebugger {
                     ui.end_row();
 
                     ui.label("Depth/Stencil:");
-                    ui.label(if config.has_depth_stencil { "Enabled" } else { "Disabled" });
+                    ui.label(if config.has_depth_stencil {
+                        "Enabled"
+                    } else {
+                        "Disabled"
+                    });
                     ui.end_row();
 
                     ui.label("Blending:");
-                    ui.label(if config.has_blending { "Enabled" } else { "Disabled" });
+                    ui.label(if config.has_blending {
+                        "Enabled"
+                    } else {
+                        "Disabled"
+                    });
                     ui.end_row();
 
                     ui.label("Sample Count:");
@@ -222,17 +230,25 @@ impl PipelineDebugger {
     }
 
     /// Render shader information
-    fn render_shaders(&self, ui: &mut egui::Ui, shaders: &[ShaderInfo], selected_shader_index: &mut usize) {
+    fn render_shaders(
+        &self,
+        ui: &mut egui::Ui,
+        shaders: &[ShaderInfo],
+        selected_shader_index: &mut usize,
+    ) {
         ui.group(|ui| {
             ui.heading("Shaders");
-            
+
             // Shader tabs
             ui.horizontal(|ui| {
                 for (i, shader) in shaders.iter().enumerate() {
-                    if ui.selectable_label(
-                        *selected_shader_index == i,
-                        format!("{} ({})", shader.stage.as_str(), shader.entry_point)
-                    ).clicked() {
+                    if ui
+                        .selectable_label(
+                            *selected_shader_index == i,
+                            format!("{} ({})", shader.stage.as_str(), shader.entry_point),
+                        )
+                        .clicked()
+                    {
                         *selected_shader_index = i;
                     }
                 }
@@ -244,7 +260,7 @@ impl PipelineDebugger {
             if let Some(shader) = shaders.get(*selected_shader_index) {
                 ui.label(format!("Entry Point: {}", shader.entry_point));
                 ui.separator();
-                
+
                 egui::ScrollArea::vertical()
                     .max_height(300.0)
                     .show(ui, |ui| {
@@ -252,7 +268,7 @@ impl PipelineDebugger {
                             egui::TextEdit::multiline(&mut shader.source.as_str())
                                 .font(egui::TextStyle::Monospace)
                                 .code_editor()
-                                .desired_width(f32::INFINITY)
+                                .desired_width(f32::INFINITY),
                         );
                     });
             }
@@ -260,21 +276,29 @@ impl PipelineDebugger {
     }
 
     /// Render validation messages
-    fn render_validation(&self, ui: &mut egui::Ui, messages: &[ValidationMessage], show_all_messages: &mut bool) {
+    fn render_validation(
+        &self,
+        ui: &mut egui::Ui,
+        messages: &[ValidationMessage],
+        show_all_messages: &mut bool,
+    ) {
         ui.group(|ui| {
             ui.horizontal(|ui| {
                 ui.heading("Validation Messages");
                 ui.separator();
-                
+
                 let error_count = self.count_messages_by_severity(ValidationSeverity::Error);
                 let warning_count = self.count_messages_by_severity(ValidationSeverity::Warning);
                 let info_count = self.count_messages_by_severity(ValidationSeverity::Info);
-                
+
                 if error_count > 0 {
                     ui.colored_label(egui::Color32::RED, format!("❌ {} errors", error_count));
                 }
                 if warning_count > 0 {
-                    ui.colored_label(egui::Color32::YELLOW, format!("⚠️ {} warnings", warning_count));
+                    ui.colored_label(
+                        egui::Color32::YELLOW,
+                        format!("⚠️ {} warnings", warning_count),
+                    );
                 }
                 if info_count > 0 {
                     ui.colored_label(egui::Color32::LIGHT_BLUE, format!("ℹ️ {} info", info_count));
@@ -318,7 +342,7 @@ impl PipelineDebugger {
             // Make local copies of mutable state
             let mut selected_shader = self.selected_shader_index;
             let mut show_all = self.show_all_messages;
-            
+
             // Configuration
             self.render_config(ui, &info.config);
             ui.add_space(10.0);
@@ -331,7 +355,7 @@ impl PipelineDebugger {
 
             // Validation messages
             self.render_validation(ui, &info.validation_messages, &mut show_all);
-            
+
             // Update state
             self.selected_shader_index = selected_shader;
             self.show_all_messages = show_all;
@@ -367,12 +391,10 @@ mod tests {
                     stage: ShaderStage::Fragment,
                 },
             ],
-            validation_messages: vec![
-                ValidationMessage {
-                    severity: ValidationSeverity::Warning,
-                    message: "Unused variable".to_string(),
-                },
-            ],
+            validation_messages: vec![ValidationMessage {
+                severity: ValidationSeverity::Warning,
+                message: "Unused variable".to_string(),
+            }],
         }
     }
 
@@ -421,7 +443,7 @@ mod tests {
         let error = ValidationSeverity::Error;
         let warning = ValidationSeverity::Warning;
         let info = ValidationSeverity::Info;
-        
+
         assert_eq!(error.icon(), "❌");
         assert_eq!(warning.icon(), "⚠️");
         assert_eq!(info.icon(), "ℹ️");
@@ -436,10 +458,19 @@ mod tests {
             message: "Error message".to_string(),
         });
         debugger.load_pipeline(pipeline);
-        
-        assert_eq!(debugger.count_messages_by_severity(ValidationSeverity::Error), 1);
-        assert_eq!(debugger.count_messages_by_severity(ValidationSeverity::Warning), 1);
-        assert_eq!(debugger.count_messages_by_severity(ValidationSeverity::Info), 0);
+
+        assert_eq!(
+            debugger.count_messages_by_severity(ValidationSeverity::Error),
+            1
+        );
+        assert_eq!(
+            debugger.count_messages_by_severity(ValidationSeverity::Warning),
+            1
+        );
+        assert_eq!(
+            debugger.count_messages_by_severity(ValidationSeverity::Info),
+            0
+        );
     }
 
     #[test]
@@ -452,7 +483,7 @@ mod tests {
             has_blending: true,
             sample_count: 4,
         };
-        
+
         assert_eq!(config.label, Some("Test".to_string()));
         assert_eq!(config.color_target_count, 2);
         assert_eq!(config.sample_count, 4);

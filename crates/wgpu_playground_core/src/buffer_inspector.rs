@@ -235,7 +235,10 @@ impl BufferInspector {
         ui.horizontal(|ui| {
             ui.label("Display format:");
             for format in DataFormat::all() {
-                if ui.selectable_label(self.display_format == *format, format.as_str()).clicked() {
+                if ui
+                    .selectable_label(self.display_format == *format, format.as_str())
+                    .clicked()
+                {
                     self.display_format = *format;
                 }
             }
@@ -248,9 +251,11 @@ impl BufferInspector {
             ui.horizontal(|ui| {
                 ui.label(format!("Buffer size: {} bytes", self.buffer_data.len()));
                 ui.separator();
-                ui.label(format!("Displaying: {}/{} bytes", 
+                ui.label(format!(
+                    "Displaying: {}/{} bytes",
                     self.max_display_bytes.min(self.buffer_data.len()),
-                    self.buffer_data.len()));
+                    self.buffer_data.len()
+                ));
             });
         }
 
@@ -272,7 +277,7 @@ impl BufferInspector {
                         egui::TextEdit::multiline(&mut self.format_data().as_str())
                             .font(egui::TextStyle::Monospace)
                             .code_editor()
-                            .desired_width(f32::INFINITY)
+                            .desired_width(f32::INFINITY),
                     );
                 });
         } else if self.error_message.is_none() {

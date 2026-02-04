@@ -112,7 +112,7 @@ impl TextureInspector {
 
     /// Set zoom level
     pub fn set_zoom(&mut self, zoom: f32) {
-        self.zoom_level = zoom.max(0.1).min(10.0);
+        self.zoom_level = zoom.clamp(0.1, 10.0);
     }
 
     /// Get zoom level
@@ -124,9 +124,9 @@ impl TextureInspector {
     fn create_color_image(&self, data: &TextureData) -> egui::ColorImage {
         let width = data.width as usize;
         let height = data.height as usize;
-        
+
         let mut pixels = Vec::with_capacity(width * height);
-        
+
         // Convert data to RGBA format
         match data.format {
             TextureFormat::Rgba8Unorm | TextureFormat::Rgba8UnormSrgb => {
@@ -134,7 +134,7 @@ impl TextureInspector {
                     if chunk.len() == 4 {
                         if self.show_alpha {
                             pixels.push(egui::Color32::from_rgba_premultiplied(
-                                chunk[0], chunk[1], chunk[2], chunk[3]
+                                chunk[0], chunk[1], chunk[2], chunk[3],
                             ));
                         } else {
                             pixels.push(egui::Color32::from_rgb(chunk[0], chunk[1], chunk[2]));
@@ -147,7 +147,7 @@ impl TextureInspector {
                     if chunk.len() == 4 {
                         if self.show_alpha {
                             pixels.push(egui::Color32::from_rgba_premultiplied(
-                                chunk[2], chunk[1], chunk[0], chunk[3]
+                                chunk[2], chunk[1], chunk[0], chunk[3],
                             ));
                         } else {
                             pixels.push(egui::Color32::from_rgb(chunk[2], chunk[1], chunk[0]));
@@ -169,12 +169,12 @@ impl TextureInspector {
                 }
             }
         }
-        
+
         // Ensure we have the right number of pixels
         while pixels.len() < width * height {
             pixels.push(egui::Color32::BLACK);
         }
-        
+
         egui::ColorImage {
             size: [width, height],
             source_size: egui::vec2(width as f32, height as f32),
@@ -197,9 +197,9 @@ impl TextureInspector {
             if ui.button("+").clicked() {
                 self.zoom_level = (self.zoom_level * 1.25).min(10.0);
             }
-            
+
             ui.separator();
-            
+
             ui.checkbox(&mut self.show_alpha, "Show Alpha");
         });
 
@@ -218,7 +218,10 @@ impl TextureInspector {
         } else if let Some(texture_data) = &self.texture_data {
             // Display texture info
             ui.horizontal(|ui| {
-                ui.label(format!("Size: {}x{}", texture_data.width, texture_data.height));
+                ui.label(format!(
+                    "Size: {}x{}",
+                    texture_data.width, texture_data.height
+                ));
                 ui.separator();
                 ui.label(format!("Format: {:?}", texture_data.format));
             });
@@ -230,7 +233,7 @@ impl TextureInspector {
             let texture_handle = ui.ctx().load_texture(
                 "texture_preview",
                 color_image,
-                egui::TextureOptions::default()
+                egui::TextureOptions::default(),
             );
 
             let display_width = texture_data.width as f32 * self.zoom_level;
@@ -242,7 +245,7 @@ impl TextureInspector {
                 .show(ui, |ui| {
                     ui.add(
                         egui::Image::new(&texture_handle)
-                            .fit_to_exact_size(egui::vec2(display_width, display_height))
+                            .fit_to_exact_size(egui::vec2(display_width, display_height)),
                     );
                 });
         } else if self.error_message.is_none() {
@@ -262,10 +265,10 @@ mod tests {
             height: 2,
             format: TextureFormat::Rgba8Unorm,
             data: vec![
-                255, 0, 0, 255,    // Red
-                0, 255, 0, 255,    // Green
-                0, 0, 255, 255,    // Blue
-                255, 255, 0, 255,  // Yellow
+                255, 0, 0, 255, // Red
+                0, 255, 0, 255, // Green
+                0, 0, 255, 255, // Blue
+                255, 255, 0, 255, // Yellow
             ],
         }
     }
@@ -317,11 +320,11 @@ mod tests {
         let mut inspector = TextureInspector::new();
         inspector.set_zoom(2.0);
         assert_eq!(inspector.zoom_level, 2.0);
-        
+
         // Test clamping
         inspector.set_zoom(100.0);
         assert_eq!(inspector.zoom_level, 10.0);
-        
+
         inspector.set_zoom(0.01);
         assert_eq!(inspector.zoom_level, 0.1);
     }

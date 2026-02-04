@@ -1,5 +1,6 @@
 /// WGSL Shader Editor with syntax highlighting, line numbers, and compilation support
 use crate::shader::ShaderModule;
+use crate::shader_watcher::ShaderWatcher;
 
 /// Represents a shader compilation result
 #[derive(Debug, Clone, Default)]
@@ -25,6 +26,10 @@ pub struct ShaderEditor {
     file_path: String,
     /// Whether to show line numbers
     show_line_numbers: bool,
+    /// Shader watcher for hot reload (optional)
+    shader_watcher: Option<ShaderWatcher>,
+    /// Whether hot reload is enabled
+    hot_reload_enabled: bool,
 }
 
 impl Default for ShaderEditor {
@@ -36,12 +41,25 @@ impl Default for ShaderEditor {
 impl ShaderEditor {
     /// Create a new shader editor with default example code
     pub fn new() -> Self {
+        let shader_watcher = match ShaderWatcher::new() {
+            Ok(watcher) => {
+                log::info!("Shader hot reload initialized successfully");
+                Some(watcher)
+            }
+            Err(e) => {
+                log::warn!("Failed to initialize shader watcher: {}", e);
+                None
+            }
+        };
+
         Self {
             source_code: Self::default_shader_code(),
             label: "shader_editor".to_string(),
             compilation_result: CompilationResult::NotCompiled,
             file_path: String::new(),
             show_line_numbers: true,
+            shader_watcher,
+            hot_reload_enabled: true,
         }
     }
 
@@ -131,6 +149,30 @@ fn fs_main() -> @location(0) vec4<f32> {
 
     /// Render the shader editor UI
     pub fn ui(&mut self, ui: &mut egui::Ui, device: Option<&wgpu::Device>) {
+        // Check for shader file changes if hot reload is enabled
+        if self.hot_reload_enabled && !self.file_path.is_empty() {
+            if let Some(watcher) = &self.shader_watcher {
+                for event in watcher.poll_all() {
+                    // Check if the changed file matches our current file
+                    // Compare just the filename, as file_path may just be a filename or a full path
+                    if event.filename == self.file_path
+                        || std::path::Path::new(&self.file_path)
+                            .file_name()
+                            .and_then(|n| n.to_str())
+                            == Some(&event.filename)
+                    {
+                        log::info!(
+                            "Hot reload: Shader file '{}' changed, reloading...",
+                            event.filename
+                        );
+                        let path = self.file_path.clone();
+                        self.load_from_file(&path);
+                        ui.ctx().request_repaint(); // Request UI repaint
+                    }
+                }
+            }
+        }
+
         ui.heading("📝 WGSL Shader Editor");
         ui.separator();
 
@@ -227,6 +269,26 @@ fn fs_main() -> @location(0) vec4<f32> {
         // Options
         ui.horizontal(|ui| {
             ui.checkbox(&mut self.show_line_numbers, "Show line numbers");
+
+            // Hot reload toggle
+            if self.shader_watcher.is_some() {
+                ui.separator();
+                let hot_reload_label = if self.hot_reload_enabled {
+                    "🔥 Hot Reload: ON"
+                } else {
+                    "🔥 Hot Reload: OFF"
+                };
+                if ui
+                    .checkbox(&mut self.hot_reload_enabled, hot_reload_label)
+                    .changed()
+                {
+                    if self.hot_reload_enabled {
+                        log::info!("Hot reload enabled");
+                    } else {
+                        log::info!("Hot reload disabled");
+                    }
+                }
+            }
         });
     }
 

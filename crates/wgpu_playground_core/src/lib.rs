@@ -37,6 +37,7 @@ pub mod sampler;
 pub mod sampler_panel;
 pub mod shader;
 pub mod shader_editor;
+pub mod shader_watcher;
 pub mod surface;
 pub mod texture;
 pub mod texture_panel;

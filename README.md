@@ -44,6 +44,8 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 - **Code Export**: Generate standalone Rust projects from your playground configuration with one click
 
+**📊 For a comprehensive overview of WebGPU API feature coverage, see [WebGPU API Coverage](docs/WEBGPU_API_COVERAGE.md)**
+
 ## User Interface
 
 The application provides a tabbed interface with six main sections:
@@ -78,6 +80,7 @@ The application provides a tabbed interface with six main sections:
      - Customize project name and configuration
      - Generates complete buildable Rust project with all dependencies
      - Includes Cargo.toml, main.rs, shaders, and README
+     - **Hot Reload**: Automatically reload and update shaders when files change on disk (native platforms only)
    - Render pipeline configuration (planned)
    - Buffer and vertex data management (planned)
    - Texture operations and sampling (planned)
@@ -789,6 +792,7 @@ The documentation includes all public APIs for:
 
 ### Design Documents
 
+- **[WEBGPU_API_COVERAGE.md](docs/WEBGPU_API_COVERAGE.md)** - Comprehensive mapping of WebGPU API features to playground implementation with implementation status
 - **[USER_GUIDE.md](docs/USER_GUIDE.md)** - Comprehensive end-user documentation with tutorials and workflows
 - **[QUICK_START.md](docs/QUICK_START.md)** - Quick start guide for new users
 - **[WGSL_SHADER_GUIDE.md](docs/WGSL_SHADER_GUIDE.md)** - Complete guide to writing WGSL shaders including structure, built-in functions, and debugging

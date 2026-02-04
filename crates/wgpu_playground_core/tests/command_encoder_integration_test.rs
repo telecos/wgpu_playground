@@ -268,13 +268,13 @@ fn test_copy_texture_to_buffer() {
         // Create a buffer for readback
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Readback Buffer"),
-            size: 64, // 4x4 RGBA texture = 64 bytes
+            size: 1024, // 256 bytes/row * 4 rows (padded for alignment)
             usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
             mapped_at_creation: false,
         });
 
         // Write test data to texture
-        let test_data = vec![128u8; 64];
+        let test_data = vec![128u8; 1024]; // Padded to match bytes_per_row alignment
         queue.write_texture(
             wgpu::TexelCopyTextureInfo {
                 texture: &texture,
@@ -339,8 +339,12 @@ fn test_copy_texture_to_buffer() {
         rx.await.unwrap().unwrap();
 
         let data = buffer_slice.get_mapped_range();
+        // Check first pixel in first row
         assert_eq!(data[0], 128);
-        assert_eq!(data[63], 128);
+        // Check last pixel in first row (offset 12, since pixels are 4 bytes each: 3*4=12)
+        assert_eq!(data[12], 128);
+        // Check first pixel in last row (row 3, offset 256*3)
+        assert_eq!(data[768], 128);
         drop(data);
         buffer.unmap();
     });

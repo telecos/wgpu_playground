@@ -1,6 +1,7 @@
 mod common;
 
 use common::create_test_device;
+use wgpu::PollType;
 use wgpu_playground_core::buffer::{BufferDescriptor, BufferOps, BufferUsages};
 
 #[test]
@@ -184,6 +185,9 @@ fn test_map_read_buffer() {
         let data = vec![1u8; 256];
         queue.write_buffer(&buffer, 0, &data);
 
+        // Poll device to ensure write is processed before mapping
+        device.poll(PollType::Poll);
+
         // Map the buffer for reading
         BufferOps::map_read(&buffer).await.unwrap();
 
@@ -215,6 +219,9 @@ fn test_map_write_buffer() {
         );
 
         let buffer = descriptor.create_buffer(&device).unwrap();
+
+        // Poll device before mapping
+        device.poll(PollType::Poll);
 
         // Map the buffer for writing
         BufferOps::map_write(&buffer).await.unwrap();
@@ -403,6 +410,9 @@ fn test_buffer_copy_operations() {
 
         queue.submit(std::iter::once(encoder.finish()));
 
+        // Poll device to ensure operations complete before mapping
+        device.poll(PollType::Poll);
+
         // Map and verify destination buffer
         BufferOps::map_read(&dst_buffer).await.unwrap();
         {
@@ -434,6 +444,9 @@ fn test_buffer_read_back() {
         // Write test data
         let test_data: Vec<u8> = (0..256).map(|i| i as u8).collect();
         queue.write_buffer(&buffer, 0, &test_data);
+
+        // Poll device before mapping
+        device.poll(PollType::Poll);
 
         // Map and read the buffer
         BufferOps::map_read(&buffer).await.unwrap();
@@ -487,6 +500,9 @@ fn test_buffer_write_then_read_back() {
         encoder.copy_buffer_to_buffer(&buffer, 0, &staging, 0, 1024);
         queue.submit(std::iter::once(encoder.finish()));
 
+        // Poll device before mapping
+        device.poll(PollType::Poll);
+
         // Read back and verify
         BufferOps::map_read(&staging).await.unwrap();
         {
@@ -524,6 +540,9 @@ fn test_buffer_partial_write() {
         let data2 = vec![0xBB_u8; 512];
         queue.write_buffer(&buffer, 512, &data2);
 
+        // Poll device before mapping
+        device.poll(PollType::Poll);
+
         // Verify both halves
         BufferOps::map_read(&buffer).await.unwrap();
         {
@@ -551,6 +570,9 @@ fn test_buffer_zero_initialization() {
         )
         .create_buffer(&device)
         .unwrap();
+
+        // Poll device before mapping
+        device.poll(PollType::Poll);
 
         // Buffers should be zero-initialized
         BufferOps::map_read(&buffer).await.unwrap();
@@ -583,6 +605,9 @@ fn test_buffer_overwrite_data() {
 
         // Overwrite with different data
         queue.write_buffer(&buffer, 0, &vec![2u8; 256]);
+
+        // Poll device before mapping
+        device.poll(PollType::Poll);
 
         // Verify overwrite worked
         BufferOps::map_read(&buffer).await.unwrap();
@@ -630,6 +655,9 @@ fn test_buffer_large_data_transfer() {
         encoder.copy_buffer_to_buffer(&buffer, 0, &readback, 0, size);
         queue.submit(std::iter::once(encoder.finish()));
 
+        // Poll device before mapping
+        device.poll(PollType::Poll);
+
         // Verify first and last bytes
         BufferOps::map_read(&readback).await.unwrap();
         {
@@ -658,6 +686,9 @@ fn test_buffer_multiple_map_unmap_cycles() {
         .unwrap();
 
         queue.write_buffer(&buffer, 0, &vec![1u8; 256]);
+
+        // Poll device before mapping
+        device.poll(PollType::Poll);
 
         // Map and unmap multiple times
         for _ in 0..3 {
@@ -697,6 +728,9 @@ fn test_buffer_map_write_modify_read() {
         .create_buffer(&device)
         .unwrap();
 
+        // Poll device before mapping
+        device.poll(PollType::Poll);
+
         // Write data using MAP_WRITE
         BufferOps::map_write(&write_buffer).await.unwrap();
         {
@@ -713,6 +747,9 @@ fn test_buffer_map_write_modify_read() {
         });
         encoder.copy_buffer_to_buffer(&write_buffer, 0, &read_buffer, 0, 256);
         queue.submit(std::iter::once(encoder.finish()));
+
+        // Poll device before mapping
+        device.poll(PollType::Poll);
 
         // Verify using MAP_READ
         BufferOps::map_read(&read_buffer).await.unwrap();
@@ -747,6 +784,9 @@ fn test_buffer_aligned_access() {
         let data: Vec<u32> = (0..64).collect();
         queue.write_buffer(&buffer, 0, bytemuck::cast_slice(&data));
 
+        // Poll device before mapping
+        device.poll(PollType::Poll);
+
         // Read back as u32
         BufferOps::map_read(&buffer).await.unwrap();
         {
@@ -780,6 +820,8 @@ fn test_buffer_empty_write() {
         queue.write_buffer(&buffer, 0, &[]);
 
         // No need to poll when writing empty data - no work was submitted
+        // But we still need to poll before mapping
+        device.poll(PollType::Poll);
 
         // Verify buffer is still zero-initialized
         BufferOps::map_read(&buffer).await.unwrap();
@@ -846,6 +888,9 @@ fn test_buffer_concurrent_access_different_buffers() {
         for (i, buffer) in buffers.iter().enumerate() {
             queue.write_buffer(buffer, 0, &vec![i as u8; 256]);
         }
+
+        // Poll device before mapping
+        device.poll(PollType::Poll);
 
         // Verify each buffer has correct data
         for (i, buffer) in buffers.iter().enumerate() {

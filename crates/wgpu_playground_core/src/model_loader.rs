@@ -94,9 +94,12 @@ pub struct ModelData {
     pub index_count: u32,
 }
 
+/// Result type for buffer creation
+pub type BufferCreationResult = Result<(Buffer, Buffer), ModelLoadError>;
+
 impl ModelData {
     /// Create GPU buffers from the model data
-    pub fn create_buffers(&self, device: &Device) -> Result<(Buffer, Buffer), ModelLoadError> {
+    pub fn create_buffers(&self, device: &Device) -> BufferCreationResult {
         // Flatten all vertices from all meshes
         let mut all_vertices = Vec::new();
         let mut all_indices = Vec::new();

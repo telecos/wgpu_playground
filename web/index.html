@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive WebGPU experimentation tool built with Rust and wgpu. Explore GPU rendering capabilities directly in your browser using WebAssembly.">
     <title>wgpu_playground - WebGPU Demo</title>
     <style>
         * {
@@ -87,19 +88,20 @@
 
         .error {
             background: #fee;
-            color: #c33;
+            color: #b30000;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
-            border-left: 4px solid #c33;
+            border-left: 4px solid #b30000;
         }
 
         .info {
             background: #f0f8ff;
+            color: #1a1a1a;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #4a5fc1;
         }
 
         .footer {
@@ -128,30 +130,87 @@
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
         }
+
+        /* Accessibility improvements */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #000;
+            color: #fff;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+            border-radius: 0 0 4px 0;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* Improved focus indicators */
+        a:focus,
+        button:focus,
+        canvas:focus {
+            outline: 3px solid #ffd700;
+            outline-offset: 2px;
+        }
+
+        /* Ensure sufficient color contrast for links */
+        .footer a {
+            color: #fff;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .footer a:hover,
+        .footer a:focus {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
+    <!-- Skip navigation link for keyboard users -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header class="header" role="banner">
         <h1>🎨 wgpu_playground WebGPU Demo</h1>
         <p>Interactive WebGPU experimentation in your browser</p>
-    </div>
+    </header>
 
     <div class="container">
-        <div class="demo-container">
-            <div id="loading" class="loading">
-                <div class="loading-spinner"></div>
+        <main id="main-content" class="demo-container" role="main">
+            <div id="loading" class="loading" role="status" aria-live="polite" aria-label="Loading status">
+                <div class="loading-spinner" aria-hidden="true"></div>
                 <p>Loading WebGPU demo...</p>
             </div>
 
-            <div id="error-message" style="display: none;"></div>
+            <div id="error-message" style="display: none;" role="alert" aria-live="assertive"></div>
 
             <div id="app-container" style="display: none;">
-                <canvas id="canvas"></canvas>
-                <div id="status"></div>
+                <canvas id="canvas" 
+                        role="img" 
+                        aria-label="WebGPU rendering canvas - Interactive graphics display"
+                        tabindex="0"></canvas>
+                <div id="status" role="status" aria-live="polite"></div>
             </div>
 
-            <div class="info">
-                <h3>About this demo</h3>
+            <section class="info" aria-labelledby="about-heading">
+                <h2 id="about-heading">About this demo</h2>
                 <p>
                     This is an interactive WebGPU demo built with Rust and wgpu. 
                     It showcases GPU rendering capabilities directly in your browser using WebAssembly.
@@ -162,17 +221,21 @@
                 <p style="margin-top: 5px; font-size: 0.9em; color: #666;">
                     <em>* Requires manual enablement in browser settings</em>
                 </p>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
-    <div class="footer">
-        <p>
-            <a href="https://github.com/telecos/wgpu_playground" target="_blank">View on GitHub</a>
-            | 
-            <a href="../wgpu_playground_core/index.html">Documentation</a>
-        </p>
-    </div>
+    <footer class="footer" role="contentinfo">
+        <nav aria-label="Footer navigation">
+            <a href="https://github.com/telecos/wgpu_playground" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               aria-label="View wgpu_playground source code on GitHub (opens in new tab)">View on GitHub</a>
+            <span aria-hidden="true"> | </span>
+            <a href="../wgpu_playground_core/index.html" 
+               aria-label="View project documentation">Documentation</a>
+        </nav>
+    </footer>
 
     <script type="module">
         import init, * as wasm from './pkg/wgpu_playground_core.js';
@@ -203,6 +266,9 @@
                 // TODO: Initialize your WASM application here
                 // For example: wasm.run_app();
 
+                // Add keyboard navigation support for the canvas
+                setupKeyboardNavigation();
+
             } catch (error) {
                 console.error('Failed to load demo:', error);
                 
@@ -224,6 +290,62 @@
                     </ul>
                 `;
             }
+        }
+
+        // Setup keyboard navigation and accessibility features
+        function setupKeyboardNavigation() {
+            const canvas = document.getElementById('canvas');
+            
+            // Add keyboard event listener to canvas
+            canvas.addEventListener('keydown', function(event) {
+                // Announce canvas interaction to screen readers
+                const statusEl = document.getElementById('status');
+                
+                switch(event.key) {
+                    case 'Enter':
+                    case ' ':
+                        // Activate canvas interaction
+                        console.log('Canvas activated with keyboard');
+                        statusEl.setAttribute('aria-live', 'polite');
+                        statusEl.textContent = 'Canvas interaction mode activated. Press Escape to exit.';
+                        break;
+                    case 'Escape':
+                        // Exit canvas interaction
+                        console.log('Canvas interaction exited');
+                        statusEl.setAttribute('aria-live', 'polite');
+                        statusEl.textContent = 'Canvas interaction mode exited.';
+                        canvas.blur();
+                        break;
+                    case 'h':
+                    case 'H':
+                        // Show help
+                        if (!event.ctrlKey && !event.metaKey) {
+                            showKeyboardHelp();
+                        }
+                        break;
+                }
+            });
+
+            // Add focus/blur handlers for better accessibility
+            canvas.addEventListener('focus', function() {
+                const statusEl = document.getElementById('status');
+                statusEl.setAttribute('aria-live', 'polite');
+                statusEl.textContent = 'Canvas focused. Press H for keyboard shortcuts help.';
+            });
+
+            console.log('Keyboard navigation setup complete');
+        }
+
+        // Show keyboard shortcuts help
+        function showKeyboardHelp() {
+            const helpMessage = `
+                Keyboard Shortcuts:
+                - H: Show this help
+                - Enter/Space: Activate canvas interaction
+                - Escape: Exit canvas interaction
+                - Tab: Navigate between elements
+            `;
+            alert(helpMessage);
         }
 
         // Load the demo when the page loads

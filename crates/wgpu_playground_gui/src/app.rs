@@ -107,7 +107,6 @@ impl PlaygroundApp {
             compute_section_open: false,
             resources_section_open: false,
             tools_section_open: false,
-            selected_tab: Tab::AdapterSelection,
             save_load_filename: "playground_state.json".to_string(),
             save_load_message: None,
         }

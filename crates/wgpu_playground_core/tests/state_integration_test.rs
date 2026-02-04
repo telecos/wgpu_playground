@@ -1,7 +1,7 @@
 use std::fs;
 /// Integration test for state save/load functionality
 use wgpu_playground_core::state::{
-    BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState,
+    BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState, Theme,
 };
 
 #[test]
@@ -9,7 +9,7 @@ fn test_save_and_load_state() {
     // Create a playground state with some panel configurations
     let state = PlaygroundState {
         version: "1.0".to_string(),
-        theme: wgpu_playground_core::state::Theme::default(),
+        theme: Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "test_buffer".to_string(),
             size: "2048".to_string(),

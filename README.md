@@ -42,6 +42,7 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Buffer Configuration**: Create and configure GPU buffers with custom parameters including size, usage flags, and mapping options
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
+- **Code Export**: Generate standalone Rust projects from your playground configuration with one click
 
 ## User Interface
 
@@ -72,6 +73,11 @@ The application provides a tabbed interface with six main sections:
      - Inline editing and validation
      - Real-time compilation with error reporting
      - Load example shaders or write your own
+   - **Code Export**: Generate standalone Cargo projects from examples:
+     - Export Triangle, Cube, or custom shader examples
+     - Customize project name and configuration
+     - Generates complete buildable Rust project with all dependencies
+     - Includes Cargo.toml, main.rs, shaders, and README
    - Render pipeline configuration (planned)
    - Buffer and vertex data management (planned)
    - Texture operations and sampling (planned)

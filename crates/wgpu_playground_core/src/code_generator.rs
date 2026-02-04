@@ -507,6 +507,12 @@ impl CodeGenerator {
             - Rust (latest stable version)\n\
             - A GPU with WebGPU support (Vulkan, Metal, or DirectX 12)\n\
             \n\
+            ## Note\n\
+            \n\
+            This code uses winit 0.30. If you encounter compilation errors,\n\
+            you may need to update the event loop code to use ApplicationHandler.\n\
+            See the winit 0.30 migration guide for details.\n\
+            \n\
             ## Generated Configuration\n\
             \n\
             - Canvas size: {}x{}\n\

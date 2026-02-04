@@ -221,8 +221,8 @@ impl PlaygroundState {
     /// ```
     pub fn to_url_encoded(&self) -> Result<String, String> {
         // Serialize to JSON (compact format for smaller URLs)
-        let json = serde_json::to_string(self)
-            .map_err(|e| format!("Failed to serialize state: {}", e))?;
+        let json =
+            serde_json::to_string(self).map_err(|e| format!("Failed to serialize state: {}", e))?;
 
         // Encode to base64 using URL-safe alphabet (no padding for shorter URLs)
         let encoded = BASE64_URL_SAFE_NO_PAD.encode(json.as_bytes());
@@ -412,7 +412,9 @@ mod tests {
 
         // Should produce a valid base64 string
         assert!(!encoded.is_empty());
-        assert!(encoded.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_'));
+        assert!(encoded
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_'));
 
         // Should be decodable
         let decoded = PlaygroundState::from_url_encoded(&encoded).unwrap();
@@ -552,7 +554,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     #[test]
     fn test_url_parsing_invalid_base64() {
         let url = "https://example.com?state=invalid!!!base64";
-        let result = PlaygroundState::from_url(&url);
+        let result = PlaygroundState::from_url(url);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("Failed to decode base64"));
     }
@@ -560,7 +562,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     #[test]
     fn test_url_parsing_no_state_param() {
         let url = "https://example.com?foo=bar&baz=qux";
-        let result = PlaygroundState::from_url(&url);
+        let result = PlaygroundState::from_url(url);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("No 'state' parameter"));
     }
@@ -568,7 +570,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     #[test]
     fn test_url_parsing_no_query_params() {
         let url = "https://example.com";
-        let result = PlaygroundState::from_url(&url);
+        let result = PlaygroundState::from_url(url);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("No query parameters"));
     }

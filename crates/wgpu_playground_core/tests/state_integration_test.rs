@@ -239,7 +239,9 @@ fn test_url_encoding_integration() {
     let encoded = state.to_url_encoded().expect("Failed to encode state");
     assert!(!encoded.is_empty());
     assert!(
-        encoded.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_'),
+        encoded
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_'),
         "Encoded string should be URL-safe"
     );
 
@@ -360,7 +362,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     };
 
     // Encode to URL
-    let encoded = state.to_url_encoded().expect("Failed to encode shader state");
+    let encoded = state
+        .to_url_encoded()
+        .expect("Failed to encode shader state");
     assert!(!encoded.is_empty());
 
     // Decode and verify shader code is preserved
@@ -420,4 +424,3 @@ fn test_url_parameter_extraction() {
         assert!(decoded.buffer_panel.is_some());
     }
 }
-

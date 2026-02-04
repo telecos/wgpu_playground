@@ -198,11 +198,9 @@ impl PlaygroundApp {
                     }
                 }
 
-                if !self.share_url.is_empty() {
-                    if ui.button("📋 Copy to Clipboard").clicked() {
-                        ctx.copy_text(self.share_url.clone());
-                        self.share_message = Some("✓ Copied to clipboard!".to_string());
-                    }
+                if !self.share_url.is_empty() && ui.button("📋 Copy to Clipboard").clicked() {
+                    ctx.copy_text(self.share_url.clone());
+                    self.share_message = Some("✓ Copied to clipboard!".to_string());
                 }
             });
 
@@ -385,6 +383,7 @@ impl PlaygroundApp {
     /// Load state from a URL parameter string
     ///
     /// This method parses a URL query string and loads the state if a 'state' parameter is found.
+    #[allow(dead_code)]
     pub fn load_state_from_url(&mut self, url: &str) -> Result<(), String> {
         let state = wgpu_playground_core::state::PlaygroundState::from_url(url)?;
         self.import_state(&state);

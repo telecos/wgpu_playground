@@ -373,6 +373,10 @@ fn test_multiple_buffers_with_different_usages() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_copy_operations() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
@@ -764,6 +768,10 @@ fn test_buffer_map_write_modify_read() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_aligned_access() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
@@ -801,6 +809,10 @@ fn test_buffer_aligned_access() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_empty_write() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
@@ -864,6 +876,10 @@ fn test_buffer_descriptor_validation_in_create() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_buffer_concurrent_access_different_buffers() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {

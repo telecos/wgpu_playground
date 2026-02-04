@@ -134,16 +134,11 @@ pub struct BindGroupLayoutPanelState {
 }
 
 /// UI theme preference
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum Theme {
     Light,
+    #[default]
     Dark,
-}
-
-impl Default for Theme {
-    fn default() -> Self {
-        Self::Dark
-    }
 }
 
 /// Complete serializable playground state

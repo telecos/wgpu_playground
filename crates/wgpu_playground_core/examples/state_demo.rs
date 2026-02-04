@@ -12,6 +12,7 @@ fn main() {
     println!("1. Creating playground state with sample configuration...");
     let state = PlaygroundState {
         version: "1.0".to_string(),
+        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "vertex_buffer".to_string(),
             size: "4096".to_string(),

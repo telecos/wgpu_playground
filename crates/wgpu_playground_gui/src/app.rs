@@ -350,11 +350,7 @@ impl PlaygroundApp {
                             Tab::Performance,
                             "  Performance",
                         );
-                        ui.selectable_value(
-                            &mut self.selected_tab,
-                            Tab::Settings,
-                            "  Settings",
-                        );
+                        ui.selectable_value(&mut self.selected_tab, Tab::Settings, "  Settings");
                     });
                 }
             });
@@ -409,6 +405,7 @@ impl PlaygroundApp {
     }
 
     /// Get the current theme
+    #[allow(dead_code)]
     pub fn get_current_theme(&self) -> Theme {
         self.settings_panel.get_theme()
     }

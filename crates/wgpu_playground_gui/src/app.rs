@@ -397,8 +397,6 @@ impl PlaygroundApp {
     /// This checks the browser's URL for a 'state' parameter and loads it if present.
     #[cfg(target_arch = "wasm32")]
     pub fn try_load_from_browser_url(&mut self) {
-        use wasm_bindgen::JsCast;
-
         if let Some(window) = web_sys::window() {
             if let Ok(location) = window.location().href() {
                 if location.contains("?state=") {

@@ -938,7 +938,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             columns[1].vertical(|ui| {
                 if let Some(idx) = self.selected_example {
                     let example_id = self.examples[idx].id;
-                    let _example_name = self.examples[idx].name;
                     let example_description = self.examples[idx].description;
                     let example_category = self.examples[idx].category.clone();
                     let example_source_code = self.examples[idx].source_code;

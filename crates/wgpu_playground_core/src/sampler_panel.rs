@@ -507,6 +507,10 @@ impl SamplerPanel {
     }
 
     /// Import state from a serializable format
+    /// 
+    /// Note: Address modes, filters, and compare function are stored as strings but are not
+    /// parsed back to avoid complexity. The panel will retain default values for these fields.
+    /// Future enhancement could add enum parsing support.
     pub fn import_state(&mut self, state: &crate::state::SamplerPanelState) {
         self.label_input = state.label.clone();
         self.lod_min_input = state.lod_min_clamp.clone();
@@ -515,8 +519,11 @@ impl SamplerPanel {
             self.anisotropy = aniso.clamp(1, 16);
         }
         self.enable_compare = state.compare.is_some();
-        // Note: Enum values are stored as strings but need to be parsed back
-        // For now, we'll skip parsing them to avoid complexity
+        
+        // TODO: Parse address modes, filters, and compare function from strings
+        // For now, these remain at their default values
+        // The string values are preserved in the saved state for reference
+        
         self.validation_error = None;
         self.success_message = None;
     }

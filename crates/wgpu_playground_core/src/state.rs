@@ -3,7 +3,13 @@
 /// This module provides serialization support for the playground state,
 /// allowing users to save and load their work. It includes serializable
 /// versions of panel configurations and conversion methods.
-
+/// 
+/// # Limitations
+/// 
+/// Some enum values (TextureFormat, TextureDimension, AddressMode, FilterMode, etc.)
+/// are serialized as strings but not parsed back during import to avoid complexity.
+/// These fields will retain their default values when loading state.
+/// The string values are preserved in JSON for reference and future enhancement.
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
@@ -175,7 +181,7 @@ impl PlaygroundState {
     /// Save the state to a JSON file
     pub fn save_to_file(&self, path: &Path) -> Result<(), std::io::Error> {
         let json = serde_json::to_string_pretty(self)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+            .map_err(std::io::Error::other)?;
         std::fs::write(path, json)?;
         log::info!("Saved playground state to {:?}", path);
         Ok(())
@@ -185,7 +191,7 @@ impl PlaygroundState {
     pub fn load_from_file(path: &Path) -> Result<Self, std::io::Error> {
         let json = std::fs::read_to_string(path)?;
         let state: Self = serde_json::from_str(&json)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+            .map_err(std::io::Error::other)?;
         log::info!("Loaded playground state from {:?}", path);
         Ok(state)
     }

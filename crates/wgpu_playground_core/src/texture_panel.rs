@@ -461,6 +461,10 @@ impl TexturePanel {
     }
 
     /// Import state from a serializable format
+    /// 
+    /// Note: Format and dimension enum values are stored as strings but are not parsed back
+    /// to avoid complexity. The panel will retain default values for these fields.
+    /// Future enhancement could add enum parsing support.
     pub fn import_state(&mut self, state: &crate::state::TexturePanelState) {
         self.label_input = state.label.clone();
         self.width_input = state.width.clone();
@@ -473,8 +477,11 @@ impl TexturePanel {
         self.usage_texture_binding = state.usage_texture_binding;
         self.usage_storage_binding = state.usage_storage_binding;
         self.usage_render_attachment = state.usage_render_attachment;
-        // Note: Format and dimension are stored as strings but need to be parsed back
-        // For now, we'll skip parsing them to avoid complexity
+        
+        // TODO: Parse format and dimension from strings
+        // For now, these remain at their default values
+        // The string values are preserved in the saved state for reference
+        
         self.validation_error = None;
         self.success_message = None;
     }

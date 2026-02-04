@@ -284,10 +284,12 @@
     <script type="module">
         import init, * as wasm from './pkg/wgpu_playground_core.js';
 
-        // Touch controls state
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let lastTouchDistance = 0;
+        // Touch controls - encapsulated state
+        const touchState = {
+            startX: 0,
+            startY: 0,
+            lastDistance: 0
+        };
 
         // Initialize touch controls for canvas
         function initTouchControls() {
@@ -306,13 +308,13 @@
             
             if (touches.length === 1) {
                 // Single touch - record starting position
-                touchStartX = touches[0].clientX;
-                touchStartY = touches[0].clientY;
+                touchState.startX = touches[0].clientX;
+                touchState.startY = touches[0].clientY;
             } else if (touches.length === 2) {
                 // Two fingers - pinch to zoom
                 const dx = touches[0].clientX - touches[1].clientX;
                 const dy = touches[0].clientY - touches[1].clientY;
-                lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+                touchState.lastDistance = Math.sqrt(dx * dx + dy * dy);
             }
         }
 
@@ -322,33 +324,33 @@
 
             if (touches.length === 1) {
                 // Single touch - pan/drag
-                const deltaX = touches[0].clientX - touchStartX;
-                const deltaY = touches[0].clientY - touchStartY;
+                const deltaX = touches[0].clientX - touchState.startX;
+                const deltaY = touches[0].clientY - touchState.startY;
                 
                 // TODO: Pass deltaX/deltaY to WASM app for camera/view manipulation
                 // Example: wasm.handle_pan(deltaX, deltaY);
                 
-                touchStartX = touches[0].clientX;
-                touchStartY = touches[0].clientY;
+                touchState.startX = touches[0].clientX;
+                touchState.startY = touches[0].clientY;
             } else if (touches.length === 2) {
                 // Two fingers - pinch to zoom
                 const dx = touches[0].clientX - touches[1].clientX;
                 const dy = touches[0].clientY - touches[1].clientY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (lastTouchDistance > 0) {
-                    const scale = distance / lastTouchDistance;
+                if (touchState.lastDistance > 0) {
+                    const scale = distance / touchState.lastDistance;
                     // TODO: Pass scale to WASM app for zoom manipulation
                     // Example: wasm.handle_zoom(scale);
                 }
                 
-                lastTouchDistance = distance;
+                touchState.lastDistance = distance;
             }
         }
 
         function handleTouchEnd(e) {
             e.preventDefault();
-            lastTouchDistance = 0;
+            touchState.lastDistance = 0;
         }
 
         async function loadDemo() {
@@ -372,12 +374,12 @@
                 const statusEl = document.getElementById('status');
                 // Use feature detection instead of user agent sniffing
                 const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                const isMobileDevice = touchSupport && window.matchMedia('(max-width: 768px)').matches;
+                const isSmallTouchDevice = touchSupport && window.matchMedia('(max-width: 768px)').matches;
                 
                 statusEl.innerHTML = `
                     ✅ <strong>WebGPU initialized successfully!</strong><br>
                     <small>Ready to explore GPU rendering capabilities.</small><br>
-                    <small>Device: ${isMobileDevice ? 'Mobile' : 'Desktop'} | Touch: ${touchSupport ? 'Enabled' : 'Disabled'}</small>
+                    <small>Device: ${isSmallTouchDevice ? 'Mobile' : 'Desktop'} | Touch: ${touchSupport ? 'Enabled' : 'Disabled'}</small>
                 `;
 
                 // TODO: Initialize your WASM application here

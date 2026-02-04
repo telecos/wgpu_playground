@@ -176,6 +176,7 @@ fn cs_main() {
 }
 
 #[test]
+#[serial]
 #[cfg(not(target_arch = "wasm32"))]
 fn test_shader_watcher_multiple_files() {
     // Create two test shader files

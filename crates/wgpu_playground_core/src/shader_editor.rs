@@ -159,7 +159,8 @@ fn fs_main() -> @location(0) vec4<f32> {
                        std::path::Path::new(&self.file_path).file_name()
                            .and_then(|n| n.to_str()) == Some(&event.filename) {
                         log::info!("Hot reload: Shader file '{}' changed, reloading...", event.filename);
-                        self.load_from_file(&self.file_path.clone());
+                        let path = self.file_path.clone();
+                        self.load_from_file(&path);
                         ui.ctx().request_repaint(); // Request UI repaint
                     }
                 }

@@ -230,6 +230,7 @@ mod tests {
     fn test_state_serialization() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::Light,
             buffer_panel: Some(BufferPanelState {
                 label: "test_buffer".to_string(),
                 size: "1024".to_string(),
@@ -262,6 +263,7 @@ mod tests {
         // Test JSON deserialization
         let loaded_state = PlaygroundState::from_json(&json).unwrap();
         assert_eq!(loaded_state.version, "1.0");
+        assert_eq!(loaded_state.theme, Theme::Light);
         assert!(loaded_state.buffer_panel.is_some());
         let buffer_panel = loaded_state.buffer_panel.unwrap();
         assert_eq!(buffer_panel.label, "test_buffer");
@@ -274,6 +276,7 @@ mod tests {
     fn test_shader_editor_state_serialization() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            theme: Theme::Dark,
             buffer_panel: None,
             texture_panel: None,
             sampler_panel: None,
@@ -291,6 +294,7 @@ mod tests {
         let json = state.to_json().unwrap();
         let loaded_state = PlaygroundState::from_json(&json).unwrap();
 
+        assert_eq!(loaded_state.theme, Theme::Dark);
         assert!(loaded_state.shader_editor.is_some());
         let shader = loaded_state.shader_editor.unwrap();
         assert_eq!(shader.source_code, "@vertex fn main() {}");
@@ -305,8 +309,50 @@ mod tests {
         let loaded_state = PlaygroundState::from_json(&json).unwrap();
 
         assert_eq!(loaded_state.version, "1.0");
+        assert_eq!(loaded_state.theme, Theme::default());
         assert!(loaded_state.buffer_panel.is_none());
         assert!(loaded_state.texture_panel.is_none());
         assert!(loaded_state.shader_editor.is_none());
+    }
+
+    #[test]
+    fn test_theme_serialization() {
+        // Test Light theme
+        let light_state = PlaygroundState {
+            version: "1.0".to_string(),
+            theme: Theme::Light,
+            buffer_panel: None,
+            texture_panel: None,
+            sampler_panel: None,
+            shader_editor: None,
+            render_pipeline_panel: None,
+            compute_pipeline_panel: None,
+            bind_group_panel: None,
+            bind_group_layout_panel: None,
+        };
+
+        let json = light_state.to_json().unwrap();
+        assert!(json.contains("Light"));
+        let loaded = PlaygroundState::from_json(&json).unwrap();
+        assert_eq!(loaded.theme, Theme::Light);
+
+        // Test Dark theme
+        let dark_state = PlaygroundState {
+            version: "1.0".to_string(),
+            theme: Theme::Dark,
+            buffer_panel: None,
+            texture_panel: None,
+            sampler_panel: None,
+            shader_editor: None,
+            render_pipeline_panel: None,
+            compute_pipeline_panel: None,
+            bind_group_panel: None,
+            bind_group_layout_panel: None,
+        };
+
+        let json = dark_state.to_json().unwrap();
+        assert!(json.contains("Dark"));
+        let loaded = PlaygroundState::from_json(&json).unwrap();
+        assert_eq!(loaded.theme, Theme::Dark);
     }
 }

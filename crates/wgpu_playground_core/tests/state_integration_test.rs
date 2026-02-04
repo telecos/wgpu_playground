@@ -1,7 +1,7 @@
 use std::fs;
 /// Integration test for state save/load functionality
 use wgpu_playground_core::state::{
-    BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState,
+    BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState, Theme,
 };
 
 #[test]
@@ -9,6 +9,7 @@ fn test_save_and_load_state() {
     // Create a playground state with some panel configurations
     let state = PlaygroundState {
         version: "1.0".to_string(),
+        theme: Theme::Dark,
         buffer_panel: Some(BufferPanelState {
             label: "test_buffer".to_string(),
             size: "2048".to_string(),
@@ -76,6 +77,7 @@ fn test_save_and_load_state() {
 
     // Verify the loaded state matches
     assert_eq!(loaded_state.version, "1.0");
+    assert_eq!(loaded_state.theme, Theme::Dark);
 
     // Verify buffer panel
     assert!(loaded_state.buffer_panel.is_some());
@@ -110,6 +112,7 @@ fn test_save_and_load_state() {
 fn test_json_serialization_format() {
     let state = PlaygroundState {
         version: "1.0".to_string(),
+        theme: Theme::Light,
         buffer_panel: Some(BufferPanelState {
             label: "my_buffer".to_string(),
             size: "1024".to_string(),
@@ -140,6 +143,7 @@ fn test_json_serialization_format() {
     // Verify JSON contains expected fields
     assert!(json.contains("\"version\""));
     assert!(json.contains("\"1.0\""));
+    assert!(json.contains("\"theme\""));
     assert!(json.contains("\"buffer_panel\""));
     assert!(json.contains("\"my_buffer\""));
     assert!(json.contains("\"1024\""));
@@ -149,6 +153,7 @@ fn test_json_serialization_format() {
     // Verify it can be parsed back
     let parsed = PlaygroundState::from_json(&json).expect("Failed to parse JSON");
     assert_eq!(parsed.version, "1.0");
+    assert_eq!(parsed.theme, Theme::Light);
     assert!(parsed.buffer_panel.is_some());
 }
 
@@ -157,6 +162,7 @@ fn test_partial_state_loading() {
     // Test loading a state with only some panels configured
     let state = PlaygroundState {
         version: "1.0".to_string(),
+        theme: Theme::Dark,
         buffer_panel: None,
         texture_panel: Some(TexturePanelState {
             label: "only_texture".to_string(),
@@ -184,6 +190,7 @@ fn test_partial_state_loading() {
     let json = state.to_json().expect("Failed to serialize");
     let loaded = PlaygroundState::from_json(&json).expect("Failed to parse");
 
+    assert_eq!(loaded.theme, Theme::Dark);
     assert!(loaded.buffer_panel.is_none());
     assert!(loaded.texture_panel.is_some());
     assert!(loaded.sampler_panel.is_none());

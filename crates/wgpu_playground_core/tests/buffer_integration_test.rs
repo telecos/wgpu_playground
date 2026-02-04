@@ -834,10 +834,8 @@ fn test_buffer_empty_write() {
 
         // Write empty slice (should not crash)
         queue.write_buffer(&buffer, 0, &[]);
-        let _ = device.poll(wgpu::PollType::Wait {
-            submission_index: None,
-            timeout: None,
-        });
+        
+        // No need to poll when writing empty data - no work was submitted
 
         // Verify buffer is still zero-initialized
         BufferOps::map_read(&buffer).await.unwrap();

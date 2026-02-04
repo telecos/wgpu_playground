@@ -251,7 +251,7 @@
 
             <div id="app-container" style="display: none;">
                 <canvas id="canvas"></canvas>
-                <div id="status"></div>
+                <div id="status" aria-live="polite" aria-atomic="true"></div>
             </div>
 
             <div class="info">
@@ -338,7 +338,8 @@
                 const dy = touches[0].clientY - touches[1].clientY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                if (touchState.lastDistance > 0) {
+                // Minimum threshold to prevent extreme zoom from small movements
+                if (touchState.lastDistance > 10) {
                     const scale = distance / touchState.lastDistance;
                     // TODO: Pass scale to WASM app for zoom manipulation
                     // Example: wasm.handle_zoom(scale);

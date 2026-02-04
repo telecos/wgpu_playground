@@ -469,7 +469,7 @@ fn test_texture_copy_with_mip_levels() {
                 buffer: &buffer_mip1,
                 layout: wgpu::TexelCopyBufferLayout {
                     offset: 0,
-                    bytes_per_row: Some(512), // 128 * 4 = 512 bytes per row
+                    bytes_per_row: Some(512), // 128 pixels * 4 bytes/pixel = 512 bytes (satisfies 256-byte alignment)
                     rows_per_image: Some(128),
                 },
             },

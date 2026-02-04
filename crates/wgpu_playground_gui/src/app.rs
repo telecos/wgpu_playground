@@ -39,6 +39,12 @@ pub struct PlaygroundApp {
     performance_panel: PerformancePanel,
     command_recording_panel: CommandRecordingPanel,
     selected_tab: Tab,
+    // Collapsible section states
+    setup_section_open: bool,
+    rendering_section_open: bool,
+    compute_section_open: bool,
+    resources_section_open: bool,
+    tools_section_open: bool,
     // State save/load UI fields
     save_load_filename: String,
     save_load_message: Option<String>,
@@ -94,7 +100,13 @@ impl PlaygroundApp {
             resource_inspector_panel: ResourceInspectorPanel::new(),
             performance_panel: PerformancePanel::new(),
             command_recording_panel: CommandRecordingPanel::new(),
-            selected_tab: Tab::AdapterSelection,
+            selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
+            // Initialize section states - Rendering open by default
+            setup_section_open: false,
+            rendering_section_open: true,
+            compute_section_open: false,
+            resources_section_open: false,
+            tools_section_open: false,
             save_load_filename: "playground_state.json".to_string(),
             save_load_message: None,
         }
@@ -170,80 +182,172 @@ impl PlaygroundApp {
 
         // Sidebar on the left
         egui::SidePanel::left("sidebar").show(ctx, |ui| {
-            ui.heading("Navigation");
-            ui.separator();
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                ui.heading("Navigation");
+                ui.separator();
+                ui.add_space(5.0);
 
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::AdapterSelection,
-                "⚙️ Adapter Selection",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::DeviceConfig,
-                "🔧 Device Config",
-            );
-            ui.selectable_value(&mut self.selected_tab, Tab::DeviceInfo, "📊 Device Info");
-            ui.selectable_value(&mut self.selected_tab, Tab::Rendering, "🎨 Rendering");
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::BufferConfig,
-                "📐 Buffer Config",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::SamplerConfig,
-                "🎨 Sampler Config",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::TextureConfig,
-                "🖼️ Texture Config",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::BindGroupConfig,
-                "🔗 Bind Group Config",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::BindGroupLayoutConfig,
-                "🔗 Bind Group Layout",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::ComputePipelineConfig,
-                "⚙️ Compute Pipeline",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::RenderPipelineConfig,
-                "⚡ Render Pipeline",
-            );
-            ui.selectable_value(&mut self.selected_tab, Tab::DrawCommand, "📊 Draw Command");
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::RenderPassConfig,
-                "🎬 Render Pass",
-            );
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::ComputeDispatch,
-                "🚀 Compute Dispatch",
-            );
-            ui.selectable_value(&mut self.selected_tab, Tab::Compute, "🧮 Compute/ML");
-            ui.selectable_value(&mut self.selected_tab, Tab::Console, "🖥️ Console");
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::ResourceInspector,
-                "🔍 Resource Inspector",
-            );
-            ui.selectable_value(&mut self.selected_tab, Tab::Performance, "📊 Performance");
-            ui.selectable_value(
-                &mut self.selected_tab,
-                Tab::CommandRecording,
-                "📹 Command Recording",
-            );
+                // Setup Section
+                ui.push_id("setup_section", |ui| {
+                    let header_response =
+                        ui.selectable_label(self.setup_section_open, "⚙️ Setup & Configuration");
+                    if header_response.clicked() {
+                        self.setup_section_open = !self.setup_section_open;
+                    }
+                });
+
+                if self.setup_section_open {
+                    ui.indent("setup_indent", |ui| {
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::AdapterSelection,
+                            "  Adapter Selection",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::DeviceConfig,
+                            "  Device Config",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::DeviceInfo,
+                            "  Device Info",
+                        );
+                    });
+                }
+                ui.add_space(3.0);
+
+                // Rendering Section
+                ui.push_id("rendering_section", |ui| {
+                    let header_response =
+                        ui.selectable_label(self.rendering_section_open, "🎨 Rendering & Graphics");
+                    if header_response.clicked() {
+                        self.rendering_section_open = !self.rendering_section_open;
+                    }
+                });
+
+                if self.rendering_section_open {
+                    ui.indent("rendering_indent", |ui| {
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::Rendering,
+                            "  Examples & Preview",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::RenderPipelineConfig,
+                            "  Render Pipeline",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::RenderPassConfig,
+                            "  Render Pass",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::DrawCommand,
+                            "  Draw Commands",
+                        );
+                    });
+                }
+                ui.add_space(3.0);
+
+                // Compute Section
+                ui.push_id("compute_section", |ui| {
+                    let header_response =
+                        ui.selectable_label(self.compute_section_open, "🧮 Compute & ML");
+                    if header_response.clicked() {
+                        self.compute_section_open = !self.compute_section_open;
+                    }
+                });
+
+                if self.compute_section_open {
+                    ui.indent("compute_indent", |ui| {
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::Compute,
+                            "  Compute Panel",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::ComputePipelineConfig,
+                            "  Compute Pipeline",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::ComputeDispatch,
+                            "  Compute Dispatch",
+                        );
+                    });
+                }
+                ui.add_space(3.0);
+
+                // Resources Section
+                ui.push_id("resources_section", |ui| {
+                    let header_response =
+                        ui.selectable_label(self.resources_section_open, "📦 Resources");
+                    if header_response.clicked() {
+                        self.resources_section_open = !self.resources_section_open;
+                    }
+                });
+
+                if self.resources_section_open {
+                    ui.indent("resources_indent", |ui| {
+                        ui.selectable_value(&mut self.selected_tab, Tab::BufferConfig, "  Buffers");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::TextureConfig,
+                            "  Textures",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::SamplerConfig,
+                            "  Samplers",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::BindGroupConfig,
+                            "  Bind Groups",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::BindGroupLayoutConfig,
+                            "  Bind Group Layouts",
+                        );
+                    });
+                }
+                ui.add_space(3.0);
+
+                // Tools Section
+                ui.push_id("tools_section", |ui| {
+                    let header_response =
+                        ui.selectable_label(self.tools_section_open, "🔧 Tools & Debugging");
+                    if header_response.clicked() {
+                        self.tools_section_open = !self.tools_section_open;
+                    }
+                });
+
+                if self.tools_section_open {
+                    ui.indent("tools_indent", |ui| {
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::ResourceInspector,
+                            "  Resource Inspector",
+                        );
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::CommandRecording,
+                            "  Command Recording",
+                        );
+                        ui.selectable_value(&mut self.selected_tab, Tab::Console, "  Console");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::Performance,
+                            "  Performance",
+                        );
+                    });
+                }
+            });
         });
 
         // Main canvas area

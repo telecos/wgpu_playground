@@ -48,6 +48,55 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 
 ## User Interface
 
+The application provides an organized, collapsible sidebar navigation with immediate visual feedback:
+
+### Navigation Structure
+
+The sidebar is organized into five main sections:
+
+1. **⚙️ Setup & Configuration**:
+   - **Adapter Selection**: Choose and configure GPU adapters with detailed properties
+   - **Device Config**: Enable/disable WebGPU features and adjust device limits
+   - **Device Info**: View comprehensive GPU adapter information and capabilities
+
+2. **🎨 Rendering & Graphics** (Open by default with auto-running example):
+   - **Examples & Preview**: Interactive WebGPU rendering examples with live preview
+     - Triangle rendering example (auto-runs on startup)
+     - Rotating 3D cube with camera controls
+     - Real-time rendering preview displayed prominently
+     - Canvas controls (size, clear color, camera position)
+     - Source code viewer for each example
+   - **WGSL Shader Editor**: Interactive shader editor with syntax highlighting
+   - **Render Pipeline**: Configure rendering pipeline settings
+   - **Render Pass**: Set up render pass configuration
+   - **Draw Commands**: Configure draw command parameters
+
+3. **🧮 Compute & ML**:
+   - **Compute Panel**: Tools for compute shader and ML operations
+   - **Compute Pipeline**: Configure compute pipeline settings
+   - **Compute Dispatch**: Set up compute dispatch parameters
+
+4. **📦 Resources**:
+   - **Buffers**: Create and configure GPU buffers with usage flags
+   - **Textures**: Texture creation and configuration
+   - **Samplers**: Sampler configuration for texture filtering
+   - **Bind Groups**: Resource binding configuration
+   - **Bind Group Layouts**: Layout configuration for bind groups
+
+5. **🔧 Tools & Debugging**:
+   - **Resource Inspector**: Inspect created GPU resources
+   - **Command Recording**: Record and inspect command buffer execution
+   - **Console**: View GPU errors, warnings, and validation messages
+   - **Performance**: Monitor performance metrics
+
+### Key Features
+
+- **Immediate Visual Feedback**: The app opens to the Rendering tab with a triangle example auto-running, showcasing WebGPU capabilities immediately
+- **Collapsible Sections**: Reduce visual clutter by grouping related features
+- **Prominent Preview**: Rendered output is displayed at the top when running examples
+- **Interactive Controls**: Canvas size, clear color, and camera controls for 3D examples
+- **Mouse Interaction**: Drag to rotate 3D objects, scroll to zoom
+
 The application provides a tabbed interface with six main sections:
 
 1. **Adapter Selection Tab**: Choose and configure GPU adapters:

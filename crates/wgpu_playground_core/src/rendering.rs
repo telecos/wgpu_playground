@@ -90,6 +90,8 @@ pub struct RenderingPanel {
     camera_distance: f32,
     camera_rotation_x: f32,
     camera_rotation_y: f32,
+    // Track if we've auto-started an example
+    first_render: bool,
     // Code export
     export_project_name: String,
     export_status_message: Option<(String, bool)>, // (message, is_success)
@@ -111,7 +113,7 @@ impl RenderingPanel {
     fn new_without_device() -> Self {
         Self {
             examples: get_all_examples(),
-            selected_example: None,
+            selected_example: Some(0), // Auto-select first example (triangle)
             show_source_code: false,
             category_filter: None,
             render_state: RenderState::None,
@@ -127,6 +129,7 @@ impl RenderingPanel {
             camera_distance: 3.0,
             camera_rotation_x: 0.0,
             camera_rotation_y: 0.0,
+            first_render: true, // Mark that this is the first render
             export_project_name: "wgpu_standalone".to_string(),
             export_status_message: None,
         }
@@ -753,10 +756,20 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         queue: &Queue,
         renderer: &mut egui_wgpu::Renderer,
     ) {
+        // Auto-run the triangle example on first render
+        if self.first_render && !self.show_shader_editor {
+            self.first_render = false;
+            if let Some(0) = self.selected_example {
+                // Auto-run the first example (triangle)
+                self.is_example_running = true;
+                self.create_triangle_render_state(device, queue);
+            }
+        }
+
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("🎨 Rendering Examples");
             ui.separator();
-            ui.label("Select an example to view its source code and run it.");
+            ui.label("Explore WebGPU rendering with interactive examples. Click an example to see its code and rendering output.");
             ui.add_space(10.0);
 
             // Category filter
@@ -789,6 +802,72 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         queue: &Queue,
         renderer: &mut egui_wgpu::Renderer,
     ) {
+        // Show render preview prominently at top if an example is running
+        if self.is_example_running {
+            if let Some(idx) = self.selected_example {
+                let example_id = self.examples[idx].id;
+                let example_name = self.examples[idx].name;
+
+                ui.heading(format!("🎨 {}", example_name));
+                ui.separator();
+                ui.add_space(5.0);
+
+                // Render the example first
+                self.render_current_example(device, queue);
+
+                // Display the rendered texture prominently
+                if let Some(texture_id) = self.register_texture(device, renderer) {
+                    let size = egui::vec2(self.canvas_width as f32, self.canvas_height as f32);
+
+                    // Create an interactive canvas for mouse control
+                    let response = ui.add(
+                        egui::Image::new(egui::load::SizedTexture::new(texture_id, size))
+                            .sense(egui::Sense::click_and_drag()),
+                    );
+
+                    // Handle mouse interaction for 3D camera control
+                    if example_id == "cube" {
+                        if response.dragged() {
+                            let delta = response.drag_delta();
+                            self.camera_rotation_y += delta.x * 0.01;
+                            self.camera_rotation_x -= delta.y * 0.01;
+                            // Clamp rotation_x to avoid gimbal lock
+                            self.camera_rotation_x = self
+                                .camera_rotation_x
+                                .clamp(-std::f32::consts::PI / 2.0, std::f32::consts::PI / 2.0);
+                        }
+
+                        // Mouse wheel for zoom
+                        let scroll_delta = ui.input(|i| i.smooth_scroll_delta.y);
+                        if scroll_delta.abs() > 0.1 {
+                            self.camera_distance -= scroll_delta * 0.01;
+                            self.camera_distance = self.camera_distance.clamp(1.0, 10.0);
+                        }
+                    }
+
+                    ui.add_space(5.0);
+                    ui.horizontal(|ui| {
+                        ui.label(
+                            egui::RichText::new("✓ Rendering with WebGPU")
+                                .color(egui::Color32::from_rgb(100, 255, 100)),
+                        );
+                        if example_id == "cube" {
+                            ui.label(
+                                egui::RichText::new("💡 Drag to rotate, scroll to zoom")
+                                    .color(egui::Color32::GRAY)
+                                    .italics(),
+                            );
+                        }
+                    });
+                } else {
+                    ui.colored_label(egui::Color32::RED, "Failed to register render texture");
+                }
+
+                ui.add_space(10.0);
+                ui.separator();
+            }
+        }
+
         // Category filter
         ui.horizontal(|ui| {
             ui.label("Filter by category:");
@@ -821,7 +900,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         ui.add_space(10.0);
         ui.separator();
 
-        // Two-column layout: examples list on left, preview on right
+        // Two-column layout: examples list on left, controls on right
         ui.columns(2, |columns| {
             // Left column: Example list
             columns[0].vertical(|ui| {
@@ -859,16 +938,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 }
             });
 
-            // Right column: Preview and source code
+            // Right column: Controls and source code
             columns[1].vertical(|ui| {
                 if let Some(idx) = self.selected_example {
                     let example_id = self.examples[idx].id;
-                    let example_name = self.examples[idx].name;
                     let example_description = self.examples[idx].description;
                     let example_category = self.examples[idx].category.clone();
                     let example_source_code = self.examples[idx].source_code;
 
-                    ui.heading(format!("🎨 {}", example_name));
+                    ui.heading("Controls");
                     ui.separator();
 
                     // Description
@@ -900,12 +978,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                         }
                     }
 
-                    // Render preview if example is running
+                    // Canvas controls (only if example is running)
                     if self.is_example_running && example_category == ExampleCategory::Rendering {
                         ui.add_space(10.0);
-                        ui.separator();
 
-                        // Canvas controls
                         ui.collapsing("⚙️ Canvas Controls", |ui| {
                             ui.horizontal(|ui| {
                                 ui.label("Canvas Size:");
@@ -972,62 +1048,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                                 }
                             }
                         });
-
-                        ui.add_space(10.0);
-                        ui.label(egui::RichText::new("Preview:").strong());
-
-                        // Render the example
-                        self.render_current_example(device, queue);
-
-                        // Register and display the texture
-                        if let Some(texture_id) = self.register_texture(device, renderer) {
-                            let size =
-                                egui::vec2(self.canvas_width as f32, self.canvas_height as f32);
-
-                            // Create an interactive canvas for mouse control
-                            let response = ui.add(
-                                egui::Image::new(egui::load::SizedTexture::new(texture_id, size))
-                                    .sense(egui::Sense::click_and_drag()),
-                            );
-
-                            // Handle mouse interaction for 3D camera control
-                            if example_id == "cube" {
-                                if response.dragged() {
-                                    let delta = response.drag_delta();
-                                    self.camera_rotation_y += delta.x * 0.01;
-                                    self.camera_rotation_x -= delta.y * 0.01;
-                                    // Clamp rotation_x to avoid gimbal lock
-                                    self.camera_rotation_x = self.camera_rotation_x.clamp(
-                                        -std::f32::consts::PI / 2.0,
-                                        std::f32::consts::PI / 2.0,
-                                    );
-                                }
-
-                                // Mouse wheel for zoom
-                                let scroll_delta = ui.input(|i| i.smooth_scroll_delta.y);
-                                if scroll_delta.abs() > 0.1 {
-                                    self.camera_distance -= scroll_delta * 0.01;
-                                    self.camera_distance = self.camera_distance.clamp(1.0, 10.0);
-                                }
-                            }
-
-                            ui.label(
-                                egui::RichText::new("✓ Rendering with WebGPU")
-                                    .color(egui::Color32::from_rgb(100, 255, 100)),
-                            );
-                            if example_id == "cube" {
-                                ui.label(
-                                    egui::RichText::new("💡 Drag to rotate, scroll to zoom")
-                                        .color(egui::Color32::GRAY)
-                                        .italics(),
-                                );
-                            }
-                        } else {
-                            ui.colored_label(
-                                egui::Color32::RED,
-                                "Failed to register render texture",
-                            );
-                        }
                     }
 
                     ui.add_space(10.0);
@@ -1268,11 +1288,12 @@ mod tests {
     fn test_rendering_panel_new_without_device() {
         let panel = RenderingPanel::new_without_device();
         assert_eq!(panel.examples.len(), 4);
-        assert_eq!(panel.selected_example, None);
+        assert_eq!(panel.selected_example, Some(0)); // First example is auto-selected
         assert!(!panel.show_source_code);
         assert_eq!(panel.category_filter, None);
         assert!(!panel.is_example_running);
         assert!(!panel.show_shader_editor);
+        assert!(panel.first_render); // First render flag should be true initially
     }
 
     #[test]

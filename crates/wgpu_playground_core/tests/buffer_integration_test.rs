@@ -1,6 +1,7 @@
 mod common;
 
 use common::create_test_device;
+use std::time::Duration;
 use wgpu_playground_core::buffer::{BufferDescriptor, BufferOps, BufferUsages};
 
 #[test]
@@ -187,7 +188,7 @@ fn test_map_read_buffer() {
         // Wait for the write to complete
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Map the buffer for reading
@@ -412,7 +413,7 @@ fn test_buffer_copy_operations() {
         // Wait for operations to complete
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Map and verify destination buffer
@@ -450,7 +451,7 @@ fn test_buffer_read_back() {
         // Wait for write to complete
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Map and read the buffer
@@ -507,7 +508,7 @@ fn test_buffer_write_then_read_back() {
 
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Read back and verify
@@ -549,7 +550,7 @@ fn test_buffer_partial_write() {
 
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Verify both halves
@@ -610,14 +611,14 @@ fn test_buffer_overwrite_data() {
         queue.write_buffer(&buffer, 0, &vec![1u8; 256]);
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Overwrite with different data
         queue.write_buffer(&buffer, 0, &vec![2u8; 256]);
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Verify overwrite worked
@@ -652,7 +653,7 @@ fn test_buffer_large_data_transfer() {
         queue.write_buffer(&buffer, 0, &data);
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Copy to readback buffer to verify
@@ -671,7 +672,7 @@ fn test_buffer_large_data_transfer() {
         queue.submit(std::iter::once(encoder.finish()));
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Verify first and last bytes
@@ -704,7 +705,7 @@ fn test_buffer_multiple_map_unmap_cycles() {
         queue.write_buffer(&buffer, 0, &vec![1u8; 256]);
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Map and unmap multiple times
@@ -763,7 +764,7 @@ fn test_buffer_map_write_modify_read() {
         queue.submit(std::iter::once(encoder.finish()));
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Verify using MAP_READ
@@ -800,7 +801,7 @@ fn test_buffer_aligned_access() {
         queue.write_buffer(&buffer, 0, bytemuck::cast_slice(&data));
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Read back as u32
@@ -904,7 +905,7 @@ fn test_buffer_concurrent_access_different_buffers() {
         }
         let _ = device.poll(wgpu::PollType::Wait {
             submission_index: None,
-            timeout: None,
+            timeout: Some(Duration::from_secs(10)),
         });
 
         // Verify each buffer has correct data

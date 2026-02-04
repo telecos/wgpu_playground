@@ -660,6 +660,7 @@ pub async fn export_texture_to_bytes(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use image::GenericImageView;
 
     #[test]
     fn test_texture_builder_default() {
@@ -1276,5 +1277,38 @@ mod tests {
         assert_eq!(builder.label, cloned.label);
         assert_eq!(builder.base_mip_level, cloned.base_mip_level);
         assert_eq!(builder.mip_level_count, cloned.mip_level_count);
+    }
+
+    #[test]
+    fn test_load_texture_from_bytes_invalid_data() {
+        // Test loading from invalid image data
+        let invalid_bytes = vec![0u8; 100];
+        
+        // This should fail since it's not valid image data
+        assert!(image::load_from_memory(&invalid_bytes).is_err());
+    }
+
+    #[test]
+    fn test_load_texture_from_bytes_png_format() {
+        // Create a minimal valid PNG (1x1 pixel, white)
+        let png_data = vec![
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1x1 dimensions
+            0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+            0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, // IDAT chunk
+            0x54, 0x08, 0xD7, 0x63, 0xF8, 0xFF, 0xFF, 0x3F,
+            0x00, 0x05, 0xFE, 0x02, 0xFE, 0xDC, 0xCC, 0x59,
+            0xE7, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, // IEND chunk
+            0x44, 0xAE, 0x42, 0x60, 0x82,
+        ];
+
+        // This should successfully decode
+        let result = image::load_from_memory(&png_data);
+        assert!(result.is_ok());
+        
+        if let Ok(img) = result {
+            assert_eq!(img.dimensions(), (1, 1));
+        }
     }
 }

@@ -773,4 +773,77 @@ mod tests {
         panel.selected_dimension = TextureDimension::D3;
         assert_eq!(panel.selected_dimension, TextureDimension::D3);
     }
+
+    #[test]
+    fn test_load_from_bytes_valid_png() {
+        let mut panel = TexturePanel::new();
+        
+        // Create a minimal valid PNG (1x1 pixel, white)
+        let png_data = vec![
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+            0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+            0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41,
+            0x54, 0x08, 0xD7, 0x63, 0xF8, 0xFF, 0xFF, 0x3F,
+            0x00, 0x05, 0xFE, 0x02, 0xFE, 0xDC, 0xCC, 0x59,
+            0xE7, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E,
+            0x44, 0xAE, 0x42, 0x60, 0x82,
+        ];
+
+        panel.load_from_bytes(png_data);
+        
+        // Should have loaded successfully
+        assert!(panel.loaded_texture_data.is_some());
+        assert!(panel.loaded_texture_dimensions.is_some());
+        assert_eq!(panel.loaded_texture_dimensions, Some((1, 1)));
+        assert_eq!(panel.width_input, "1");
+        assert_eq!(panel.height_input, "1");
+        assert!(panel.file_load_message.is_some());
+        assert!(panel.validation_error.is_none());
+    }
+
+    #[test]
+    fn test_load_from_bytes_invalid_data() {
+        let mut panel = TexturePanel::new();
+        let invalid_data = vec![0u8; 100];
+
+        panel.load_from_bytes(invalid_data);
+        
+        // Should have failed to load
+        assert!(panel.loaded_texture_data.is_none());
+        assert!(panel.loaded_texture_dimensions.is_none());
+        assert!(panel.file_load_message.is_none());
+        assert!(panel.validation_error.is_some());
+    }
+
+    #[test]
+    fn test_clear_loaded_texture() {
+        let mut panel = TexturePanel::new();
+        
+        // First load some data
+        let png_data = vec![
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+            0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+            0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41,
+            0x54, 0x08, 0xD7, 0x63, 0xF8, 0xFF, 0xFF, 0x3F,
+            0x00, 0x05, 0xFE, 0x02, 0xFE, 0xDC, 0xCC, 0x59,
+            0xE7, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E,
+            0x44, 0xAE, 0x42, 0x60, 0x82,
+        ];
+        panel.load_from_bytes(png_data);
+        
+        // Verify it's loaded
+        assert!(panel.loaded_texture_data.is_some());
+        
+        // Clear it
+        panel.clear_loaded_texture();
+        
+        // Should be cleared
+        assert!(panel.loaded_texture_data.is_none());
+        assert!(panel.loaded_texture_dimensions.is_none());
+        assert!(panel.file_load_message.is_none());
+    }
 }

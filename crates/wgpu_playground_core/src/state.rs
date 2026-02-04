@@ -10,6 +10,7 @@
 /// are serialized as strings but not parsed back during import to avoid complexity.
 /// These fields will retain their default values when loading state.
 /// The string values are preserved in JSON for reference and future enhancement.
+use base64::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
@@ -215,6 +216,117 @@ impl PlaygroundState {
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json)
     }
+
+    /// Encode state to a URL-safe base64 string
+    ///
+    /// This compresses the JSON representation and encodes it in base64 (URL-safe variant)
+    /// for sharing via URL parameters.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::state::PlaygroundState;
+    ///
+    /// let state = PlaygroundState::new();
+    /// let encoded = state.to_url_encoded().unwrap();
+    /// assert!(!encoded.is_empty());
+    /// ```
+    pub fn to_url_encoded(&self) -> Result<String, String> {
+        // Serialize to JSON (compact format for smaller URLs)
+        let json =
+            serde_json::to_string(self).map_err(|e| format!("Failed to serialize state: {}", e))?;
+
+        // Encode to base64 using URL-safe alphabet (no padding for shorter URLs)
+        let encoded = BASE64_URL_SAFE_NO_PAD.encode(json.as_bytes());
+
+        Ok(encoded)
+    }
+
+    /// Decode state from a URL-safe base64 string
+    ///
+    /// This decodes a base64-encoded string and deserializes the JSON state.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::state::PlaygroundState;
+    ///
+    /// let state = PlaygroundState::new();
+    /// let encoded = state.to_url_encoded().unwrap();
+    /// let decoded = PlaygroundState::from_url_encoded(&encoded).unwrap();
+    /// assert_eq!(decoded.version, state.version);
+    /// ```
+    pub fn from_url_encoded(encoded: &str) -> Result<Self, String> {
+        // Decode from base64
+        let json_bytes = BASE64_URL_SAFE_NO_PAD
+            .decode(encoded.as_bytes())
+            .map_err(|e| format!("Failed to decode base64: {}", e))?;
+
+        // Convert bytes to string
+        let json = String::from_utf8(json_bytes)
+            .map_err(|e| format!("Failed to convert to UTF-8: {}", e))?;
+
+        // Deserialize from JSON
+        let state = serde_json::from_str(&json)
+            .map_err(|e| format!("Failed to deserialize state: {}", e))?;
+
+        Ok(state)
+    }
+
+    /// Generate a shareable URL with the current state encoded in the query parameter
+    ///
+    /// # Arguments
+    ///
+    /// * `base_url` - The base URL of the application (e.g., <https://example.com/demo>)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::state::PlaygroundState;
+    ///
+    /// let state = PlaygroundState::new();
+    /// let url = state.to_shareable_url("https://example.com").unwrap();
+    /// assert!(url.starts_with("https://example.com?state="));
+    /// ```
+    pub fn to_shareable_url(&self, base_url: &str) -> Result<String, String> {
+        let encoded_state = self.to_url_encoded()?;
+        Ok(format!("{}?state={}", base_url, encoded_state))
+    }
+
+    /// Extract state from a URL query parameter
+    ///
+    /// # Arguments
+    ///
+    /// * `url` - The full URL or query string containing the state parameter
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wgpu_playground_core::state::PlaygroundState;
+    ///
+    /// let state = PlaygroundState::new();
+    /// let url = state.to_shareable_url("https://example.com").unwrap();
+    /// let decoded = PlaygroundState::from_url(&url).unwrap();
+    /// assert_eq!(decoded.version, state.version);
+    /// ```
+    pub fn from_url(url: &str) -> Result<Self, String> {
+        // Extract query parameter from URL
+        let query_start = url
+            .find('?')
+            .ok_or_else(|| "No query parameters found in URL".to_string())?;
+        let query = &url[query_start + 1..];
+
+        // Parse query parameters
+        for param in query.split('&') {
+            if let Some((key, value)) = param.split_once('=') {
+                if key == "state" {
+                    return Self::from_url_encoded(value);
+                }
+            }
+        }
+
+        Err("No 'state' parameter found in URL".to_string())
+    }
 }
 
 #[cfg(test)]
@@ -305,5 +417,255 @@ mod tests {
         assert!(loaded_state.buffer_panel.is_none());
         assert!(loaded_state.texture_panel.is_none());
         assert!(loaded_state.shader_editor.is_none());
+    }
+
+    #[test]
+    fn test_url_encoding_empty_state() {
+        let state = PlaygroundState::new();
+        let encoded = state.to_url_encoded().unwrap();
+
+        // Should produce a valid base64 string
+        assert!(!encoded.is_empty());
+        assert!(encoded
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_'));
+
+        // Should be decodable
+        let decoded = PlaygroundState::from_url_encoded(&encoded).unwrap();
+        assert_eq!(decoded.version, state.version);
+    }
+
+    #[test]
+    fn test_url_encoding_with_buffer_state() {
+        let state = PlaygroundState {
+            version: "1.0".to_string(),
+            buffer_panel: Some(BufferPanelState {
+                label: "vertex_buffer".to_string(),
+                size: "2048".to_string(),
+                usage_vertex: true,
+                usage_index: false,
+                usage_uniform: true,
+                usage_storage: false,
+                usage_indirect: false,
+                usage_copy_src: true,
+                usage_copy_dst: false,
+                usage_map_read: false,
+                usage_map_write: false,
+                usage_query_resolve: false,
+                mapped_at_creation: false,
+            }),
+            texture_panel: None,
+            sampler_panel: None,
+            shader_editor: None,
+            render_pipeline_panel: None,
+            compute_pipeline_panel: None,
+            bind_group_panel: None,
+            bind_group_layout_panel: None,
+        };
+
+        let encoded = state.to_url_encoded().unwrap();
+        let decoded = PlaygroundState::from_url_encoded(&encoded).unwrap();
+
+        assert_eq!(decoded.version, "1.0");
+        assert!(decoded.buffer_panel.is_some());
+        let buffer = decoded.buffer_panel.unwrap();
+        assert_eq!(buffer.label, "vertex_buffer");
+        assert_eq!(buffer.size, "2048");
+        assert!(buffer.usage_vertex);
+        assert!(buffer.usage_uniform);
+        assert!(buffer.usage_copy_src);
+    }
+
+    #[test]
+    fn test_url_encoding_with_shader_state() {
+        let shader_code = r#"
+@vertex
+fn vs_main(@location(0) position: vec3<f32>) -> @builtin(position) vec4<f32> {
+    return vec4<f32>(position, 1.0);
+}
+
+@fragment
+fn fs_main() -> @location(0) vec4<f32> {
+    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+}
+"#;
+
+        let state = PlaygroundState {
+            version: "1.0".to_string(),
+            buffer_panel: None,
+            texture_panel: None,
+            sampler_panel: None,
+            shader_editor: Some(ShaderEditorState {
+                source_code: shader_code.to_string(),
+                label: "red_shader".to_string(),
+                file_path: "shader.wgsl".to_string(),
+            }),
+            render_pipeline_panel: None,
+            compute_pipeline_panel: None,
+            bind_group_panel: None,
+            bind_group_layout_panel: None,
+        };
+
+        let encoded = state.to_url_encoded().unwrap();
+        let decoded = PlaygroundState::from_url_encoded(&encoded).unwrap();
+
+        assert!(decoded.shader_editor.is_some());
+        let shader = decoded.shader_editor.unwrap();
+        assert_eq!(shader.source_code, shader_code);
+        assert_eq!(shader.label, "red_shader");
+    }
+
+    #[test]
+    fn test_shareable_url_generation() {
+        let state = PlaygroundState {
+            version: "1.0".to_string(),
+            buffer_panel: Some(BufferPanelState {
+                label: "test".to_string(),
+                size: "1024".to_string(),
+                usage_vertex: true,
+                usage_index: false,
+                usage_uniform: false,
+                usage_storage: false,
+                usage_indirect: false,
+                usage_copy_src: false,
+                usage_copy_dst: false,
+                usage_map_read: false,
+                usage_map_write: false,
+                usage_query_resolve: false,
+                mapped_at_creation: false,
+            }),
+            texture_panel: None,
+            sampler_panel: None,
+            shader_editor: None,
+            render_pipeline_panel: None,
+            compute_pipeline_panel: None,
+            bind_group_panel: None,
+            bind_group_layout_panel: None,
+        };
+
+        let base_url = "https://example.com/playground";
+        let url = state.to_shareable_url(base_url).unwrap();
+
+        assert!(url.starts_with(base_url));
+        assert!(url.contains("?state="));
+
+        // Extract and verify state from URL
+        let decoded = PlaygroundState::from_url(&url).unwrap();
+        assert_eq!(decoded.version, "1.0");
+        assert!(decoded.buffer_panel.is_some());
+    }
+
+    #[test]
+    fn test_url_parsing_with_multiple_params() {
+        let state = PlaygroundState::new();
+        let encoded = state.to_url_encoded().unwrap();
+        let url = format!("https://example.com?foo=bar&state={}&baz=qux", encoded);
+
+        let decoded = PlaygroundState::from_url(&url).unwrap();
+        assert_eq!(decoded.version, "1.0");
+    }
+
+    #[test]
+    fn test_url_parsing_invalid_base64() {
+        let url = "https://example.com?state=invalid!!!base64";
+        let result = PlaygroundState::from_url(url);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Failed to decode base64"));
+    }
+
+    #[test]
+    fn test_url_parsing_no_state_param() {
+        let url = "https://example.com?foo=bar&baz=qux";
+        let result = PlaygroundState::from_url(url);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("No 'state' parameter"));
+    }
+
+    #[test]
+    fn test_url_parsing_no_query_params() {
+        let url = "https://example.com";
+        let result = PlaygroundState::from_url(url);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("No query parameters"));
+    }
+
+    #[test]
+    fn test_complex_state_roundtrip() {
+        let state = PlaygroundState {
+            version: "1.0".to_string(),
+            buffer_panel: Some(BufferPanelState {
+                label: "complex_buffer".to_string(),
+                size: "4096".to_string(),
+                usage_vertex: true,
+                usage_index: true,
+                usage_uniform: true,
+                usage_storage: true,
+                usage_indirect: false,
+                usage_copy_src: true,
+                usage_copy_dst: true,
+                usage_map_read: true,
+                usage_map_write: false,
+                usage_query_resolve: false,
+                mapped_at_creation: true,
+            }),
+            texture_panel: Some(TexturePanelState {
+                label: "render_target".to_string(),
+                width: "1024".to_string(),
+                height: "768".to_string(),
+                depth: "1".to_string(),
+                mip_levels: "1".to_string(),
+                sample_count: "1".to_string(),
+                format: "Rgba8Unorm".to_string(),
+                dimension: "D2".to_string(),
+                usage_copy_src: false,
+                usage_copy_dst: true,
+                usage_texture_binding: true,
+                usage_storage_binding: false,
+                usage_render_attachment: true,
+            }),
+            sampler_panel: Some(SamplerPanelState {
+                label: "linear_sampler".to_string(),
+                address_mode_u: "Repeat".to_string(),
+                address_mode_v: "Repeat".to_string(),
+                address_mode_w: "ClampToEdge".to_string(),
+                mag_filter: "Linear".to_string(),
+                min_filter: "Linear".to_string(),
+                mipmap_filter: "Linear".to_string(),
+                lod_min_clamp: "0.0".to_string(),
+                lod_max_clamp: "32.0".to_string(),
+                compare: None,
+                max_anisotropy: "1".to_string(),
+            }),
+            shader_editor: Some(ShaderEditorState {
+                source_code: "@vertex fn main() {}".to_string(),
+                label: "test_shader".to_string(),
+                file_path: "test.wgsl".to_string(),
+            }),
+            render_pipeline_panel: None,
+            compute_pipeline_panel: None,
+            bind_group_panel: None,
+            bind_group_layout_panel: None,
+        };
+
+        // Test full roundtrip
+        let encoded = state.to_url_encoded().unwrap();
+        let decoded = PlaygroundState::from_url_encoded(&encoded).unwrap();
+
+        assert_eq!(decoded.version, state.version);
+        assert!(decoded.buffer_panel.is_some());
+        assert!(decoded.texture_panel.is_some());
+        assert!(decoded.sampler_panel.is_some());
+        assert!(decoded.shader_editor.is_some());
+
+        let buffer = decoded.buffer_panel.unwrap();
+        assert_eq!(buffer.label, "complex_buffer");
+        assert_eq!(buffer.size, "4096");
+        assert!(buffer.usage_vertex);
+        assert!(buffer.mapped_at_creation);
+
+        let texture = decoded.texture_panel.unwrap();
+        assert_eq!(texture.label, "render_target");
+        assert_eq!(texture.width, "1024");
+        assert_eq!(texture.height, "768");
     }
 }

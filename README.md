@@ -43,8 +43,45 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
 - **Code Export**: Generate standalone Rust projects from your playground configuration with one click
+- **State Persistence**: Save and load your playground configurations to/from JSON files
+- **URL Sharing**: Generate shareable links with your configuration encoded in the URL for easy collaboration
 
 **📊 For a comprehensive overview of WebGPU API feature coverage, see [WebGPU API Coverage](docs/WEBGPU_API_COVERAGE.md)**
+
+## Sharing and Collaboration
+
+The playground supports multiple ways to save and share your work:
+
+### Save/Load State
+
+Use the file operations in the top menu bar to save and load playground configurations:
+
+- **💾 Save State**: Save your current configuration to a JSON file
+- **📂 Load State**: Load a previously saved configuration from a JSON file
+
+Saved configurations include:
+- Buffer settings (size, usage flags, labels)
+- Texture settings (dimensions, format, usage)
+- Sampler settings (filtering, addressing modes)
+- Shader source code and labels
+
+### URL Sharing
+
+Generate shareable links that encode your entire playground state:
+
+1. Configure your resources (buffers, textures, shaders, etc.)
+2. Click **🔗 Generate Share Link** in the top menu bar
+3. The link is automatically copied to your clipboard
+4. Share the URL with others - they can open it to see your exact configuration
+
+**Example share URL format:**
+```
+https://telecos.github.io/wgpu_playground/demo?state=eyJ2ZXJzaW9uIjoiMS4wIi...
+```
+
+When someone opens a share URL, the playground automatically loads the encoded state and restores all your settings.
+
+**Note**: URL sharing works best for reasonably-sized configurations. Very large shader code or many resources may result in long URLs.
 
 ## User Interface
 

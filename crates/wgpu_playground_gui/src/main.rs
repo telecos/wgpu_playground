@@ -132,7 +132,10 @@ impl AppState {
             },
         );
 
-        let playground_app = PlaygroundApp::new(&adapter, &device, &queue);
+        let mut playground_app = PlaygroundApp::new(&adapter, &device, &queue);
+
+        // Try to load state from URL if present (mainly for WASM/web builds)
+        playground_app.try_load_from_browser_url();
 
         // Try to load saved state and apply theme
         let state_path = std::path::Path::new("playground_state.json");

@@ -194,3 +194,236 @@ fn test_partial_state_loading() {
     let texture = loaded.texture_panel.unwrap();
     assert_eq!(texture.label, "only_texture");
 }
+
+#[test]
+fn test_url_encoding_integration() {
+    // Create a complex state
+    let state = PlaygroundState {
+        version: "1.0".to_string(),
+        buffer_panel: Some(BufferPanelState {
+            label: "shared_buffer".to_string(),
+            size: "4096".to_string(),
+            usage_vertex: true,
+            usage_index: true,
+            usage_uniform: false,
+            usage_storage: true,
+            usage_indirect: false,
+            usage_copy_src: true,
+            usage_copy_dst: true,
+            usage_map_read: false,
+            usage_map_write: false,
+            usage_query_resolve: false,
+            mapped_at_creation: false,
+        }),
+        texture_panel: Some(TexturePanelState {
+            label: "shared_texture".to_string(),
+            width: "1024".to_string(),
+            height: "768".to_string(),
+            depth: "1".to_string(),
+            mip_levels: "4".to_string(),
+            sample_count: "1".to_string(),
+            format: "Rgba8Unorm".to_string(),
+            dimension: "D2".to_string(),
+            usage_copy_src: false,
+            usage_copy_dst: true,
+            usage_texture_binding: true,
+            usage_storage_binding: false,
+            usage_render_attachment: true,
+        }),
+        sampler_panel: None,
+        shader_editor: None,
+        render_pipeline_panel: None,
+        compute_pipeline_panel: None,
+        bind_group_panel: None,
+        bind_group_layout_panel: None,
+    };
+
+    // Test URL encoding and decoding
+    let encoded = state.to_url_encoded().expect("Failed to encode state");
+    assert!(!encoded.is_empty());
+    assert!(
+        encoded
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '-' || c == '_'),
+        "Encoded string should be URL-safe"
+    );
+
+    // Decode and verify
+    let decoded = PlaygroundState::from_url_encoded(&encoded).expect("Failed to decode state");
+    assert_eq!(decoded.version, state.version);
+    assert!(decoded.buffer_panel.is_some());
+    assert!(decoded.texture_panel.is_some());
+
+    let buffer = decoded.buffer_panel.unwrap();
+    assert_eq!(buffer.label, "shared_buffer");
+    assert_eq!(buffer.size, "4096");
+    assert!(buffer.usage_vertex);
+    assert!(buffer.usage_storage);
+
+    let texture = decoded.texture_panel.unwrap();
+    assert_eq!(texture.label, "shared_texture");
+    assert_eq!(texture.width, "1024");
+    assert_eq!(texture.height, "768");
+}
+
+#[test]
+fn test_shareable_url_generation_integration() {
+    let state = PlaygroundState {
+        version: "1.0".to_string(),
+        buffer_panel: Some(BufferPanelState {
+            label: "url_buffer".to_string(),
+            size: "2048".to_string(),
+            usage_vertex: true,
+            usage_index: false,
+            usage_uniform: true,
+            usage_storage: false,
+            usage_indirect: false,
+            usage_copy_src: false,
+            usage_copy_dst: true,
+            usage_map_read: false,
+            usage_map_write: false,
+            usage_query_resolve: false,
+            mapped_at_creation: false,
+        }),
+        texture_panel: None,
+        sampler_panel: None,
+        shader_editor: None,
+        render_pipeline_panel: None,
+        compute_pipeline_panel: None,
+        bind_group_panel: None,
+        bind_group_layout_panel: None,
+    };
+
+    // Test shareable URL generation
+    let base_url = "https://example.com/playground";
+    let url = state
+        .to_shareable_url(base_url)
+        .expect("Failed to generate shareable URL");
+
+    assert!(url.starts_with(base_url));
+    assert!(url.contains("?state="));
+
+    // Extract state from URL and verify
+    let decoded = PlaygroundState::from_url(&url).expect("Failed to extract state from URL");
+    assert_eq!(decoded.version, "1.0");
+    assert!(decoded.buffer_panel.is_some());
+
+    let buffer = decoded.buffer_panel.unwrap();
+    assert_eq!(buffer.label, "url_buffer");
+    assert_eq!(buffer.size, "2048");
+    assert!(buffer.usage_vertex);
+    assert!(buffer.usage_uniform);
+}
+
+#[test]
+fn test_url_with_complex_shader_code() {
+    use wgpu_playground_core::state::ShaderEditorState;
+
+    // Test with a realistic shader code that contains special characters
+    let shader_code = r#"
+@group(0) @binding(0)
+var<uniform> transform: mat4x4<f32>;
+
+struct VertexInput {
+    @location(0) position: vec3<f32>,
+    @location(1) color: vec4<f32>,
+}
+
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) color: vec4<f32>,
+}
+
+@vertex
+fn vs_main(input: VertexInput) -> VertexOutput {
+    var output: VertexOutput;
+    output.position = transform * vec4<f32>(input.position, 1.0);
+    output.color = input.color;
+    return output;
+}
+
+@fragment
+fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+    return input.color;
+}
+"#;
+
+    let state = PlaygroundState {
+        version: "1.0".to_string(),
+        buffer_panel: None,
+        texture_panel: None,
+        sampler_panel: None,
+        shader_editor: Some(ShaderEditorState {
+            source_code: shader_code.to_string(),
+            label: "transform_shader".to_string(),
+            file_path: "transform.wgsl".to_string(),
+        }),
+        render_pipeline_panel: None,
+        compute_pipeline_panel: None,
+        bind_group_panel: None,
+        bind_group_layout_panel: None,
+    };
+
+    // Encode to URL
+    let encoded = state
+        .to_url_encoded()
+        .expect("Failed to encode shader state");
+    assert!(!encoded.is_empty());
+
+    // Decode and verify shader code is preserved
+    let decoded = PlaygroundState::from_url_encoded(&encoded).expect("Failed to decode");
+    assert!(decoded.shader_editor.is_some());
+
+    let shader = decoded.shader_editor.unwrap();
+    assert_eq!(shader.source_code, shader_code);
+    assert_eq!(shader.label, "transform_shader");
+    assert_eq!(shader.file_path, "transform.wgsl");
+}
+
+#[test]
+fn test_url_parameter_extraction() {
+    // Test extracting state from various URL formats
+    let state = PlaygroundState {
+        version: "1.0".to_string(),
+        buffer_panel: Some(BufferPanelState {
+            label: "test".to_string(),
+            size: "1024".to_string(),
+            usage_vertex: true,
+            usage_index: false,
+            usage_uniform: false,
+            usage_storage: false,
+            usage_indirect: false,
+            usage_copy_src: false,
+            usage_copy_dst: false,
+            usage_map_read: false,
+            usage_map_write: false,
+            usage_query_resolve: false,
+            mapped_at_creation: false,
+        }),
+        texture_panel: None,
+        sampler_panel: None,
+        shader_editor: None,
+        render_pipeline_panel: None,
+        compute_pipeline_panel: None,
+        bind_group_panel: None,
+        bind_group_layout_panel: None,
+    };
+
+    let encoded = state.to_url_encoded().unwrap();
+
+    // Test different URL formats
+    let test_cases = vec![
+        format!("https://example.com?state={}", encoded),
+        format!("https://example.com/path?state={}", encoded),
+        format!("https://example.com?foo=bar&state={}", encoded),
+        format!("https://example.com?state={}&foo=bar", encoded),
+        format!("http://localhost:8080?state={}", encoded),
+    ];
+
+    for url in test_cases {
+        let decoded = PlaygroundState::from_url(&url)
+            .unwrap_or_else(|e| panic!("Failed to decode URL '{}': {}", url, e));
+        assert_eq!(decoded.version, "1.0");
+        assert!(decoded.buffer_panel.is_some());
+    }
+}

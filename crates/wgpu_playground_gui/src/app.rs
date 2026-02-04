@@ -51,6 +51,9 @@ pub struct PlaygroundApp {
     // State save/load UI fields
     save_load_filename: String,
     save_load_message: Option<String>,
+    // URL sharing fields
+    share_url: String,
+    share_message: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -114,6 +117,8 @@ impl PlaygroundApp {
             tools_section_open: false,
             save_load_filename: "playground_state.json".to_string(),
             save_load_message: None,
+            share_url: String::new(),
+            share_message: None,
         }
     }
 
@@ -182,6 +187,62 @@ impl PlaygroundApp {
                     },
                     msg,
                 );
+            }
+
+            // Second row: Share functionality
+            ui.separator();
+            ui.horizontal(|ui| {
+                ui.label("Share:");
+
+                if ui.button("🔗 Generate Share Link").clicked() {
+                    // Get current base URL (for native, use localhost; for web, use window.location)
+                    let base_url = if cfg!(target_arch = "wasm32") {
+                        "https://telecos.github.io/wgpu_playground/demo"
+                    } else {
+                        "http://localhost:8080"
+                    };
+
+                    match self.export_state().to_shareable_url(base_url) {
+                        Ok(url) => {
+                            self.share_url = url.clone();
+                            self.share_message = Some("✓ Share link generated!".to_string());
+                            // Copy to clipboard automatically
+                            ctx.copy_text(url);
+                        }
+                        Err(e) => {
+                            self.share_message = Some(format!("✗ Failed to generate link: {}", e));
+                        }
+                    }
+                }
+
+                if !self.share_url.is_empty() && ui.button("📋 Copy to Clipboard").clicked() {
+                    ctx.copy_text(self.share_url.clone());
+                    self.share_message = Some("✓ Copied to clipboard!".to_string());
+                }
+            });
+
+            // Show share message if any
+            if let Some(msg) = &self.share_message {
+                ui.colored_label(
+                    if msg.starts_with("✓") {
+                        egui::Color32::GREEN
+                    } else {
+                        egui::Color32::RED
+                    },
+                    msg,
+                );
+            }
+
+            // Show generated URL in a scrollable text area
+            if !self.share_url.is_empty() {
+                ui.horizontal(|ui| {
+                    ui.label("Share URL:");
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.share_url)
+                            .desired_width(ui.available_width())
+                            .interactive(false),
+                    );
+                });
             }
         });
 
@@ -461,6 +522,48 @@ impl PlaygroundApp {
         self.import_state(&state);
         log::info!("Playground state loaded from {:?}", path);
         Ok(())
+    }
+
+    /// Load state from a URL parameter string
+    ///
+    /// This method parses a URL query string and loads the state if a 'state' parameter is found.
+    #[allow(dead_code)]
+    pub fn load_state_from_url(&mut self, url: &str) -> Result<(), String> {
+        let state = wgpu_playground_core::state::PlaygroundState::from_url(url)?;
+        self.import_state(&state);
+        log::info!("Playground state loaded from URL");
+        Ok(())
+    }
+
+    /// Try to load state from URL on startup (for web/WASM builds)
+    ///
+    /// This checks the browser's URL for a 'state' parameter and loads it if present.
+    #[cfg(target_arch = "wasm32")]
+    pub fn try_load_from_browser_url(&mut self) {
+        if let Some(window) = web_sys::window() {
+            if let Ok(location) = window.location().href() {
+                if location.contains("?state=") {
+                    match self.load_state_from_url(&location) {
+                        Ok(_) => {
+                            log::info!("Successfully loaded shared state from URL");
+                            self.share_message =
+                                Some("✓ Loaded shared configuration from URL".to_string());
+                        }
+                        Err(e) => {
+                            log::error!("Failed to load state from URL: {}", e);
+                            self.share_message =
+                                Some(format!("✗ Failed to load shared state: {}", e));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Placeholder for native builds (URL loading not supported)
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn try_load_from_browser_url(&mut self) {
+        // No-op for native builds - URL state loading only works in browser
     }
 }
 

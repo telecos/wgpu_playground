@@ -7,8 +7,10 @@ mod common;
 
 use common::create_test_device;
 use wgpu::util::DeviceExt;
-use wgpu_playground_core::visual_regression::{capture_texture, compare_with_reference, ComparisonConfig};
 use wgpu_playground_core::visual_regression::test_utils::create_test_render_target;
+use wgpu_playground_core::visual_regression::{
+    capture_texture, compare_with_reference, ComparisonConfig,
+};
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -49,9 +51,18 @@ fn draw_colored_triangle(dev: &wgpu::Device, q: &wgpu::Queue) -> wgpu::Texture {
     let target = create_test_render_target(dev, 256, 256);
 
     let verts = vec![
-        SimpleVertex { pos: [0.0, 0.5], col: [1.0, 0.0, 0.0] },
-        SimpleVertex { pos: [-0.5, -0.5], col: [0.0, 1.0, 0.0] },
-        SimpleVertex { pos: [0.5, -0.5], col: [0.0, 0.0, 1.0] },
+        SimpleVertex {
+            pos: [0.0, 0.5],
+            col: [1.0, 0.0, 0.0],
+        },
+        SimpleVertex {
+            pos: [-0.5, -0.5],
+            col: [0.0, 1.0, 0.0],
+        },
+        SimpleVertex {
+            pos: [0.5, -0.5],
+            col: [0.0, 0.0, 1.0],
+        },
     ];
 
     let vbuf = dev.create_buffer_init(&wgpu::util::BufferInitDescriptor {

@@ -42,7 +42,7 @@ impl ReportBuilder {
             right_path.display(),
             caption
         );
-        
+
         self.sections.push(ReportSection {
             title: "Visual Comparison".to_string(),
             content: html,
@@ -54,8 +54,7 @@ impl ReportBuilder {
             let ratio = wgpu_ms / d;
             format!(
                 "<tr><td>Dawn</td><td>{:.2} ms</td><td>{:.1}x</td></tr>",
-                d,
-                ratio
+                d, ratio
             )
         } else {
             "<tr><td>Dawn</td><td colspan='2'>Not available</td></tr>".to_string()
@@ -69,8 +68,7 @@ impl ReportBuilder {
                 {}
             </table>
             "#,
-            wgpu_ms,
-            dawn_row
+            wgpu_ms, dawn_row
         );
 
         self.sections.push(ReportSection {
@@ -81,7 +79,7 @@ impl ReportBuilder {
 
     pub fn save_to(&self, output_path: &Path) -> std::io::Result<()> {
         let mut body = String::new();
-        
+
         for sec in &self.sections {
             body.push_str(&format!("<h2>{}</h2>\n", sec.title));
             body.push_str(&sec.content);
@@ -129,7 +127,7 @@ mod tests {
     fn report_builder_creates_html() {
         let mut builder = ReportBuilder::new("test_case");
         builder.add_metrics_table(10.5, Some(12.3));
-        
+
         // Just verify we can generate the HTML content
         let html = format!(
             r#"<!DOCTYPE html>
@@ -144,7 +142,7 @@ mod tests {
 </html>"#,
             builder.test_name, builder.test_name
         );
-        
+
         assert!(html.contains("<!DOCTYPE html>"));
         assert!(html.contains("test_case"));
     }

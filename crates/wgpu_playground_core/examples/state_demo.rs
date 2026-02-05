@@ -80,6 +80,7 @@ fn fs_main() -> @location(0) vec4<f32> {
         compute_pipeline_panel: None,
         bind_group_panel: None,
         bind_group_layout_panel: None,
+        api_coverage: None,
     };
     println!("   ✓ State created with:");
     println!("     - Buffer: vertex_buffer (4096 bytes, VERTEX | COPY_DST)");

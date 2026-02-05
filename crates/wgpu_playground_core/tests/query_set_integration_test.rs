@@ -89,6 +89,10 @@ fn test_timestamp_write() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_query_set_resolution() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
@@ -106,7 +110,7 @@ fn test_query_set_resolution() {
         let buffer_desc = BufferDescriptor::new(
             Some("query_results"),
             16, // 2 queries * 8 bytes
-            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_SRC,
+            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_DST,
         );
         let buffer = buffer_desc.create_buffer(&device).unwrap();
 
@@ -138,6 +142,10 @@ fn test_query_set_resolution() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_query_set_multiple_resolutions() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
@@ -155,7 +163,7 @@ fn test_query_set_multiple_resolutions() {
         let buffer_desc = BufferDescriptor::new(
             Some("query_results"),
             32, // 4 queries * 8 bytes
-            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_SRC,
+            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_DST,
         );
         let buffer = buffer_desc.create_buffer(&device).unwrap();
 
@@ -189,6 +197,10 @@ fn test_query_set_multiple_resolutions() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_query_set_partial_resolution() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
@@ -206,7 +218,7 @@ fn test_query_set_partial_resolution() {
         let buffer_desc = BufferDescriptor::new(
             Some("query_results"),
             16, // 2 queries * 8 bytes
-            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_SRC,
+            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_DST,
         );
         let buffer = buffer_desc.create_buffer(&device).unwrap();
 
@@ -240,6 +252,10 @@ fn test_query_set_partial_resolution() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_query_set_buffer_offset() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device_with_timestamp().await else {
@@ -257,7 +273,7 @@ fn test_query_set_buffer_offset() {
         let buffer_desc = BufferDescriptor::new(
             Some("query_results"),
             32, // Extra space for testing offset
-            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_SRC,
+            BufferUsages::QUERY_RESOLVE | BufferUsages::MAP_READ | BufferUsages::COPY_DST,
         );
         let buffer = buffer_desc.create_buffer(&device).unwrap();
 

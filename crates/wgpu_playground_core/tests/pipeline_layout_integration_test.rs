@@ -196,6 +196,10 @@ fn test_pipeline_layout_with_multiple_bind_groups() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Requires PUSH_CONSTANTS feature not available in CI"
+)]
 fn test_pipeline_layout_with_bind_groups_and_push_constants() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device().await else {
@@ -238,6 +242,10 @@ fn test_pipeline_layout_with_bind_groups_and_push_constants() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Requires PUSH_CONSTANTS feature not available in CI"
+)]
 fn test_complex_pipeline_layout() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device().await else {
@@ -298,6 +306,10 @@ fn test_complex_pipeline_layout() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Requires PUSH_CONSTANTS feature not available in CI"
+)]
 fn test_compute_pipeline_layout() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device().await else {

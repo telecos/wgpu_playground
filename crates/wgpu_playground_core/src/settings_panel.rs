@@ -78,7 +78,7 @@ impl SettingsPanel {
         ui.add_space(5.0);
 
         let current_backend = WebGPUImplementation::current();
-        
+
         // Display current backend prominently
         ui.horizontal(|ui| {
             ui.label("Current Backend:");
@@ -126,11 +126,8 @@ impl SettingsPanel {
                 // Show Dawn as disabled if not compiled in
                 #[cfg(not(feature = "dawn"))]
                 {
-                    ui.add_enabled(
-                        false,
-                        egui::Label::new("🌅 Dawn Native (Not Available)"),
-                    )
-                    .on_hover_text("Compile with --features dawn to enable");
+                    ui.add_enabled(false, egui::Label::new("🌅 Dawn Native (Not Available)"))
+                        .on_hover_text("Compile with --features dawn to enable");
                 }
             });
 
@@ -148,7 +145,7 @@ impl SettingsPanel {
                 "⚠️ Warning: Backend switching requires application restart",
             );
             ui.add_space(5.0);
-            
+
             ui.horizontal(|ui| {
                 ui.label("To apply this change, set the environment variable:");
                 ui.code(format!("WEBGPU_IMPL={}", self.selected_backend.name()));
@@ -184,7 +181,14 @@ impl SettingsPanel {
                     ui.label("  ○");
                 }
                 ui.label(backend.name());
-                ui.label(format!("({})", if *backend == current_backend { "active" } else { "inactive" }));
+                ui.label(format!(
+                    "({})",
+                    if *backend == current_backend {
+                        "active"
+                    } else {
+                        "inactive"
+                    }
+                ));
             });
         }
 

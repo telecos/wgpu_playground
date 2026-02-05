@@ -2,6 +2,157 @@
 
 use crate::api_coverage::{ApiCategory, ApiCoverageTracker, CoverageData};
 use egui::{CollapsingHeader, Color32, RichText, ScrollArea, Ui};
+use std::collections::HashMap;
+
+/// Expected WebGPU APIs organized by category
+fn get_expected_apis() -> HashMap<ApiCategory, Vec<&'static str>> {
+    let mut apis = HashMap::new();
+
+    apis.insert(
+        ApiCategory::Device,
+        vec![
+            "create_buffer",
+            "create_texture",
+            "create_sampler",
+            "create_shader_module",
+            "create_bind_group",
+            "create_bind_group_layout",
+            "create_pipeline_layout",
+            "create_render_pipeline",
+            "create_compute_pipeline",
+            "create_command_encoder",
+            "create_render_bundle_encoder",
+            "create_query_set",
+        ],
+    );
+
+    apis.insert(
+        ApiCategory::Queue,
+        vec!["submit", "write_buffer", "write_texture"],
+    );
+
+    apis.insert(
+        ApiCategory::Buffer,
+        vec![
+            "create_buffer",
+            "map_read",
+            "map_write",
+            "unmap",
+            "destroy",
+            "slice",
+        ],
+    );
+
+    apis.insert(
+        ApiCategory::Texture,
+        vec!["create_texture", "create_view", "destroy", "as_image_copy"],
+    );
+
+    apis.insert(ApiCategory::Sampler, vec!["create_sampler"]);
+
+    apis.insert(
+        ApiCategory::Shader,
+        vec!["create_shader_module", "get_compilation_info"],
+    );
+
+    apis.insert(
+        ApiCategory::RenderPipeline,
+        vec!["create_render_pipeline", "get_bind_group_layout"],
+    );
+
+    apis.insert(
+        ApiCategory::ComputePipeline,
+        vec!["create_compute_pipeline", "get_bind_group_layout"],
+    );
+
+    apis.insert(
+        ApiCategory::BindGroup,
+        vec!["create_bind_group", "create_bind_group_layout"],
+    );
+
+    apis.insert(ApiCategory::PipelineLayout, vec!["create_pipeline_layout"]);
+
+    apis.insert(
+        ApiCategory::RenderPass,
+        vec![
+            "begin_render_pass",
+            "set_pipeline",
+            "set_bind_group",
+            "set_vertex_buffer",
+            "set_index_buffer",
+            "draw",
+            "draw_indexed",
+            "draw_indirect",
+            "draw_indexed_indirect",
+            "set_viewport",
+            "set_scissor_rect",
+            "set_blend_constant",
+            "set_stencil_reference",
+            "execute_bundles",
+            "end_pass",
+        ],
+    );
+
+    apis.insert(
+        ApiCategory::ComputePass,
+        vec![
+            "begin_compute_pass",
+            "set_pipeline",
+            "set_bind_group",
+            "dispatch_workgroups",
+            "dispatch_workgroups_indirect",
+            "end_pass",
+        ],
+    );
+
+    apis.insert(
+        ApiCategory::CommandEncoder,
+        vec![
+            "begin_render_pass",
+            "begin_compute_pass",
+            "copy_buffer_to_buffer",
+            "copy_buffer_to_texture",
+            "copy_texture_to_buffer",
+            "copy_texture_to_texture",
+            "clear_buffer",
+            "clear_texture",
+            "finish",
+        ],
+    );
+
+    apis.insert(
+        ApiCategory::RenderBundle,
+        vec!["create_render_bundle_encoder", "finish", "execute_bundles"],
+    );
+
+    apis.insert(
+        ApiCategory::QuerySet,
+        vec!["create_query_set", "write_timestamp", "resolve_query_set"],
+    );
+
+    apis
+}
+
+/// Get documentation URL for a WebGPU API category
+fn get_documentation_url(category: ApiCategory) -> &'static str {
+    match category {
+        ApiCategory::Device => "https://www.w3.org/TR/webgpu/#gpu-device",
+        ApiCategory::Queue => "https://www.w3.org/TR/webgpu/#gpu-queue",
+        ApiCategory::Buffer => "https://www.w3.org/TR/webgpu/#gpu-buffer",
+        ApiCategory::Texture => "https://www.w3.org/TR/webgpu/#gpu-texture",
+        ApiCategory::Sampler => "https://www.w3.org/TR/webgpu/#gpu-sampler",
+        ApiCategory::Shader => "https://www.w3.org/TR/webgpu/#gpu-shadermodule",
+        ApiCategory::RenderPipeline => "https://www.w3.org/TR/webgpu/#gpu-renderpipeline",
+        ApiCategory::ComputePipeline => "https://www.w3.org/TR/webgpu/#gpu-computepipeline",
+        ApiCategory::BindGroup => "https://www.w3.org/TR/webgpu/#gpu-bindgroup",
+        ApiCategory::PipelineLayout => "https://www.w3.org/TR/webgpu/#gpu-pipelinelayout",
+        ApiCategory::RenderPass => "https://www.w3.org/TR/webgpu/#render-passes",
+        ApiCategory::ComputePass => "https://www.w3.org/TR/webgpu/#compute-passes",
+        ApiCategory::CommandEncoder => "https://www.w3.org/TR/webgpu/#gpu-commandencoder",
+        ApiCategory::RenderBundle => "https://www.w3.org/TR/webgpu/#gpu-renderbundle",
+        ApiCategory::QuerySet => "https://www.w3.org/TR/webgpu/#gpu-queryset",
+    }
+}
 
 /// Panel for displaying API coverage information
 pub struct ApiCoveragePanel {
@@ -13,6 +164,8 @@ pub struct ApiCoveragePanel {
     selected_category: Option<ApiCategory>,
     /// Show percentage view
     show_percentage: bool,
+    /// Expanded categories (to show detailed API list)
+    expanded_categories: HashMap<ApiCategory, bool>,
 }
 
 impl Default for ApiCoveragePanel {
@@ -29,6 +182,7 @@ impl ApiCoveragePanel {
             filter_text: String::new(),
             selected_category: None,
             show_percentage: true,
+            expanded_categories: HashMap::new(),
         }
     }
 
@@ -184,18 +338,36 @@ impl ApiCoveragePanel {
     }
 
     fn render_category_breakdown(&mut self, ui: &mut Ui, snapshot: &CoverageData) {
-        CollapsingHeader::new("📂 Categories")
+        CollapsingHeader::new("📂 Category Coverage")
             .default_open(true)
             .show(ui, |ui| {
-                ScrollArea::vertical().max_height(200.0).show(ui, |ui| {
+                ScrollArea::vertical().max_height(400.0).show(ui, |ui| {
+                    let expected_apis = get_expected_apis();
+
                     for category in ApiCategory::all() {
-                        let count = snapshot.category_count(category);
-                        if count > 0 || self.selected_category == Some(category) {
+                        let expected = expected_apis.get(&category).map_or(0, |v| v.len());
+                        let covered_count = snapshot.category_count(category);
+                        let coverage_pct = if expected > 0 {
+                            (covered_count as f32 / expected as f32) * 100.0
+                        } else {
+                            0.0
+                        };
+
+                        // Skip empty categories unless selected
+                        if covered_count == 0
+                            && expected == 0
+                            && self.selected_category != Some(category)
+                        {
+                            continue;
+                        }
+
+                        ui.group(|ui| {
                             ui.horizontal(|ui| {
+                                // Category name and selection
                                 let is_selected = self.selected_category == Some(category);
                                 let response = ui.selectable_label(
                                     is_selected,
-                                    format!("{}: {}", category.name(), count),
+                                    RichText::new(category.name()).strong(),
                                 );
 
                                 if response.clicked() {
@@ -203,15 +375,124 @@ impl ApiCoveragePanel {
                                         if is_selected { None } else { Some(category) };
                                 }
 
-                                // Progress bar
-                                let bar_width = (count as f32 / 10.0).min(1.0);
-                                ui.add(
-                                    egui::ProgressBar::new(bar_width)
-                                        .desired_width(100.0)
-                                        .show_percentage(),
-                                );
+                                // Coverage stats
+                                ui.label(format!("{}/{} APIs", covered_count, expected));
+
+                                // Progress bar with color coding
+                                let progress = if expected > 0 {
+                                    covered_count as f32 / expected as f32
+                                } else {
+                                    0.0
+                                };
+
+                                let bar_color = if progress >= 0.8 {
+                                    Color32::from_rgb(100, 255, 100) // Green
+                                } else if progress >= 0.5 {
+                                    Color32::from_rgb(255, 200, 100) // Yellow
+                                } else if progress > 0.0 {
+                                    Color32::from_rgb(255, 150, 100) // Orange
+                                } else {
+                                    Color32::from_rgb(200, 200, 200) // Gray
+                                };
+
+                                let mut progress_bar =
+                                    egui::ProgressBar::new(progress).desired_width(150.0);
+
+                                if self.show_percentage {
+                                    progress_bar =
+                                        progress_bar.text(format!("{:.0}%", coverage_pct));
+                                }
+
+                                ui.add(progress_bar.fill(bar_color));
+
+                                // Documentation link
+                                if ui
+                                    .button("📖 Docs")
+                                    .on_hover_text("Open WebGPU specification")
+                                    .clicked()
+                                {
+                                    let url = get_documentation_url(category);
+                                    #[cfg(not(target_arch = "wasm32"))]
+                                    {
+                                        if let Err(e) = webbrowser::open(url) {
+                                            log::error!("Failed to open browser: {}", e);
+                                        }
+                                    }
+                                    #[cfg(target_arch = "wasm32")]
+                                    {
+                                        web_sys::window().and_then(|w| w.open_with_url(url).ok());
+                                    }
+                                }
+
+                                // Expand/collapse button
+                                let is_expanded =
+                                    *self.expanded_categories.get(&category).unwrap_or(&false);
+                                if ui.button(if is_expanded { "▼" } else { "▶" }).clicked() {
+                                    self.expanded_categories.insert(category, !is_expanded);
+                                }
                             });
-                        }
+
+                            // Show detailed API list if expanded
+                            if *self.expanded_categories.get(&category).unwrap_or(&false) {
+                                ui.indent("api_list", |ui| {
+                                    if let Some(expected_api_list) = expected_apis.get(&category) {
+                                        let covered_apis: Vec<_> = snapshot
+                                            .calls_by_category(category)
+                                            .into_iter()
+                                            .map(|call| call.method.as_str())
+                                            .collect();
+
+                                        for api_name in expected_api_list {
+                                            let is_covered = covered_apis.contains(api_name);
+                                            ui.horizontal(|ui| {
+                                                if is_covered {
+                                                    ui.label(
+                                                        RichText::new("✓").color(
+                                                            Color32::from_rgb(100, 255, 100),
+                                                        ),
+                                                    );
+                                                } else {
+                                                    ui.label(
+                                                        RichText::new("○").color(
+                                                            Color32::from_rgb(200, 200, 200),
+                                                        ),
+                                                    );
+                                                }
+
+                                                let text_color = if is_covered {
+                                                    Color32::WHITE
+                                                } else {
+                                                    Color32::GRAY
+                                                };
+
+                                                ui.label(
+                                                    RichText::new(*api_name).color(text_color),
+                                                );
+
+                                                // "Try this API" button for uncovered APIs
+                                                if !is_covered
+                                                    && ui
+                                                        .button("Try")
+                                                        .on_hover_text(
+                                                            "Jump to panel to try this API",
+                                                        )
+                                                        .clicked()
+                                                {
+                                                    log::info!(
+                                                        "Try this API: {} -> {}",
+                                                        category.name(),
+                                                        api_name
+                                                    );
+                                                    // TODO: Could trigger navigation to relevant panel
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        ui.add_space(4.0);
                     }
                 });
             });
@@ -291,6 +572,7 @@ mod tests {
         assert_eq!(panel.filter_text, "");
         assert_eq!(panel.selected_category, None);
         assert!(panel.show_percentage);
+        assert!(panel.expanded_categories.is_empty());
     }
 
     #[test]
@@ -314,5 +596,30 @@ mod tests {
 
         panel.set_open(false);
         assert!(!panel.is_open());
+    }
+
+    #[test]
+    fn test_expected_apis() {
+        let apis = get_expected_apis();
+
+        // Verify all categories have some APIs defined
+        assert!(apis.contains_key(&ApiCategory::Device));
+        assert!(apis.contains_key(&ApiCategory::Buffer));
+        assert!(apis.contains_key(&ApiCategory::RenderPass));
+
+        // Verify specific APIs are present
+        let buffer_apis = apis.get(&ApiCategory::Buffer).unwrap();
+        assert!(buffer_apis.contains(&"create_buffer"));
+        assert!(buffer_apis.contains(&"map_read"));
+    }
+
+    #[test]
+    fn test_documentation_urls() {
+        // Verify all categories have documentation URLs
+        for category in ApiCategory::all() {
+            let url = get_documentation_url(category);
+            assert!(url.starts_with("https://"));
+            assert!(url.contains("webgpu"));
+        }
     }
 }

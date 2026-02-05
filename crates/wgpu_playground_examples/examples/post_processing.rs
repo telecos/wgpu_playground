@@ -1,7 +1,7 @@
 /// Post-Processing Effects Example
 ///
 /// This example demonstrates advanced post-processing techniques in WebGPU:
-/// - **First Pass**: Renders a colorful rotating triangle to an offscreen texture
+/// - **First Pass**: Renders a colorful triangle to an offscreen texture
 /// - **Second Pass**: Applies post-processing effects (blur, grayscale, edge detection)
 /// - **Final Pass**: Displays the processed result
 ///

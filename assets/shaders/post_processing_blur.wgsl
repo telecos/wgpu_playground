@@ -27,9 +27,8 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    // Simple box blur with 9-tap kernel
+    // Simple box blur with 9-tap kernel (3x3)
     let texel_size = 1.0 / vec2<f32>(textureDimensions(input_texture));
-    let blur_radius = 2.0;
     
     var color = vec3<f32>(0.0);
     var total_weight = 0.0;
@@ -37,7 +36,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // 3x3 box blur kernel
     for (var x = -1; x <= 1; x++) {
         for (var y = -1; y <= 1; y++) {
-            let offset = vec2<f32>(f32(x), f32(y)) * texel_size * blur_radius;
+            let offset = vec2<f32>(f32(x), f32(y)) * texel_size;
             let sample_coords = input.tex_coords + offset;
             color += textureSample(input_texture, texture_sampler, sample_coords).rgb;
             total_weight += 1.0;

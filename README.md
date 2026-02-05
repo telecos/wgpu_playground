@@ -958,7 +958,96 @@ Key Concepts:
   • Same buffer used without copying, maximizing GPU efficiency
 ```
 
+#### GPU Particle System Example
+
+A complete GPU particle system demonstrating advanced compute-to-render integration:
+
+```bash
+cargo run --package wgpu_playground_examples --example particle_system
+```
+
+This example demonstrates:
+- Compute shaders for particle physics simulation (position, velocity, lifetime)
+- Storage buffers shared between compute and render pipelines
+- Instanced rendering to efficiently draw thousands of particles
+- Dynamic particle spawning with queue.write_buffer
+- Alpha blending and soft circular particle rendering
+- Gravity, damping, and boundary collision physics
+
+**Key WebGPU APIs exercised:**
+- **Compute pipelines**: GPU-accelerated particle physics with workgroup dispatching
+- **Storage buffers**: Shared STORAGE + VERTEX buffer usage for compute-to-render data flow
+- **Instanced rendering**: Single draw call for 10,000 particle quads
+- **Dynamic updates**: CPU-to-GPU particle spawning per frame
+
+**Example output:**
+```
+=== GPU Particle System Example ===
+
+This example demonstrates:
+  • Compute shader for particle physics simulation
+  • Storage buffers shared between compute and render
+  • Instanced rendering for efficient particle display
+  • Dynamic particle spawning with queue.write_buffer
+
+Using adapter: Your GPU Name
+Backend: Vulkan
+
+✓ GPU device created
+
+Initialized 10000 particles (all dead initially)
+✓ Created particle buffer
+  - Size: 480000 bytes (10000 particles × 48 bytes)
+  - Usage: STORAGE (compute access) + VERTEX (render access) + COPY_DST (updates)
+
+✓ Created simulation parameters buffer
+  - Delta time: 0.016 seconds
+  - Gravity: -0.5
+  - Damping: 0.98
+
+Setting up compute pipeline...
+✓ Compute pipeline created
+
+Setting up render pipeline...
+✓ Render pipeline created
+  - Using instanced rendering (one quad per particle)
+  - Alpha blending enabled for smooth particles
+
+Running particle simulation...
+
+Frame 0:
+  ✓ Spawned 50 new particles
+  ✓ Compute pass: Updated particle physics
+  ✓ Render pass: Drew 50 active particles (instanced)
+  ✓ Frame complete
+
+Frame 2:
+  ✓ Spawned 50 new particles
+  ✓ Compute pass: Updated particle physics
+  ✓ Render pass: Drew 100 active particles (instanced)
+  ✓ Frame complete
+
+=== Particle System Example Complete ===
+
+Successfully demonstrated:
+  ✓ Compute shader particle physics simulation
+    - Position and velocity integration
+    - Gravity and damping forces
+    - Lifetime management
+  ✓ Storage buffer sharing (STORAGE + VERTEX usage)
+  ✓ Instanced rendering (10000 instances per frame)
+  ✓ Dynamic particle spawning with queue.write_buffer
+  ✓ Compute-to-render pipeline integration
+
+Key WebGPU Concepts:
+  • Compute pipelines: GPU-accelerated physics simulation
+  • Storage buffers: Shared data between compute and render
+  • Instanced rendering: Efficient drawing of many objects
+  • Dynamic updates: CPU-to-GPU data transfer per frame
+```
+
 Other available examples:
+- `particle_system` - GPU particle system with compute shaders and instanced rendering
 - `adapter_demo` - Enumerate and select GPU adapters
 - `texture_mapping` - Texture creation, sampling, and binding
 - `backend_selection` - Enumerate and select GPU backends

@@ -504,7 +504,7 @@ fn main() {
             compute_pass.set_pipeline(&compute_pipeline);
             compute_pass.set_bind_group(0, &compute_bind_group, &[]);
             
-            let workgroup_count = (NUM_PARTICLES as u32).div_ceil(WORKGROUP_SIZE);
+            let workgroup_count = NUM_PARTICLES.div_ceil(WORKGROUP_SIZE);
             compute_pass.dispatch_workgroups(workgroup_count, 1, 1);
         }
         println!("  ✓ Compute pass: Updated particle physics");

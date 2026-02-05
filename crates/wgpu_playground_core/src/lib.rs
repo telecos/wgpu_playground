@@ -22,6 +22,7 @@ pub mod device_config;
 pub mod device_info;
 pub mod draw_command_panel;
 pub mod error;
+pub mod example_metadata;
 pub mod examples;
 pub mod implementation;
 pub mod model_loader;

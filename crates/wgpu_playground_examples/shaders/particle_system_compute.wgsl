@@ -21,7 +21,7 @@ struct SimulationParams {
     delta_time: f32,
     gravity: f32,
     damping: f32,
-    _padding: f32,
+    max_lifetime: f32,
 }
 
 // Particle buffer (read-write storage)
@@ -86,6 +86,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     
     // Fade out particles as they approach death
     // This creates a nice visual effect
-    let lifetime_ratio = particles[index].lifetime / 4.0; // assume max lifetime is ~4 seconds
+    let lifetime_ratio = particles[index].lifetime / params.max_lifetime;
     particles[index].color.a = min(lifetime_ratio, 1.0);
 }

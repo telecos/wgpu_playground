@@ -87,7 +87,7 @@ struct SimulationParams {
     delta_time: f32,
     gravity: f32,
     damping: f32,
-    _padding: f32,
+    max_lifetime: f32,
 }
 
 unsafe impl bytemuck::Pod for SimulationParams {}
@@ -246,7 +246,7 @@ fn main() {
         delta_time: TIME_STEP,
         gravity: -0.5,
         damping: 0.98,
-        _padding: 0.0,
+        max_lifetime: 4.0, // Maximum expected lifetime (matches spawn range)
     };
     
     let params_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -258,7 +258,8 @@ fn main() {
     println!("✓ Created simulation parameters buffer");
     println!("  - Delta time: {} seconds", sim_params.delta_time);
     println!("  - Gravity: {}", sim_params.gravity);
-    println!("  - Damping: {}\n", sim_params.damping);
+    println!("  - Damping: {}", sim_params.damping);
+    println!("  - Max lifetime: {} seconds\n", sim_params.max_lifetime);
     
     // === COMPUTE PIPELINE SETUP ===
     println!("Setting up compute pipeline...");
@@ -504,6 +505,8 @@ fn main() {
             compute_pass.set_pipeline(&compute_pipeline);
             compute_pass.set_bind_group(0, &compute_bind_group, &[]);
             
+            // Calculate number of workgroups needed to process all particles (rounded up)
+            // Each workgroup processes WORKGROUP_SIZE particles
             let workgroup_count = NUM_PARTICLES.div_ceil(WORKGROUP_SIZE);
             compute_pass.dispatch_workgroups(workgroup_count, 1, 1);
         }

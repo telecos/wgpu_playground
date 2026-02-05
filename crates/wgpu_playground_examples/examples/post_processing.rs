@@ -156,9 +156,9 @@ fn main() {
 
     // Create scene vertices (colorful triangle)
     let scene_vertices = vec![
-        ColorVertex::new([0.0, 0.7], [1.0, 0.0, 0.0]),    // Top - Red
-        ColorVertex::new([-0.6, -0.4], [0.0, 1.0, 0.0]),  // Bottom-left - Green
-        ColorVertex::new([0.6, -0.4], [0.0, 0.0, 1.0]),   // Bottom-right - Blue
+        ColorVertex::new([0.0, 0.7], [1.0, 0.0, 0.0]), // Top - Red
+        ColorVertex::new([-0.6, -0.4], [0.0, 1.0, 0.0]), // Bottom-left - Green
+        ColorVertex::new([0.6, -0.4], [0.0, 0.0, 1.0]), // Bottom-right - Blue
     ];
 
     let scene_vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -235,10 +235,13 @@ fn main() {
     println!("✓ Scene pipeline created");
 
     // Create render textures
-    let (_scene_texture, scene_view) = create_render_texture(&device, width, height, "Scene Texture");
+    let (_scene_texture, scene_view) =
+        create_render_texture(&device, width, height, "Scene Texture");
     let (_blur_texture, blur_view) = create_render_texture(&device, width, height, "Blur Texture");
-    let (_grayscale_texture, grayscale_view) = create_render_texture(&device, width, height, "Grayscale Texture");
-    let (_edge_texture, edge_view) = create_render_texture(&device, width, height, "Edge Detection Texture");
+    let (_grayscale_texture, grayscale_view) =
+        create_render_texture(&device, width, height, "Grayscale Texture");
+    let (_edge_texture, edge_view) =
+        create_render_texture(&device, width, height, "Edge Detection Texture");
     let output_texture = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("Output Texture"),
         size: wgpu::Extent3d {

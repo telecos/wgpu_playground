@@ -163,10 +163,6 @@ fn main() {
     println!("  ✓ Intermediate texture: {}x{} (STORAGE_BINDING + TEXTURE_BINDING)", IMAGE_WIDTH, IMAGE_HEIGHT);
     println!("  ✓ Output texture: {}x{} (STORAGE_BINDING)\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    // Note: In a real application, you would upload image data here using queue.write_texture
-    // For this example, we're focusing on the compute shader APIs
-    // The input texture starts with uninitialized data
-    println!("  ✓ Input texture ready (would upload image data in real application)\n");
 
     // === CREATE HORIZONTAL BLUR PIPELINE ===
     println!("Creating horizontal blur compute pipeline...");
@@ -391,8 +387,9 @@ fn main() {
     }
     println!("  ✓ Vertical blur dispatched\n");
 
-    // Submit and wait
+    // Submit and wait for completion
     queue.submit(std::iter::once(encoder.finish()));
+    // Poll to wait for GPU work to complete. We ignore the result since we're just waiting.
     let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
     println!("  ✓ Both passes completed successfully\n");

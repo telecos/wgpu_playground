@@ -76,6 +76,43 @@ macro_rules! assert_visual_match {
     };
 }
 
+/// Save two images side-by-side for visual comparison
+///
+/// Creates a simple side-by-side image for manual inspection.
+/// Used for backend comparison reports.
+pub fn save_side_by_side(
+    left_image: &RgbaImage,
+    right_image: &RgbaImage,
+    output_path: &std::path::Path,
+) -> Result<(), VisualRegressionError> {
+    use image::ImageBuffer;
+
+    let (w1, h1) = left_image.dimensions();
+    let (w2, h2) = right_image.dimensions();
+    let height = h1.max(h2);
+    let width = w1 + w2;
+
+    let mut combined = ImageBuffer::new(width, height);
+
+    // Copy left image
+    for y in 0..h1 {
+        for x in 0..w1 {
+            combined.put_pixel(x, y, *left_image.get_pixel(x, y));
+        }
+    }
+
+    // Copy right image
+    for y in 0..h2 {
+        for x in 0..w2 {
+            combined.put_pixel(w1 + x, y, *right_image.get_pixel(x, y));
+        }
+    }
+
+    combined
+        .save(output_path)
+        .map_err(|e| VisualRegressionError::SaveError(format!("Failed to save: {}", e)))
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

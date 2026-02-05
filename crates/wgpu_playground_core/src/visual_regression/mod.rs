@@ -311,6 +311,60 @@ pub fn compare_with_reference(
     })
 }
 
+/// Compares two images directly and returns the difference metric
+///
+/// Useful for backend comparison testing where you want to compare
+/// two rendered outputs (e.g., wgpu-rs vs Dawn) without reference files.
+///
+/// # Arguments
+///
+/// * `image_a` - First image to compare
+/// * `image_b` - Second image to compare  
+/// * `threshold` - Maximum allowed difference (0.0 - 1.0)
+///
+/// # Returns
+///
+/// Returns a comparison result with the difference metric
+pub fn compare_images(
+    image_a: &RgbaImage,
+    image_b: &RgbaImage,
+    threshold: f32,
+) -> Result<ComparisonResult, VisualRegressionError> {
+    if image_a.dimensions() != image_b.dimensions() {
+        return Err(VisualRegressionError::DimensionMismatch {
+            expected: image_a.dimensions(),
+            actual: image_b.dimensions(),
+        });
+    }
+
+    let (width, height) = image_a.dimensions();
+    let mut total_diff = 0.0f32;
+
+    for y in 0..height {
+        for x in 0..width {
+            let pixel_a = image_a.get_pixel(x, y);
+            let pixel_b = image_b.get_pixel(x, y);
+
+            let r_diff = (pixel_a[0] as f32 - pixel_b[0] as f32).abs() / 255.0;
+            let g_diff = (pixel_a[1] as f32 - pixel_b[1] as f32).abs() / 255.0;
+            let b_diff = (pixel_a[2] as f32 - pixel_b[2] as f32).abs() / 255.0;
+            let a_diff = (pixel_a[3] as f32 - pixel_b[3] as f32).abs() / 255.0;
+
+            let pixel_diff = (r_diff + g_diff + b_diff + a_diff) / 4.0;
+            total_diff += pixel_diff;
+        }
+    }
+
+    let difference = total_diff / (width * height) as f32;
+    let is_match = difference <= threshold;
+
+    Ok(ComparisonResult {
+        is_match,
+        difference,
+        diff_image_path: None,
+    })
+}
+
 /// Gets the path to a reference image
 ///
 /// Note: Uses a relative path from CARGO_MANIFEST_DIR (the core crate directory)

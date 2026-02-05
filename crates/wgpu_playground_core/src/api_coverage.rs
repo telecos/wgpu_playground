@@ -211,6 +211,25 @@ impl ApiCoverageTracker {
         }
     }
 
+    /// Get the global API coverage tracker (thread-local singleton)
+    /// 
+    /// This provides a convenient way to access a shared tracker instance
+    /// across the application without needing to pass it explicitly.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn global() -> &'static ApiCoverageTracker {
+        use std::sync::OnceLock;
+        static GLOBAL_TRACKER: OnceLock<ApiCoverageTracker> = OnceLock::new();
+        GLOBAL_TRACKER.get_or_init(|| ApiCoverageTracker::new())
+    }
+
+    /// Get the global API coverage tracker (WASM version)
+    #[cfg(target_arch = "wasm32")]
+    pub fn global() -> &'static ApiCoverageTracker {
+        use std::sync::OnceLock;
+        static GLOBAL_TRACKER: OnceLock<ApiCoverageTracker> = OnceLock::new();
+        GLOBAL_TRACKER.get_or_init(|| ApiCoverageTracker::new())
+    }
+
     /// Record an API call
     pub fn record(&self, category: ApiCategory, method: impl Into<String>) {
         if !*self.enabled.lock().unwrap() {

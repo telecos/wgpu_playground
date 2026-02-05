@@ -14,6 +14,8 @@ use base64::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
+use crate::api_coverage::CoverageData;
+
 /// Serializable version of BufferPanel state
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BufferPanelState {
@@ -166,6 +168,9 @@ pub struct PlaygroundState {
     pub bind_group_panel: Option<BindGroupPanelState>,
     /// Bind group layout panel state
     pub bind_group_layout_panel: Option<BindGroupLayoutPanelState>,
+    /// API coverage data
+    #[serde(default)]
+    pub api_coverage: Option<CoverageData>,
 }
 
 impl Default for PlaygroundState {
@@ -181,6 +186,7 @@ impl Default for PlaygroundState {
             compute_pipeline_panel: None,
             bind_group_panel: None,
             bind_group_layout_panel: None,
+            api_coverage: None,
         }
     }
 }
@@ -360,6 +366,7 @@ mod tests {
             compute_pipeline_panel: None,
             bind_group_panel: None,
             bind_group_layout_panel: None,
+            api_coverage: None,
         };
 
         // Test JSON serialization
@@ -395,6 +402,7 @@ mod tests {
             compute_pipeline_panel: None,
             bind_group_panel: None,
             bind_group_layout_panel: None,
+            api_coverage: None,
         };
 
         let json = state.to_json().unwrap();
@@ -462,6 +470,7 @@ mod tests {
             compute_pipeline_panel: None,
             bind_group_panel: None,
             bind_group_layout_panel: None,
+            api_coverage: None,
         };
 
         let encoded = state.to_url_encoded().unwrap();
@@ -506,6 +515,7 @@ fn fs_main() -> @location(0) vec4<f32> {
             compute_pipeline_panel: None,
             bind_group_panel: None,
             bind_group_layout_panel: None,
+            api_coverage: None,
         };
 
         let encoded = state.to_url_encoded().unwrap();
@@ -522,6 +532,7 @@ fn fs_main() -> @location(0) vec4<f32> {
         let state = PlaygroundState {
             version: "1.0".to_string(),
             theme: Theme::default(),
+            api_coverage: None,
             buffer_panel: Some(BufferPanelState {
                 label: "test".to_string(),
                 size: "1024".to_string(),
@@ -596,6 +607,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     fn test_complex_state_roundtrip() {
         let state = PlaygroundState {
             version: "1.0".to_string(),
+            api_coverage: None,
             theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "complex_buffer".to_string(),

@@ -371,6 +371,14 @@ impl BufferDescriptor {
             self.size,
             self.usage
         );
+        
+        // Track API usage
+        #[cfg(not(test))]
+        {
+            use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+            ApiCoverageTracker::global().record(ApiCategory::Buffer, "create_buffer");
+        }
+        
         let buffer = device.create_buffer(&self.to_wgpu());
         log::trace!("Buffer created successfully");
         Ok(buffer)
@@ -418,6 +426,14 @@ impl BufferOps {
     /// ```
     pub async fn map_read(buffer: &Buffer) -> Result<(), BufferError> {
         log::debug!("Mapping buffer for reading");
+        
+        // Track API usage
+        #[cfg(not(test))]
+        {
+            use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+            ApiCoverageTracker::global().record(ApiCategory::Buffer, "map_read");
+        }
+        
         let (sender, receiver) = futures_channel::oneshot::channel();
 
         buffer.slice(..).map_async(MapMode::Read, move |result| {
@@ -460,6 +476,14 @@ impl BufferOps {
     /// ```
     pub async fn map_write(buffer: &Buffer) -> Result<(), BufferError> {
         log::debug!("Mapping buffer for writing");
+        
+        // Track API usage
+        #[cfg(not(test))]
+        {
+            use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+            ApiCoverageTracker::global().record(ApiCategory::Buffer, "map_write");
+        }
+        
         let (sender, receiver) = futures_channel::oneshot::channel();
 
         buffer.slice(..).map_async(MapMode::Write, move |result| {

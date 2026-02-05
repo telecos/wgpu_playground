@@ -403,6 +403,13 @@ impl<'a> RenderPassEncoder<'a> {
     ) -> Result<Self, RenderPassError> {
         descriptor.validate()?;
 
+        // Track API usage
+        #[cfg(not(test))]
+        {
+            use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+            ApiCoverageTracker::global().record(ApiCategory::RenderPass, "begin_render_pass");
+        }
+
         let color_attachments: Vec<_> = descriptor
             .color_attachments
             .iter()
@@ -428,6 +435,13 @@ impl<'a> RenderPassEncoder<'a> {
     /// # Arguments
     /// * `pipeline` - The render pipeline to use
     pub fn set_pipeline(&mut self, pipeline: &'a RenderPipeline) {
+        // Track API usage
+        #[cfg(not(test))]
+        {
+            use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+            ApiCoverageTracker::global().record(ApiCategory::RenderPass, "set_pipeline");
+        }
+        
         self.pass.set_pipeline(pipeline);
     }
 
@@ -499,6 +513,13 @@ impl<'a> RenderPassEncoder<'a> {
     /// render_pass.draw(0..3, 0..1);
     /// ```
     pub fn draw(&mut self, vertices: std::ops::Range<u32>, instances: std::ops::Range<u32>) {
+        // Track API usage
+        #[cfg(not(test))]
+        {
+            use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+            ApiCoverageTracker::global().record(ApiCategory::RenderPass, "draw");
+        }
+        
         self.pass.draw(vertices, instances);
     }
 

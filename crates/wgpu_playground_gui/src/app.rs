@@ -1,4 +1,6 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
+use wgpu_playground_core::api_coverage::ApiCoverageTracker;
+use wgpu_playground_core::api_coverage_panel::ApiCoveragePanel;
 use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_inspector::BufferInspector;
@@ -49,6 +51,7 @@ pub struct PlaygroundApp {
     performance_panel: PerformancePanel,
     command_recording_panel: CommandRecordingPanel,
     settings_panel: SettingsPanel,
+    api_coverage_panel: ApiCoveragePanel,
     selected_tab: Tab,
     // Collapsible section states
     setup_section_open: bool,
@@ -90,6 +93,7 @@ enum Tab {
     CommandRecording,
     Settings,
     ModelLoader,
+    ApiCoverage,
 }
 
 impl PlaygroundApp {
@@ -124,6 +128,7 @@ impl PlaygroundApp {
             performance_panel: PerformancePanel::new(),
             command_recording_panel: CommandRecordingPanel::new(),
             settings_panel: SettingsPanel::new(),
+            api_coverage_panel: ApiCoveragePanel::new(),
             selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
             // Initialize section states - Rendering open by default
             setup_section_open: false,
@@ -522,6 +527,11 @@ impl PlaygroundApp {
                             Tab::CommandRecording,
                             "  Command Recording",
                         ).on_hover_text("Record and replay GPU commands");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::ApiCoverage,
+                            "  API Coverage",
+                        ).on_hover_text("Track and visualize WebGPU API usage");
                         ui.selectable_value(&mut self.selected_tab, Tab::Console, "  Console")
                             .on_hover_text("View GPU errors and validation messages (Ctrl+5)");
                         ui.selectable_value(
@@ -561,6 +571,10 @@ impl PlaygroundApp {
             Tab::PipelineDebugger => self.pipeline_debugger.ui(ui),
             Tab::Performance => self.performance_panel.ui(ui),
             Tab::CommandRecording => self.command_recording_panel.ui(ui),
+            Tab::ApiCoverage => {
+                let tracker = ApiCoverageTracker::global();
+                self.api_coverage_panel.ui(ui, tracker);
+            }
             Tab::Settings => {
                 if let Some(new_theme) = self.settings_panel.ui(ui) {
                     // Apply the theme change

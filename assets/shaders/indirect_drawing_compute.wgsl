@@ -38,7 +38,7 @@ fn generate_draw_params() {
     indexed_draw_params[0] = 6u;  // index_count
     indexed_draw_params[1] = 1u;  // instance_count
     indexed_draw_params[2] = 0u;  // first_index
-    indexed_draw_params[3] = 0;   // base_vertex (i32 cast as u32)
+    indexed_draw_params[3] = 0u;  // base_vertex (stored as u32, interpreted as i32 by GPU)
     indexed_draw_params[4] = 0u;  // first_instance
 }
 

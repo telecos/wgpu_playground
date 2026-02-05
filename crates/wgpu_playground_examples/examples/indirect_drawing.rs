@@ -236,7 +236,7 @@ fn example_draw_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
         let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
         render_pass.set_pipeline(&pipeline);
         render_pass.set_vertex_buffer(0, &vertex_buffer, 0, None);
-        
+
         // Use drawIndirect - parameters come from the indirect buffer
         render_pass.draw_indirect(&indirect_buffer, 0);
     }
@@ -384,7 +384,7 @@ fn example_draw_indexed_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
         render_pass.set_pipeline(&pipeline);
         render_pass.set_vertex_buffer(0, &vertex_buffer, 0, None);
         render_pass.set_index_buffer(&index_buffer, wgpu_playground_core::render_pass_encoder::IndexFormat::Uint16, 0, None);
-        
+
         // Use drawIndexedIndirect - parameters come from the indirect buffer
         render_pass.draw_indexed_indirect(&indirect_buffer, 0);
     }

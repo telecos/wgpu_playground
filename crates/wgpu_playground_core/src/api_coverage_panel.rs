@@ -142,10 +142,8 @@ impl ApiCoveragePanel {
                 if ui.button("⏸ Pause Tracking").clicked() {
                     tracker.disable();
                 }
-            } else {
-                if ui.button("▶ Resume Tracking").clicked() {
-                    tracker.enable();
-                }
+            } else if ui.button("▶ Resume Tracking").clicked() {
+                tracker.enable();
             }
 
             // Reset button

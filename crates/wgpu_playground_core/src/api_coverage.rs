@@ -106,24 +106,15 @@ impl ApiCall {
 }
 
 /// Serializable coverage data for persistence
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct CoverageData {
     /// Set of API calls that have been made
+    #[serde(default)]
     pub calls: HashSet<ApiCall>,
     /// Session name or identifier
     pub session_name: Option<String>,
     /// Timestamp when coverage tracking started
     pub start_time: Option<String>,
-}
-
-impl Default for CoverageData {
-    fn default() -> Self {
-        Self {
-            calls: HashSet::new(),
-            session_name: None,
-            start_time: None,
-        }
-    }
 }
 
 impl CoverageData {
@@ -219,7 +210,7 @@ impl ApiCoverageTracker {
     pub fn global() -> &'static ApiCoverageTracker {
         use std::sync::OnceLock;
         static GLOBAL_TRACKER: OnceLock<ApiCoverageTracker> = OnceLock::new();
-        GLOBAL_TRACKER.get_or_init(|| ApiCoverageTracker::new())
+        GLOBAL_TRACKER.get_or_init(ApiCoverageTracker::new)
     }
 
     /// Get the global API coverage tracker (WASM version)
@@ -227,7 +218,7 @@ impl ApiCoverageTracker {
     pub fn global() -> &'static ApiCoverageTracker {
         use std::sync::OnceLock;
         static GLOBAL_TRACKER: OnceLock<ApiCoverageTracker> = OnceLock::new();
-        GLOBAL_TRACKER.get_or_init(|| ApiCoverageTracker::new())
+        GLOBAL_TRACKER.get_or_init(ApiCoverageTracker::new)
     }
 
     /// Record an API call

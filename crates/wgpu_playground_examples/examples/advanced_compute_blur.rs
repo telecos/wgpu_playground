@@ -13,7 +13,6 @@
 /// Each pass uses workgroup shared memory to cache texture tiles, reducing global memory access.
 ///
 /// Run with: cargo run --package wgpu_playground_examples --example advanced_compute_blur
-
 use wgpu::util::DeviceExt;
 
 /// Workgroup size for compute shader (must match shader @workgroup_size)

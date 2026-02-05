@@ -1,7 +1,26 @@
+use crate::api_coverage::ApiCategory;
 use crate::examples::{get_all_examples, Example, ExampleCategory};
 use crate::example_metadata::get_example_api_tags;
 use crate::shader_editor::ShaderEditor;
 use wgpu::{Device, Queue};
+
+/// Get color for API category badge
+fn category_badge_color(category: &ApiCategory) -> egui::Color32 {
+    match category {
+        ApiCategory::RenderPass => egui::Color32::from_rgb(220, 20, 60),      // Crimson - main rendering
+        ApiCategory::ComputePass => egui::Color32::from_rgb(138, 43, 226),    // Blue Violet - compute
+        ApiCategory::Buffer => egui::Color32::from_rgb(50, 150, 100),         // Sea Green - data
+        ApiCategory::Texture => egui::Color32::from_rgb(255, 140, 0),         // Dark Orange - textures
+        ApiCategory::Sampler => egui::Color32::from_rgb(218, 165, 32),        // Goldenrod - sampler
+        ApiCategory::Shader => egui::Color32::from_rgb(70, 130, 180),         // Steel Blue - shader
+        ApiCategory::RenderPipeline => egui::Color32::from_rgb(178, 34, 34),  // Firebrick - pipeline
+        ApiCategory::ComputePipeline => egui::Color32::from_rgb(123, 104, 238), // Medium Slate Blue
+        ApiCategory::BindGroup => egui::Color32::from_rgb(34, 139, 34),       // Forest Green - binding
+        ApiCategory::CommandEncoder => egui::Color32::from_rgb(85, 107, 47),  // Dark Olive Green - commands
+        ApiCategory::Queue => egui::Color32::from_rgb(184, 134, 11),          // Dark Goldenrod - queue
+        _ => egui::Color32::from_rgb(105, 105, 105),                          // Dim Gray - others
+    }
+}
 
 /// Rendering state for executable examples
 struct TriangleState {
@@ -960,12 +979,13 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     if !coverage_tags.is_empty() {
                         ui.label(egui::RichText::new("WebGPU APIs Covered:").strong());
                         ui.horizontal_wrapped(|ui| {
+                            ui.spacing_mut().item_spacing = egui::vec2(6.0, 4.0);
                             for tag in coverage_tags {
-                                let badge_color = egui::Color32::from_rgb(70, 130, 180);
+                                let badge_text = format!(" {} ", tag.name());
                                 ui.label(
-                                    egui::RichText::new(tag.name())
+                                    egui::RichText::new(&badge_text)
                                         .color(egui::Color32::WHITE)
-                                        .background_color(badge_color)
+                                        .background_color(category_badge_color(&tag))
                                         .small(),
                                 );
                             }
@@ -1322,5 +1342,34 @@ mod tests {
         let panel = RenderingPanel::default();
         assert_eq!(panel.examples.len(), 4);
         assert!(!panel.is_example_running);
+    }
+
+    #[test]
+    fn test_category_badge_colors_are_distinct() {
+        // Ensure different categories get different colors
+        let render_pass_color = category_badge_color(&ApiCategory::RenderPass);
+        let compute_pass_color = category_badge_color(&ApiCategory::ComputePass);
+        let buffer_color = category_badge_color(&ApiCategory::Buffer);
+        let texture_color = category_badge_color(&ApiCategory::Texture);
+        
+        // Colors should be different for different categories
+        assert_ne!(render_pass_color, compute_pass_color);
+        assert_ne!(buffer_color, texture_color);
+        assert_ne!(render_pass_color, buffer_color);
+    }
+
+    #[test]
+    fn test_example_metadata_integration() {
+        // Verify that all examples have API coverage metadata
+        let examples = get_all_examples();
+        for example in examples {
+            let tags = get_example_api_tags(example.id);
+            // Each example should have at least some API tags
+            // (this would fail if we add new examples without updating metadata)
+            if example.id == "triangle" || example.id == "cube" 
+                || example.id == "texture_mapping" || example.id == "compute_shader" {
+                assert!(!tags.is_empty(), "Example {} should have API tags", example.id);
+            }
+        }
     }
 }

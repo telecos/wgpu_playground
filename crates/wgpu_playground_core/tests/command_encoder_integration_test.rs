@@ -179,7 +179,7 @@ fn test_copy_buffer_to_texture() {
         // Create a buffer with texture data
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Texture Data Buffer"),
-            size: 64, // 4x4 RGBA texture = 64 bytes
+            size: 1024, // 256 bytes/row (with padding) * 4 rows
             usage: wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
@@ -200,8 +200,13 @@ fn test_copy_buffer_to_texture() {
             view_formats: &[],
         });
 
-        // Write test data to buffer
-        let test_data = vec![255u8; 64];
+        // Write test data to buffer (needs to match padded size)
+        let mut test_data = vec![0u8; 1024];
+        // Fill the actual texture data (4 rows of 16 bytes each)
+        for row in 0..4 {
+            let offset = row * 256;
+            test_data[offset..offset + 16].fill(255u8);
+        }
         queue.write_buffer(&buffer, 0, &test_data);
 
         // Copy buffer to texture
@@ -211,7 +216,7 @@ fn test_copy_buffer_to_texture() {
                 buffer: &buffer,
                 layout: wgpu::TexelCopyBufferLayout {
                     offset: 0,
-                    bytes_per_row: Some(16), // 4 pixels * 4 bytes
+                    bytes_per_row: Some(256), // WebGPU COPY_BYTES_PER_ROW_ALIGNMENT requirement
                     rows_per_image: Some(4),
                 },
             },

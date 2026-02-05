@@ -420,7 +420,19 @@ impl ApiCoveragePanel {
                                     }
                                     #[cfg(target_arch = "wasm32")]
                                     {
-                                        web_sys::window().and_then(|w| w.open_with_url(url).ok());
+                                        match web_sys::window() {
+                                            Some(w) => {
+                                                if let Err(e) = w.open_with_url(url) {
+                                                    log::error!(
+                                                        "Failed to open documentation: {:?}",
+                                                        e
+                                                    );
+                                                }
+                                            }
+                                            None => {
+                                                log::error!("Failed to get window object");
+                                            }
+                                        }
                                     }
                                 }
 

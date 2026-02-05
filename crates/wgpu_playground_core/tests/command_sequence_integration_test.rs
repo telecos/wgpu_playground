@@ -512,7 +512,7 @@ fn test_complex_command_sequence() {
         // Create readback buffer for texture
         let texture_readback = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Texture Readback"),
-            size: 16 * 16 * 4,
+            size: 256 * 16, // 256 bytes/row (with padding) * 16 rows
             usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
             mapped_at_creation: false,
         });
@@ -587,7 +587,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 buffer: &texture_readback,
                 layout: wgpu::TexelCopyBufferLayout {
                     offset: 0,
-                    bytes_per_row: Some(16 * 4),
+                    bytes_per_row: Some(256), // WebGPU COPY_BYTES_PER_ROW_ALIGNMENT requirement
                     rows_per_image: Some(16),
                 },
             },

@@ -69,9 +69,9 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
 fn create_triangle_vertices(offset_x: f32, offset_y: f32, color: [f32; 3]) -> Vec<Vertex> {
     let size = 0.2;
     vec![
-        Vertex::new([offset_x, offset_y + size], color),              // Top
-        Vertex::new([offset_x - size, offset_y - size], color),       // Bottom-left
-        Vertex::new([offset_x + size, offset_y - size], color),       // Bottom-right
+        Vertex::new([offset_x, offset_y + size], color), // Top
+        Vertex::new([offset_x - size, offset_y - size], color), // Bottom-left
+        Vertex::new([offset_x + size, offset_y - size], color), // Bottom-right
     ]
 }
 
@@ -111,21 +111,21 @@ fn main() {
     // Create multiple triangle batches to demonstrate render bundle reuse
     println!("Creating triangle geometry:");
     let mut all_vertices = Vec::new();
-    
+
     // First batch - Red triangles
     for i in 0..3 {
         let x = -0.6 + (i as f32 * 0.3);
         let y = 0.5;
         all_vertices.extend_from_slice(&create_triangle_vertices(x, y, [1.0, 0.0, 0.0]));
     }
-    
+
     // Second batch - Green triangles
     for i in 0..3 {
         let x = -0.6 + (i as f32 * 0.3);
         let y = 0.0;
         all_vertices.extend_from_slice(&create_triangle_vertices(x, y, [0.0, 1.0, 0.0]));
     }
-    
+
     // Third batch - Blue triangles
     for i in 0..3 {
         let x = -0.6 + (i as f32 * 0.3);
@@ -133,7 +133,11 @@ fn main() {
         all_vertices.extend_from_slice(&create_triangle_vertices(x, y, [0.0, 0.0, 1.0]));
     }
 
-    println!("  {} triangles ({} vertices)", all_vertices.len() / 3, all_vertices.len());
+    println!(
+        "  {} triangles ({} vertices)",
+        all_vertices.len() / 3,
+        all_vertices.len()
+    );
     println!();
 
     // Create vertex buffer
@@ -227,7 +231,7 @@ fn main() {
     // RENDER BUNDLE: Record draw commands once
     // ========================================
     println!("=== Creating Render Bundle ===");
-    
+
     let mut render_bundle_encoder =
         device.create_render_bundle_encoder(&wgpu::RenderBundleEncoderDescriptor {
             label: Some("Render Bundle Encoder"),
@@ -241,12 +245,12 @@ fn main() {
     render_bundle_encoder.set_pipeline(&pipeline);
     render_bundle_encoder.set_vertex_buffer(0, vertex_buffer.slice(..));
     render_bundle_encoder.draw(0..all_vertices.len() as u32, 0..1);
-    
+
     // Finish the bundle - this creates a reusable command buffer
     let render_bundle = render_bundle_encoder.finish(&wgpu::RenderBundleDescriptor {
         label: Some("Render Bundle"),
     });
-    
+
     println!("✓ Render bundle created and recorded");
     println!("  - Pipeline configured");
     println!("  - Vertex buffer bound");
@@ -262,12 +266,12 @@ fn main() {
     // Demonstrate bundle execution multiple times
     // ========================================
     println!("=== Executing Render Bundle ===");
-    
+
     // We'll execute the bundle 3 times to simulate multiple frames/passes
     // In a real application, this would be done across multiple frames
     for pass_num in 1..=3 {
         println!("\nRender Pass {}:", pass_num);
-        
+
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some(&format!("Render Encoder {}", pass_num)),
         });
@@ -297,7 +301,7 @@ fn main() {
             // Execute the pre-recorded bundle!
             // This is much more efficient than re-recording all draw commands
             render_pass.execute_bundles(std::iter::once(&render_bundle));
-            
+
             println!("  ✓ Bundle executed via execute_bundles()");
         }
 
@@ -364,7 +368,7 @@ mod tests {
     fn test_create_triangle_vertices() {
         let vertices = create_triangle_vertices(0.5, 0.5, [1.0, 0.0, 0.0]);
         assert_eq!(vertices.len(), 3);
-        
+
         // All vertices should have the same color
         for v in &vertices {
             assert_eq!(v.color, [1.0, 0.0, 0.0]);

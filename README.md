@@ -511,6 +511,9 @@ cargo run --package wgpu_playground_examples --example rotating_cube
 # Render to texture
 cargo run --package wgpu_playground_examples --example render_to_texture
 
+# Post-processing effects (blur, grayscale, edge detection)
+cargo run --package wgpu_playground_examples --example post_processing
+
 # Compute shader example
 cargo run --package wgpu_playground_examples --example compute_render_sharing
 
@@ -796,6 +799,87 @@ Key concepts:
   - Second pass samples the texture via bind group
   - Two separate render pipelines for different passes
 ```
+
+#### Post-Processing Effects Example
+
+An advanced multi-pass rendering example demonstrating real-world post-processing techniques:
+
+```bash
+cargo run --package wgpu_playground_examples --example post_processing
+```
+
+This example demonstrates:
+- Multiple render-to-texture passes (5 passes total)
+- Rendering a scene to an offscreen texture
+- Applying sequential post-processing effects: blur, grayscale, edge detection
+- Multiple render pipelines with different fragment shaders
+- Full-screen quad rendering for post-processing
+- Texture sampling in fragment shaders with various algorithms
+- Real-world post-processing workflow commonly used in games and graphics applications
+
+**Example output:**
+```
+=== Post-Processing Effects Example ===
+
+This example demonstrates multiple post-processing effects:
+  Pass 1: Render scene to texture
+  Pass 2: Apply blur effect
+  Pass 3: Apply grayscale effect
+  Pass 4: Apply edge detection effect
+  Pass 5: Display final result
+
+Using adapter: NVIDIA GeForce RTX 3080
+Backend: Vulkan
+✓ GPU device created
+
+=== Scene Pass Setup ===
+✓ Scene pipeline created
+✓ Render textures created
+
+=== Post-Processing Pipelines Setup ===
+✓ All post-processing pipelines created
+
+✓ All bind groups created
+
+=== Executing Multi-Pass Post-Processing ===
+
+Pass 1: Rendering scene...
+  ✓ Scene rendered
+Pass 2: Applying blur effect...
+  ✓ Blur applied
+Pass 3: Applying grayscale effect...
+  ✓ Grayscale applied
+Pass 4: Applying edge detection...
+  ✓ Edge detection applied
+Pass 5: Displaying final result...
+  ✓ Final result displayed
+
+✓ All render commands submitted to GPU
+✓ Rendering complete
+
+=== Post-Processing Example Complete ===
+
+This example successfully demonstrated:
+  • Multiple render-to-texture passes (5 passes total)
+  • Scene rendering to offscreen texture
+  • Blur post-processing effect
+  • Grayscale post-processing effect
+  • Edge detection post-processing effect
+  • Multiple render pipelines with different shaders
+  • Texture sampling in fragment shaders
+  • Full-screen quad rendering
+
+Key WebGPU concepts:
+  - Render-to-texture workflow (framebuffers)
+  - Multiple render pipelines for different effects
+  - Bind groups for texture and sampler resources
+  - Multi-pass rendering with intermediate textures
+```
+
+**Post-Processing Effects Implemented:**
+- **Blur**: 3x3 box blur kernel for smoothing
+- **Grayscale**: Luminance-based color conversion using standard weights
+- **Edge Detection**: Sobel operator for detecting edges in the image
 
 #### Compute-Render Buffer Sharing Example
 

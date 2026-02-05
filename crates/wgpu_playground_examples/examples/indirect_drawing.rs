@@ -40,6 +40,26 @@ impl Vertex {
     fn new(position: [f32; 2], color: [f32; 3]) -> Self {
         Self { position, color }
     }
+
+    fn buffer_layout() -> wgpu::VertexBufferLayout<'static> {
+        const ATTRIBUTES: [wgpu::VertexAttribute; 2] = [
+            wgpu::VertexAttribute {
+                format: wgpu::VertexFormat::Float32x2,
+                offset: 0,
+                shader_location: 0,
+            },
+            wgpu::VertexAttribute {
+                format: wgpu::VertexFormat::Float32x3,
+                offset: std::mem::size_of::<[f32; 2]>() as u64,
+                shader_location: 1,
+            },
+        ];
+        wgpu::VertexBufferLayout {
+            array_stride: std::mem::size_of::<Vertex>() as u64,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &ATTRIBUTES,
+        }
+    }
 }
 
 /// Create GPU device and queue
@@ -147,23 +167,6 @@ fn example_draw_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
         source: wgpu::ShaderSource::Wgsl(shader.source().into()),
     });
 
-    let vertex_buffer_layout = wgpu::VertexBufferLayout {
-        array_stride: std::mem::size_of::<Vertex>() as u64,
-        step_mode: wgpu::VertexStepMode::Vertex,
-        attributes: &[
-            wgpu::VertexAttribute {
-                format: wgpu::VertexFormat::Float32x2,
-                offset: 0,
-                shader_location: 0,
-            },
-            wgpu::VertexAttribute {
-                format: wgpu::VertexFormat::Float32x3,
-                offset: std::mem::size_of::<[f32; 2]>() as u64,
-                shader_location: 1,
-            },
-        ],
-    };
-
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Indirect Pipeline Layout"),
         bind_group_layouts: &[],
@@ -177,7 +180,7 @@ fn example_draw_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
             module: &shader_module,
             entry_point: Some("vs_main"),
             compilation_options: Default::default(),
-            buffers: &[vertex_buffer_layout],
+            buffers: &[Vertex::buffer_layout()],
         },
         primitive: wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleList,
@@ -311,23 +314,6 @@ fn example_draw_indexed_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
         source: wgpu::ShaderSource::Wgsl(shader.source().into()),
     });
 
-    let vertex_buffer_layout = wgpu::VertexBufferLayout {
-        array_stride: std::mem::size_of::<Vertex>() as u64,
-        step_mode: wgpu::VertexStepMode::Vertex,
-        attributes: &[
-            wgpu::VertexAttribute {
-                format: wgpu::VertexFormat::Float32x2,
-                offset: 0,
-                shader_location: 0,
-            },
-            wgpu::VertexAttribute {
-                format: wgpu::VertexFormat::Float32x3,
-                offset: std::mem::size_of::<[f32; 2]>() as u64,
-                shader_location: 1,
-            },
-        ],
-    };
-
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Indexed Indirect Pipeline Layout"),
         bind_group_layouts: &[],
@@ -341,7 +327,7 @@ fn example_draw_indexed_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
             module: &shader_module,
             entry_point: Some("vs_main"),
             compilation_options: Default::default(),
-            buffers: &[vertex_buffer_layout],
+            buffers: &[Vertex::buffer_layout()],
         },
         primitive: wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleList,

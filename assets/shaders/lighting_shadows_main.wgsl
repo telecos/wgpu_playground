@@ -85,11 +85,12 @@ fn calculate_shadow(shadow_pos: vec4<f32>) -> f32 {
     
     // Use comparison sampler for hardware PCF
     // Returns 1.0 if depth test passes (not in shadow), 0.0 if fails (in shadow)
+    // Bias of 0.005 helps prevent shadow acne (self-shadowing artifacts)
     let shadow = textureSampleCompare(
         shadow_map,
         shadow_sampler,
         proj_coords.xy,
-        proj_coords.z - 0.005 // Bias to prevent shadow acne
+        proj_coords.z - 0.005
     );
     
     return shadow;
@@ -108,18 +109,19 @@ fn calculate_phong_lighting(
     let normal = normalize(world_normal);
     let light_direction = normalize(light_dir);
     
-    // Ambient
+    // Ambient lighting (10% contribution, always present)
     let ambient_strength = 0.1;
     let ambient = ambient_strength * light_color;
     
-    // Diffuse
+    // Diffuse lighting (Lambert's cosine law)
     let diff = max(dot(normal, light_direction), 0.0);
     let diffuse = diff * light_color;
     
-    // Specular
+    // Specular lighting (Phong model)
+    // Shininess of 32 creates moderately shiny surface
     let reflect_dir = reflect(-light_direction, normal);
     let spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.0);
-    let specular_strength = 0.5;
+    let specular_strength = 0.5; // 50% specular contribution
     let specular = specular_strength * spec * light_color;
     
     // Combine with shadow (ambient is not affected by shadows)
@@ -152,6 +154,8 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // Point light contribution
     let point_light_dir = lights.point_light_position.xyz - input.world_position;
     let point_light_dist = length(point_light_dir);
+    // Quadratic attenuation: 1 / (1 + linear*d + quadratic*d^2)
+    // Linear term: 0.09, Quadratic term: 0.032 (suitable for medium-range light)
     let point_light_attenuation = 1.0 / (1.0 + 0.09 * point_light_dist + 0.032 * point_light_dist * point_light_dist);
     
     let point_light_contrib = calculate_phong_lighting(

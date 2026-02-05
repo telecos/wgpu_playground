@@ -6,7 +6,9 @@ use wgpu_playground_core::query_set::{QuerySetDescriptor, QuerySetOps, QueryType
 
 // Helper function to create a test device and queue with timestamp query support
 async fn create_test_device_with_timestamp() -> Option<(wgpu::Device, wgpu::Queue)> {
-    create_test_device_with_features(wgpu::Features::TIMESTAMP_QUERY).await
+    // TIMESTAMP_QUERY_INSIDE_ENCODERS implies TIMESTAMP_QUERY
+    // We need this feature to call write_timestamp on command encoders
+    create_test_device_with_features(wgpu::Features::TIMESTAMP_QUERY_INSIDE_ENCODERS).await
 }
 
 #[test]
@@ -62,6 +64,10 @@ fn test_query_set_creation_with_zero_count() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "TIMESTAMP_QUERY_INSIDE_ENCODERS not supported in CI with lavapipe software rendering"
+)]
 fn test_timestamp_write() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device_with_timestamp().await else {

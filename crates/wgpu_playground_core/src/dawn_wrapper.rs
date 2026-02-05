@@ -67,6 +67,26 @@ mod ffi {
     pub const WGPUBackendType_Vulkan: WGPUBackendType = 4;
     pub const WGPUBackendType_OpenGL: WGPUBackendType = 5;
 
+    // Status codes for adapter request
+    pub type WGPURequestAdapterStatus = u32;
+    pub const WGPURequestAdapterStatus_Success: WGPURequestAdapterStatus = 0;
+    pub const WGPURequestAdapterStatus_Unavailable: WGPURequestAdapterStatus = 1;
+    pub const WGPURequestAdapterStatus_Error: WGPURequestAdapterStatus = 2;
+    pub const WGPURequestAdapterStatus_Unknown: WGPURequestAdapterStatus = 3;
+
+    // Status codes for device request
+    pub type WGPURequestDeviceStatus = u32;
+    pub const WGPURequestDeviceStatus_Success: WGPURequestDeviceStatus = 0;
+    pub const WGPURequestDeviceStatus_Error: WGPURequestDeviceStatus = 1;
+    pub const WGPURequestDeviceStatus_Unknown: WGPURequestDeviceStatus = 2;
+
+    // String view for C strings
+    #[repr(C)]
+    pub struct WGPUStringView {
+        pub data: *const u8,
+        pub length: usize,
+    }
+
     // Structs matching Dawn's C API
     #[repr(C)]
     pub struct WGPUChainedStruct {
@@ -88,6 +108,29 @@ mod ffi {
         pub force_fallback_adapter: u32,
     }
 
+    #[repr(C)]
+    pub struct WGPUDeviceDescriptor {
+        pub next_in_chain: *const WGPUChainedStruct,
+        pub label: *const u8,
+    }
+
+    // Callback function types
+    pub type WGPURequestAdapterCallback = unsafe extern "C" fn(
+        status: WGPURequestAdapterStatus,
+        adapter: WGPUAdapter,
+        message: WGPUStringView,
+        userdata1: *mut c_void,
+        userdata2: *mut c_void,
+    );
+
+    pub type WGPURequestDeviceCallback = unsafe extern "C" fn(
+        status: WGPURequestDeviceStatus,
+        device: WGPUDevice,
+        message: WGPUStringView,
+        userdata1: *mut c_void,
+        userdata2: *mut c_void,
+    );
+
     // Dawn FFI functions
     // These will be linked from libdawn if successfully built
     // If Dawn build fails, these won't be available and we use the fallback
@@ -96,7 +139,21 @@ mod ffi {
         pub fn wgpuCreateInstance(descriptor: *const WGPUInstanceDescriptor) -> WGPUInstance;
         pub fn wgpuInstanceRelease(instance: WGPUInstance);
         pub fn wgpuAdapterRelease(adapter: WGPUAdapter);
-        // Additional functions would be declared here
+        pub fn wgpuDeviceRelease(device: WGPUDevice);
+        pub fn wgpuInstanceRequestAdapter(
+            instance: WGPUInstance,
+            options: *const WGPURequestAdapterOptions,
+            callback: WGPURequestAdapterCallback,
+            userdata1: *mut c_void,
+            userdata2: *mut c_void,
+        );
+        pub fn wgpuAdapterRequestDevice(
+            adapter: WGPUAdapter,
+            descriptor: *const WGPUDeviceDescriptor,
+            callback: WGPURequestDeviceCallback,
+            userdata1: *mut c_void,
+            userdata2: *mut c_void,
+        );
     }
 }
 
@@ -182,12 +239,131 @@ impl DawnInstance {
     ) -> Result<DawnAdapter, DawnError> {
         match &self.inner {
             #[cfg(dawn_enabled)]
-            DawnInstanceInner::NativeDawn(_instance) => {
-                // TODO: Implement native Dawn adapter request via FFI
-                // For now, this would require implementing async callback mechanism
-                // matching Dawn's C API
-                log::warn!("Native Dawn adapter request not yet implemented, using fallback");
-                Err(DawnError::NotImplemented)
+            DawnInstanceInner::NativeDawn(instance) => {
+                use std::sync::{Arc, Mutex};
+
+                // Callback result container
+                #[derive(Default)]
+                struct CallbackResult {
+                    adapter: Option<ffi::WGPUAdapter>,
+                    status: ffi::WGPURequestAdapterStatus,
+                    message: String,
+                }
+
+                let result = Arc::new(Mutex::new(None::<CallbackResult>));
+                let result_clone = Arc::clone(&result);
+
+                // C callback function
+                unsafe extern "C" fn adapter_callback(
+                    status: ffi::WGPURequestAdapterStatus,
+                    adapter: ffi::WGPUAdapter,
+                    message: ffi::WGPUStringView,
+                    userdata1: *mut std::os::raw::c_void,
+                    _userdata2: *mut std::os::raw::c_void,
+                ) {
+                    let result_ptr = userdata1 as *const Mutex<Option<CallbackResult>>;
+                    if !result_ptr.is_null() {
+                        let result_arc = Arc::from_raw(result_ptr);
+
+                        // Extract message string
+                        let msg = if !message.data.is_null() && message.length > 0 {
+                            let slice = std::slice::from_raw_parts(message.data, message.length);
+                            String::from_utf8_lossy(slice).to_string()
+                        } else {
+                            String::new()
+                        };
+
+                        if let Ok(mut guard) = result_arc.lock() {
+                            *guard = Some(CallbackResult {
+                                adapter: if adapter.is_null() {
+                                    None
+                                } else {
+                                    Some(adapter)
+                                },
+                                status,
+                                message: msg,
+                            });
+                        }
+
+                        // Don't drop the Arc, we need it after the callback
+                        std::mem::forget(result_arc);
+                    }
+                }
+
+                // Prepare request options
+                let options = ffi::WGPURequestAdapterOptions {
+                    next_in_chain: std::ptr::null(),
+                    compatible_surface: std::ptr::null_mut(),
+                    power_preference: power_preference.to_wgpu(),
+                    backend_type: ffi::WGPUBackendType_Undefined,
+                    force_fallback_adapter: 0,
+                };
+
+                // Make the async request
+                unsafe {
+                    let userdata = Arc::into_raw(result_clone) as *mut std::os::raw::c_void;
+                    ffi::wgpuInstanceRequestAdapter(
+                        *instance,
+                        &options,
+                        adapter_callback,
+                        userdata,
+                        std::ptr::null_mut(),
+                    );
+                }
+
+                // Poll for completion (Dawn callbacks are usually immediate or very fast)
+                // In a real async implementation, this would integrate with an event loop
+                const MAX_WAIT_MS: u64 = 5000;
+                const POLL_INTERVAL_MS: u64 = 10;
+                let start = std::time::Instant::now();
+
+                loop {
+                    if let Ok(guard) = result.lock() {
+                        if guard.is_some() {
+                            break;
+                        }
+                    }
+
+                    if start.elapsed().as_millis() > MAX_WAIT_MS as u128 {
+                        return Err(DawnError::NoAdapterFound);
+                    }
+
+                    // Small sleep to avoid busy waiting
+                    std::thread::sleep(std::time::Duration::from_millis(POLL_INTERVAL_MS));
+                }
+
+                // Extract result
+                let callback_result = result
+                    .lock()
+                    .unwrap()
+                    .take()
+                    .ok_or(DawnError::NoAdapterFound)?;
+
+                // Map status to error
+                match callback_result.status {
+                    ffi::WGPURequestAdapterStatus_Success => {
+                        if let Some(adapter) = callback_result.adapter {
+                            log::info!("Native Dawn adapter request succeeded");
+                            Ok(DawnAdapter {
+                                inner: DawnAdapterInner::NativeDawn(adapter),
+                            })
+                        } else {
+                            Err(DawnError::NoAdapterFound)
+                        }
+                    }
+                    ffi::WGPURequestAdapterStatus_Unavailable => {
+                        log::warn!("Dawn adapter unavailable");
+                        Err(DawnError::AdapterUnavailable)
+                    }
+                    ffi::WGPURequestAdapterStatus_Error => {
+                        log::error!("Dawn adapter error: {}", callback_result.message);
+                        Err(DawnError::AdapterError(callback_result.message))
+                    }
+                    _ => {
+                        log::error!("Unknown Dawn adapter status");
+                        Err(DawnError::Unknown)
+                    }
+                }
             }
             DawnInstanceInner::WgpuFallback(instance) => {
                 log::info!(
@@ -235,6 +411,18 @@ impl DawnInstance {
             #[cfg(dawn_enabled)]
             DawnInstanceInner::NativeDawn(_) => true,
             DawnInstanceInner::WgpuFallback(_) => false,
+        }
+    }
+}
+
+#[cfg(feature = "dawn")]
+impl Drop for DawnInstance {
+    fn drop(&mut self) {
+        #[cfg(dawn_enabled)]
+        if let DawnInstanceInner::NativeDawn(instance) = &self.inner {
+            unsafe {
+                ffi::wgpuInstanceRelease(*instance);
+            }
         }
     }
 }
@@ -304,10 +492,128 @@ impl DawnAdapter {
     ) -> Result<DawnDevice, DawnError> {
         match &self.inner {
             #[cfg(dawn_enabled)]
-            DawnAdapterInner::NativeDawn(_) => {
-                // TODO: Implement native Dawn device request
-                log::warn!("Native Dawn device request not yet implemented, using fallback");
-                Err(DawnError::NotImplemented)
+            DawnAdapterInner::NativeDawn(adapter) => {
+                use std::sync::{Arc, Mutex};
+
+                // Callback result container
+                #[derive(Default)]
+                struct CallbackResult {
+                    device: Option<ffi::WGPUDevice>,
+                    status: ffi::WGPURequestDeviceStatus,
+                    message: String,
+                }
+
+                let result = Arc::new(Mutex::new(None::<CallbackResult>));
+                let result_clone = Arc::clone(&result);
+
+                // C callback function
+                unsafe extern "C" fn device_callback(
+                    status: ffi::WGPURequestDeviceStatus,
+                    device: ffi::WGPUDevice,
+                    message: ffi::WGPUStringView,
+                    userdata1: *mut std::os::raw::c_void,
+                    _userdata2: *mut std::os::raw::c_void,
+                ) {
+                    let result_ptr = userdata1 as *const Mutex<Option<CallbackResult>>;
+                    if !result_ptr.is_null() {
+                        let result_arc = Arc::from_raw(result_ptr);
+
+                        // Extract message string
+                        let msg = if !message.data.is_null() && message.length > 0 {
+                            let slice = std::slice::from_raw_parts(message.data, message.length);
+                            String::from_utf8_lossy(slice).to_string()
+                        } else {
+                            String::new()
+                        };
+
+                        if let Ok(mut guard) = result_arc.lock() {
+                            *guard = Some(CallbackResult {
+                                device: if device.is_null() { None } else { Some(device) },
+                                status,
+                                message: msg,
+                            });
+                        }
+
+                        // Don't drop the Arc, we need it after the callback
+                        std::mem::forget(result_arc);
+                    }
+                }
+
+                // Prepare device descriptor
+                let label_cstring;
+                let label_ptr = if let Some(label) = &descriptor.label {
+                    label_cstring = std::ffi::CString::new(label.as_str())
+                        .unwrap_or_else(|_| std::ffi::CString::new("").unwrap());
+                    label_cstring.as_ptr() as *const u8
+                } else {
+                    std::ptr::null()
+                };
+
+                let device_desc = ffi::WGPUDeviceDescriptor {
+                    next_in_chain: std::ptr::null(),
+                    label: label_ptr,
+                };
+
+                // Make the async request
+                unsafe {
+                    let userdata = Arc::into_raw(result_clone) as *mut std::os::raw::c_void;
+                    ffi::wgpuAdapterRequestDevice(
+                        *adapter,
+                        &device_desc,
+                        device_callback,
+                        userdata,
+                        std::ptr::null_mut(),
+                    );
+                }
+
+                // Poll for completion
+                const MAX_WAIT_MS: u64 = 5000;
+                const POLL_INTERVAL_MS: u64 = 10;
+                let start = std::time::Instant::now();
+
+                loop {
+                    if let Ok(guard) = result.lock() {
+                        if guard.is_some() {
+                            break;
+                        }
+                    }
+
+                    if start.elapsed().as_millis() > MAX_WAIT_MS as u128 {
+                        return Err(DawnError::DeviceCreationFailed);
+                    }
+
+                    // Small sleep to avoid busy waiting
+                    std::thread::sleep(std::time::Duration::from_millis(POLL_INTERVAL_MS));
+                }
+
+                // Extract result
+                let callback_result = result
+                    .lock()
+                    .unwrap()
+                    .take()
+                    .ok_or(DawnError::DeviceCreationFailed)?;
+
+                // Map status to error
+                match callback_result.status {
+                    ffi::WGPURequestDeviceStatus_Success => {
+                        if let Some(device) = callback_result.device {
+                            log::info!("Native Dawn device request succeeded");
+                            Ok(DawnDevice {
+                                inner: DawnDeviceInner::NativeDawn(device),
+                            })
+                        } else {
+                            Err(DawnError::DeviceCreationFailed)
+                        }
+                    }
+                    ffi::WGPURequestDeviceStatus_Error => {
+                        log::error!("Dawn device error: {}", callback_result.message);
+                        Err(DawnError::DeviceError(callback_result.message))
+                    }
+                    _ => {
+                        log::error!("Unknown Dawn device status");
+                        Err(DawnError::Unknown)
+                    }
+                }
             }
             DawnAdapterInner::WgpuFallback(adapter) => {
                 log::info!("Requesting device with label: {:?}", descriptor.label);
@@ -347,6 +653,18 @@ impl DawnAdapter {
             #[cfg(dawn_enabled)]
             DawnAdapterInner::NativeDawn(_) => None,
             DawnAdapterInner::WgpuFallback(adapter) => Some(adapter),
+        }
+    }
+}
+
+#[cfg(feature = "dawn")]
+impl Drop for DawnAdapter {
+    fn drop(&mut self) {
+        #[cfg(dawn_enabled)]
+        if let DawnAdapterInner::NativeDawn(adapter) = &self.inner {
+            unsafe {
+                ffi::wgpuAdapterRelease(*adapter);
+            }
         }
     }
 }
@@ -443,13 +761,29 @@ impl DawnDevice {
     }
 }
 
+#[cfg(feature = "dawn")]
+impl Drop for DawnDevice {
+    fn drop(&mut self) {
+        #[cfg(dawn_enabled)]
+        if let DawnDeviceInner::NativeDawn(device) = &self.inner {
+            unsafe {
+                ffi::wgpuDeviceRelease(*device);
+            }
+        }
+    }
+}
+
 /// Dawn-specific errors
 #[derive(Debug)]
 pub enum DawnError {
     InstanceCreationFailed,
     NoAdapterFound,
+    AdapterUnavailable,
+    AdapterError(String),
     DeviceCreationFailed,
+    DeviceError(String),
     NotImplemented,
+    Unknown,
 }
 
 impl std::fmt::Display for DawnError {
@@ -457,10 +791,14 @@ impl std::fmt::Display for DawnError {
         match self {
             Self::InstanceCreationFailed => write!(f, "Failed to create Dawn instance"),
             Self::NoAdapterFound => write!(f, "No suitable Dawn adapter found"),
+            Self::AdapterUnavailable => write!(f, "Dawn adapter unavailable"),
+            Self::AdapterError(msg) => write!(f, "Dawn adapter error: {}", msg),
             Self::DeviceCreationFailed => write!(f, "Failed to create Dawn device"),
+            Self::DeviceError(msg) => write!(f, "Dawn device error: {}", msg),
             Self::NotImplemented => {
                 write!(f, "Feature not yet implemented for native Dawn")
             }
+            Self::Unknown => write!(f, "Unknown Dawn error"),
         }
     }
 }

@@ -441,7 +441,7 @@ impl<'a> RenderPassEncoder<'a> {
             use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
             ApiCoverageTracker::global().record(ApiCategory::RenderPass, "set_pipeline");
         }
-        
+
         self.pass.set_pipeline(pipeline);
     }
 
@@ -519,7 +519,7 @@ impl<'a> RenderPassEncoder<'a> {
             use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
             ApiCoverageTracker::global().record(ApiCategory::RenderPass, "draw");
         }
-        
+
         self.pass.draw(vertices, instances);
     }
 

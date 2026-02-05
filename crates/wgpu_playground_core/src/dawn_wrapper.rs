@@ -283,12 +283,7 @@ impl DawnInstance {
                         let result_arc = Arc::from_raw(result_ptr);
 
                         // Extract message string
-                        let msg = if !message.data.is_null() && message.length > 0 {
-                            let slice = std::slice::from_raw_parts(message.data, message.length);
-                            String::from_utf8_lossy(slice).to_string()
-                        } else {
-                            String::new()
-                        };
+                        let msg = extract_message_from_string_view(message);
 
                         if let Ok(mut guard) = result_arc.lock() {
                             *guard = Some(CallbackResult {

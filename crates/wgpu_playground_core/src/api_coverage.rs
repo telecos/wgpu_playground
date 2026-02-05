@@ -212,7 +212,7 @@ impl ApiCoverageTracker {
     }
 
     /// Get the global API coverage tracker (thread-local singleton)
-    /// 
+    ///
     /// This provides a convenient way to access a shared tracker instance
     /// across the application without needing to pass it explicitly.
     #[cfg(not(target_arch = "wasm32"))]
@@ -328,19 +328,24 @@ mod tests {
         let mut data = CoverageData::new();
         assert_eq!(data.call_count(), 0);
 
-        data.calls.insert(ApiCall::new(ApiCategory::Buffer, "create_buffer"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Buffer, "create_buffer"));
         assert_eq!(data.call_count(), 1);
 
-        data.calls.insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
         assert_eq!(data.call_count(), 2);
     }
 
     #[test]
     fn test_coverage_data_by_category() {
         let mut data = CoverageData::new();
-        data.calls.insert(ApiCall::new(ApiCategory::Buffer, "create_buffer"));
-        data.calls.insert(ApiCall::new(ApiCategory::Buffer, "write_buffer"));
-        data.calls.insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Buffer, "create_buffer"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Buffer, "write_buffer"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
 
         assert_eq!(data.category_count(ApiCategory::Buffer), 2);
         assert_eq!(data.category_count(ApiCategory::Texture), 1);
@@ -423,7 +428,9 @@ mod tests {
         tracker1.record(ApiCategory::Buffer, "create_buffer");
 
         let mut data2 = CoverageData::new();
-        data2.calls.insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
+        data2
+            .calls
+            .insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
 
         tracker1.merge(&data2);
         assert_eq!(tracker1.call_count(), 2);
@@ -439,9 +446,12 @@ mod tests {
     #[test]
     fn test_used_categories() {
         let mut data = CoverageData::new();
-        data.calls.insert(ApiCall::new(ApiCategory::Buffer, "create_buffer"));
-        data.calls.insert(ApiCall::new(ApiCategory::Buffer, "write_buffer"));
-        data.calls.insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Buffer, "create_buffer"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Buffer, "write_buffer"));
+        data.calls
+            .insert(ApiCall::new(ApiCategory::Texture, "create_texture"));
 
         let categories = data.used_categories();
         assert_eq!(categories.len(), 2);

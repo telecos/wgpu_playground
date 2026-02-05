@@ -128,9 +128,7 @@ fn test_api_coverage_merge() {
     assert_eq!(tracker1.calls_for_category(ApiCategory::Texture).len(), 1);
     assert_eq!(tracker1.calls_for_category(ApiCategory::Shader).len(), 1);
     assert_eq!(
-        tracker1
-            .calls_for_category(ApiCategory::RenderPass)
-            .len(),
+        tracker1.calls_for_category(ApiCategory::RenderPass).len(),
         1
     );
 }
@@ -185,8 +183,5 @@ fn test_api_coverage_duplicate_calls() {
 
     // Should only be tracked once (HashSet behavior)
     assert_eq!(tracker.call_count(), 1);
-    assert_eq!(
-        tracker.calls_for_category(ApiCategory::Buffer).len(),
-        1
-    );
+    assert_eq!(tracker.calls_for_category(ApiCategory::Buffer).len(), 1);
 }

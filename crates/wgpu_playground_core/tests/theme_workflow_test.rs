@@ -26,7 +26,7 @@ fn test_theme_switching_workflow() {
         compute_pipeline_panel: None,
         bind_group_panel: None,
         bind_group_layout_panel: None,
-            api_coverage: None,
+        api_coverage: None,
     };
 
     // Step 4: Save to file
@@ -88,7 +88,7 @@ fn test_theme_independence_from_other_state() {
         compute_pipeline_panel: None,
         bind_group_panel: None,
         bind_group_layout_panel: None,
-            api_coverage: None,
+        api_coverage: None,
     };
 
     state.save_to_file(&state_file).expect("Failed to save");

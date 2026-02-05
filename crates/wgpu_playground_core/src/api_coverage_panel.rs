@@ -83,7 +83,12 @@ impl ApiCoveragePanel {
         self.render_api_call_list(ui, &snapshot);
     }
 
-    fn render_header(&mut self, ui: &mut Ui, snapshot: &CoverageData, tracker: &ApiCoverageTracker) {
+    fn render_header(
+        &mut self,
+        ui: &mut Ui,
+        snapshot: &CoverageData,
+        tracker: &ApiCoverageTracker,
+    ) {
         ui.vertical_centered(|ui| {
             ui.heading("API Coverage Statistics");
             ui.add_space(4.0);
@@ -122,11 +127,9 @@ impl ApiCoveragePanel {
 
             // Tracking status
             let status_text = if tracker.is_enabled() {
-                RichText::new("● Tracking Active")
-                    .color(Color32::from_rgb(100, 255, 100))
+                RichText::new("● Tracking Active").color(Color32::from_rgb(100, 255, 100))
             } else {
-                RichText::new("○ Tracking Paused")
-                    .color(Color32::from_rgb(200, 200, 200))
+                RichText::new("○ Tracking Paused").color(Color32::from_rgb(200, 200, 200))
             };
             ui.label(status_text);
         });
@@ -186,38 +189,33 @@ impl ApiCoveragePanel {
         CollapsingHeader::new("📂 Categories")
             .default_open(true)
             .show(ui, |ui| {
-                ScrollArea::vertical()
-                    .max_height(200.0)
-                    .show(ui, |ui| {
-                        for category in ApiCategory::all() {
-                            let count = snapshot.category_count(category);
-                            if count > 0 || self.selected_category == Some(category) {
-                                ui.horizontal(|ui| {
-                                    let is_selected = self.selected_category == Some(category);
-                                    let response = ui.selectable_label(
-                                        is_selected,
-                                        format!("{}: {}", category.name(), count),
-                                    );
+                ScrollArea::vertical().max_height(200.0).show(ui, |ui| {
+                    for category in ApiCategory::all() {
+                        let count = snapshot.category_count(category);
+                        if count > 0 || self.selected_category == Some(category) {
+                            ui.horizontal(|ui| {
+                                let is_selected = self.selected_category == Some(category);
+                                let response = ui.selectable_label(
+                                    is_selected,
+                                    format!("{}: {}", category.name(), count),
+                                );
 
-                                    if response.clicked() {
-                                        self.selected_category = if is_selected {
-                                            None
-                                        } else {
-                                            Some(category)
-                                        };
-                                    }
+                                if response.clicked() {
+                                    self.selected_category =
+                                        if is_selected { None } else { Some(category) };
+                                }
 
-                                    // Progress bar
-                                    let bar_width = (count as f32 / 10.0).min(1.0);
-                                    ui.add(
-                                        egui::ProgressBar::new(bar_width)
-                                            .desired_width(100.0)
-                                            .show_percentage(),
-                                    );
-                                });
-                            }
+                                // Progress bar
+                                let bar_width = (count as f32 / 10.0).min(1.0);
+                                ui.add(
+                                    egui::ProgressBar::new(bar_width)
+                                        .desired_width(100.0)
+                                        .show_percentage(),
+                                );
+                            });
                         }
-                    });
+                    }
+                });
             });
     }
 

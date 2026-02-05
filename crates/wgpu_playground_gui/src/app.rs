@@ -200,6 +200,27 @@ impl PlaygroundApp {
             ui.horizontal(|ui| {
                 ui.heading("🎮 WebGPU Playground");
 
+                // Add backend indicator
+                ui.add_space(10.0);
+                ui.separator();
+                ui.add_space(10.0);
+
+                let current_backend =
+                    wgpu_playground_core::implementation::WebGPUImplementation::current();
+                let (backend_label, backend_color) = match current_backend {
+                    wgpu_playground_core::implementation::WebGPUImplementation::Wgpu => {
+                        ("🦀 wgpu-rs", egui::Color32::from_rgb(100, 150, 255))
+                    }
+                    #[cfg(feature = "dawn")]
+                    wgpu_playground_core::implementation::WebGPUImplementation::Dawn => {
+                        ("🌅 Dawn Native", egui::Color32::from_rgb(255, 180, 100))
+                    }
+                };
+
+                ui.label("Backend:");
+                ui.colored_label(backend_color, backend_label)
+                    .on_hover_text(current_backend.description());
+
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     // File operations
                     ui.label("File:");

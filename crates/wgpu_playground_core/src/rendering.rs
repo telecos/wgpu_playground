@@ -1,4 +1,5 @@
 use crate::examples::{get_all_examples, Example, ExampleCategory};
+use crate::example_metadata::get_example_api_tags;
 use crate::shader_editor::ShaderEditor;
 use wgpu::{Device, Queue};
 
@@ -952,6 +953,26 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     // Description
                     ui.label(egui::RichText::new("Description:").strong());
                     ui.label(example_description);
+                    ui.add_space(5.0);
+
+                    // API Coverage Badges
+                    let coverage_tags = get_example_api_tags(example_id);
+                    if !coverage_tags.is_empty() {
+                        ui.label(egui::RichText::new("WebGPU APIs Covered:").strong());
+                        ui.horizontal_wrapped(|ui| {
+                            for tag in coverage_tags {
+                                let badge_color = egui::Color32::from_rgb(70, 130, 180);
+                                ui.label(
+                                    egui::RichText::new(tag.name())
+                                        .color(egui::Color32::WHITE)
+                                        .background_color(badge_color)
+                                        .small(),
+                                );
+                            }
+                        });
+                        ui.add_space(5.0);
+                    }
+                    
                     ui.add_space(10.0);
 
                     // Run button (only for rendering examples)

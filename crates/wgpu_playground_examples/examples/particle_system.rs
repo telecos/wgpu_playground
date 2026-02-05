@@ -1,3 +1,4 @@
+use std::f32::consts::PI;
 /// GPU Particle System Example
 ///
 /// This example demonstrates a complete GPU particle system using:
@@ -15,7 +16,6 @@
 ///
 /// Run with: cargo run --package wgpu_playground_examples --example particle_system
 use wgpu::util::DeviceExt;
-use std::f32::consts::PI;
 
 /// Number of particles in the system
 const NUM_PARTICLES: u32 = 10000;
@@ -31,12 +31,12 @@ const TIME_STEP: f32 = 0.016; // ~60 FPS
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 struct Particle {
-    position: [f32; 2],  // x, y position in clip space [-1, 1]
-    velocity: [f32; 2],  // x, y velocity
-    color: [f32; 4],     // r, g, b, a
-    lifetime: f32,       // remaining lifetime in seconds
-    size: f32,           // particle size multiplier
-    _padding: [f32; 2],  // padding to 48 bytes for alignment
+    position: [f32; 2], // x, y position in clip space [-1, 1]
+    velocity: [f32; 2], // x, y velocity
+    color: [f32; 4],    // r, g, b, a
+    lifetime: f32,      // remaining lifetime in seconds
+    size: f32,          // particle size multiplier
+    _padding: [f32; 2], // padding to 48 bytes for alignment
 }
 
 // Safety: Particle is repr(C) with only f32 fields
@@ -138,35 +138,30 @@ fn spawn_particles(
     emitter_angle: f32,
 ) -> usize {
     let mut spawned = 0;
-    
+
     for particle in particles.iter_mut() {
         if spawned >= count {
             break;
         }
-        
+
         if !particle.is_alive() {
             // Generate random angle within cone
             let angle_variance = PI / 6.0; // 30 degree cone
             let angle = emitter_angle + (rand::random::<f32>() - 0.5) * angle_variance;
-            
+
             // Random speed
             let speed = 0.3 + rand::random::<f32>() * 0.3;
-            
+
             // Random color variation (warm colors: red to yellow)
             let color_variation = rand::random::<f32>();
-            let color = [
-                1.0,
-                0.5 + color_variation * 0.5,
-                0.2,
-                1.0,
-            ];
-            
+            let color = [1.0, 0.5 + color_variation * 0.5, 0.2, 1.0];
+
             // Random lifetime
             let lifetime = 2.0 + rand::random::<f32>() * 2.0;
-            
+
             // Random size
             let size = 0.003 + rand::random::<f32>() * 0.003;
-            
+
             *particle = Particle::new(
                 emitter_pos,
                 [angle.cos() * speed, angle.sin() * speed],
@@ -174,11 +169,11 @@ fn spawn_particles(
                 lifetime,
                 size,
             );
-            
+
             spawned += 1;
         }
     }
-    
+
     spawned
 }
 
@@ -202,28 +197,31 @@ fn create_render_texture(device: &wgpu::Device, width: u32, height: u32) -> wgpu
 
 fn main() {
     env_logger::init();
-    
+
     println!("=== GPU Particle System Example ===\n");
     println!("This example demonstrates:");
     println!("  • Compute shader for particle physics simulation");
     println!("  • Storage buffers shared between compute and render");
     println!("  • Instanced rendering for efficient particle display");
     println!("  • Dynamic particle spawning with queue.write_buffer\n");
-    
+
     // Create device and queue
     let device_queue = pollster::block_on(create_device());
     if device_queue.is_none() {
         eprintln!("Failed to create GPU device");
         return;
     }
-    
+
     let (device, queue) = device_queue.unwrap();
     println!("✓ GPU device created\n");
-    
+
     // Initialize particle data
     let mut particles = initialize_particles();
-    println!("Initialized {} particles (all dead initially)", NUM_PARTICLES);
-    
+    println!(
+        "Initialized {} particles (all dead initially)",
+        NUM_PARTICLES
+    );
+
     // Create shared particle buffer (STORAGE for compute + VERTEX for rendering)
     let particle_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Particle Buffer"),
@@ -232,15 +230,16 @@ fn main() {
             | wgpu::BufferUsages::VERTEX
             | wgpu::BufferUsages::COPY_DST,
     });
-    
+
     println!("✓ Created particle buffer");
-    println!("  - Size: {} bytes ({} particles × {} bytes)",
+    println!(
+        "  - Size: {} bytes ({} particles × {} bytes)",
         particles.len() * std::mem::size_of::<Particle>(),
         particles.len(),
         std::mem::size_of::<Particle>()
     );
     println!("  - Usage: STORAGE (compute access) + VERTEX (render access) + COPY_DST (updates)\n");
-    
+
     // Create simulation parameters buffer
     let sim_params = SimulationParams {
         delta_time: TIME_STEP,
@@ -248,29 +247,29 @@ fn main() {
         damping: 0.98,
         max_lifetime: 4.0, // Maximum expected lifetime (matches spawn range)
     };
-    
+
     let params_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Simulation Parameters"),
         contents: bytemuck::cast_slice(&[sim_params]),
         usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
     });
-    
+
     println!("✓ Created simulation parameters buffer");
     println!("  - Delta time: {} seconds", sim_params.delta_time);
     println!("  - Gravity: {}", sim_params.gravity);
     println!("  - Damping: {}", sim_params.damping);
     println!("  - Max lifetime: {} seconds\n", sim_params.max_lifetime);
-    
+
     // === COMPUTE PIPELINE SETUP ===
     println!("Setting up compute pipeline...");
-    
+
     let compute_shader_source = include_str!("../shaders/particle_system_compute.wgsl");
-    
+
     let compute_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("Particle Compute Shader"),
         source: wgpu::ShaderSource::Wgsl(compute_shader_source.into()),
     });
-    
+
     // Compute bind group layout
     let compute_bind_group_layout =
         device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -300,13 +299,13 @@ fn main() {
                 },
             ],
         });
-    
+
     let compute_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Compute Pipeline Layout"),
         bind_group_layouts: &[&compute_bind_group_layout],
         push_constant_ranges: &[],
     });
-    
+
     let compute_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
         label: Some("Particle Compute Pipeline"),
         layout: Some(&compute_pipeline_layout),
@@ -315,7 +314,7 @@ fn main() {
         compilation_options: Default::default(),
         cache: None,
     });
-    
+
     let compute_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("Compute Bind Group"),
         layout: &compute_bind_group_layout,
@@ -330,42 +329,42 @@ fn main() {
             },
         ],
     });
-    
+
     println!("✓ Compute pipeline created\n");
-    
+
     // === RENDER PIPELINE SETUP ===
     println!("Setting up render pipeline...");
-    
+
     let render_shader_source = include_str!("../shaders/particle_system_render.wgsl");
-    
+
     let render_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("Particle Render Shader"),
         source: wgpu::ShaderSource::Wgsl(render_shader_source.into()),
     });
-    
+
     // Vertex buffer layout for quad vertices (instanced rendering)
     // We'll use a simple quad and instance it for each particle
     let quad_vertices: &[f32] = &[
-        -1.0, -1.0,  // bottom-left
-         1.0, -1.0,  // bottom-right
-         1.0,  1.0,  // top-right
-        -1.0,  1.0,  // top-left
+        -1.0, -1.0, // bottom-left
+        1.0, -1.0, // bottom-right
+        1.0, 1.0, // top-right
+        -1.0, 1.0, // top-left
     ];
-    
+
     let quad_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Quad Vertex Buffer"),
         contents: bytemuck::cast_slice(quad_vertices),
         usage: wgpu::BufferUsages::VERTEX,
     });
-    
+
     let quad_indices: &[u16] = &[0, 1, 2, 0, 2, 3];
-    
+
     let quad_index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Quad Index Buffer"),
         contents: bytemuck::cast_slice(quad_indices),
         usage: wgpu::BufferUsages::INDEX,
     });
-    
+
     // Vertex buffer layout for quad (per-vertex)
     let quad_layout = wgpu::VertexBufferLayout {
         array_stride: 2 * std::mem::size_of::<f32>() as u64,
@@ -376,7 +375,7 @@ fn main() {
             shader_location: 0,
         }],
     };
-    
+
     // Particle buffer layout (per-instance)
     let particle_layout = wgpu::VertexBufferLayout {
         array_stride: std::mem::size_of::<Particle>() as u64,
@@ -414,13 +413,13 @@ fn main() {
             },
         ],
     };
-    
+
     let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Render Pipeline Layout"),
         bind_group_layouts: &[],
         push_constant_ranges: &[],
     });
-    
+
     let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("Particle Render Pipeline"),
         layout: Some(&render_pipeline_layout),
@@ -458,22 +457,22 @@ fn main() {
         multiview: None,
         cache: None,
     });
-    
+
     println!("✓ Render pipeline created");
     println!("  - Using instanced rendering (one quad per particle)");
     println!("  - Alpha blending enabled for smooth particles\n");
-    
+
     // Create render texture
     let render_texture = create_render_texture(&device, 800, 600);
     let texture_view = render_texture.create_view(&wgpu::TextureViewDescriptor::default());
-    
+
     // === SIMULATION LOOP ===
     println!("Running particle simulation...\n");
-    
+
     let num_frames = 10;
     for frame in 0..num_frames {
         println!("Frame {}:", frame);
-        
+
         // Spawn new particles every frame
         if frame % 2 == 0 {
             // Spawn from bottom center, shooting upward
@@ -483,35 +482,35 @@ fn main() {
                 [0.0, -0.8],
                 PI / 2.0, // straight up
             );
-            
+
             if spawned > 0 {
                 // Update buffer with new particles
                 queue.write_buffer(&particle_buffer, 0, bytemuck::cast_slice(&particles));
                 println!("  ✓ Spawned {} new particles", spawned);
             }
         }
-        
+
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some(&format!("Frame {} Encoder", frame)),
         });
-        
+
         // 1. Run compute shader to update particles
         {
             let mut compute_pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
                 label: Some(&format!("Frame {} Compute Pass", frame)),
                 timestamp_writes: None,
             });
-            
+
             compute_pass.set_pipeline(&compute_pipeline);
             compute_pass.set_bind_group(0, &compute_bind_group, &[]);
-            
+
             // Calculate number of workgroups needed to process all particles (rounded up)
             // Each workgroup processes WORKGROUP_SIZE particles
             let workgroup_count = NUM_PARTICLES.div_ceil(WORKGROUP_SIZE);
             compute_pass.dispatch_workgroups(workgroup_count, 1, 1);
         }
         println!("  ✓ Compute pass: Updated particle physics");
-        
+
         // 2. Render particles
         {
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -534,17 +533,20 @@ fn main() {
                 timestamp_writes: None,
                 occlusion_query_set: None,
             });
-            
+
             render_pass.set_pipeline(&render_pipeline);
             render_pass.set_vertex_buffer(0, quad_buffer.slice(..));
             render_pass.set_vertex_buffer(1, particle_buffer.slice(..));
             render_pass.set_index_buffer(quad_index_buffer.slice(..), wgpu::IndexFormat::Uint16);
             render_pass.draw_indexed(0..6, 0, 0..NUM_PARTICLES);
         }
-        
+
         let alive_count = particles.iter().filter(|p| p.is_alive()).count();
-        println!("  ✓ Render pass: Drew {} active particles (instanced)", alive_count);
-        
+        println!(
+            "  ✓ Render pass: Drew {} active particles (instanced)",
+            alive_count
+        );
+
         // Submit commands
         queue.submit(std::iter::once(encoder.finish()));
         let _ = device.poll(wgpu::PollType::Wait {
@@ -553,7 +555,7 @@ fn main() {
         });
         println!("  ✓ Frame complete\n");
     }
-    
+
     println!("=== Particle System Example Complete ===\n");
     println!("Successfully demonstrated:");
     println!("  ✓ Compute shader particle physics simulation");
@@ -561,7 +563,10 @@ fn main() {
     println!("    - Gravity and damping forces");
     println!("    - Lifetime management");
     println!("  ✓ Storage buffer sharing (STORAGE + VERTEX usage)");
-    println!("  ✓ Instanced rendering ({} instances per frame)", NUM_PARTICLES);
+    println!(
+        "  ✓ Instanced rendering ({} instances per frame)",
+        NUM_PARTICLES
+    );
     println!("  ✓ Dynamic particle spawning with queue.write_buffer");
     println!("  ✓ Compute-to-render pipeline integration");
     println!("\nKey WebGPU Concepts:");
@@ -574,7 +579,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_particle_size() {
         // Verify particle structure size (should be multiple of 16 for alignment)
@@ -582,79 +587,73 @@ mod tests {
         assert_eq!(size, 48);
         assert_eq!(size % 16, 0);
     }
-    
+
     #[test]
     fn test_particle_creation() {
-        let p = Particle::new(
-            [1.0, 2.0],
-            [0.5, 0.5],
-            [1.0, 0.0, 0.0, 1.0],
-            3.0,
-            0.01,
-        );
+        let p = Particle::new([1.0, 2.0], [0.5, 0.5], [1.0, 0.0, 0.0, 1.0], 3.0, 0.01);
         assert_eq!(p.position, [1.0, 2.0]);
         assert_eq!(p.velocity, [0.5, 0.5]);
         assert_eq!(p.color, [1.0, 0.0, 0.0, 1.0]);
         assert_eq!(p.lifetime, 3.0);
         assert_eq!(p.size, 0.01);
     }
-    
+
     #[test]
     fn test_dead_particle() {
         let p = Particle::dead();
         assert!(!p.is_alive());
         assert_eq!(p.lifetime, 0.0);
     }
-    
+
     #[test]
     fn test_particle_lifetime() {
         let alive = Particle::new([0.0, 0.0], [0.0, 0.0], [1.0, 1.0, 1.0, 1.0], 1.0, 0.01);
         let dead = Particle::new([0.0, 0.0], [0.0, 0.0], [1.0, 1.0, 1.0, 1.0], 0.0, 0.01);
-        
+
         assert!(alive.is_alive());
         assert!(!dead.is_alive());
     }
-    
+
     #[test]
     fn test_particles_are_pod() {
         let particles = vec![
             Particle::new([0.0, 0.5], [0.1, 0.1], [1.0, 0.0, 0.0, 1.0], 2.0, 0.01),
             Particle::new([-0.5, -0.5], [0.1, -0.1], [0.0, 1.0, 0.0, 1.0], 3.0, 0.015),
         ];
-        
+
         let bytes = bytemuck::cast_slice::<Particle, u8>(&particles);
         assert_eq!(bytes.len(), 2 * std::mem::size_of::<Particle>());
     }
-    
+
     #[test]
     fn test_initialize_particles() {
         let particles = initialize_particles();
         assert_eq!(particles.len(), NUM_PARTICLES as usize);
-        
+
         // All should be dead initially
         for particle in particles.iter() {
             assert!(!particle.is_alive());
         }
     }
-    
+
     #[test]
     fn test_spawn_particles() {
         let mut particles = initialize_particles();
-        
+
         // Spawn 10 particles
         let spawned = spawn_particles(&mut particles, 10, [0.0, 0.0], 0.0);
         assert_eq!(spawned, 10);
-        
+
         // Count alive particles
         let alive = particles.iter().filter(|p| p.is_alive()).count();
         assert_eq!(alive, 10);
     }
-    
+
     #[test]
     fn test_simulation_params_size() {
         assert_eq!(std::mem::size_of::<SimulationParams>(), 16);
     }
-    
+
     #[tokio::test]
     async fn test_device_creation() {
         let result = create_device().await;

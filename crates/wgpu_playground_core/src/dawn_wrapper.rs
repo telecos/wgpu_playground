@@ -157,6 +157,23 @@ mod ffi {
     }
 }
 
+// Constants for async callback polling
+#[cfg(all(feature = "dawn", dawn_enabled))]
+const CALLBACK_MAX_WAIT_MS: u64 = 5000;
+#[cfg(all(feature = "dawn", dawn_enabled))]
+const CALLBACK_POLL_INTERVAL_MS: u64 = 10;
+
+// Helper function to extract message from WGPUStringView
+#[cfg(all(feature = "dawn", dawn_enabled))]
+unsafe fn extract_message_from_string_view(message: ffi::WGPUStringView) -> String {
+    if !message.data.is_null() && message.length > 0 {
+        let slice = std::slice::from_raw_parts(message.data, message.length);
+        String::from_utf8_lossy(slice).to_string()
+    } else {
+        String::new()
+    }
+}
+
 /// Dawn instance wrapper
 ///
 /// Manages the lifecycle of a Dawn WebGPU instance.
@@ -313,9 +330,8 @@ impl DawnInstance {
 
                 // Poll for completion (Dawn callbacks are usually immediate or very fast)
                 // In a real async implementation, this would integrate with an event loop
-                const MAX_WAIT_MS: u64 = 5000;
-                const POLL_INTERVAL_MS: u64 = 10;
                 let start = std::time::Instant::now();
+                let max_wait = std::time::Duration::from_millis(CALLBACK_MAX_WAIT_MS);
 
                 loop {
                     if let Ok(guard) = result.lock() {
@@ -324,12 +340,12 @@ impl DawnInstance {
                         }
                     }
 
-                    if start.elapsed().as_millis() > MAX_WAIT_MS as u128 {
+                    if start.elapsed() > max_wait {
                         return Err(DawnError::NoAdapterFound);
                     }
 
                     // Small sleep to avoid busy waiting
-                    std::thread::sleep(std::time::Duration::from_millis(POLL_INTERVAL_MS));
+                    std::thread::sleep(std::time::Duration::from_millis(CALLBACK_POLL_INTERVAL_MS));
                 }
 
                 // Extract result
@@ -519,12 +535,7 @@ impl DawnAdapter {
                         let result_arc = Arc::from_raw(result_ptr);
 
                         // Extract message string
-                        let msg = if !message.data.is_null() && message.length > 0 {
-                            let slice = std::slice::from_raw_parts(message.data, message.length);
-                            String::from_utf8_lossy(slice).to_string()
-                        } else {
-                            String::new()
-                        };
+                        let msg = extract_message_from_string_view(message);
 
                         if let Ok(mut guard) = result_arc.lock() {
                             *guard = Some(CallbackResult {
@@ -567,9 +578,8 @@ impl DawnAdapter {
                 }
 
                 // Poll for completion
-                const MAX_WAIT_MS: u64 = 5000;
-                const POLL_INTERVAL_MS: u64 = 10;
                 let start = std::time::Instant::now();
+                let max_wait = std::time::Duration::from_millis(CALLBACK_MAX_WAIT_MS);
 
                 loop {
                     if let Ok(guard) = result.lock() {
@@ -578,12 +588,12 @@ impl DawnAdapter {
                         }
                     }
 
-                    if start.elapsed().as_millis() > MAX_WAIT_MS as u128 {
+                    if start.elapsed() > max_wait {
                         return Err(DawnError::DeviceCreationFailed);
                     }
 
                     // Small sleep to avoid busy waiting
-                    std::thread::sleep(std::time::Duration::from_millis(POLL_INTERVAL_MS));
+                    std::thread::sleep(std::time::Duration::from_millis(CALLBACK_POLL_INTERVAL_MS));
                 }
 
                 // Extract result

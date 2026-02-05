@@ -1046,7 +1046,89 @@ Key WebGPU Concepts:
   • Dynamic updates: CPU-to-GPU data transfer per frame
 ```
 
+#### Advanced Compute Blur Example
+
+An advanced compute shader example demonstrating Gaussian blur with workgroup shared memory:
+
+```bash
+cargo run --package wgpu_playground_examples --example advanced_compute_blur
+```
+
+This example demonstrates:
+- `var<workgroup>` shared memory for efficient tile-based processing
+- `workgroupBarrier()` synchronization between shader invocations
+- Multiple dispatch calls (separable blur: horizontal + vertical passes)
+- Storage textures for read/write operations
+- Gaussian blur using a 11x11 kernel (radius=5)
+
+**Example output:**
+```
+=== Advanced Compute Shader Example ===
+Gaussian Blur with Shared Memory and Multiple Dispatches
+
+Using adapter: NVIDIA GeForce RTX 3080
+Backend: Vulkan
+
+Generating 512x512 test image...
+  ✓ Created checkerboard pattern with gradient
+
+Creating textures...
+  ✓ Input texture: 512x512 (TEXTURE_BINDING)
+  ✓ Uploaded 1048576 bytes of image data
+  ✓ Intermediate texture: 512x512 (STORAGE_BINDING + TEXTURE_BINDING)
+  ✓ Output texture: 512x512 (STORAGE_BINDING)
+
+Creating horizontal blur compute pipeline...
+  ✓ Horizontal blur pipeline created
+  ✓ Uses workgroup shared memory for caching
+  ✓ Applies Gaussian blur in horizontal direction
+
+Creating vertical blur compute pipeline...
+  ✓ Vertical blur pipeline created
+  ✓ Uses workgroup shared memory for caching
+  ✓ Applies Gaussian blur in vertical direction
+
+  ✓ Created bind groups for horizontal and vertical passes
+
+Executing blur passes...
+
+Pass 1: Horizontal Blur
+  - Input: Original image
+  - Output: Intermediate texture
+  - Workgroups: 32x32 (1024 total)
+  ✓ Horizontal blur dispatched
+
+Pass 2: Vertical Blur
+  - Input: Intermediate texture
+  - Output: Final blurred image
+  - Workgroups: 32x32 (1024 total)
+  ✓ Vertical blur dispatched
+
+  ✓ Both passes completed successfully
+
+=== Example Complete ===
+
+This example demonstrated:
+  ✓ Workgroup shared memory (var<workgroup>) for efficient tile caching
+  ✓ workgroupBarrier() for synchronization between threads
+  ✓ Multiple dispatch calls (separable blur: horizontal + vertical)
+  ✓ Storage textures for read/write operations
+  ✓ Gaussian blur using 11x11 kernel
+
+Key WebGPU APIs Exercised:
+  • var<workgroup>: Shared memory within a workgroup
+  • workgroupBarrier(): Ensures all threads complete before proceeding
+  • textureLoad/textureStore: Direct texture access in compute shaders
+  • Multiple dispatch: Sequential passes for efficient separable filters
+
+Performance Benefits:
+  • Shared memory reduces global memory bandwidth
+  • Separable blur: O(n) instead of O(n²) for 2D convolution
+  • Workgroup tiling enables efficient texture caching
+```
+
 Other available examples:
+- `advanced_compute_blur` - Advanced compute shader with workgroup shared memory, barriers, and multi-dispatch
 - `particle_system` - GPU particle system with compute shaders and instanced rendering
 - `adapter_demo` - Enumerate and select GPU adapters
 - `texture_mapping` - Texture creation, sampling, and binding

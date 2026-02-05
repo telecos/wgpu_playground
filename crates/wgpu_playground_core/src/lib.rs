@@ -52,3 +52,4 @@ pub mod texture;
 pub mod texture_inspector;
 pub mod texture_panel;
 pub mod visual_regression;
+pub mod report_html;

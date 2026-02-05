@@ -165,6 +165,10 @@ fn test_buffer_with_all_usage_flags() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_map_read_buffer() {
     pollster::block_on(async {
         let Some((device, queue)) = create_test_device().await else {
@@ -204,6 +208,10 @@ fn test_map_read_buffer() {
 }
 
 #[test]
+#[cfg_attr(
+    all(target_os = "linux", target_env = "gnu"),
+    ignore = "Hangs in CI with lavapipe software rendering"
+)]
 fn test_map_write_buffer() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device().await else {

@@ -258,9 +258,9 @@ fn example_draw_indexed_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
 
     // Create vertices for a quad
     let vertices = vec![
-        Vertex::new([-0.5, 0.5], [1.0, 0.0, 0.0]),  // Top-left - Red
-        Vertex::new([0.5, 0.5], [0.0, 1.0, 0.0]),   // Top-right - Green
-        Vertex::new([0.5, -0.5], [0.0, 0.0, 1.0]),  // Bottom-right - Blue
+        Vertex::new([-0.5, 0.5], [1.0, 0.0, 0.0]), // Top-left - Red
+        Vertex::new([0.5, 0.5], [0.0, 1.0, 0.0]),  // Top-right - Green
+        Vertex::new([0.5, -0.5], [0.0, 0.0, 1.0]), // Bottom-right - Blue
         Vertex::new([-0.5, -0.5], [1.0, 1.0, 0.0]), // Bottom-left - Yellow
     ];
 
@@ -383,7 +383,12 @@ fn example_draw_indexed_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
         let mut render_pass = RenderPassEncoder::begin(&mut encoder, &descriptor).unwrap();
         render_pass.set_pipeline(&pipeline);
         render_pass.set_vertex_buffer(0, &vertex_buffer, 0, None);
-        render_pass.set_index_buffer(&index_buffer, wgpu_playground_core::render_pass_encoder::IndexFormat::Uint16, 0, None);
+        render_pass.set_index_buffer(
+            &index_buffer,
+            wgpu_playground_core::render_pass_encoder::IndexFormat::Uint16,
+            0,
+            None,
+        );
 
         // Use drawIndexedIndirect - parameters come from the indirect buffer
         render_pass.draw_indexed_indirect(&indirect_buffer, 0);
@@ -414,9 +419,7 @@ fn example_compute_generated_params(device: &wgpu::Device, queue: &wgpu::Queue) 
             .with_shader(compute_shader)
             .with_entry_point("generate_draw_params");
 
-    let compute_pipeline = compute_pipeline_descriptor
-        .create_pipeline(device)
-        .unwrap();
+    let compute_pipeline = compute_pipeline_descriptor.create_pipeline(device).unwrap();
 
     // Create storage buffers for draw parameters
     // These will be written by the compute shader
@@ -432,7 +435,9 @@ fn example_compute_generated_params(device: &wgpu::Device, queue: &wgpu::Queue) 
         20, // 5 u32 values for DrawIndexedIndirect
         BufferUsages::STORAGE | BufferUsages::INDIRECT,
     );
-    let indexed_draw_buffer = indexed_draw_buffer_descriptor.create_buffer(device).unwrap();
+    let indexed_draw_buffer = indexed_draw_buffer_descriptor
+        .create_buffer(device)
+        .unwrap();
 
     // Create bind group for compute shader
     let bind_group_layout = compute_pipeline.get_bind_group_layout(0);
@@ -512,6 +517,9 @@ fn example_buffer_copy(device: &wgpu::Device, queue: &wgpu::Queue) {
     });
 
     println!("  ✓ Copied draw parameters from source buffer to indirect buffer");
-    println!("  ✓ Parameters: {} vertices, {} instances", source_params[0], source_params[1]);
+    println!(
+        "  ✓ Parameters: {} vertices, {} instances",
+        source_params[0], source_params[1]
+    );
     println!("  ✓ Destination buffer ready for indirect drawing\n");
 }

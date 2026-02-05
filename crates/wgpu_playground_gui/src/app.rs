@@ -607,6 +607,7 @@ impl PlaygroundApp {
             compute_pipeline_panel: None, // TODO: Add when ComputePipelinePanel has export_state
             bind_group_panel: None,      // TODO: Add when BindGroupPanel has export_state
             bind_group_layout_panel: None, // TODO: Add when BindGroupLayoutPanel has export_state
+            api_coverage: None,          // API coverage is tracked globally, not exported per-state
         }
     }
 

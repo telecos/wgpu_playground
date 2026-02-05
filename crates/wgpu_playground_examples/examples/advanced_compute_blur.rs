@@ -60,16 +60,16 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
 /// Generate a test pattern image (checkerboard with gradient)
 fn generate_test_image() -> Vec<u8> {
     let mut data = Vec::with_capacity((IMAGE_WIDTH * IMAGE_HEIGHT * 4) as usize);
-    
+
     for y in 0..IMAGE_HEIGHT {
         for x in 0..IMAGE_WIDTH {
             // Create a checkerboard pattern
             let checker = ((x / 32) + (y / 32)) % 2 == 0;
-            
+
             // Add a gradient
             let gradient_x = (x as f32 / IMAGE_WIDTH as f32 * 255.0) as u8;
             let gradient_y = (y as f32 / IMAGE_HEIGHT as f32 * 255.0) as u8;
-            
+
             if checker {
                 data.extend_from_slice(&[gradient_x, gradient_y, 200, 255]);
             } else {
@@ -77,7 +77,7 @@ fn generate_test_image() -> Vec<u8> {
             }
         }
     }
-    
+
     data
 }
 
@@ -157,11 +157,19 @@ fn main() {
         view_formats: &[],
     });
 
-    println!("  ✓ Input texture: {}x{} (TEXTURE_BINDING)", IMAGE_WIDTH, IMAGE_HEIGHT);
+    println!(
+        "  ✓ Input texture: {}x{} (TEXTURE_BINDING)",
+        IMAGE_WIDTH, IMAGE_HEIGHT
+    );
     println!("  ✓ Uploaded {} bytes of image data", image_data.len());
-    println!("  ✓ Intermediate texture: {}x{} (STORAGE_BINDING + TEXTURE_BINDING)", IMAGE_WIDTH, IMAGE_HEIGHT);
-    println!("  ✓ Output texture: {}x{} (STORAGE_BINDING)\n", IMAGE_WIDTH, IMAGE_HEIGHT);
-
+    println!(
+        "  ✓ Intermediate texture: {}x{} (STORAGE_BINDING + TEXTURE_BINDING)",
+        IMAGE_WIDTH, IMAGE_HEIGHT
+    );
+    println!(
+        "  ✓ Output texture: {}x{} (STORAGE_BINDING)\n",
+        IMAGE_WIDTH, IMAGE_HEIGHT
+    );
 
     // === CREATE HORIZONTAL BLUR PIPELINE ===
     println!("Creating horizontal blur compute pipeline...");
@@ -298,7 +306,8 @@ fn main() {
 
     // === CREATE BIND GROUPS ===
     let input_view = input_texture.create_view(&wgpu::TextureViewDescriptor::default());
-    let intermediate_view = intermediate_texture.create_view(&wgpu::TextureViewDescriptor::default());
+    let intermediate_view =
+        intermediate_texture.create_view(&wgpu::TextureViewDescriptor::default());
     let output_view = output_texture.create_view(&wgpu::TextureViewDescriptor::default());
 
     let horizontal_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -355,8 +364,13 @@ fn main() {
     println!("Pass 1: Horizontal Blur");
     println!("  - Input: Original image");
     println!("  - Output: Intermediate texture");
-    println!("  - Workgroups: {}x{} ({} total)", workgroups_x, workgroups_y, workgroups_x * workgroups_y);
-    
+    println!(
+        "  - Workgroups: {}x{} ({} total)",
+        workgroups_x,
+        workgroups_y,
+        workgroups_x * workgroups_y
+    );
+
     {
         let mut compute_pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("Horizontal Blur Pass"),
@@ -372,8 +386,13 @@ fn main() {
     println!("Pass 2: Vertical Blur");
     println!("  - Input: Intermediate texture");
     println!("  - Output: Final blurred image");
-    println!("  - Workgroups: {}x{} ({} total)", workgroups_x, workgroups_y, workgroups_x * workgroups_y);
-    
+    println!(
+        "  - Workgroups: {}x{} ({} total)",
+        workgroups_x,
+        workgroups_y,
+        workgroups_x * workgroups_y
+    );
+
     {
         let mut compute_pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("Vertical Blur Pass"),
@@ -389,7 +408,10 @@ fn main() {
     // Submit and wait for completion
     queue.submit(std::iter::once(encoder.finish()));
     // Poll to wait for GPU work to complete. We ignore the result since we're just waiting.
-    let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
 
     println!("  ✓ Both passes completed successfully\n");
 
@@ -400,7 +422,11 @@ fn main() {
     println!("  ✓ workgroupBarrier() for synchronization between threads");
     println!("  ✓ Multiple dispatch calls (separable blur: horizontal + vertical)");
     println!("  ✓ Storage textures for read/write operations");
-    println!("  ✓ Gaussian blur using {}x{} kernel", BLUR_RADIUS * 2 + 1, BLUR_RADIUS * 2 + 1);
+    println!(
+        "  ✓ Gaussian blur using {}x{} kernel",
+        BLUR_RADIUS * 2 + 1,
+        BLUR_RADIUS * 2 + 1
+    );
     println!("\nKey WebGPU APIs Exercised:");
     println!("  • var<workgroup>: Shared memory within a workgroup");
     println!("  • workgroupBarrier(): Ensures all threads complete before proceeding");
@@ -415,10 +441,11 @@ fn main() {
 /// Create blur shader (horizontal or vertical)
 fn create_blur_shader(device: &wgpu::Device, horizontal: bool) -> wgpu::ShaderModule {
     let direction = if horizontal { "horizontal" } else { "vertical" };
-    
+
     // Gaussian weights for radius=5 (pre-calculated)
     // These approximate a Gaussian distribution
-    let shader_source = format!(r#"
+    let shader_source = format!(
+        r#"
 // {direction} Gaussian Blur with Workgroup Shared Memory
 // Demonstrates: var<workgroup>, workgroupBarrier(), storage textures
 
@@ -523,7 +550,8 @@ fn main(
         direction = direction,
         WORKGROUP_SIZE = WORKGROUP_SIZE,
         BLUR_RADIUS = BLUR_RADIUS,
-        shared_array_size = (WORKGROUP_SIZE + 2 * BLUR_RADIUS as u32) * (WORKGROUP_SIZE + 2 * BLUR_RADIUS as u32),
+        shared_array_size =
+            (WORKGROUP_SIZE + 2 * BLUR_RADIUS as u32) * (WORKGROUP_SIZE + 2 * BLUR_RADIUS as u32),
         blur_loop_body = if horizontal {
             "let offset_x = i;\n        let offset_y = 0;"
         } else {
@@ -532,7 +560,10 @@ fn main(
     );
 
     device.create_shader_module(wgpu::ShaderModuleDescriptor {
-        label: Some(&format!("{} Blur Shader", if horizontal { "Horizontal" } else { "Vertical" })),
+        label: Some(&format!(
+            "{} Blur Shader",
+            if horizontal { "Horizontal" } else { "Vertical" }
+        )),
         source: wgpu::ShaderSource::Wgsl(shader_source.into()),
     })
 }
@@ -553,7 +584,7 @@ mod tests {
         // Verify shared memory tile size calculation
         let tile_with_padding = WORKGROUP_SIZE + 2 * BLUR_RADIUS as u32;
         assert_eq!(tile_with_padding, 26); // 16 + 2*5
-        
+
         let total_elements = tile_with_padding * tile_with_padding;
         assert_eq!(total_elements, 676); // 26 * 26
     }
@@ -562,7 +593,7 @@ mod tests {
     fn test_image_generation() {
         let data = generate_test_image();
         assert_eq!(data.len(), (IMAGE_WIDTH * IMAGE_HEIGHT * 4) as usize);
-        
+
         // Verify RGBA format (4 bytes per pixel)
         assert_eq!(data.len() % 4, 0);
     }

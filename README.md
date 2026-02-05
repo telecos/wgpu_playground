@@ -6,6 +6,29 @@
 
 Repository for experimenting WebGPU capabilities in Rust
 
+## Table of Contents
+
+- [🚀 Try the Demo](#-try-the-demo)
+- [Quick Start](#quick-start)
+- [Contributing](#contributing)
+- [Overview](#overview)
+- [Features](#features)
+- [Supported Platforms](#supported-platforms)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Native Build](#native-build-desktop-application)
+  - [Web Build](#web-build-webassembly)
+- [Usage](#usage)
+  - [Running the GUI Application](#running-the-gui-application)
+  - [Using the Web Demo](#using-the-web-demo)
+  - [Running Examples](#running-examples)
+- [Example Programs](#example-programs)
+- [Project Structure](#project-structure)
+- [Documentation](#documentation)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
 ## 🚀 Try the Demo
 
 Experience wgpu_playground directly in your browser:
@@ -24,11 +47,57 @@ New to wgpu_playground? Get started quickly:
 
 ## Contributing
 
-Want to contribute to wgpu_playground?
+We welcome contributions to wgpu_playground! Here's how to get started:
 
-🛠️ **[Developer Guide](DEVELOPER_GUIDE.md)** - Complete developer guide with architecture, workflows, and debugging
+### Quick Contribution Guide
 
-📝 **[Contributing Guidelines](CONTRIBUTING.md)** - Contribution process, coding standards, and PR requirements
+1. **Fork and Clone**: Fork the repository and clone it locally
+2. **Create a Branch**: `git checkout -b feature/your-feature-name`
+3. **Make Changes**: Implement your feature or fix
+4. **Test**: Run `cargo test --workspace` and `cargo clippy`
+5. **Format**: Run `cargo fmt --all`
+6. **Commit**: Write clear commit messages
+7. **Push and PR**: Push your branch and create a pull request
+
+### Development Prerequisites
+
+- Rust toolchain (latest stable)
+- Familiarity with WebGPU concepts (optional but helpful)
+- GPU with Vulkan/Metal/DirectX 12 support
+
+### Running Tests and Checks
+
+```bash
+# Format code
+cargo fmt --all
+
+# Run lints
+cargo clippy --workspace --all-targets -- -D warnings
+
+# Run tests
+cargo test --workspace
+
+# Check security
+cargo deny check
+cargo audit
+```
+
+### Documentation and Resources
+
+For comprehensive development information:
+
+🛠️ **[Developer Guide](DEVELOPER_GUIDE.md)** - Architecture, workflows, and debugging tips
+
+📝 **[Contributing Guidelines](CONTRIBUTING.md)** - Detailed contribution process, coding standards, and PR requirements
+
+📋 **[Project Plan](PLAN.md)** - Roadmap and planned features
+
+### Code of Conduct
+
+- Be respectful and constructive
+- Welcome newcomers and help them get started
+- Focus on the code and ideas, not personalities
+- Assume good intentions
 
 ## Overview
 
@@ -48,6 +117,57 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **URL Sharing**: Generate shareable links with your configuration encoded in the URL for easy collaboration
 
 **📊 For a comprehensive overview of WebGPU API feature coverage, see [WebGPU API Coverage](docs/WEBGPU_API_COVERAGE.md)**
+
+## Supported Platforms
+
+wgpu_playground runs on multiple platforms with different backend support:
+
+### Desktop Platforms
+
+| Platform | Native Build | Graphics API | Status | Notes |
+|----------|-------------|--------------|--------|-------|
+| **Linux** | ✅ Full Support | Vulkan (primary), OpenGL | ✅ Fully Tested | Requires X11 or Wayland |
+| **macOS** | ✅ Full Support | Metal | ✅ Fully Tested | macOS 10.13+ required |
+| **Windows** | ✅ Full Support | DirectX 12 (primary), Vulkan | ✅ Fully Tested | Windows 10+ recommended |
+
+### Web Platforms
+
+| Platform | Browser | WebGPU Support | Status | Notes |
+|----------|---------|----------------|--------|-------|
+| **Desktop** | Chrome 113+ | ✅ Enabled by default | ✅ Fully Tested | Recommended browser |
+| **Desktop** | Edge 113+ | ✅ Enabled by default | ✅ Fully Tested | Based on Chromium |
+| **Desktop** | Safari 17+ | 🟡 Requires manual enable | ✅ Tested | Enable in Experimental Features |
+| **Desktop** | Firefox Nightly | 🟡 Experimental | ⚠️ Limited Testing | Enable in about:config |
+| **Mobile** | Chrome/Edge (Android) | ✅ Enabled by default | ✅ Touch controls supported | Chrome 113+ required |
+| **Mobile** | Safari (iOS 17+) | 🟡 Requires manual enable | ✅ Touch controls supported | Enable in Settings |
+
+### Headless/CI Environments
+
+| Environment | Backend | Support | Notes |
+|-------------|---------|---------|-------|
+| **Linux CI** | Vulkan (lavapipe) | ✅ Full Support | Software rendering for tests |
+| **Linux CI** | OpenGL (Mesa) | ✅ Full Support | Fallback software rendering |
+| **GitHub Actions** | All platforms | ✅ Automated | Full CI/CD pipeline |
+
+### Graphics Backend Selection
+
+You can select a specific graphics backend using the `WGPU_BACKEND` environment variable:
+
+```bash
+# Use Vulkan (Linux, Windows)
+WGPU_BACKEND=vulkan cargo run --release
+
+# Use Metal (macOS)
+WGPU_BACKEND=metal cargo run --release
+
+# Use DirectX 12 (Windows)
+WGPU_BACKEND=dx12 cargo run --release
+
+# Use OpenGL (fallback, all platforms)
+WGPU_BACKEND=gl cargo run --release
+```
+
+For more details on backend selection and WebGPU implementations, see [WEBGPU_IMPLEMENTATIONS.md](docs/WEBGPU_IMPLEMENTATIONS.md).
 
 ## Sharing and Collaboration
 
@@ -190,28 +310,254 @@ The application provides a tabbed interface with six main sections:
    - Neural network layer implementations
    - Performance profiling
 
-## Building and Running
+## Prerequisites
 
-### Prerequisites
+Before building wgpu_playground, ensure you have the following installed:
 
-- Rust (latest stable version)
-- A GPU with WebGPU support (Vulkan, Metal, or DirectX 12)
+### System Requirements
 
-### Build
+#### All Platforms
+- **Rust**: Latest stable version (1.75.0 or newer recommended)
+  - Install via [rustup](https://rustup.rs/): `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+  - Verify installation: `rustc --version`
+
+#### Platform-Specific Requirements
+
+**Linux:**
+- **Display Server**: X11 or Wayland
+- **Graphics API**: Vulkan support (recommended) or OpenGL 4.3+
+  - Install Vulkan drivers for your GPU:
+    - NVIDIA: `nvidia-vulkan-driver` (Debian/Ubuntu) or `nvidia-utils` (Arch)
+    - AMD: `mesa-vulkan-drivers` (Debian/Ubuntu) or `vulkan-radeon` (Arch)
+    - Intel: `mesa-vulkan-drivers` (Debian/Ubuntu) or `vulkan-intel` (Arch)
+- **Build Tools**: `gcc`, `cmake`, `pkg-config`
+  - Debian/Ubuntu: `sudo apt install build-essential cmake pkg-config`
+  - Arch: `sudo pacman -S base-devel cmake`
+
+**macOS:**
+- **macOS Version**: 10.13 (High Sierra) or newer
+- **Graphics API**: Metal (built-in on macOS 10.13+)
+- **Xcode Command Line Tools**: `xcode-select --install`
+
+**Windows:**
+- **Graphics API**: DirectX 12 (Windows 10+) or Vulkan
+- **Visual Studio**: Build Tools for Visual Studio 2019 or newer
+  - Download from [Microsoft](https://visualstudio.microsoft.com/downloads/)
+  - Install "Desktop development with C++" workload
+
+### GPU Requirements
+
+Your GPU must support one of the following graphics APIs:
+- **Vulkan 1.1+** (Linux, Windows, Android)
+- **Metal 2+** (macOS, iOS)
+- **DirectX 12** (Windows 10+)
+- **OpenGL 4.3+** (fallback, limited features)
+
+**Note**: For headless systems or CI environments, software rendering is available using Vulkan lavapipe or OpenGL Mesa.
+
+### Web Browser Requirements (for Web Build)
+
+For running the WebAssembly demo in a browser:
+- **Chrome/Edge**: Version 113 or newer (WebGPU enabled by default)
+- **Safari**: Technology Preview, or Safari 17+ with WebGPU enabled in Experimental Features (Settings → Safari → Advanced → Experimental Features)
+- **Firefox**: Nightly build with WebGPU enabled in `about:config`
+
+## Installation
+
+### Native Build (Desktop Application)
+
+#### 1. Clone the Repository
 
 ```bash
+git clone https://github.com/telecos/wgpu_playground.git
+cd wgpu_playground
+```
+
+#### 2. Build the Project
+
+```bash
+# Development build (faster compilation, includes debug info)
+cargo build
+
+# Release build (optimized, recommended for daily use)
 cargo build --release
 ```
 
-### Run
+#### 3. Run the Application
 
 ```bash
+# Run development build
+cargo run
+
+# Run release build (recommended)
 cargo run --release
 ```
 
-**Note:** This application requires a display/window system to run. On Linux, ensure you have either X11 or Wayland available. On headless systems, the application won't run as it requires GPU rendering capabilities.
+**Platform-Specific Notes:**
 
-### Examples
+- **Linux**: Ensure you have a display server running (X11 or Wayland). On headless systems, the GUI application won't run, but you can still run tests and examples.
+- **macOS**: The application should run natively using Metal backend.
+- **Windows**: The application will use DirectX 12 by default. For Vulkan, set `WGPU_BACKEND=vulkan` environment variable.
+
+### Web Build (WebAssembly)
+
+Build and run wgpu_playground in a web browser using WebAssembly.
+
+#### 1. Install wasm-pack
+
+```bash
+# Using cargo
+cargo install wasm-pack
+
+# Or download from https://rustwasm.github.io/wasm-pack/installer/
+```
+
+#### 2. Build the WASM Module
+
+```bash
+cd crates/wgpu_playground_core
+wasm-pack build --target web --release
+```
+
+This creates a `pkg/` directory containing the WebAssembly module and JavaScript bindings.
+
+#### 3. Copy Built Files to Web Directory
+
+```bash
+# From the repository root
+cp -r crates/wgpu_playground_core/pkg web/
+```
+
+#### 4. Serve Locally
+
+```bash
+cd web
+
+# Using Python 3
+python3 -m http.server 8000
+
+# Or using Node.js http-server
+npx http-server -p 8000
+
+# Or using Rust's basic-http-server
+cargo install basic-http-server
+basic-http-server .
+```
+
+#### 5. Open in Browser
+
+Navigate to `http://localhost:8000` in a WebGPU-supported browser.
+
+**Note**: The web build is automatically deployed to GitHub Pages at https://telecos.github.io/wgpu_playground/demo/ on every push to the main branch.
+
+## Usage
+
+### Running the GUI Application
+
+After building the project, you can run the main GUI application:
+
+```bash
+# Run with default settings (release mode recommended)
+cargo run --release
+
+# Run with debug logging enabled
+RUST_LOG=debug cargo run --release
+
+# Run with specific backend (Vulkan example)
+WGPU_BACKEND=vulkan cargo run --release
+```
+
+The application will open a window with an interactive GUI featuring:
+- **GPU adapter selection and configuration**
+- **Device information and capabilities viewer**
+- **Interactive rendering examples** (triangle, rotating cube, etc.)
+- **WGSL shader editor** with syntax highlighting
+- **Buffer, texture, and sampler configuration tools**
+- **Compute shader experimentation**
+- **Code export** to standalone Rust projects
+
+### Using the Web Demo
+
+Visit the live demo at https://telecos.github.io/wgpu_playground/demo/ or run it locally:
+
+1. Build and serve the web version (see [Web Build](#web-build-webassembly) section above)
+2. Open your browser to the served URL
+3. Interact with the WebGPU demo using touch or mouse controls
+4. Share your configurations using the URL sharing feature
+
+### Running Examples
+
+The project includes several standalone command-line examples that demonstrate specific WebGPU features. These examples run independently of the GUI application and are useful for learning and testing.
+
+#### Available Examples
+
+**List all examples:**
+```bash
+# List example files
+ls crates/wgpu_playground_examples/examples/
+
+# Or view in cargo package metadata
+cargo tree -p wgpu_playground_examples
+```
+
+**Run specific examples:**
+```bash
+# Basic triangle rendering
+cargo run --package wgpu_playground_examples --example triangle
+
+# 3D rotating cube
+cargo run --package wgpu_playground_examples --example rotating_cube
+
+# Render to texture
+cargo run --package wgpu_playground_examples --example render_to_texture
+
+# Compute shader example
+cargo run --package wgpu_playground_examples --example compute_render_sharing
+
+# Instanced rendering
+cargo run --package wgpu_playground_examples --example instanced_rendering
+
+# Multisampling anti-aliasing
+cargo run --package wgpu_playground_examples --example multisampling
+
+# Backend selection
+cargo run --package wgpu_playground_examples --example backend_selection
+
+# Error handling patterns
+cargo run --package wgpu_playground_examples --example error_handling
+```
+
+Each example includes detailed output explaining what operations are being performed and their results.
+
+### Common Workflows
+
+#### Creating and Testing Shaders
+
+1. Run the GUI application: `cargo run --release`
+2. Navigate to the **Rendering** tab in the sidebar
+3. Open the **WGSL Shader Editor**
+4. Load an example shader or write your own
+5. Compile and view errors in real-time
+6. Export your shader as a standalone project
+
+#### Experimenting with Buffers and Textures
+
+1. Navigate to the **Resources** section in the sidebar
+2. Configure buffer settings (size, usage flags, labels)
+3. Create textures with custom dimensions and formats
+4. Configure samplers for texture filtering
+5. Bind resources to shaders using bind groups
+
+#### Sharing Your Work
+
+1. Configure your resources and shaders
+2. Click **🔗 Generate Share Link** in the menu bar
+3. Copy the URL and share it with others
+4. Recipients can open the link to see your exact configuration
+
+For detailed tutorials and workflows, see the **[User Guide](docs/USER_GUIDE.md)**.
+
+## Example Programs
 
 The project includes standalone examples demonstrating various WebGPU features:
 

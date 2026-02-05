@@ -84,7 +84,7 @@ impl SettingsPanel {
         ui.horizontal(|ui| {
             ui.label("Current Backend:");
             if current_backend == WebGPUImplementation::Wgpu {
-                ui.colored_label(egui::Color32::from_rgb(100, 150, 255), "wgpu-core");
+                ui.colored_label(egui::Color32::from_rgb(100, 150, 255), "wgpu-rs");
             } else {
                 ui.colored_label(egui::Color32::from_rgb(255, 180, 100), "Dawn Native");
             }
@@ -93,7 +93,7 @@ impl SettingsPanel {
 
         // Backend selection dropdown
         let selected_text = match self.selected_backend {
-            WebGPUImplementation::Wgpu => "🦀 wgpu-core (Rust implementation)",
+            WebGPUImplementation::Wgpu => "🦀 wgpu-rs (Rust implementation)",
             #[cfg(feature = "dawn")]
             WebGPUImplementation::Dawn => "🌅 Dawn Native (C++ implementation)",
         };
@@ -105,7 +105,7 @@ impl SettingsPanel {
                 ui.selectable_value(
                     &mut self.selected_backend,
                     WebGPUImplementation::Wgpu,
-                    "🦀 wgpu-core (Rust implementation)",
+                    "🦀 wgpu-rs (Rust implementation)",
                 )
                 .on_hover_text("Used by Firefox, fully featured and stable");
 

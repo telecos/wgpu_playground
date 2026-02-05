@@ -7,10 +7,10 @@
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Top Menu Bar (After Changes - wgpu-core Active)
+## Top Menu Bar (After Changes - wgpu-rs Active)
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ 🎮 WebGPU Playground │ Backend: 🦀 wgpu-core   File: [💾] [📂] [filename] │
+│ 🎮 WebGPU Playground │ Backend: 🦀 wgpu-rs   File: [💾] [📂] [filename] │
 │                      │          (in blue)                                 │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -59,11 +59,11 @@
 ║ 🔧 WebGPU Backend                                            ║
 ║ Select the WebGPU implementation backend:                    ║
 ║                                                              ║
-║ Current Backend: wgpu-core (in blue)                         ║
+║ Current Backend: wgpu-rs (in blue)                         ║
 ║                                                              ║
-║ Select Backend: [🦀 wgpu-core (Rust impl...)    ▼]         ║
+║ Select Backend: [🦀 wgpu-rs (Rust impl...)    ▼]         ║
 ║   ┌──────────────────────────────────────────┐              ║
-║   │ 🦀 wgpu-core (Rust implementation)       │              ║
+║   │ 🦀 wgpu-rs (Rust implementation)       │              ║
 ║   │ 🌅 Dawn Native (Not Available)   ⊘      │              ║
 ║   └──────────────────────────────────────────┘              ║
 ║                                                              ║
@@ -97,11 +97,11 @@
 ║ 🔧 WebGPU Backend                                            ║
 ║ Select the WebGPU implementation backend:                    ║
 ║                                                              ║
-║ Current Backend: wgpu-core (in blue)                         ║
+║ Current Backend: wgpu-rs (in blue)                         ║
 ║                                                              ║
-║ Select Backend: [🦀 wgpu-core (Rust impl...)    ▼]         ║
+║ Select Backend: [🦀 wgpu-rs (Rust impl...)    ▼]         ║
 ║   ┌──────────────────────────────────────────┐              ║
-║   │ 🦀 wgpu-core (Rust implementation)       │              ║
+║   │ 🦀 wgpu-rs (Rust implementation)       │              ║
 ║   │ 🌅 Dawn Native (C++ implementation)      │              ║
 ║   └──────────────────────────────────────────┘              ║
 ║                                                              ║
@@ -125,7 +125,7 @@
 ║ 🔧 WebGPU Backend                                            ║
 ║ Select the WebGPU implementation backend:                    ║
 ║                                                              ║
-║ Current Backend: wgpu-core (in blue)                         ║
+║ Current Backend: wgpu-rs (in blue)                         ║
 ║                                                              ║
 ║ Select Backend: [🌅 Dawn Native (C++ impl...)   ▼]         ║
 ║                                                              ║
@@ -149,7 +149,7 @@
 
 ## Color Legend
 
-- 🦀 wgpu-core: Blue (RGB 100, 150, 255)
+- 🦀 wgpu-rs: Blue (RGB 100, 150, 255)
 - 🌅 Dawn Native: Orange (RGB 255, 180, 100)
 - ✓ Success/Available: Green (RGB 100, 200, 100)
 - ⚠️ Warning: Orange (RGB 255, 200, 100)

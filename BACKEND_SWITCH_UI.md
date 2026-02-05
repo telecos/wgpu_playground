@@ -1,6 +1,6 @@
 # Backend Switch UI Implementation
 
-This document describes the UI changes implemented for backend switching between Dawn Native and wgpu-core.
+This document describes the UI changes implemented for backend switching between Dawn Native and wgpu-rs.
 
 ## Features Implemented
 
@@ -11,13 +11,13 @@ This document describes the UI changes implemented for backend switching between
 **Appearance**:
 - Label: "Backend:"
 - Current backend name displayed with color coding:
-  - 🦀 wgpu-core (blue color: RGB 100, 150, 255)
+  - 🦀 wgpu-rs (blue color: RGB 100, 150, 255)
   - 🌅 Dawn Native (orange color: RGB 255, 180, 100)
 - Hover tooltip shows the backend description
 
 **Example Display**:
 ```
-🎮 WebGPU Playground | Backend: 🦀 wgpu-core | File: [💾 Save State] [📂 Load State] ...
+🎮 WebGPU Playground | Backend: 🦀 wgpu-rs | File: [💾 Save State] [📂 Load State] ...
 ```
 
 ### 2. Backend Selector in Settings Panel
@@ -28,12 +28,12 @@ This document describes the UI changes implemented for backend switching between
 
 #### Current Backend Display
 - Prominently shows the active backend with color coding
-- Format: "Current Backend: wgpu-core" (in blue) or "Current Backend: Dawn Native" (in orange)
+- Format: "Current Backend: wgpu-rs" (in blue) or "Current Backend: Dawn Native" (in orange)
 
 #### Backend Selection Dropdown
 - ComboBox labeled "Select Backend"
 - Options:
-  1. 🦀 wgpu-core (Rust implementation)
+  1. 🦀 wgpu-rs (Rust implementation)
      - Always available
      - Tooltip: "Used by Firefox, fully featured and stable"
   
@@ -109,7 +109,7 @@ When Dawn is not compiled in:
 
 ### Color Scheme
 
-- **wgpu-core**: Blue (RGB 100, 150, 255) - representing Rust
+- **wgpu-rs**: Blue (RGB 100, 150, 255) - representing Rust
 - **Dawn Native**: Orange (RGB 255, 180, 100) - representing native C++
 - **Active/Success**: Green (RGB 100, 200, 100)
 - **Warning**: Orange (RGB 255, 200, 100)

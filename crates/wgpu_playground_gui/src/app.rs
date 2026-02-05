@@ -208,7 +208,7 @@ impl PlaygroundApp {
                 let current_backend = wgpu_playground_core::implementation::WebGPUImplementation::current();
                 let (backend_label, backend_color) = match current_backend {
                     wgpu_playground_core::implementation::WebGPUImplementation::Wgpu => {
-                        ("🦀 wgpu-core", egui::Color32::from_rgb(100, 150, 255))
+                        ("🦀 wgpu-rs", egui::Color32::from_rgb(100, 150, 255))
                     }
                     #[cfg(feature = "dawn")]
                     wgpu_playground_core::implementation::WebGPUImplementation::Dawn => {

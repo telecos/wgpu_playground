@@ -855,4 +855,41 @@ mod tests {
         let default_desc = DawnDeviceDescriptor::default();
         assert!(default_desc.label.is_none());
     }
+
+    #[test]
+    fn test_dawn_error_types() {
+        // Test that all error types can be created and displayed
+        let err1 = DawnError::InstanceCreationFailed;
+        assert!(err1.to_string().contains("instance"));
+
+        let err2 = DawnError::NoAdapterFound;
+        assert!(err2.to_string().contains("adapter"));
+
+        let err3 = DawnError::AdapterUnavailable;
+        assert!(err3.to_string().contains("unavailable"));
+
+        let err4 = DawnError::AdapterError("test message".to_string());
+        assert!(err4.to_string().contains("test message"));
+
+        let err5 = DawnError::DeviceCreationFailed;
+        assert!(err5.to_string().contains("device"));
+
+        let err6 = DawnError::DeviceError("device error".to_string());
+        assert!(err6.to_string().contains("device error"));
+
+        let err7 = DawnError::NotImplemented;
+        assert!(err7.to_string().contains("not yet implemented"));
+
+        let err8 = DawnError::Unknown;
+        assert!(err8.to_string().contains("Unknown"));
+    }
+
+    #[test]
+    fn test_dawn_error_is_error_trait() {
+        // Verify DawnError implements std::error::Error
+        fn check_error<E: std::error::Error>(_e: &E) {}
+
+        let err = DawnError::NoAdapterFound;
+        check_error(&err);
+    }
 }

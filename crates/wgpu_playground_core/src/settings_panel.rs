@@ -78,15 +78,18 @@ impl SettingsPanel {
         ui.add_space(5.0);
 
         let current_backend = WebGPUImplementation::current();
-        let available_backends = WebGPUImplementation::available_implementations();
         
         // Display current backend prominently
         ui.horizontal(|ui| {
             ui.label("Current Backend:");
-            if current_backend == WebGPUImplementation::Wgpu {
-                ui.colored_label(egui::Color32::from_rgb(100, 150, 255), "wgpu-rs");
-            } else {
-                ui.colored_label(egui::Color32::from_rgb(255, 180, 100), "Dawn Native");
+            match current_backend {
+                WebGPUImplementation::Wgpu => {
+                    ui.colored_label(egui::Color32::from_rgb(100, 150, 255), "wgpu-rs");
+                }
+                #[cfg(feature = "dawn")]
+                WebGPUImplementation::Dawn => {
+                    ui.colored_label(egui::Color32::from_rgb(255, 180, 100), "Dawn Native");
+                }
             }
         });
         ui.add_space(5.0);
@@ -171,6 +174,7 @@ impl SettingsPanel {
         ui.add_space(10.0);
 
         // Additional info
+        let available_backends = WebGPUImplementation::available_implementations();
         ui.label("💡 Tip: Available backends:");
         for backend in &available_backends {
             ui.horizontal(|ui| {

@@ -1,3 +1,4 @@
+use crate::pipeline_preview::RenderPipelinePreviewState;
 use crate::render_pipeline::{
     BlendComponent, BlendFactor, BlendOperation, BlendState, ColorTargetState, ColorWrites,
     CompareFunction, CullMode, DepthStencilState, FrontFace, MultisampleState, PrimitiveState,
@@ -91,6 +92,11 @@ pub struct RenderPipelinePanel {
     validation_error: Option<String>,
     /// Success message
     success_message: Option<String>,
+
+    /// Pipeline preview rendering state
+    preview_state: Option<RenderPipelinePreviewState>,
+    /// Whether preview is enabled
+    show_preview: bool,
 }
 
 /// Depth format options for UI
@@ -231,6 +237,9 @@ impl RenderPipelinePanel {
 
             validation_error: None,
             success_message: None,
+
+            preview_state: None,
+            show_preview: false,
         }
     }
 
@@ -708,6 +717,448 @@ impl RenderPipelinePanel {
                     *self = Self::new();
                 }
             });
+        });
+    }
+
+    /// UI with live pipeline preview
+    pub fn ui_with_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: Option<&wgpu::Device>,
+        queue: Option<&wgpu::Queue>,
+        renderer: Option<&mut egui_wgpu::Renderer>,
+    ) {
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            ui.heading("🎨 Render Pipeline Configuration");
+            ui.label("Configure comprehensive render pipeline settings with vertex, primitive, depth-stencil, multisample, and fragment states.");
+            ui.add_space(10.0);
+
+            // Display messages
+            if let Some(error) = &self.validation_error {
+                ui.colored_label(egui::Color32::RED, format!("❌ {}", error));
+                ui.add_space(5.0);
+            }
+            if let Some(success) = &self.success_message {
+                ui.colored_label(egui::Color32::GREEN, success);
+                ui.add_space(5.0);
+            }
+
+            // Presets Section
+            ui.group(|ui| {
+                ui.heading("📋 Presets");
+                ui.label("Quick configuration presets:");
+                ui.add_space(5.0);
+
+                ui.horizontal_wrapped(|ui| {
+                    for preset in PipelinePreset::all() {
+                        if ui.button(preset.name()).clicked() {
+                            self.apply_preset(preset);
+                        }
+                    }
+                });
+            });
+
+            ui.add_space(10.0);
+
+            // Call the existing UI method to render all configuration sections
+            // We need to temporarily create a new scope to prevent duplicate heading
+            self.render_configuration_ui(ui);
+
+            ui.add_space(15.0);
+
+            // Live Preview Section
+            if self.show_preview {
+                ui.group(|ui| {
+                    ui.horizontal(|ui| {
+                        ui.heading("🎬 Pipeline Preview");
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.small_button("✕").on_hover_text("Hide preview").clicked() {
+                                self.show_preview = false;
+                            }
+                        });
+                    });
+                    ui.add_space(5.0);
+
+                    ui.label("Preview shows how this pipeline configuration affects rendering of a 3D cube:");
+                    ui.label("• Topology: Triangle/Line primitives");
+                    ui.label("• Culling: Front/back face visibility");
+                    ui.label("• Depth: Z-buffer testing effect");
+                    ui.label("• Blending: Color composition");
+
+                    ui.add_space(5.0);
+
+                    // Initialize preview if we have device
+                    if let Some(device) = device {
+                        if self.preview_state.is_none() {
+                            let mut preview = RenderPipelinePreviewState::new();
+                            preview.initialize(device);
+                            self.preview_state = Some(preview);
+                        }
+
+                        // Update descriptor before borrowing preview
+                        self.update_descriptor();
+
+                        // Update pipeline when configuration changes
+                        if let Some(preview) = &mut self.preview_state {
+                            // Build primitive state
+                            let primitive = PrimitiveState::new()
+                                .with_topology(self.topology)
+                                .with_cull_mode(self.cull_mode)
+                                .with_front_face(self.front_face);
+
+                            // Build depth-stencil state
+                            let depth_stencil = if self.enable_depth_stencil {
+                                Some(
+                                    DepthStencilState::new(self.depth_format.to_wgpu())
+                                        .with_depth_write_enabled(self.depth_write_enabled)
+                                        .with_depth_compare(self.depth_compare),
+                                )
+                            } else {
+                                None
+                            };
+
+                            // Build blend state
+                            let blend = if self.blend_enabled {
+                                Some(BlendState::new(
+                                    BlendComponent::new(
+                                        self.color_blend_src,
+                                        self.color_blend_dst,
+                                        self.color_blend_op,
+                                    ),
+                                    BlendComponent::new(
+                                        self.alpha_blend_src,
+                                        self.alpha_blend_dst,
+                                        self.alpha_blend_op,
+                                    ),
+                                ))
+                            } else {
+                                None
+                            };
+
+                            // Build multisample state
+                            let multisample = MultisampleState::new()
+                                .with_count(self.sample_count)
+                                .with_alpha_to_coverage(self.alpha_to_coverage_enabled);
+
+                            // Update pipeline
+                            preview.update_pipeline(
+                                device,
+                                &primitive,
+                                depth_stencil.as_ref(),
+                                blend.as_ref(),
+                                &multisample,
+                            );
+                        }
+                    }
+
+                    // Render preview
+                    if let (Some(preview), Some(device), Some(queue), Some(renderer)) =
+                        (&mut self.preview_state, device, queue, renderer)
+                    {
+                        // Render the preview
+                        let delta_time = ui.input(|i| i.stable_dt);
+                        preview.render(device, queue, delta_time);
+
+                        // Display the preview texture
+                        if let Some(texture_id) = preview.get_texture_id(device, renderer) {
+                            let (width, height) = preview.size();
+                            ui.add(egui::Image::new(egui::load::SizedTexture::new(
+                                texture_id,
+                                egui::vec2(width as f32, height as f32),
+                            )));
+                        }
+
+                        // Always request repaint for animated preview (rotating cube)
+                        ui.ctx().request_repaint();
+                    } else if device.is_none() {
+                        ui.colored_label(
+                            egui::Color32::YELLOW,
+                            "⚠ Preview requires GPU device to be initialized",
+                        );
+                    }
+                });
+            } else {
+                // Show "Test Pipeline" button when preview is hidden
+                ui.horizontal(|ui| {
+                    if ui.button("🎬 Test Pipeline").on_hover_text("Show live preview of pipeline configuration").clicked() {
+                        self.show_preview = true;
+                    }
+                });
+            }
+        });
+    }
+
+    /// Render the main configuration UI (used by both ui() and ui_with_preview())
+    fn render_configuration_ui(&mut self, ui: &mut egui::Ui) {
+        // Pipeline Properties
+        ui.group(|ui| {
+            ui.heading("Pipeline Properties");
+            ui.add_space(5.0);
+
+            egui::Grid::new("pipeline_properties")
+                .num_columns(2)
+                .spacing([10.0, 8.0])
+                .show(ui, |ui| {
+                    ui.label("Label:");
+                    ui.text_edit_singleline(&mut self.label_input);
+                    ui.end_row();
+                });
+        });
+
+        ui.add_space(10.0);
+
+        // Vertex State
+        ui.group(|ui| {
+            ui.heading("🔺 Vertex State");
+            ui.label("Configure vertex shader entry point:");
+            ui.add_space(5.0);
+
+            egui::Grid::new("vertex_state")
+                .num_columns(2)
+                .spacing([10.0, 8.0])
+                .show(ui, |ui| {
+                    ui.label("Vertex Entry Point:");
+                    ui.text_edit_singleline(&mut self.vertex_entry_point);
+                    ui.end_row();
+                });
+        });
+
+        ui.add_space(10.0);
+
+        // Primitive State
+        ui.group(|ui| {
+            ui.heading("🔷 Primitive State");
+            ui.label("Configure primitive topology and culling:");
+            ui.add_space(5.0);
+
+            egui::Grid::new("primitive_state")
+                .num_columns(2)
+                .spacing([10.0, 8.0])
+                .show(ui, |ui| {
+                    ui.label("Topology:")
+                        .on_hover_text("How vertices are assembled into primitives");
+                    Self::render_topology_combo(ui, &mut self.topology);
+                    ui.end_row();
+
+                    ui.label("Cull Mode:")
+                        .on_hover_text("Which faces to cull (not render)");
+                    Self::render_cull_mode_combo(ui, &mut self.cull_mode);
+                    ui.end_row();
+
+                    ui.label("Front Face:")
+                        .on_hover_text("Winding order that determines front-facing");
+                    Self::render_front_face_combo(ui, &mut self.front_face);
+                    ui.end_row();
+                });
+        });
+
+        ui.add_space(10.0);
+
+        // Depth-Stencil State
+        ui.group(|ui| {
+            ui.heading("📏 Depth-Stencil State");
+            ui.checkbox(&mut self.enable_depth_stencil, "Enable Depth-Stencil Testing");
+            ui.add_space(5.0);
+
+            if self.enable_depth_stencil {
+                egui::Grid::new("depth_stencil_state")
+                    .num_columns(2)
+                    .spacing([10.0, 8.0])
+                    .show(ui, |ui| {
+                        ui.label("Depth Format:");
+                        Self::render_depth_format_combo(ui, &mut self.depth_format);
+                        ui.end_row();
+
+                        ui.label("Depth Write:");
+                        ui.checkbox(&mut self.depth_write_enabled, "Enabled");
+                        ui.end_row();
+
+                        ui.label("Depth Compare:")
+                            .on_hover_text("Comparison function for depth test");
+                        Self::render_compare_function_combo(ui, &mut self.depth_compare, "depth_compare");
+                        ui.end_row();
+
+                        ui.label("Stencil Read Mask:");
+                        ui.text_edit_singleline(&mut self.stencil_read_mask_input);
+                        ui.end_row();
+
+                        ui.label("Stencil Write Mask:");
+                        ui.text_edit_singleline(&mut self.stencil_write_mask_input);
+                        ui.end_row();
+                    });
+
+                ui.add_space(5.0);
+
+                ui.collapsing("Stencil Front Face", |ui| {
+                    egui::Grid::new("stencil_front")
+                        .num_columns(2)
+                        .spacing([10.0, 8.0])
+                        .show(ui, |ui| {
+                            ui.label("Compare:");
+                            Self::render_compare_function_combo(ui, &mut self.stencil_front_compare, "stencil_front_compare");
+                            ui.end_row();
+
+                            ui.label("Fail Operation:");
+                            Self::render_stencil_operation_combo(ui, &mut self.stencil_front_fail_op, "stencil_front_fail");
+                            ui.end_row();
+
+                            ui.label("Depth Fail Operation:");
+                            Self::render_stencil_operation_combo(ui, &mut self.stencil_front_depth_fail_op, "stencil_front_depth_fail");
+                            ui.end_row();
+
+                            ui.label("Pass Operation:");
+                            Self::render_stencil_operation_combo(ui, &mut self.stencil_front_pass_op, "stencil_front_pass");
+                            ui.end_row();
+                        });
+                });
+
+                ui.collapsing("Stencil Back Face", |ui| {
+                    egui::Grid::new("stencil_back")
+                        .num_columns(2)
+                        .spacing([10.0, 8.0])
+                        .show(ui, |ui| {
+                            ui.label("Compare:");
+                            Self::render_compare_function_combo(ui, &mut self.stencil_back_compare, "stencil_back_compare");
+                            ui.end_row();
+
+                            ui.label("Fail Operation:");
+                            Self::render_stencil_operation_combo(ui, &mut self.stencil_back_fail_op, "stencil_back_fail");
+                            ui.end_row();
+
+                            ui.label("Depth Fail Operation:");
+                            Self::render_stencil_operation_combo(ui, &mut self.stencil_back_depth_fail_op, "stencil_back_depth_fail");
+                            ui.end_row();
+
+                            ui.label("Pass Operation:");
+                            Self::render_stencil_operation_combo(ui, &mut self.stencil_back_pass_op, "stencil_back_pass");
+                            ui.end_row();
+                        });
+                });
+            }
+        });
+
+        ui.add_space(10.0);
+
+        // Multisample State
+        ui.group(|ui| {
+            ui.heading("🔬 Multisample State");
+            ui.label("Configure multisampling anti-aliasing:");
+            ui.add_space(5.0);
+
+            egui::Grid::new("multisample_state")
+                .num_columns(2)
+                .spacing([10.0, 8.0])
+                .show(ui, |ui| {
+                    ui.label("Sample Count:")
+                        .on_hover_text("Number of samples per pixel (1, 2, 4, or 8)");
+                    egui::ComboBox::from_id_salt("sample_count")
+                        .selected_text(format!("{}", self.sample_count))
+                        .show_ui(ui, |ui| {
+                            ui.selectable_value(&mut self.sample_count, 1, "1 (No MSAA)");
+                            ui.selectable_value(&mut self.sample_count, 2, "2x MSAA");
+                            ui.selectable_value(&mut self.sample_count, 4, "4x MSAA");
+                            ui.selectable_value(&mut self.sample_count, 8, "8x MSAA");
+                        });
+                    ui.end_row();
+
+                    ui.label("Alpha to Coverage:")
+                        .on_hover_text("Enable alpha to coverage for transparency");
+                    ui.checkbox(&mut self.alpha_to_coverage_enabled, "Enabled");
+                    ui.end_row();
+                });
+        });
+
+        ui.add_space(10.0);
+
+        // Fragment State
+        ui.group(|ui| {
+            ui.heading("🎨 Fragment State");
+            ui.label("Configure fragment shader and color output:");
+            ui.add_space(5.0);
+
+            egui::Grid::new("fragment_state")
+                .num_columns(2)
+                .spacing([10.0, 8.0])
+                .show(ui, |ui| {
+                    ui.label("Fragment Entry Point:");
+                    ui.text_edit_singleline(&mut self.fragment_entry_point);
+                    ui.end_row();
+
+                    ui.label("Target Format:");
+                    Self::render_target_format_combo(ui, &mut self.target_format);
+                    ui.end_row();
+
+                    ui.label("Blending:");
+                    ui.checkbox(&mut self.blend_enabled, "Enable Blending");
+                    ui.end_row();
+                });
+
+            if self.blend_enabled {
+                ui.add_space(5.0);
+
+                ui.collapsing("Color Blend", |ui| {
+                    egui::Grid::new("color_blend")
+                        .num_columns(2)
+                        .spacing([10.0, 8.0])
+                        .show(ui, |ui| {
+                            ui.label("Source Factor:");
+                            Self::render_blend_factor_combo(ui, &mut self.color_blend_src, "color_src");
+                            ui.end_row();
+
+                            ui.label("Destination Factor:");
+                            Self::render_blend_factor_combo(ui, &mut self.color_blend_dst, "color_dst");
+                            ui.end_row();
+
+                            ui.label("Operation:");
+                            Self::render_blend_operation_combo(ui, &mut self.color_blend_op, "color_op");
+                            ui.end_row();
+                        });
+                });
+
+                ui.collapsing("Alpha Blend", |ui| {
+                    egui::Grid::new("alpha_blend")
+                        .num_columns(2)
+                        .spacing([10.0, 8.0])
+                        .show(ui, |ui| {
+                            ui.label("Source Factor:");
+                            Self::render_blend_factor_combo(ui, &mut self.alpha_blend_src, "alpha_src");
+                            ui.end_row();
+
+                            ui.label("Destination Factor:");
+                            Self::render_blend_factor_combo(ui, &mut self.alpha_blend_dst, "alpha_dst");
+                            ui.end_row();
+
+                            ui.label("Operation:");
+                            Self::render_blend_operation_combo(ui, &mut self.alpha_blend_op, "alpha_op");
+                            ui.end_row();
+                        });
+                });
+            }
+
+            ui.add_space(5.0);
+
+            ui.label("Color Write Mask:");
+            ui.horizontal(|ui| {
+                ui.checkbox(&mut self.write_red, "Red");
+                ui.checkbox(&mut self.write_green, "Green");
+                ui.checkbox(&mut self.write_blue, "Blue");
+                ui.checkbox(&mut self.write_alpha, "Alpha");
+            });
+        });
+
+        ui.add_space(10.0);
+
+        // Action buttons
+        ui.horizontal(|ui| {
+            if ui.button("📝 Update Configuration").clicked() {
+                self.update_descriptor();
+                self.validation_error = None;
+                self.success_message = Some("✓ Configuration updated".to_string());
+            }
+
+            if ui.button("🔄 Reset to Default").clicked() {
+                *self = Self::new();
+            }
         });
     }
 

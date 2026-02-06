@@ -1188,15 +1188,35 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     }
 
     /// Export the current configuration to a standalone Rust project
-    fn export_to_standalone_project(&mut self, example_id: &str, shader_source: &str) {
-        use crate::code_generator::{CodeGenConfig, CodeGenerator, ExampleType};
-
-        // Determine example type
-        let example_type = match example_id {
-            "triangle" => ExampleType::Triangle,
-            "cube" => ExampleType::Cube,
-            _ => ExampleType::Custom,
+    fn export_to_standalone_project(&mut self, _example_id: &str, shader_source: &str) {
+        // Create a simple playground state with just shader info
+        let playground_state = crate::state::PlaygroundState {
+            version: "1.0".to_string(),
+            theme: crate::state::Theme::Dark,
+            shader_editor: Some(crate::state::ShaderEditorState {
+                source_code: shader_source.to_string(),
+                label: "shader".to_string(),
+                file_path: "shader.wgsl".to_string(),
+            }),
+            buffer_panel: None,
+            texture_panel: None,
+            sampler_panel: None,
+            render_pipeline_panel: None,
+            compute_pipeline_panel: None,
+            bind_group_panel: None,
+            bind_group_layout_panel: None,
+            api_coverage: None,
         };
+
+        self.export_to_standalone_project_with_state(&playground_state);
+    }
+
+    /// Export the playground configuration to a standalone Rust project
+    pub fn export_to_standalone_project_with_state(
+        &mut self,
+        playground_state: &crate::state::PlaygroundState,
+    ) {
+        use crate::code_generator::{CodeGenConfig, CodeGenerator};
 
         // Create output directory in user's home directory
         let output_path =
@@ -1206,12 +1226,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 std::path::PathBuf::from(&self.export_project_name)
             };
 
-        // Configure the code generator
+        // Configure the code generator with full playground state
         let config = CodeGenConfig::new(self.export_project_name.clone())
-            .with_shader(shader_source.to_string())
-            .with_example_type(example_type)
             .with_canvas_size(self.canvas_width, self.canvas_height)
-            .with_clear_color(self.clear_color);
+            .with_clear_color(self.clear_color)
+            .with_playground_state(playground_state.clone());
 
         let generator = CodeGenerator::new(config);
 

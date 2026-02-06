@@ -578,7 +578,10 @@ impl PlaygroundApp {
                     .ui_with_preview(ui, Some(device), Some(queue), Some(renderer))
             }
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
-            Tab::TextureConfig => self.texture_panel.ui(ui),
+            Tab::TextureConfig => {
+                self.texture_panel
+                    .ui_with_preview(ui, Some(device), Some(queue), Some(renderer))
+            }
             Tab::ModelLoader => self.model_loader_panel.show(ui, device),
             Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
             Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),

@@ -433,12 +433,12 @@ impl CodeGenerator {
                 env_logger::init();\n    \
                 \n    \
                 let event_loop = EventLoop::new().unwrap();\n    \
+                let window_attributes = Window::default_attributes()\n        \
+                    .with_title(\"{}\")\n        \
+                    .with_inner_size(winit::dpi::PhysicalSize::new({}, {}));\n    \
+                \n    \
                 let window = Arc::new(\n        \
-                    winit::window::WindowBuilder::new()\n            \
-                        .with_title(\"{}\")\n            \
-                        .with_inner_size(winit::dpi::PhysicalSize::new({}, {}))\n            \
-                        .build(&event_loop)\n            \
-                        .unwrap(),\n    \
+                    event_loop.create_window(window_attributes).unwrap()\n    \
                 );\n\
                 \n    \
                 let mut state = pollster::block_on(State::new(window.clone()));\n\
@@ -662,8 +662,7 @@ impl CodeGenerator {
                         memory_hints: Default::default(),\n                        \
                         experimental_features: Default::default(),\n                        \
                         trace: wgpu::Trace::Off,\n                    \
-                    },\n                \
-                    None,\n            \
+                    },\n            \
                 )\n            \
                 .await\n            \
                 .unwrap();\n\
@@ -1020,12 +1019,12 @@ impl CodeGenerator {
                 env_logger::init();\n    \
                 \n    \
                 let event_loop = EventLoop::new().unwrap();\n    \
+                let window_attributes = Window::default_attributes()\n        \
+                    .with_title(\"{}\")\n        \
+                    .with_inner_size(winit::dpi::PhysicalSize::new({}, {}));\n    \
+                \n    \
                 let window = Arc::new(\n        \
-                    winit::window::WindowBuilder::new()\n            \
-                        .with_title(\"{}\")\n            \
-                        .with_inner_size(winit::dpi::PhysicalSize::new({}, {}))\n            \
-                        .build(&event_loop)\n            \
-                        .unwrap(),\n    \
+                    event_loop.create_window(window_attributes).unwrap()\n    \
                 );\n\
                 \n    \
                 let mut state = pollster::block_on(State::new(window.clone()));\n\

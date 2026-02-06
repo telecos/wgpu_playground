@@ -514,9 +514,7 @@ impl TexturePanel {
                                     if !preview.has_texture() || self.file_load_message.is_some() {
                                         preview.update_from_image_data(device, queue, rgba_data, width, height);
                                         // Clear the file load message after updating preview
-                                        if self.file_load_message.is_some() {
-                                            self.file_load_message = None;
-                                        }
+                                        self.file_load_message = None;
                                     }
                                 }
                             }
@@ -534,12 +532,14 @@ impl TexturePanel {
                         preview.render(device, queue);
 
                         // Display the preview texture
-                        if let Some(texture_id) = preview.get_texture_id(device, renderer.unwrap()) {
-                            let (width, height) = preview.size();
-                            ui.add(egui::Image::new(egui::load::SizedTexture::new(
-                                texture_id,
-                                egui::vec2(width as f32, height as f32),
-                            )));
+                        if let Some(renderer) = renderer {
+                            if let Some(texture_id) = preview.get_texture_id(device, renderer) {
+                                let (width, height) = preview.size();
+                                ui.add(egui::Image::new(egui::load::SizedTexture::new(
+                                    texture_id,
+                                    egui::vec2(width as f32, height as f32),
+                                )));
+                            }
                         }
                     } else if device.is_none() {
                         ui.colored_label(

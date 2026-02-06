@@ -22,12 +22,24 @@ fn test_all_api_categories_are_accessible() {
 
         // Each category should have a description
         let description = category.description();
-        assert!(!description.is_empty(), "Category {:?} has empty description", category);
+        assert!(
+            !description.is_empty(),
+            "Category {:?} has empty description",
+            category
+        );
 
         // Each category should have a spec URL
         let spec_url = category.spec_url();
-        assert!(spec_url.starts_with("https://"), "Category {:?} has invalid spec URL", category);
-        assert!(spec_url.contains("webgpu"), "Category {:?} spec URL doesn't contain 'webgpu'", category);
+        assert!(
+            spec_url.starts_with("https://"),
+            "Category {:?} has invalid spec URL",
+            category
+        );
+        assert!(
+            spec_url.contains("webgpu"),
+            "Category {:?} spec URL doesn't contain 'webgpu'",
+            category
+        );
     }
 }
 
@@ -37,12 +49,30 @@ fn test_major_categories_are_present() {
     let category_names: Vec<&str> = categories.iter().map(|c| c.name()).collect();
 
     // Verify major WebGPU objects are documented
-    assert!(category_names.contains(&"Device"), "Device category should be present");
-    assert!(category_names.contains(&"Queue"), "Queue category should be present");
-    assert!(category_names.contains(&"Buffer"), "Buffer category should be present");
-    assert!(category_names.contains(&"Texture"), "Texture category should be present");
-    assert!(category_names.contains(&"Render Pipeline"), "Render Pipeline category should be present");
-    assert!(category_names.contains(&"Compute Pipeline"), "Compute Pipeline category should be present");
+    assert!(
+        category_names.contains(&"Device"),
+        "Device category should be present"
+    );
+    assert!(
+        category_names.contains(&"Queue"),
+        "Queue category should be present"
+    );
+    assert!(
+        category_names.contains(&"Buffer"),
+        "Buffer category should be present"
+    );
+    assert!(
+        category_names.contains(&"Texture"),
+        "Texture category should be present"
+    );
+    assert!(
+        category_names.contains(&"Render Pipeline"),
+        "Render Pipeline category should be present"
+    );
+    assert!(
+        category_names.contains(&"Compute Pipeline"),
+        "Compute Pipeline category should be present"
+    );
 }
 
 #[test]

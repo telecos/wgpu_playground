@@ -1,6 +1,7 @@
 use crate::sampler::{
     AddressMode, CompareFunction, FilterMode, MipmapFilterMode, SamplerDescriptor,
 };
+use crate::tooltip::{address_mode, compare_function, filter_mode, sampler};
 
 /// UI panel for creating and configuring GPU samplers
 pub struct SamplerPanel {
@@ -274,11 +275,11 @@ impl SamplerPanel {
                     .num_columns(2)
                     .spacing([10.0, 8.0])
                     .show(ui, |ui| {
-                        ui.label("Min LOD:");
+                        sampler::LOD_MIN_CLAMP.apply(ui.label("Min LOD:"));
                         ui.text_edit_singleline(&mut self.lod_min_input);
                         ui.end_row();
 
-                        ui.label("Max LOD:");
+                        sampler::LOD_MAX_CLAMP.apply(ui.label("Max LOD:"));
                         ui.text_edit_singleline(&mut self.lod_max_input);
                         ui.end_row();
                     });
@@ -289,7 +290,9 @@ impl SamplerPanel {
             // Anisotropic Filtering
             ui.group(|ui| {
                 ui.heading("Anisotropic Filtering");
-                ui.label("Improve texture quality at oblique angles (1 = disabled, 16 = maximum quality):");
+                sampler::MAX_ANISOTROPY.apply(
+                    ui.label("Improve texture quality at oblique angles (1 = disabled, 16 = maximum quality):")
+                );
                 ui.add_space(5.0);
 
                 ui.horizontal(|ui| {
@@ -321,7 +324,7 @@ impl SamplerPanel {
             // Border Color
             ui.group(|ui| {
                 ui.heading("Border Color");
-                ui.label("Color used when address mode is ClampToBorder:");
+                sampler::BORDER_COLOR.apply(ui.label("Color used when address mode is ClampToBorder:"));
                 ui.add_space(5.0);
 
                 ui.checkbox(&mut self.enable_border_color, "Enable border color");
@@ -423,18 +426,63 @@ impl SamplerPanel {
         });
     }
 
+    // Helper methods for applying tooltips based on enum values
+    fn address_mode_tooltip(response: egui::Response, mode: AddressMode) -> egui::Response {
+        match mode {
+            AddressMode::ClampToEdge => address_mode::CLAMP_TO_EDGE.apply(response),
+            AddressMode::Repeat => address_mode::REPEAT.apply(response),
+            AddressMode::MirrorRepeat => address_mode::MIRROR_REPEAT.apply(response),
+            AddressMode::ClampToBorder => address_mode::CLAMP_TO_BORDER.apply(response),
+        }
+    }
+
+    fn filter_mode_tooltip(response: egui::Response, mode: FilterMode) -> egui::Response {
+        match mode {
+            FilterMode::Nearest => filter_mode::NEAREST.apply(response),
+            FilterMode::Linear => filter_mode::LINEAR.apply(response),
+        }
+    }
+
+    fn mipmap_filter_tooltip(response: egui::Response, mode: MipmapFilterMode) -> egui::Response {
+        match mode {
+            MipmapFilterMode::Nearest => filter_mode::NEAREST.apply(response),
+            MipmapFilterMode::Linear => filter_mode::LINEAR.apply(response),
+        }
+    }
+
+    fn compare_function_tooltip(response: egui::Response, func: CompareFunction) -> egui::Response {
+        match func {
+            CompareFunction::Never => compare_function::NEVER.apply(response),
+            CompareFunction::Less => compare_function::LESS.apply(response),
+            CompareFunction::Equal => compare_function::EQUAL.apply(response),
+            CompareFunction::LessEqual => compare_function::LESS_EQUAL.apply(response),
+            CompareFunction::Greater => compare_function::GREATER.apply(response),
+            CompareFunction::NotEqual => compare_function::NOT_EQUAL.apply(response),
+            CompareFunction::GreaterEqual => compare_function::GREATER_EQUAL.apply(response),
+            CompareFunction::Always => compare_function::ALWAYS.apply(response),
+        }
+    }
+
     fn render_address_mode_combo(ui: &mut egui::Ui, current: &mut AddressMode, id: &str) {
         egui::ComboBox::from_id_salt(id)
             .selected_text(format!("{:?}", current))
             .show_ui(ui, |ui| {
-                ui.selectable_value(current, AddressMode::ClampToEdge, "ClampToEdge")
-                    .on_hover_text("Clamp coordinates to edge");
-                ui.selectable_value(current, AddressMode::Repeat, "Repeat")
-                    .on_hover_text("Wrap coordinates, creating repeating pattern");
-                ui.selectable_value(current, AddressMode::MirrorRepeat, "MirrorRepeat")
-                    .on_hover_text("Mirror coordinates back and forth");
-                ui.selectable_value(current, AddressMode::ClampToBorder, "ClampToBorder")
-                    .on_hover_text("Use border color outside [0, 1]");
+                Self::address_mode_tooltip(
+                    ui.selectable_value(current, AddressMode::ClampToEdge, "ClampToEdge"),
+                    AddressMode::ClampToEdge,
+                );
+                Self::address_mode_tooltip(
+                    ui.selectable_value(current, AddressMode::Repeat, "Repeat"),
+                    AddressMode::Repeat,
+                );
+                Self::address_mode_tooltip(
+                    ui.selectable_value(current, AddressMode::MirrorRepeat, "MirrorRepeat"),
+                    AddressMode::MirrorRepeat,
+                );
+                Self::address_mode_tooltip(
+                    ui.selectable_value(current, AddressMode::ClampToBorder, "ClampToBorder"),
+                    AddressMode::ClampToBorder,
+                );
             });
     }
 
@@ -442,10 +490,14 @@ impl SamplerPanel {
         egui::ComboBox::from_id_salt(id)
             .selected_text(format!("{:?}", current))
             .show_ui(ui, |ui| {
-                ui.selectable_value(current, FilterMode::Nearest, "Nearest")
-                    .on_hover_text("Use nearest texel value");
-                ui.selectable_value(current, FilterMode::Linear, "Linear")
-                    .on_hover_text("Interpolate between texels");
+                Self::filter_mode_tooltip(
+                    ui.selectable_value(current, FilterMode::Nearest, "Nearest"),
+                    FilterMode::Nearest,
+                );
+                Self::filter_mode_tooltip(
+                    ui.selectable_value(current, FilterMode::Linear, "Linear"),
+                    FilterMode::Linear,
+                );
             });
     }
 
@@ -453,10 +505,14 @@ impl SamplerPanel {
         egui::ComboBox::from_id_salt(id)
             .selected_text(format!("{:?}", current))
             .show_ui(ui, |ui| {
-                ui.selectable_value(current, MipmapFilterMode::Nearest, "Nearest")
-                    .on_hover_text("Use nearest mipmap level");
-                ui.selectable_value(current, MipmapFilterMode::Linear, "Linear")
-                    .on_hover_text("Interpolate between mipmap levels");
+                Self::mipmap_filter_tooltip(
+                    ui.selectable_value(current, MipmapFilterMode::Nearest, "Nearest"),
+                    MipmapFilterMode::Nearest,
+                );
+                Self::mipmap_filter_tooltip(
+                    ui.selectable_value(current, MipmapFilterMode::Linear, "Linear"),
+                    MipmapFilterMode::Linear,
+                );
             });
     }
 
@@ -464,14 +520,38 @@ impl SamplerPanel {
         egui::ComboBox::from_id_salt(id)
             .selected_text(format!("{:?}", current))
             .show_ui(ui, |ui| {
-                ui.selectable_value(current, CompareFunction::Never, "Never");
-                ui.selectable_value(current, CompareFunction::Less, "Less");
-                ui.selectable_value(current, CompareFunction::Equal, "Equal");
-                ui.selectable_value(current, CompareFunction::LessEqual, "LessEqual");
-                ui.selectable_value(current, CompareFunction::Greater, "Greater");
-                ui.selectable_value(current, CompareFunction::NotEqual, "NotEqual");
-                ui.selectable_value(current, CompareFunction::GreaterEqual, "GreaterEqual");
-                ui.selectable_value(current, CompareFunction::Always, "Always");
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::Never, "Never"),
+                    CompareFunction::Never,
+                );
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::Less, "Less"),
+                    CompareFunction::Less,
+                );
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::Equal, "Equal"),
+                    CompareFunction::Equal,
+                );
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::LessEqual, "LessEqual"),
+                    CompareFunction::LessEqual,
+                );
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::Greater, "Greater"),
+                    CompareFunction::Greater,
+                );
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::NotEqual, "NotEqual"),
+                    CompareFunction::NotEqual,
+                );
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::GreaterEqual, "GreaterEqual"),
+                    CompareFunction::GreaterEqual,
+                );
+                Self::compare_function_tooltip(
+                    ui.selectable_value(current, CompareFunction::Always, "Always"),
+                    CompareFunction::Always,
+                );
             });
     }
 

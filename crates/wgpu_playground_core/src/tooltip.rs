@@ -392,6 +392,31 @@ pub mod filter_mode {
     );
 }
 
+/// Sampler property tooltips
+pub mod sampler {
+    use super::TooltipInfo;
+
+    pub const LOD_MIN_CLAMP: TooltipInfo = TooltipInfo::new(
+        "Minimum level of detail (LOD) to use when sampling. Lower values use higher resolution mipmap levels. Typically 0.0 to use the highest resolution.",
+        Some("#dom-gputextureviewdescriptor-basemiplevel"),
+    );
+
+    pub const LOD_MAX_CLAMP: TooltipInfo = TooltipInfo::new(
+        "Maximum level of detail (LOD) to use when sampling. Higher values allow using lower resolution mipmap levels. Common values are 32.0 or the actual mip level count.",
+        Some("#dom-gputextureviewdescriptor-miplevelcount"),
+    );
+
+    pub const MAX_ANISOTROPY: TooltipInfo = TooltipInfo::new(
+        "Maximum anisotropy level for anisotropic filtering. Higher values (up to 16) improve texture quality at oblique viewing angles but may reduce performance. A value of 1 disables anisotropic filtering.",
+        Some("#dom-gpusamplerdescriptor-maxanisotropy"),
+    );
+
+    pub const BORDER_COLOR: TooltipInfo = TooltipInfo::new(
+        "The color to use when the address mode is ClampToBorder and texture coordinates fall outside [0, 1]. Choose from predefined colors: transparent black, opaque black, opaque white, or zero.",
+        Some("#dom-gpusamplerdescriptor-bordercolor"),
+    );
+}
+
 /// Stencil operation tooltips
 pub mod stencil_operation {
     use super::TooltipInfo;

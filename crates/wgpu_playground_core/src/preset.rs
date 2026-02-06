@@ -208,7 +208,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     
     return vec4<f32>(color, 1.0);
 }
-"#.to_string(),
+"#
+        .to_string(),
         label: "pbr_material".to_string(),
         file_path: String::new(),
     });
@@ -404,7 +405,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let color = vec3<f32>(0.8, 0.8, 0.8);
     return vec4<f32>(color * lighting, 1.0);
 }
-"#.to_string(),
+"#
+        .to_string(),
         label: "shadow_mapping".to_string(),
         file_path: String::new(),
     });

@@ -42,7 +42,11 @@ impl PresetPanel {
         // Show message if any
         if let Some(ref msg) = self.message {
             ui.horizontal(|ui| {
-                ui.label(RichText::new("ℹ").color(Color32::from_rgb(70, 130, 180)).size(16.0));
+                ui.label(
+                    RichText::new("ℹ")
+                        .color(Color32::from_rgb(70, 130, 180))
+                        .size(16.0),
+                );
                 ui.label(msg);
             });
             ui.add_space(5.0);
@@ -140,17 +144,24 @@ impl PresetPanel {
                             // Selection checkbox
                             let mut selected = is_selected;
                             if ui.checkbox(&mut selected, "").changed() {
-                                self.selected_preset = if selected { Some(original_idx) } else { None };
+                                self.selected_preset =
+                                    if selected { Some(original_idx) } else { None };
                             }
 
                             // Category badge
                             let (badge_text, badge_color) = match preset.category {
-                                PresetCategory::Material => ("Material", Color32::from_rgb(70, 130, 180)),
-                                PresetCategory::Lighting => ("Lighting", Color32::from_rgb(255, 215, 0)),
+                                PresetCategory::Material => {
+                                    ("Material", Color32::from_rgb(70, 130, 180))
+                                }
+                                PresetCategory::Lighting => {
+                                    ("Lighting", Color32::from_rgb(255, 215, 0))
+                                }
                                 PresetCategory::PostProcessing => {
                                     ("Post-Processing", Color32::from_rgb(138, 43, 226))
                                 }
-                                PresetCategory::Rendering => ("Rendering", Color32::from_rgb(220, 20, 60)),
+                                PresetCategory::Rendering => {
+                                    ("Rendering", Color32::from_rgb(220, 20, 60))
+                                }
                             };
 
                             ui.label(

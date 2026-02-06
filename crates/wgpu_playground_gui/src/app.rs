@@ -16,6 +16,7 @@ use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
 use wgpu_playground_core::model_loader_panel::ModelLoaderPanel;
 use wgpu_playground_core::performance_panel::PerformancePanel;
 use wgpu_playground_core::pipeline_debugger::PipelineDebugger;
+use wgpu_playground_core::preset_panel::PresetPanel;
 use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
@@ -26,7 +27,6 @@ use wgpu_playground_core::state::Theme;
 use wgpu_playground_core::texture_inspector::TextureInspector;
 use wgpu_playground_core::texture_panel::TexturePanel;
 use wgpu_playground_core::tutorial_panel::TutorialPanel;
-use wgpu_playground_core::preset_panel::PresetPanel;
 
 pub struct PlaygroundApp {
     device_info: DeviceInfo,

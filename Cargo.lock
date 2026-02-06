@@ -3567,6 +3567,7 @@ dependencies = [
  "image",
  "js-sys",
  "log",
+ "naga",
  "notify",
  "pollster 0.3.0",
  "serde",

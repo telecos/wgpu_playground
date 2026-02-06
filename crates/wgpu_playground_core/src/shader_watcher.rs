@@ -1,5 +1,8 @@
 use std::path::PathBuf;
+
+#[cfg(not(target_arch = "wasm32"))]
 use std::sync::mpsc::{channel, Receiver};
+#[cfg(not(target_arch = "wasm32"))]
 use std::sync::{Arc, Mutex};
 
 /// Represents a shader file change event

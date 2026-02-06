@@ -234,6 +234,18 @@ impl PlaygroundApp {
                     ui.label("File:");
 
                     if ui
+                        .button("📦 Export Project")
+                        .on_hover_text(
+                            "Export current playground configuration as a standalone Rust project",
+                        )
+                        .clicked()
+                    {
+                        let state = self.export_state();
+                        self.rendering_panel
+                            .export_to_standalone_project_with_state(&state);
+                    }
+
+                    if ui
                         .button("💾 Save State")
                         .on_hover_text("Save current playground state to a file (Ctrl+S)")
                         .clicked()

@@ -656,15 +656,21 @@ impl BindGroupPanel {
             .iter()
             .map(|(binding, resource)| {
                 let resource_name = match resource {
-                    ResourceAssignment::Buffer(idx) => {
-                        self.mock_buffers.get(*idx).map(|b| b.name.clone()).unwrap_or_else(|| "Unknown Buffer".to_string())
-                    }
-                    ResourceAssignment::Texture(idx) => {
-                        self.mock_textures.get(*idx).map(|t| t.name.clone()).unwrap_or_else(|| "Unknown Texture".to_string())
-                    }
-                    ResourceAssignment::Sampler(idx) => {
-                        self.mock_samplers.get(*idx).map(|s| s.name.clone()).unwrap_or_else(|| "Unknown Sampler".to_string())
-                    }
+                    ResourceAssignment::Buffer(idx) => self
+                        .mock_buffers
+                        .get(*idx)
+                        .map(|b| b.name.clone())
+                        .unwrap_or_else(|| "Unknown Buffer".to_string()),
+                    ResourceAssignment::Texture(idx) => self
+                        .mock_textures
+                        .get(*idx)
+                        .map(|t| t.name.clone())
+                        .unwrap_or_else(|| "Unknown Texture".to_string()),
+                    ResourceAssignment::Sampler(idx) => self
+                        .mock_samplers
+                        .get(*idx)
+                        .map(|s| s.name.clone())
+                        .unwrap_or_else(|| "Unknown Sampler".to_string()),
                 };
                 (*binding, resource_name)
             })
@@ -687,7 +693,9 @@ impl BindGroupPanel {
             ui.label("• Pipeline Stages (left): Shader stages where bindings are accessible");
             ui.label("• Bindings (center): Configured binding slots with their types");
             ui.label("• Resources (right): Actual GPU resources bound to each slot");
-            ui.label("• Arrows: Show the data flow from resources through bindings to pipeline stages");
+            ui.label(
+                "• Arrows: Show the data flow from resources through bindings to pipeline stages",
+            );
             ui.label("• Colors: Different binding types are color-coded (see legend)");
         });
     }

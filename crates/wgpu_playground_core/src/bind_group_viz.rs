@@ -2,9 +2,16 @@
 ///
 /// Visual diagram showing bind group layouts and their connections to resources
 /// and pipeline stages. Helps users understand resource flow through the pipeline.
-
 use crate::bind_group_panel::{BindGroupLayoutEntryConfig, BindingTypeConfig, ShaderStagesConfig};
 use egui::{Color32, Pos2, Rect, Stroke, Vec2};
+
+/// Layout parameters for visualization positioning
+struct LayoutParams {
+    pipeline_x: f32,
+    binding_x: f32,
+    resource_x: f32,
+    start_y: f32,
+}
 
 /// Visualizer for bind group layouts
 pub struct BindGroupVisualizer {
@@ -60,21 +67,21 @@ impl BindGroupVisualizer {
             self.draw_title(&painter, rect, title);
 
             // Calculate layout
-            let pipeline_x = rect.left() + 50.0;
-            let binding_x = rect.center().x - 100.0;
-            let resource_x = rect.right() - 200.0;
+            let layout_params = LayoutParams {
+                pipeline_x: rect.left() + 50.0,
+                binding_x: rect.center().x - 100.0,
+                resource_x: rect.right() - 200.0,
+                start_y: rect.top() + 100.0,
+            };
 
             // Draw pipeline stages section
-            self.draw_pipeline_stages(&painter, rect, pipeline_x);
+            self.draw_pipeline_stages(&painter, rect, layout_params.pipeline_x);
 
             // Draw bindings section with connections
             self.draw_bindings(
                 &painter,
-                rect,
                 layout_entries,
-                binding_x,
-                pipeline_x,
-                resource_x,
+                &layout_params,
                 binding_assignments,
             );
 
@@ -121,7 +128,12 @@ impl BindGroupVisualizer {
 
             // Draw stage box
             painter.rect_filled(stage_rect, 5.0, color.linear_multiply(0.3));
-            painter.rect_stroke(stage_rect, 5.0, Stroke::new(2.0, *color), egui::epaint::StrokeKind::Outside);
+            painter.rect_stroke(
+                stage_rect,
+                5.0,
+                Stroke::new(2.0, *color),
+                egui::epaint::StrokeKind::Outside,
+            );
 
             // Draw stage name
             painter.text(
@@ -138,20 +150,17 @@ impl BindGroupVisualizer {
     fn draw_bindings(
         &self,
         painter: &egui::Painter,
-        rect: Rect,
         layout_entries: &[BindGroupLayoutEntryConfig],
-        binding_x: f32,
-        pipeline_x: f32,
-        resource_x: f32,
+        layout_params: &LayoutParams,
         binding_assignments: &[(u32, String)],
     ) {
         let binding_height = 60.0;
         let binding_spacing = 20.0;
-        let start_y = rect.top() + 100.0;
+        let start_y = layout_params.start_y;
 
         // Draw bindings label
         painter.text(
-            Pos2::new(binding_x, start_y - 30.0),
+            Pos2::new(layout_params.binding_x, start_y - 30.0),
             egui::Align2::LEFT_CENTER,
             "Bindings",
             egui::FontId::proportional(14.0),
@@ -160,7 +169,7 @@ impl BindGroupVisualizer {
 
         // Draw resources label
         painter.text(
-            Pos2::new(resource_x, start_y - 30.0),
+            Pos2::new(layout_params.resource_x, start_y - 30.0),
             egui::Align2::LEFT_CENTER,
             "Resources",
             egui::FontId::proportional(14.0),
@@ -169,15 +178,22 @@ impl BindGroupVisualizer {
 
         for (i, entry) in layout_entries.iter().enumerate() {
             let y = start_y + (i as f32) * (binding_height + binding_spacing);
-            let binding_rect =
-                Rect::from_min_size(Pos2::new(binding_x, y), Vec2::new(200.0, binding_height));
+            let binding_rect = Rect::from_min_size(
+                Pos2::new(layout_params.binding_x, y),
+                Vec2::new(200.0, binding_height),
+            );
 
             // Get color based on binding type
             let color = self.get_binding_type_color(&entry.binding_type);
 
             // Draw binding box
             painter.rect_filled(binding_rect, 5.0, color.linear_multiply(0.2));
-            painter.rect_stroke(binding_rect, 5.0, Stroke::new(2.0, color), egui::epaint::StrokeKind::Outside);
+            painter.rect_stroke(
+                binding_rect,
+                5.0,
+                Stroke::new(2.0, color),
+                egui::epaint::StrokeKind::Outside,
+            );
 
             // Draw binding number and type
             let binding_text = format!("Binding {}", entry.binding);
@@ -204,7 +220,7 @@ impl BindGroupVisualizer {
                 painter,
                 &entry.visibility,
                 Pos2::new(binding_rect.left(), binding_rect.center().y),
-                pipeline_x,
+                layout_params.pipeline_x,
                 start_y,
                 color,
             );
@@ -217,7 +233,7 @@ impl BindGroupVisualizer {
                 self.draw_resource_connection(
                     painter,
                     Pos2::new(binding_rect.right(), binding_rect.center().y),
-                    resource_x,
+                    layout_params.resource_x,
                     y,
                     binding_height,
                     resource_name,
@@ -242,10 +258,7 @@ impl BindGroupVisualizer {
         let stage_width = 120.0;
 
         if visibility.vertex {
-            let target = Pos2::new(
-                pipeline_x + stage_width,
-                start_y + stage_height / 2.0,
-            );
+            let target = Pos2::new(pipeline_x + stage_width, start_y + stage_height / 2.0);
             self.draw_connection_line(painter, binding_pos, target, color, "Vertex");
         }
 
@@ -267,6 +280,7 @@ impl BindGroupVisualizer {
     }
 
     /// Draw connection from binding to resource
+    #[allow(clippy::too_many_arguments)]
     fn draw_resource_connection(
         &self,
         painter: &egui::Painter,
@@ -280,7 +294,12 @@ impl BindGroupVisualizer {
         // Draw resource box
         let resource_rect = Rect::from_min_size(Pos2::new(resource_x, y), Vec2::new(180.0, height));
         painter.rect_filled(resource_rect, 5.0, color.linear_multiply(0.15));
-        painter.rect_stroke(resource_rect, 5.0, Stroke::new(1.5, color), egui::epaint::StrokeKind::Outside);
+        painter.rect_stroke(
+            resource_rect,
+            5.0,
+            Stroke::new(1.5, color),
+            egui::epaint::StrokeKind::Outside,
+        );
 
         // Draw resource name
         painter.text(
@@ -306,10 +325,7 @@ impl BindGroupVisualizer {
         _label: &str, // TODO: Add labels to connection lines for better clarity
     ) {
         // Simple line (can be upgraded to curved later)
-        painter.line_segment(
-            [from, to],
-            Stroke::new(2.0, color.linear_multiply(0.6)),
-        );
+        painter.line_segment([from, to], Stroke::new(2.0, color.linear_multiply(0.6)));
 
         // Draw arrow head at target
         let arrow_size = 8.0;
@@ -332,8 +348,8 @@ impl BindGroupVisualizer {
         match binding_type {
             BindingTypeConfig::UniformBuffer => Color32::from_rgb(50, 150, 100), // Sea Green
             BindingTypeConfig::StorageBuffer { .. } => Color32::from_rgb(70, 130, 180), // Steel Blue
-            BindingTypeConfig::Texture => Color32::from_rgb(255, 140, 0),        // Dark Orange
-            BindingTypeConfig::Sampler => Color32::from_rgb(218, 165, 32),       // Goldenrod
+            BindingTypeConfig::Texture => Color32::from_rgb(255, 140, 0), // Dark Orange
+            BindingTypeConfig::Sampler => Color32::from_rgb(218, 165, 32), // Goldenrod
             BindingTypeConfig::StorageTexture => Color32::from_rgb(220, 20, 60), // Crimson
         }
     }
@@ -353,7 +369,10 @@ impl BindGroupVisualizer {
 
         let binding_types = [
             ("Uniform Buffer", BindingTypeConfig::UniformBuffer),
-            ("Storage Buffer", BindingTypeConfig::StorageBuffer { read_only: true }),
+            (
+                "Storage Buffer",
+                BindingTypeConfig::StorageBuffer { read_only: true },
+            ),
             ("Texture", BindingTypeConfig::Texture),
             ("Sampler", BindingTypeConfig::Sampler),
             ("Storage Texture", BindingTypeConfig::StorageTexture),
@@ -366,7 +385,12 @@ impl BindGroupVisualizer {
             // Draw color box
             let box_rect = Rect::from_min_size(Pos2::new(legend_x, y - 5.0), Vec2::new(12.0, 12.0));
             painter.rect_filled(box_rect, 2.0, color);
-            painter.rect_stroke(box_rect, 2.0, Stroke::new(1.0, Color32::WHITE), egui::epaint::StrokeKind::Outside);
+            painter.rect_stroke(
+                box_rect,
+                2.0,
+                Stroke::new(1.0, Color32::WHITE),
+                egui::epaint::StrokeKind::Outside,
+            );
 
             // Draw label
             painter.text(
@@ -394,13 +418,13 @@ mod tests {
     #[test]
     fn test_binding_type_colors() {
         let viz = BindGroupVisualizer::new();
-        
+
         let uniform_color = viz.get_binding_type_color(&BindingTypeConfig::UniformBuffer);
         assert_ne!(uniform_color, Color32::TRANSPARENT);
-        
+
         let texture_color = viz.get_binding_type_color(&BindingTypeConfig::Texture);
         assert_ne!(texture_color, Color32::TRANSPARENT);
-        
+
         // Different types should have different colors
         assert_ne!(uniform_color, texture_color);
     }

@@ -536,3 +536,23 @@ pub mod shader_visibility {
         Some("#dom-gpushadervisibility-compute"),
     );
 }
+
+/// Compute dispatch tooltips
+pub mod compute {
+    use super::TooltipInfo;
+
+    pub const WORKGROUP_COUNT_X: TooltipInfo = TooltipInfo::new(
+        "Number of workgroups dispatched in the X dimension. Each workgroup executes the compute shader with the workgroup size defined in the shader. Total invocations in X = workgroup_count_x * workgroup_size_x.",
+        Some("#dom-gpucomputepassencoder-dispatchworkgroups"),
+    );
+
+    pub const WORKGROUP_COUNT_Y: TooltipInfo = TooltipInfo::new(
+        "Number of workgroups dispatched in the Y dimension. Each workgroup executes the compute shader with the workgroup size defined in the shader. Total invocations in Y = workgroup_count_y * workgroup_size_y.",
+        Some("#dom-gpucomputepassencoder-dispatchworkgroups"),
+    );
+
+    pub const WORKGROUP_COUNT_Z: TooltipInfo = TooltipInfo::new(
+        "Number of workgroups dispatched in the Z dimension. Each workgroup executes the compute shader with the workgroup size defined in the shader. Total invocations in Z = workgroup_count_z * workgroup_size_z.",
+        Some("#dom-gpucomputepassencoder-dispatchworkgroups"),
+    );
+}

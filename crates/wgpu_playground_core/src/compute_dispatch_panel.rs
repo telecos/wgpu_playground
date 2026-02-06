@@ -1,3 +1,5 @@
+use crate::tooltip::compute;
+
 /// UI panel for configuring and executing compute dispatch commands
 pub struct ComputeDispatchPanel {
     // Dispatch type selection
@@ -291,27 +293,24 @@ impl ComputeDispatchPanel {
                 .spacing([10.0, 8.0])
                 .show(ui, |ui| {
                     ui.label("Workgroups X:");
-                    ui.add(
+                    compute::WORKGROUP_COUNT_X.apply(ui.add(
                         egui::TextEdit::singleline(&mut self.workgroups_x_input)
                             .desired_width(100.0),
-                    )
-                    .on_hover_text("Number of workgroups to dispatch in the X dimension");
+                    ));
                     ui.end_row();
 
                     ui.label("Workgroups Y:");
-                    ui.add(
+                    compute::WORKGROUP_COUNT_Y.apply(ui.add(
                         egui::TextEdit::singleline(&mut self.workgroups_y_input)
                             .desired_width(100.0),
-                    )
-                    .on_hover_text("Number of workgroups to dispatch in the Y dimension");
+                    ));
                     ui.end_row();
 
                     ui.label("Workgroups Z:");
-                    ui.add(
+                    compute::WORKGROUP_COUNT_Z.apply(ui.add(
                         egui::TextEdit::singleline(&mut self.workgroups_z_input)
                             .desired_width(100.0),
-                    )
-                    .on_hover_text("Number of workgroups to dispatch in the Z dimension");
+                    ));
                     ui.end_row();
                 });
 

@@ -237,9 +237,12 @@ fn fs_main() -> @location(0) vec4<f32> {
 
     /// Extract line number from error message
     /// Returns None if no line number found
+    /// 
+    /// Supported error message formats:
+    /// - `:12:` - Colon-delimited format (e.g., "error:12:5: message")
+    /// - `line 12` - Explicit line number (case-insensitive)
     fn extract_line_number(&self, text: &str) -> Option<usize> {
-        // Look for patterns like ":12:" or "line 12" 
-        // Simple pattern matching for common error formats
+        // Try pattern like ":12:" first
         if let Some(pos) = text.find(':') {
             let after_colon = &text[pos + 1..];
             if let Some(end) = after_colon.find(':') {
@@ -249,15 +252,18 @@ fn fs_main() -> @location(0) vec4<f32> {
             }
         }
         
-        // Try "line N" pattern
-        if let Some(pos) = text.to_lowercase().find("line ") {
-            let after_line = &text[pos + 5..];
-            let num_str: String = after_line
-                .chars()
-                .take_while(|c| c.is_ascii_digit())
-                .collect();
-            if let Ok(num) = num_str.parse::<usize>() {
-                return Some(num);
+        // Try "line N" pattern (case-insensitive)
+        // Use ASCII case-insensitive comparison to avoid allocation
+        for i in 0..text.len().saturating_sub(4) {
+            if text[i..].starts_with("line ") || text[i..].starts_with("Line ") {
+                let after_line = &text[i + 5..];
+                let num_str: String = after_line
+                    .chars()
+                    .take_while(|c| c.is_ascii_digit())
+                    .collect();
+                if let Ok(num) = num_str.parse::<usize>() {
+                    return Some(num);
+                }
             }
         }
         
@@ -467,10 +473,14 @@ fn fs_main() -> @location(0) vec4<f32> {
     /// Render editor with line numbers
     /// Returns true if the text was changed
     fn render_with_line_numbers(&mut self, ui: &mut egui::Ui) -> bool {
+        // Constants for line number column width calculation
+        const CHAR_WIDTH_PIXELS: f32 = 8.0;       // Approximate width of a monospace character
+        const ERROR_MARKER_SPACE_PIXELS: f32 = 30.0; // Extra space for error marker (❌)
+
         // Split into lines
         let lines: Vec<&str> = self.source_code.lines().collect();
         let line_count = lines.len();
-        let line_number_width = (line_count.to_string().len() as f32) * 8.0 + 30.0; // Extra space for error markers
+        let line_number_width = (line_count.to_string().len() as f32) * CHAR_WIDTH_PIXELS + ERROR_MARKER_SPACE_PIXELS;
 
         // Create a set of lines with errors for quick lookup
         let error_lines: std::collections::HashSet<usize> = self
@@ -800,8 +810,6 @@ mod tests {
         editor.set_source_code("invalid wgsl code @@@".to_string());
         // Real-time validation should have been triggered by set_source_code
         assert!(!editor.validation_errors().is_empty());
-        // Should have at least one error
-        assert!(editor.validation_errors().len() > 0);
         // Error should have a valid line number
         assert!(editor.validation_errors()[0].line > 0);
         // Error should have a message

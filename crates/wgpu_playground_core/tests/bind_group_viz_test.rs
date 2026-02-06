@@ -12,9 +12,9 @@ fn test_visualizer_default() {
 
 #[test]
 fn test_visualizer_with_empty_layout() {
-    let viz = BindGroupVisualizer::new();
+    let _viz = BindGroupVisualizer::new();
     let layout_entries: Vec<BindGroupLayoutEntryConfig> = vec![];
-    let binding_assignments: Vec<(u32, String)> = vec![];
+    let _binding_assignments: Vec<(u32, String)> = vec![];
     
     // Should handle empty layout gracefully - this test ensures no panics
     // In actual UI, it would show "No Bind Group Layout" message
@@ -47,6 +47,10 @@ fn test_visualizer_with_basic_layout() {
     assert_eq!(binding_assignments.len(), 1);
     assert_eq!(layout_entries[0].binding, 0);
     assert_eq!(binding_assignments[0].0, 0);
+    
+    // Verify the visualizer can get the correct color for this binding type
+    let color = viz.get_binding_type_color(&layout_entries[0].binding_type);
+    assert_ne!(color, egui::Color32::TRANSPARENT);
 }
 
 #[test]
@@ -109,6 +113,16 @@ fn test_visualizer_with_complex_layout() {
         assert_eq!(layout_entries[i].binding as usize, i);
         assert_eq!(binding_assignments[i].0 as usize, i);
     }
+    
+    // Verify each binding type gets a distinct color
+    let colors: Vec<_> = layout_entries.iter()
+        .map(|entry| viz.get_binding_type_color(&entry.binding_type))
+        .collect();
+    
+    // Colors should be distinct (at least uniform vs texture vs sampler vs storage)
+    assert_ne!(colors[0], colors[1]); // Uniform vs Texture
+    assert_ne!(colors[1], colors[2]); // Texture vs Sampler
+    assert_ne!(colors[0], colors[3]); // Uniform vs Storage
 }
 
 #[test]

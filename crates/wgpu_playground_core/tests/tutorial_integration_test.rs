@@ -118,11 +118,12 @@ fn test_tutorial_panel_initialization() {
 
 #[test]
 fn test_tutorial_state_progression() {
-    let mut state = TutorialState::default();
-
     // Start tutorial
-    state.current_tutorial = Some(0);
-    state.current_step = 0;
+    let mut state = TutorialState {
+        current_tutorial: Some(0),
+        current_step: 0,
+        ..Default::default()
+    };
 
     // Progress through steps
     state.current_step += 1;

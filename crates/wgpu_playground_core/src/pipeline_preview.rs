@@ -48,6 +48,12 @@ pub struct RenderPipelinePreviewState {
     height: u32,
 }
 
+impl Default for RenderPipelinePreviewState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RenderPipelinePreviewState {
     pub fn new() -> Self {
         Self {
@@ -128,55 +134,117 @@ impl RenderPipelinePreviewState {
         // Each face has a different color to visualize culling and blending
         let vertices = vec![
             // Front face (red)
-            PreviewVertex { position: [-0.5, -0.5,  0.5], color: [1.0, 0.3, 0.3] },
-            PreviewVertex { position: [ 0.5, -0.5,  0.5], color: [1.0, 0.3, 0.3] },
-            PreviewVertex { position: [ 0.5,  0.5,  0.5], color: [1.0, 0.3, 0.3] },
-            PreviewVertex { position: [-0.5,  0.5,  0.5], color: [1.0, 0.3, 0.3] },
-            
+            PreviewVertex {
+                position: [-0.5, -0.5, 0.5],
+                color: [1.0, 0.3, 0.3],
+            },
+            PreviewVertex {
+                position: [0.5, -0.5, 0.5],
+                color: [1.0, 0.3, 0.3],
+            },
+            PreviewVertex {
+                position: [0.5, 0.5, 0.5],
+                color: [1.0, 0.3, 0.3],
+            },
+            PreviewVertex {
+                position: [-0.5, 0.5, 0.5],
+                color: [1.0, 0.3, 0.3],
+            },
             // Back face (green)
-            PreviewVertex { position: [ 0.5, -0.5, -0.5], color: [0.3, 1.0, 0.3] },
-            PreviewVertex { position: [-0.5, -0.5, -0.5], color: [0.3, 1.0, 0.3] },
-            PreviewVertex { position: [-0.5,  0.5, -0.5], color: [0.3, 1.0, 0.3] },
-            PreviewVertex { position: [ 0.5,  0.5, -0.5], color: [0.3, 1.0, 0.3] },
-            
+            PreviewVertex {
+                position: [0.5, -0.5, -0.5],
+                color: [0.3, 1.0, 0.3],
+            },
+            PreviewVertex {
+                position: [-0.5, -0.5, -0.5],
+                color: [0.3, 1.0, 0.3],
+            },
+            PreviewVertex {
+                position: [-0.5, 0.5, -0.5],
+                color: [0.3, 1.0, 0.3],
+            },
+            PreviewVertex {
+                position: [0.5, 0.5, -0.5],
+                color: [0.3, 1.0, 0.3],
+            },
             // Top face (blue)
-            PreviewVertex { position: [-0.5,  0.5,  0.5], color: [0.3, 0.3, 1.0] },
-            PreviewVertex { position: [ 0.5,  0.5,  0.5], color: [0.3, 0.3, 1.0] },
-            PreviewVertex { position: [ 0.5,  0.5, -0.5], color: [0.3, 0.3, 1.0] },
-            PreviewVertex { position: [-0.5,  0.5, -0.5], color: [0.3, 0.3, 1.0] },
-            
+            PreviewVertex {
+                position: [-0.5, 0.5, 0.5],
+                color: [0.3, 0.3, 1.0],
+            },
+            PreviewVertex {
+                position: [0.5, 0.5, 0.5],
+                color: [0.3, 0.3, 1.0],
+            },
+            PreviewVertex {
+                position: [0.5, 0.5, -0.5],
+                color: [0.3, 0.3, 1.0],
+            },
+            PreviewVertex {
+                position: [-0.5, 0.5, -0.5],
+                color: [0.3, 0.3, 1.0],
+            },
             // Bottom face (yellow)
-            PreviewVertex { position: [-0.5, -0.5, -0.5], color: [1.0, 1.0, 0.3] },
-            PreviewVertex { position: [ 0.5, -0.5, -0.5], color: [1.0, 1.0, 0.3] },
-            PreviewVertex { position: [ 0.5, -0.5,  0.5], color: [1.0, 1.0, 0.3] },
-            PreviewVertex { position: [-0.5, -0.5,  0.5], color: [1.0, 1.0, 0.3] },
-            
+            PreviewVertex {
+                position: [-0.5, -0.5, -0.5],
+                color: [1.0, 1.0, 0.3],
+            },
+            PreviewVertex {
+                position: [0.5, -0.5, -0.5],
+                color: [1.0, 1.0, 0.3],
+            },
+            PreviewVertex {
+                position: [0.5, -0.5, 0.5],
+                color: [1.0, 1.0, 0.3],
+            },
+            PreviewVertex {
+                position: [-0.5, -0.5, 0.5],
+                color: [1.0, 1.0, 0.3],
+            },
             // Right face (magenta)
-            PreviewVertex { position: [ 0.5, -0.5,  0.5], color: [1.0, 0.3, 1.0] },
-            PreviewVertex { position: [ 0.5, -0.5, -0.5], color: [1.0, 0.3, 1.0] },
-            PreviewVertex { position: [ 0.5,  0.5, -0.5], color: [1.0, 0.3, 1.0] },
-            PreviewVertex { position: [ 0.5,  0.5,  0.5], color: [1.0, 0.3, 1.0] },
-            
+            PreviewVertex {
+                position: [0.5, -0.5, 0.5],
+                color: [1.0, 0.3, 1.0],
+            },
+            PreviewVertex {
+                position: [0.5, -0.5, -0.5],
+                color: [1.0, 0.3, 1.0],
+            },
+            PreviewVertex {
+                position: [0.5, 0.5, -0.5],
+                color: [1.0, 0.3, 1.0],
+            },
+            PreviewVertex {
+                position: [0.5, 0.5, 0.5],
+                color: [1.0, 0.3, 1.0],
+            },
             // Left face (cyan)
-            PreviewVertex { position: [-0.5, -0.5, -0.5], color: [0.3, 1.0, 1.0] },
-            PreviewVertex { position: [-0.5, -0.5,  0.5], color: [0.3, 1.0, 1.0] },
-            PreviewVertex { position: [-0.5,  0.5,  0.5], color: [0.3, 1.0, 1.0] },
-            PreviewVertex { position: [-0.5,  0.5, -0.5], color: [0.3, 1.0, 1.0] },
+            PreviewVertex {
+                position: [-0.5, -0.5, -0.5],
+                color: [0.3, 1.0, 1.0],
+            },
+            PreviewVertex {
+                position: [-0.5, -0.5, 0.5],
+                color: [0.3, 1.0, 1.0],
+            },
+            PreviewVertex {
+                position: [-0.5, 0.5, 0.5],
+                color: [0.3, 1.0, 1.0],
+            },
+            PreviewVertex {
+                position: [-0.5, 0.5, -0.5],
+                color: [0.3, 1.0, 1.0],
+            },
         ];
 
         let indices: Vec<u16> = vec![
             // Front face
-            0, 1, 2,  0, 2, 3,
-            // Back face
-            4, 5, 6,  4, 6, 7,
-            // Top face
-            8, 9, 10,  8, 10, 11,
-            // Bottom face
-            12, 13, 14,  12, 14, 15,
-            // Right face
-            16, 17, 18,  16, 18, 19,
-            // Left face
-            20, 21, 22,  20, 22, 23,
+            0, 1, 2, 0, 2, 3, // Back face
+            4, 5, 6, 4, 6, 7, // Top face
+            8, 9, 10, 8, 10, 11, // Bottom face
+            12, 13, 14, 12, 14, 15, // Right face
+            16, 17, 18, 16, 18, 19, // Left face
+            20, 21, 22, 20, 22, 23,
         ];
 
         self.index_count = indices.len() as u32;
@@ -330,20 +398,30 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                 crate::render_pipeline::BlendFactor::Src => wgpu::BlendFactor::Src,
                 crate::render_pipeline::BlendFactor::OneMinusSrc => wgpu::BlendFactor::OneMinusSrc,
                 crate::render_pipeline::BlendFactor::SrcAlpha => wgpu::BlendFactor::SrcAlpha,
-                crate::render_pipeline::BlendFactor::OneMinusSrcAlpha => wgpu::BlendFactor::OneMinusSrcAlpha,
+                crate::render_pipeline::BlendFactor::OneMinusSrcAlpha => {
+                    wgpu::BlendFactor::OneMinusSrcAlpha
+                }
                 crate::render_pipeline::BlendFactor::Dst => wgpu::BlendFactor::Dst,
                 crate::render_pipeline::BlendFactor::OneMinusDst => wgpu::BlendFactor::OneMinusDst,
                 crate::render_pipeline::BlendFactor::DstAlpha => wgpu::BlendFactor::DstAlpha,
-                crate::render_pipeline::BlendFactor::OneMinusDstAlpha => wgpu::BlendFactor::OneMinusDstAlpha,
-                crate::render_pipeline::BlendFactor::SrcAlphaSaturated => wgpu::BlendFactor::SrcAlphaSaturated,
+                crate::render_pipeline::BlendFactor::OneMinusDstAlpha => {
+                    wgpu::BlendFactor::OneMinusDstAlpha
+                }
+                crate::render_pipeline::BlendFactor::SrcAlphaSaturated => {
+                    wgpu::BlendFactor::SrcAlphaSaturated
+                }
                 crate::render_pipeline::BlendFactor::Constant => wgpu::BlendFactor::Constant,
-                crate::render_pipeline::BlendFactor::OneMinusConstant => wgpu::BlendFactor::OneMinusConstant,
+                crate::render_pipeline::BlendFactor::OneMinusConstant => {
+                    wgpu::BlendFactor::OneMinusConstant
+                }
             };
 
             let convert_blend_operation = |op| match op {
                 crate::render_pipeline::BlendOperation::Add => wgpu::BlendOperation::Add,
                 crate::render_pipeline::BlendOperation::Subtract => wgpu::BlendOperation::Subtract,
-                crate::render_pipeline::BlendOperation::ReverseSubtract => wgpu::BlendOperation::ReverseSubtract,
+                crate::render_pipeline::BlendOperation::ReverseSubtract => {
+                    wgpu::BlendOperation::ReverseSubtract
+                }
                 crate::render_pipeline::BlendOperation::Min => wgpu::BlendOperation::Min,
                 crate::render_pipeline::BlendOperation::Max => wgpu::BlendOperation::Max,
             };
@@ -453,7 +531,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                 label: Some("Pipeline Preview Encoder"),
             });
 
-            if let (Some(view), Some(depth_view)) = (&self.render_texture_view, &self.depth_texture_view) {
+            if let (Some(view), Some(depth_view)) =
+                (&self.render_texture_view, &self.depth_texture_view)
+            {
                 {
                     let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: Some("Pipeline Preview Render Pass"),
@@ -490,7 +570,8 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                         render_pass.set_pipeline(pipeline);
                         render_pass.set_bind_group(0, &bind_group, &[]);
                         render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
-                        render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                        render_pass
+                            .set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
                         render_pass.draw_indexed(0..self.index_count, 0, 0..1);
                     }
                 }
@@ -539,6 +620,7 @@ impl Matrix4 {
 impl std::ops::Mul for Matrix4 {
     type Output = Matrix4;
 
+    #[allow(clippy::needless_range_loop)]
     fn mul(self, rhs: Matrix4) -> Matrix4 {
         let mut result = [[0.0; 4]; 4];
         for i in 0..4 {
@@ -565,11 +647,7 @@ fn perspective_matrix(fovy: f32, aspect: f32, near: f32, far: f32) -> Matrix4 {
 }
 
 fn view_matrix(eye: [f32; 3], center: [f32; 3], up: [f32; 3]) -> Matrix4 {
-    let f = normalize([
-        center[0] - eye[0],
-        center[1] - eye[1],
-        center[2] - eye[2],
-    ]);
+    let f = normalize([center[0] - eye[0], center[1] - eye[1], center[2] - eye[2]]);
     let s = normalize(cross(f, up));
     let u = cross(s, f);
 

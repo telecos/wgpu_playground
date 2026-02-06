@@ -957,7 +957,10 @@ impl RenderPipelinePanel {
         // Depth-Stencil State
         ui.group(|ui| {
             ui.heading("📏 Depth-Stencil State");
-            ui.checkbox(&mut self.enable_depth_stencil, "Enable Depth-Stencil Testing");
+            ui.checkbox(
+                &mut self.enable_depth_stencil,
+                "Enable Depth-Stencil Testing",
+            );
             ui.add_space(5.0);
 
             if self.enable_depth_stencil {
@@ -975,7 +978,11 @@ impl RenderPipelinePanel {
 
                         ui.label("Depth Compare:")
                             .on_hover_text("Comparison function for depth test");
-                        Self::render_compare_function_combo(ui, &mut self.depth_compare, "depth_compare");
+                        Self::render_compare_function_combo(
+                            ui,
+                            &mut self.depth_compare,
+                            "depth_compare",
+                        );
                         ui.end_row();
 
                         ui.label("Stencil Read Mask:");
@@ -995,19 +1002,35 @@ impl RenderPipelinePanel {
                         .spacing([10.0, 8.0])
                         .show(ui, |ui| {
                             ui.label("Compare:");
-                            Self::render_compare_function_combo(ui, &mut self.stencil_front_compare, "stencil_front_compare");
+                            Self::render_compare_function_combo(
+                                ui,
+                                &mut self.stencil_front_compare,
+                                "stencil_front_compare",
+                            );
                             ui.end_row();
 
                             ui.label("Fail Operation:");
-                            Self::render_stencil_operation_combo(ui, &mut self.stencil_front_fail_op, "stencil_front_fail");
+                            Self::render_stencil_operation_combo(
+                                ui,
+                                &mut self.stencil_front_fail_op,
+                                "stencil_front_fail",
+                            );
                             ui.end_row();
 
                             ui.label("Depth Fail Operation:");
-                            Self::render_stencil_operation_combo(ui, &mut self.stencil_front_depth_fail_op, "stencil_front_depth_fail");
+                            Self::render_stencil_operation_combo(
+                                ui,
+                                &mut self.stencil_front_depth_fail_op,
+                                "stencil_front_depth_fail",
+                            );
                             ui.end_row();
 
                             ui.label("Pass Operation:");
-                            Self::render_stencil_operation_combo(ui, &mut self.stencil_front_pass_op, "stencil_front_pass");
+                            Self::render_stencil_operation_combo(
+                                ui,
+                                &mut self.stencil_front_pass_op,
+                                "stencil_front_pass",
+                            );
                             ui.end_row();
                         });
                 });
@@ -1018,19 +1041,35 @@ impl RenderPipelinePanel {
                         .spacing([10.0, 8.0])
                         .show(ui, |ui| {
                             ui.label("Compare:");
-                            Self::render_compare_function_combo(ui, &mut self.stencil_back_compare, "stencil_back_compare");
+                            Self::render_compare_function_combo(
+                                ui,
+                                &mut self.stencil_back_compare,
+                                "stencil_back_compare",
+                            );
                             ui.end_row();
 
                             ui.label("Fail Operation:");
-                            Self::render_stencil_operation_combo(ui, &mut self.stencil_back_fail_op, "stencil_back_fail");
+                            Self::render_stencil_operation_combo(
+                                ui,
+                                &mut self.stencil_back_fail_op,
+                                "stencil_back_fail",
+                            );
                             ui.end_row();
 
                             ui.label("Depth Fail Operation:");
-                            Self::render_stencil_operation_combo(ui, &mut self.stencil_back_depth_fail_op, "stencil_back_depth_fail");
+                            Self::render_stencil_operation_combo(
+                                ui,
+                                &mut self.stencil_back_depth_fail_op,
+                                "stencil_back_depth_fail",
+                            );
                             ui.end_row();
 
                             ui.label("Pass Operation:");
-                            Self::render_stencil_operation_combo(ui, &mut self.stencil_back_pass_op, "stencil_back_pass");
+                            Self::render_stencil_operation_combo(
+                                ui,
+                                &mut self.stencil_back_pass_op,
+                                "stencil_back_pass",
+                            );
                             ui.end_row();
                         });
                 });
@@ -1102,15 +1141,27 @@ impl RenderPipelinePanel {
                         .spacing([10.0, 8.0])
                         .show(ui, |ui| {
                             ui.label("Source Factor:");
-                            Self::render_blend_factor_combo(ui, &mut self.color_blend_src, "color_src");
+                            Self::render_blend_factor_combo(
+                                ui,
+                                &mut self.color_blend_src,
+                                "color_src",
+                            );
                             ui.end_row();
 
                             ui.label("Destination Factor:");
-                            Self::render_blend_factor_combo(ui, &mut self.color_blend_dst, "color_dst");
+                            Self::render_blend_factor_combo(
+                                ui,
+                                &mut self.color_blend_dst,
+                                "color_dst",
+                            );
                             ui.end_row();
 
                             ui.label("Operation:");
-                            Self::render_blend_operation_combo(ui, &mut self.color_blend_op, "color_op");
+                            Self::render_blend_operation_combo(
+                                ui,
+                                &mut self.color_blend_op,
+                                "color_op",
+                            );
                             ui.end_row();
                         });
                 });
@@ -1121,15 +1172,27 @@ impl RenderPipelinePanel {
                         .spacing([10.0, 8.0])
                         .show(ui, |ui| {
                             ui.label("Source Factor:");
-                            Self::render_blend_factor_combo(ui, &mut self.alpha_blend_src, "alpha_src");
+                            Self::render_blend_factor_combo(
+                                ui,
+                                &mut self.alpha_blend_src,
+                                "alpha_src",
+                            );
                             ui.end_row();
 
                             ui.label("Destination Factor:");
-                            Self::render_blend_factor_combo(ui, &mut self.alpha_blend_dst, "alpha_dst");
+                            Self::render_blend_factor_combo(
+                                ui,
+                                &mut self.alpha_blend_dst,
+                                "alpha_dst",
+                            );
                             ui.end_row();
 
                             ui.label("Operation:");
-                            Self::render_blend_operation_combo(ui, &mut self.alpha_blend_op, "alpha_op");
+                            Self::render_blend_operation_combo(
+                                ui,
+                                &mut self.alpha_blend_op,
+                                "alpha_op",
+                            );
                             ui.end_row();
                         });
                 });

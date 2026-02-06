@@ -235,7 +235,9 @@ impl PlaygroundApp {
 
                     if ui
                         .button("📦 Export Project")
-                        .on_hover_text("Export current playground configuration as a standalone Rust project")
+                        .on_hover_text(
+                            "Export current playground configuration as a standalone Rust project",
+                        )
                         .clicked()
                     {
                         let state = self.export_state();

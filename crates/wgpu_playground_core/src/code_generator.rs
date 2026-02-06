@@ -643,7 +643,8 @@ impl CodeGenerator {
 
     /// Generate State implementation
     fn generate_state_impl(&self, state: &PlaygroundState) -> String {
-        let mut code = String::from("impl State {\n    async fn new(window: Arc<Window>) -> Self {\n");
+        let mut code =
+            String::from("impl State {\n    async fn new(window: Arc<Window>) -> Self {\n");
 
         // Basic setup
         code.push_str(
@@ -1311,8 +1312,8 @@ mod tests {
             api_coverage: None,
         };
 
-        let config = CodeGenConfig::new("full_export".to_string())
-            .with_playground_state(playground_state);
+        let config =
+            CodeGenConfig::new("full_export".to_string()).with_playground_state(playground_state);
 
         let generator = CodeGenerator::new(config);
         generator.generate(&temp_dir).unwrap();

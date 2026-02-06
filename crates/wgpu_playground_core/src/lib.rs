@@ -9,6 +9,7 @@ pub mod bind_group_panel;
 pub mod buffer;
 pub mod buffer_inspector;
 pub mod buffer_panel;
+pub mod buffer_preview;
 pub mod code_generator;
 pub mod command_encoder;
 pub mod command_recording_panel;

@@ -115,7 +115,9 @@ impl TutorialPanel {
     }
 
     fn render_active_tutorial(&mut self, ui: &mut Ui, tutorial_idx: usize) {
-        let tutorial = &self.tutorials[tutorial_idx];
+        let tutorial_title = self.tutorials[tutorial_idx].title.clone();
+        let tutorial_steps_len = self.tutorials[tutorial_idx].steps.len();
+        let tutorial_id = self.tutorials[tutorial_idx].id.clone();
         let current_step_idx = self.state.current_step;
 
         // Tutorial header
@@ -127,19 +129,19 @@ impl TutorialPanel {
             }
 
             ui.separator();
-            ui.heading(&tutorial.title);
+            ui.heading(&tutorial_title);
         });
 
         ui.separator();
         ui.add_space(5.0);
 
         // Progress bar
-        let progress = current_step_idx as f32 / tutorial.steps.len() as f32;
+        let progress = current_step_idx as f32 / tutorial_steps_len as f32;
         ui.horizontal(|ui| {
             ui.label(format!(
                 "Progress: Step {} of {}",
                 current_step_idx + 1,
-                tutorial.steps.len()
+                tutorial_steps_len
             ));
             ui.add_space(5.0);
             let progress_bar = egui::ProgressBar::new(progress)
@@ -151,12 +153,12 @@ impl TutorialPanel {
         ui.add_space(10.0);
 
         // Current step content
-        if current_step_idx < tutorial.steps.len() {
-            let step = &tutorial.steps[current_step_idx];
-            self.render_tutorial_step(ui, step, tutorial_idx);
+        if current_step_idx < tutorial_steps_len {
+            let step = self.tutorials[tutorial_idx].steps[current_step_idx].clone();
+            self.render_tutorial_step(ui, &step, tutorial_idx);
         } else {
             // Tutorial completed
-            self.render_tutorial_completion(ui, tutorial);
+            self.render_tutorial_completion(ui, &tutorial_id);
         }
     }
 
@@ -240,10 +242,8 @@ impl TutorialPanel {
 
             ui.horizontal(|ui| {
                 // Previous button
-                if self.state.current_step > 0 {
-                    if ui.button("← Previous Step").clicked() {
-                        self.state.current_step -= 1;
-                    }
+                if self.state.current_step > 0 && ui.button("← Previous Step").clicked() {
+                    self.state.current_step -= 1;
                 }
 
                 ui.add_space(10.0);
@@ -276,19 +276,28 @@ impl TutorialPanel {
         });
     }
 
-    fn render_tutorial_completion(&mut self, ui: &mut Ui, tutorial: &Tutorial) {
+    fn render_tutorial_completion(&mut self, ui: &mut Ui, tutorial_id: &str) {
         ui.vertical_centered(|ui| {
             ui.add_space(40.0);
             ui.heading(RichText::new("🎉 Congratulations!").size(24.0).color(Color32::GREEN));
             ui.add_space(20.0);
-            ui.label(RichText::new(format!("You've completed the '{}' tutorial!", tutorial.title)).size(18.0));
+            
+            let tutorial_title = match tutorial_id {
+                "hello_triangle" => "Hello Triangle",
+                "adding_textures" => "Adding Textures",
+                "3d_with_depth" => "3D with Depth",
+                "gpu_compute" => "GPU Compute",
+                _ => "Tutorial",
+            };
+            
+            ui.label(RichText::new(format!("You've completed the '{}' tutorial!", tutorial_title)).size(18.0));
             ui.add_space(30.0);
 
             ui.label("You've learned:");
             ui.add_space(10.0);
 
             // Summary of key concepts
-            match tutorial.id.as_str() {
+            match tutorial_id {
                 "hello_triangle" => {
                     ui.label("• Vertex buffers for geometry data");
                     ui.label("• Vertex and fragment shaders");

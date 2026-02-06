@@ -82,23 +82,12 @@ pub enum ValidationCheck {
 }
 
 /// State tracking for tutorial progress
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TutorialState {
     pub current_tutorial: Option<usize>,
     pub current_step: usize,
     pub completed_tutorials: Vec<String>,
     pub visited_panels: Vec<HighlightTarget>,
-}
-
-impl Default for TutorialState {
-    fn default() -> Self {
-        Self {
-            current_tutorial: None,
-            current_step: 0,
-            completed_tutorials: Vec::new(),
-            visited_panels: Vec::new(),
-        }
-    }
 }
 
 impl TutorialState {

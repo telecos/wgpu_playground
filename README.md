@@ -116,6 +116,7 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Code Export**: Generate standalone Rust projects from your playground configuration with one click
 - **State Persistence**: Save and load your playground configurations to/from JSON files
 - **URL Sharing**: Generate shareable links with your configuration encoded in the URL for easy collaboration
+- **API Reference**: Browse comprehensive WebGPU API documentation inline with method signatures and code examples
 
 **📊 For a comprehensive overview of WebGPU API feature coverage, see [WebGPU API Coverage](docs/WEBGPU_API_COVERAGE.md)**
 

@@ -2,6 +2,17 @@
 use crate::shader::ShaderModule;
 use crate::shader_watcher::ShaderWatcher;
 
+/// Represents a validation error with location information
+#[derive(Debug, Clone)]
+pub struct ValidationError {
+    /// Error message
+    pub message: String,
+    /// Line number (1-indexed)
+    pub line: usize,
+    /// Column number (1-indexed, optional)
+    pub column: Option<usize>,
+}
+
 /// Represents a shader compilation result
 #[derive(Debug, Clone, Default)]
 pub enum CompilationResult {
@@ -30,6 +41,10 @@ pub struct ShaderEditor {
     shader_watcher: Option<ShaderWatcher>,
     /// Whether hot reload is enabled
     hot_reload_enabled: bool,
+    /// Real-time validation errors
+    validation_errors: Vec<ValidationError>,
+    /// Whether real-time validation is enabled
+    realtime_validation_enabled: bool,
 }
 
 impl Default for ShaderEditor {
@@ -60,6 +75,8 @@ impl ShaderEditor {
             show_line_numbers: true,
             shader_watcher,
             hot_reload_enabled: true,
+            validation_errors: Vec::new(),
+            realtime_validation_enabled: true,
         }
     }
 
@@ -93,6 +110,10 @@ fn fs_main() -> @location(0) vec4<f32> {
             Ok(code) => {
                 self.source_code = code;
                 self.compilation_result = CompilationResult::NotCompiled;
+                // Trigger real-time validation if enabled
+                if self.realtime_validation_enabled {
+                    self.realtime_validate();
+                }
             }
             Err(e) => {
                 self.compilation_result =
@@ -110,6 +131,10 @@ fn fs_main() -> @location(0) vec4<f32> {
     pub fn set_source_code(&mut self, code: String) {
         self.source_code = code;
         self.compilation_result = CompilationResult::NotCompiled;
+        // Trigger real-time validation if enabled
+        if self.realtime_validation_enabled {
+            self.realtime_validate();
+        }
     }
 
     /// Get the compilation result
@@ -145,6 +170,96 @@ fn fs_main() -> @location(0) vec4<f32> {
                 false
             }
         }
+    }
+
+    /// Perform real-time validation using naga parser
+    /// Returns true if validation passed, false otherwise
+    fn realtime_validate(&mut self) {
+        self.validation_errors.clear();
+
+        // Skip validation for empty source
+        if self.source_code.trim().is_empty() {
+            return;
+        }
+
+        // Use naga to parse and validate WGSL
+        match naga::front::wgsl::parse_str(&self.source_code) {
+            Ok(_module) => {
+                // Validation successful
+                log::trace!("Real-time validation: OK");
+            }
+            Err(parse_error) => {
+                // Format error for display
+                let error_string = format!("{:?}", parse_error);
+                log::trace!("Real-time validation errors: {}", error_string);
+
+                // Extract location information from the error
+                // Naga errors contain source location in their error message
+                let error_message = parse_error.to_string();
+                
+                // Try to parse line information from error message
+                // Look for patterns like ":line:col" or "line X"
+                let mut found_location = false;
+                for line in error_message.lines() {
+                    // Check for line number patterns
+                    if let Some(line_num) = self.extract_line_number(line) {
+                        self.validation_errors.push(ValidationError {
+                            message: line.trim().to_string(),
+                            line: line_num,
+                            column: None,
+                        });
+                        found_location = true;
+                        break;
+                    }
+                }
+                
+                // If we couldn't extract location, add error at line 1
+                if !found_location {
+                    // Get first meaningful error line
+                    let msg = error_message
+                        .lines()
+                        .find(|l| !l.trim().is_empty())
+                        .unwrap_or("WGSL validation error")
+                        .trim()
+                        .to_string();
+                    
+                    self.validation_errors.push(ValidationError {
+                        message: msg,
+                        line: 1,
+                        column: None,
+                    });
+                }
+            }
+        }
+    }
+
+    /// Extract line number from error message
+    /// Returns None if no line number found
+    fn extract_line_number(&self, text: &str) -> Option<usize> {
+        // Look for patterns like ":12:" or "line 12" 
+        // Simple pattern matching for common error formats
+        if let Some(pos) = text.find(":") {
+            let after_colon = &text[pos + 1..];
+            if let Some(end) = after_colon.find(":") {
+                if let Ok(num) = after_colon[..end].trim().parse::<usize>() {
+                    return Some(num);
+                }
+            }
+        }
+        
+        // Try "line N" pattern
+        if let Some(pos) = text.to_lowercase().find("line ") {
+            let after_line = &text[pos + 5..];
+            let num_str: String = after_line
+                .chars()
+                .take_while(|c| c.is_ascii_digit())
+                .collect();
+            if let Ok(num) = num_str.parse::<usize>() {
+                return Some(num);
+            }
+        }
+        
+        None
     }
 
     /// Render the shader editor UI
@@ -249,6 +364,9 @@ fn fs_main() -> @location(0) vec4<f32> {
         // Shader code editor
         ui.label("Shader Code:");
 
+        // Store old source code to detect changes
+        let old_source = self.source_code.clone();
+
         egui::ScrollArea::vertical()
             .max_height(500.0)
             .show(ui, |ui| {
@@ -264,11 +382,63 @@ fn fs_main() -> @location(0) vec4<f32> {
                 }
             });
 
+        // Trigger real-time validation if source changed and validation is enabled
+        if self.realtime_validation_enabled && old_source != self.source_code {
+            self.realtime_validate();
+        }
+
+        // Display validation errors
+        if self.realtime_validation_enabled && !self.validation_errors.is_empty() {
+            ui.add_space(5.0);
+            ui.separator();
+            ui.colored_label(
+                egui::Color32::from_rgb(220, 50, 50),
+                format!("⚠️ {} validation error(s):", self.validation_errors.len()),
+            );
+            
+            egui::ScrollArea::vertical()
+                .max_height(100.0)
+                .show(ui, |ui| {
+                    for error in &self.validation_errors {
+                        let error_text = if let Some(col) = error.column {
+                            format!("Line {}, Col {}: {}", error.line, col, error.message)
+                        } else {
+                            format!("Line {}: {}", error.line, error.message)
+                        };
+                        ui.colored_label(egui::Color32::from_rgb(255, 100, 100), error_text);
+                    }
+                });
+        } else if self.realtime_validation_enabled {
+            ui.add_space(5.0);
+            ui.colored_label(egui::Color32::from_rgb(50, 200, 50), "✅ No validation errors");
+        }
+
         ui.add_space(10.0);
 
         // Options
         ui.horizontal(|ui| {
             ui.checkbox(&mut self.show_line_numbers, "Show line numbers");
+
+            ui.separator();
+            
+            // Real-time validation toggle
+            let validation_label = if self.realtime_validation_enabled {
+                "⚡ Real-time Validation: ON"
+            } else {
+                "⚡ Real-time Validation: OFF"
+            };
+            if ui
+                .checkbox(&mut self.realtime_validation_enabled, validation_label)
+                .changed()
+            {
+                if self.realtime_validation_enabled {
+                    log::info!("Real-time validation enabled");
+                    self.realtime_validate();
+                } else {
+                    log::info!("Real-time validation disabled");
+                    self.validation_errors.clear();
+                }
+            }
 
             // Hot reload toggle
             if self.shader_watcher.is_some() {
@@ -297,17 +467,29 @@ fn fs_main() -> @location(0) vec4<f32> {
         // Split into lines
         let lines: Vec<&str> = self.source_code.lines().collect();
         let line_count = lines.len();
-        let line_number_width = (line_count.to_string().len() as f32) * 8.0 + 10.0;
+        let line_number_width = (line_count.to_string().len() as f32) * 8.0 + 30.0; // Extra space for error markers
+
+        // Create a set of lines with errors for quick lookup
+        let error_lines: std::collections::HashSet<usize> = self
+            .validation_errors
+            .iter()
+            .map(|e| e.line)
+            .collect();
 
         ui.horizontal(|ui| {
-            // Line numbers column
+            // Line numbers column with error markers
             ui.vertical(|ui| {
                 ui.set_width(line_number_width);
                 ui.style_mut().override_text_style = Some(egui::TextStyle::Monospace);
 
+                // Build line numbers with error markers
                 let mut line_numbers_text = String::new();
                 for i in 1..=line_count {
-                    line_numbers_text.push_str(&format!("{}\n", i));
+                    if error_lines.contains(&i) {
+                        line_numbers_text.push_str(&format!("❌ {}\n", i));
+                    } else {
+                        line_numbers_text.push_str(&format!("   {}\n", i));
+                    }
                 }
 
                 ui.add(
@@ -597,5 +779,54 @@ mod tests {
         let all_text: String = highlighted.iter().map(|(text, _)| text.as_str()).collect();
         assert!(all_text.contains("vec4"));
         assert!(all_text.contains("f32"));
+    }
+
+    #[test]
+    fn test_realtime_validation_valid_shader() {
+        let mut editor = ShaderEditor::new();
+        // Default shader should be valid
+        editor.realtime_validate();
+        assert!(editor.validation_errors.is_empty());
+    }
+
+    #[test]
+    fn test_realtime_validation_invalid_shader() {
+        let mut editor = ShaderEditor::new();
+        editor.set_source_code("invalid wgsl code @@@".to_string());
+        // Real-time validation should have been triggered by set_source_code
+        assert!(!editor.validation_errors.is_empty());
+    }
+
+    #[test]
+    fn test_realtime_validation_empty_shader() {
+        let mut editor = ShaderEditor::new();
+        editor.realtime_validation_enabled = true;
+        editor.set_source_code("".to_string());
+        // Empty shader should not produce errors (validation is skipped)
+        assert!(editor.validation_errors.is_empty());
+    }
+
+    #[test]
+    fn test_realtime_validation_toggle() {
+        let mut editor = ShaderEditor::new();
+        assert!(editor.realtime_validation_enabled);
+
+        // Disable validation
+        editor.realtime_validation_enabled = false;
+        editor.set_source_code("invalid code".to_string());
+        // Should not validate when disabled
+        assert!(editor.validation_errors.is_empty());
+    }
+
+    #[test]
+    fn test_validation_error_structure() {
+        let error = ValidationError {
+            message: "Test error".to_string(),
+            line: 5,
+            column: Some(10),
+        };
+        assert_eq!(error.message, "Test error");
+        assert_eq!(error.line, 5);
+        assert_eq!(error.column, Some(10));
     }
 }

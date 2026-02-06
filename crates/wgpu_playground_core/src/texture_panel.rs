@@ -228,6 +228,8 @@ impl TexturePanel {
         self.loaded_texture_data = None;
         self.loaded_texture_dimensions = None;
         self.file_load_message = None;
+        // Clear preview state so it regenerates
+        self.preview_state = None;
     }
 
     /// Get loaded texture data

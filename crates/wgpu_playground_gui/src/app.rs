@@ -25,6 +25,7 @@ use wgpu_playground_core::settings_panel::SettingsPanel;
 use wgpu_playground_core::state::Theme;
 use wgpu_playground_core::texture_inspector::TextureInspector;
 use wgpu_playground_core::texture_panel::TexturePanel;
+use wgpu_playground_core::tutorial_panel::TutorialPanel;
 
 pub struct PlaygroundApp {
     device_info: DeviceInfo,
@@ -52,6 +53,7 @@ pub struct PlaygroundApp {
     command_recording_panel: CommandRecordingPanel,
     settings_panel: SettingsPanel,
     api_coverage_panel: ApiCoveragePanel,
+    tutorial_panel: TutorialPanel,
     selected_tab: Tab,
     // Collapsible section states
     setup_section_open: bool,
@@ -94,6 +96,7 @@ enum Tab {
     Settings,
     ModelLoader,
     ApiCoverage,
+    Tutorials,
 }
 
 impl PlaygroundApp {
@@ -129,6 +132,7 @@ impl PlaygroundApp {
             command_recording_panel: CommandRecordingPanel::new(),
             settings_panel: SettingsPanel::new(),
             api_coverage_panel: ApiCoveragePanel::new(),
+            tutorial_panel: TutorialPanel::new(),
             selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
             // Initialize section states - Rendering open by default
             setup_section_open: false,
@@ -525,6 +529,11 @@ impl PlaygroundApp {
                     ui.indent("tools_indent", |ui| {
                         ui.selectable_value(
                             &mut self.selected_tab,
+                            Tab::Tutorials,
+                            "  Tutorials",
+                        ).on_hover_text("Interactive guided tutorials for learning WebGPU");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
                             Tab::ResourceInspector,
                             "  Resource Inspector",
                         ).on_hover_text("Inspect all GPU resources");
@@ -607,6 +616,7 @@ impl PlaygroundApp {
                 let tracker = ApiCoverageTracker::global();
                 self.api_coverage_panel.ui(ui, tracker);
             }
+            Tab::Tutorials => self.tutorial_panel.ui(ui),
             Tab::Settings => {
                 if let Some(new_theme) = self.settings_panel.ui(ui) {
                     // Apply the theme change
@@ -620,6 +630,31 @@ impl PlaygroundApp {
                 }
             }
         });
+
+        // Track panel visits for tutorial system
+        self.track_panel_visit(self.selected_tab);
+    }
+
+    /// Track panel visits for tutorial system
+    fn track_panel_visit(&mut self, tab: Tab) {
+        use wgpu_playground_core::tutorial::HighlightTarget;
+        
+        let highlight_target = match tab {
+            Tab::RenderPipelineConfig => Some(HighlightTarget::RenderPipeline),
+            Tab::BufferConfig => Some(HighlightTarget::BufferConfig),
+            Tab::TextureConfig => Some(HighlightTarget::TextureConfig),
+            Tab::BindGroupConfig => Some(HighlightTarget::BindGroup),
+            Tab::RenderPassConfig => Some(HighlightTarget::RenderPass),
+            Tab::DrawCommand => Some(HighlightTarget::DrawCommand),
+            Tab::ComputePipelineConfig => Some(HighlightTarget::ComputePipeline),
+            Tab::ComputeDispatch => Some(HighlightTarget::ComputeDispatch),
+            Tab::Rendering => Some(HighlightTarget::Rendering),
+            _ => None,
+        };
+
+        if let Some(target) = highlight_target {
+            self.tutorial_panel.mark_panel_visited(target);
+        }
     }
 
     /// Apply a theme to the egui context

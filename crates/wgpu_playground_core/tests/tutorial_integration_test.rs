@@ -112,8 +112,8 @@ fn test_gpu_compute_tutorial_content() {
 fn test_tutorial_panel_initialization() {
     let panel = TutorialPanel::new();
 
-    // Should have tutorials loaded
-    assert!(!panel.get_current_highlight().is_none() || panel.get_current_highlight().is_none());
+    // Initially no tutorial is active, so no highlight
+    assert!(panel.get_current_highlight().is_none());
 }
 
 #[test]

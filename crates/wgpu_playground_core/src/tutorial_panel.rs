@@ -115,9 +115,11 @@ impl TutorialPanel {
     }
 
     fn render_active_tutorial(&mut self, ui: &mut Ui, tutorial_idx: usize) {
-        let tutorial_title = self.tutorials[tutorial_idx].title.clone();
-        let tutorial_steps_len = self.tutorials[tutorial_idx].steps.len();
-        let tutorial_id = self.tutorials[tutorial_idx].id.clone();
+        // Extract needed data from tutorial to avoid borrow checker issues
+        let tutorial = &self.tutorials[tutorial_idx];
+        let tutorial_title = tutorial.title.clone();
+        let tutorial_steps_len = tutorial.steps.len();
+        let tutorial_id = tutorial.id.clone();
         let current_step_idx = self.state.current_step;
 
         // Tutorial header

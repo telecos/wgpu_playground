@@ -6,6 +6,18 @@ use crate::state::{
     SamplerPanelState, ShaderEditorState, TexturePanelState,
 };
 
+/// Default buffer size in bytes when parsing fails
+const DEFAULT_BUFFER_SIZE: u64 = 256;
+
+/// Default texture width in pixels when parsing fails
+const DEFAULT_TEXTURE_WIDTH: u32 = 256;
+
+/// Default texture height in pixels when parsing fails
+const DEFAULT_TEXTURE_HEIGHT: u32 = 256;
+
+/// Default texture depth when parsing fails
+const DEFAULT_TEXTURE_DEPTH: u32 = 1;
+
 /// Configuration for code generation
 #[derive(Debug, Clone)]
 pub struct CodeGenConfig {
@@ -776,12 +788,13 @@ impl CodeGenerator {
             .parse::<u64>()
             .inspect_err(|e| {
                 log::warn!(
-                    "Failed to parse buffer size '{}': {}. Using default 256.",
+                    "Failed to parse buffer size '{}': {}. Using default {}.",
                     buffer_state.size,
-                    e
+                    e,
+                    DEFAULT_BUFFER_SIZE
                 )
             })
-            .unwrap_or(256);
+            .unwrap_or(DEFAULT_BUFFER_SIZE);
         let mut usage_flags = Vec::new();
 
         if buffer_state.usage_vertex {
@@ -827,34 +840,37 @@ impl CodeGenerator {
             .parse::<u32>()
             .inspect_err(|e| {
                 log::warn!(
-                    "Failed to parse texture width '{}': {}. Using default 256.",
+                    "Failed to parse texture width '{}': {}. Using default {}.",
                     texture_state.width,
-                    e
+                    e,
+                    DEFAULT_TEXTURE_WIDTH
                 )
             })
-            .unwrap_or(256);
+            .unwrap_or(DEFAULT_TEXTURE_WIDTH);
         let height = texture_state
             .height
             .parse::<u32>()
             .inspect_err(|e| {
                 log::warn!(
-                    "Failed to parse texture height '{}': {}. Using default 256.",
+                    "Failed to parse texture height '{}': {}. Using default {}.",
                     texture_state.height,
-                    e
+                    e,
+                    DEFAULT_TEXTURE_HEIGHT
                 )
             })
-            .unwrap_or(256);
+            .unwrap_or(DEFAULT_TEXTURE_HEIGHT);
         let depth = texture_state
             .depth
             .parse::<u32>()
             .inspect_err(|e| {
                 log::warn!(
-                    "Failed to parse texture depth '{}': {}. Using default 1.",
+                    "Failed to parse texture depth '{}': {}. Using default {}.",
                     texture_state.depth,
-                    e
+                    e,
+                    DEFAULT_TEXTURE_DEPTH
                 )
             })
-            .unwrap_or(1);
+            .unwrap_or(DEFAULT_TEXTURE_DEPTH);
 
         let mut usage_flags = Vec::new();
         if texture_state.usage_texture_binding {

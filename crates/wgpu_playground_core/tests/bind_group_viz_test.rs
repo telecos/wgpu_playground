@@ -54,7 +54,7 @@ fn test_visualizer_with_complex_layout() {
     let viz = BindGroupVisualizer::new();
 
     // Create a more complex layout with multiple bindings
-    let layout_entries = vec![
+    let layout_entries = [
         BindGroupLayoutEntryConfig {
             binding: 0,
             visibility: ShaderStagesConfig {
@@ -93,7 +93,7 @@ fn test_visualizer_with_complex_layout() {
         },
     ];
 
-    let binding_assignments = vec![
+    let binding_assignments = [
         (0, "Transform Uniform".to_string()),
         (1, "Albedo Texture".to_string()),
         (2, "Linear Sampler".to_string()),

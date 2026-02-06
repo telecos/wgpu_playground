@@ -23,6 +23,8 @@ struct PreviewVertex {
 pub struct RenderPipelinePreviewState {
     /// The render pipeline for preview
     pipeline: Option<wgpu::RenderPipeline>,
+    /// Bind group layout for uniforms
+    bind_group_layout: Option<wgpu::BindGroupLayout>,
     /// Preview vertex buffer (cube mesh)
     vertex_buffer: Option<wgpu::Buffer>,
     /// Preview index buffer
@@ -50,6 +52,7 @@ impl RenderPipelinePreviewState {
     pub fn new() -> Self {
         Self {
             pipeline: None,
+            bind_group_layout: None,
             vertex_buffer: None,
             index_buffer: None,
             index_count: 0,
@@ -408,6 +411,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         self.pipeline = Some(pipeline);
+        self.bind_group_layout = Some(bind_group_layout);
     }
 
     /// Render the preview with the current pipeline configuration
@@ -433,79 +437,66 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             usage: wgpu::BufferUsages::UNIFORM,
         });
 
-        // Create bind group layout
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("Pipeline Preview Bind Group Layout"),
-            entries: &[wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            }],
-        });
+        // Create bind group using stored bind group layout
+        if let Some(bind_group_layout) = &self.bind_group_layout {
+            let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("Pipeline Preview Bind Group"),
+                layout: bind_group_layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: uniform_buffer.as_entire_binding(),
+                }],
+            });
 
-        // Create bind group
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("Pipeline Preview Bind Group"),
-            layout: &bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: uniform_buffer.as_entire_binding(),
-            }],
-        });
+            // Render to the preview texture
+            let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Pipeline Preview Encoder"),
+            });
 
-        // Render to the preview texture
-        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Pipeline Preview Encoder"),
-        });
-
-        if let (Some(view), Some(depth_view)) = (&self.render_texture_view, &self.depth_texture_view) {
-            {
-                let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                    label: Some("Pipeline Preview Render Pass"),
-                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                        view,
-                        resolve_target: None,
-                        ops: wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(wgpu::Color {
-                                r: 0.1,
-                                g: 0.1,
-                                b: 0.15,
-                                a: 1.0,
-                            }),
-                            store: wgpu::StoreOp::Store,
-                        },
-                        depth_slice: None,
-                    })],
-                    depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                        view: depth_view,
-                        depth_ops: Some(wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(1.0),
-                            store: wgpu::StoreOp::Store,
-                        }),
-                        stencil_ops: None,
-                    }),
-                    timestamp_writes: None,
-                    occlusion_query_set: None,
-                });
-
-                // Render the cube
-                if let (Some(pipeline), Some(vertex_buffer), Some(index_buffer)) =
-                    (&self.pipeline, &self.vertex_buffer, &self.index_buffer)
+            if let (Some(view), Some(depth_view)) = (&self.render_texture_view, &self.depth_texture_view) {
                 {
-                    render_pass.set_pipeline(pipeline);
-                    render_pass.set_bind_group(0, &bind_group, &[]);
-                    render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
-                    render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-                    render_pass.draw_indexed(0..self.index_count, 0, 0..1);
-                }
-            }
+                    let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                        label: Some("Pipeline Preview Render Pass"),
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            view,
+                            resolve_target: None,
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(wgpu::Color {
+                                    r: 0.1,
+                                    g: 0.1,
+                                    b: 0.15,
+                                    a: 1.0,
+                                }),
+                                store: wgpu::StoreOp::Store,
+                            },
+                            depth_slice: None,
+                        })],
+                        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                            view: depth_view,
+                            depth_ops: Some(wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(1.0),
+                                store: wgpu::StoreOp::Store,
+                            }),
+                            stencil_ops: None,
+                        }),
+                        timestamp_writes: None,
+                        occlusion_query_set: None,
+                    });
 
-            queue.submit(Some(encoder.finish()));
+                    // Render the cube
+                    if let (Some(pipeline), Some(vertex_buffer), Some(index_buffer)) =
+                        (&self.pipeline, &self.vertex_buffer, &self.index_buffer)
+                    {
+                        render_pass.set_pipeline(pipeline);
+                        render_pass.set_bind_group(0, &bind_group, &[]);
+                        render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+                        render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                        render_pass.draw_indexed(0..self.index_count, 0, 0..1);
+                    }
+                }
+
+                queue.submit(Some(encoder.finish()));
+            }
         }
 
         self.render_texture_view.as_ref()
@@ -534,14 +525,14 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
 // Matrix helper functions
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 struct Matrix4 {
     data: [[f32; 4]; 4],
 }
 
 impl Matrix4 {
     fn as_slice(&self) -> &[f32] {
-        unsafe { std::slice::from_raw_parts(self.data.as_ptr() as *const f32, 16) }
+        bytemuck::cast_slice(&self.data)
     }
 }
 
@@ -620,7 +611,11 @@ fn rotation_matrix_x(angle: f32) -> Matrix4 {
 
 fn normalize(v: [f32; 3]) -> [f32; 3] {
     let len = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
-    [v[0] / len, v[1] / len, v[2] / len]
+    if len < f32::EPSILON {
+        [0.0, 0.0, 1.0] // Return default up vector for degenerate case
+    } else {
+        [v[0] / len, v[1] / len, v[2] / len]
+    }
 }
 
 fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {

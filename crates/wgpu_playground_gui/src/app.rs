@@ -16,6 +16,7 @@ use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
 use wgpu_playground_core::model_loader_panel::ModelLoaderPanel;
 use wgpu_playground_core::performance_panel::PerformancePanel;
 use wgpu_playground_core::pipeline_debugger::PipelineDebugger;
+use wgpu_playground_core::preset_panel::PresetPanel;
 use wgpu_playground_core::render_pass_panel::RenderPassPanel;
 use wgpu_playground_core::render_pipeline_panel::RenderPipelinePanel;
 use wgpu_playground_core::rendering::RenderingPanel;
@@ -54,6 +55,7 @@ pub struct PlaygroundApp {
     settings_panel: SettingsPanel,
     api_coverage_panel: ApiCoveragePanel,
     tutorial_panel: TutorialPanel,
+    preset_panel: PresetPanel,
     selected_tab: Tab,
     // Collapsible section states
     setup_section_open: bool,
@@ -97,6 +99,7 @@ enum Tab {
     ModelLoader,
     ApiCoverage,
     Tutorials,
+    Presets,
 }
 
 impl PlaygroundApp {
@@ -133,6 +136,7 @@ impl PlaygroundApp {
             settings_panel: SettingsPanel::new(),
             api_coverage_panel: ApiCoveragePanel::new(),
             tutorial_panel: TutorialPanel::new(),
+            preset_panel: PresetPanel::new(),
             selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
             // Initialize section states - Rendering open by default
             setup_section_open: false,
@@ -534,6 +538,11 @@ impl PlaygroundApp {
                         ).on_hover_text("Interactive guided tutorials for learning WebGPU");
                         ui.selectable_value(
                             &mut self.selected_tab,
+                            Tab::Presets,
+                            "  Configuration Presets",
+                        ).on_hover_text("Browse and load preset configurations for common rendering scenarios");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
                             Tab::ResourceInspector,
                             "  Resource Inspector",
                         ).on_hover_text("Inspect all GPU resources");
@@ -617,6 +626,13 @@ impl PlaygroundApp {
                 self.api_coverage_panel.ui(ui, tracker);
             }
             Tab::Tutorials => self.tutorial_panel.ui(ui),
+            Tab::Presets => {
+                // Handle preset loading
+                if let Some(preset_state) = self.preset_panel.ui(ui) {
+                    // Apply the preset state to the panels
+                    self.load_state_from_preset(preset_state);
+                }
+            }
             Tab::Settings => {
                 if let Some(new_theme) = self.settings_panel.ui(ui) {
                     // Apply the theme change
@@ -727,6 +743,12 @@ impl PlaygroundApp {
         self.import_state(&state);
         log::info!("Playground state loaded from {:?}", path);
         Ok(())
+    }
+
+    /// Load state from a preset configuration
+    pub fn load_state_from_preset(&mut self, state: wgpu_playground_core::state::PlaygroundState) {
+        self.import_state(&state);
+        log::info!("Preset configuration loaded");
     }
 
     /// Load state from a URL parameter string

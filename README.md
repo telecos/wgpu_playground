@@ -112,6 +112,7 @@ This is an interactive tool for experimenting with the wgpu crate's WebGPU API c
 - **Texture Loading & Export**: Load textures from image files (PNG, JPEG) with drag-and-drop support and export textures to PNG format
 - **Rendering APIs**: Experiment with render pipelines, shaders, buffers, textures, and advanced rendering techniques
 - **Compute/ML APIs**: Test compute pipelines, storage buffers, and machine learning operations
+- **Configuration Presets**: Load pre-configured setups for common rendering scenarios (PBR materials, shadow mapping, post-processing)
 - **Code Export**: Generate standalone Rust projects from your playground configuration with one click
 - **State Persistence**: Save and load your playground configurations to/from JSON files
 - **URL Sharing**: Generate shareable links with your configuration encoded in the URL for easy collaboration
@@ -1480,6 +1481,7 @@ The documentation includes all public APIs for:
 
 ### Design Documents
 
+- **[CONFIGURATION_PRESETS.md](CONFIGURATION_PRESETS.md)** - Guide to configuration presets for common rendering scenarios (PBR, shadow mapping, post-processing)
 - **[WEBGPU_API_COVERAGE.md](docs/WEBGPU_API_COVERAGE.md)** - Comprehensive mapping of WebGPU API features to playground implementation with implementation status
 - **[USER_GUIDE.md](docs/USER_GUIDE.md)** - Comprehensive end-user documentation with tutorials and workflows
 - **[QUICK_START.md](docs/QUICK_START.md)** - Quick start guide for new users

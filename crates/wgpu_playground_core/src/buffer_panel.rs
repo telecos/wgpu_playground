@@ -154,6 +154,9 @@ impl BufferPanel {
     }
 
     /// Render the buffer configuration UI
+    /// 
+    /// This is a convenience wrapper that delegates to ui_with_preview() with None values.
+    /// Use this method when preview functionality is not needed or device/queue are not available.
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         self.ui_with_preview(ui, None, None, None);
     }
@@ -330,6 +333,7 @@ impl BufferPanel {
 
             // Live Preview Section
             if self.show_preview {
+                // Update descriptor to reflect current UI state for usage flag checking
                 self.update_descriptor();
                 let usage = self.descriptor.usage();
                 
@@ -380,8 +384,10 @@ impl BufferPanel {
                                 )));
                             }
                             
-                            // Request repaint for animation
-                            ui.ctx().request_repaint();
+                            // Request repaint only for animated previews (uniform buffers)
+                            if usage.contains(BufferUsages::UNIFORM) {
+                                ui.ctx().request_repaint();
+                            }
                         } else if device.is_none() {
                             ui.colored_label(
                                 egui::Color32::YELLOW,

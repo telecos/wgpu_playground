@@ -1,6 +1,6 @@
+use crate::texture_preview::TexturePreviewState;
 use image::GenericImageView;
 use wgpu::{TextureDimension, TextureFormat, TextureUsages};
-use crate::texture_preview::TexturePreviewState;
 
 /// UI panel for creating and configuring GPU textures
 pub struct TexturePanel {
@@ -510,7 +510,7 @@ impl TexturePanel {
                                 if let Ok(img) = image::load_from_memory(loaded_data) {
                                     let rgba = img.to_rgba8();
                                     let rgba_data = rgba.as_raw();
-                                    
+
                                     if !preview.has_texture() || self.file_load_message.is_some() {
                                         preview.update_from_image_data(device, queue, rgba_data, width, height);
                                         // Clear the file load message after updating preview
@@ -522,7 +522,7 @@ impl TexturePanel {
                             // Generate procedural texture
                             let width = self.width_input.parse::<u32>().unwrap_or(256);
                             let height = self.height_input.parse::<u32>().unwrap_or(256);
-                            
+
                             if !preview.has_texture() {
                                 preview.generate_procedural_texture(device, queue, width, height);
                             }

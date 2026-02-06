@@ -330,19 +330,19 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     ) {
         // Generate a simple procedural checkerboard pattern
         let mut data = vec![0u8; (width * height * 4) as usize];
-        
+
         for y in 0..height {
             for x in 0..width {
                 let idx = ((y * width + x) * 4) as usize;
                 let checker = ((x / 32) + (y / 32)) % 2;
-                
+
                 if checker == 0 {
-                    data[idx] = 200;     // R
+                    data[idx] = 200; // R
                     data[idx + 1] = 200; // G
                     data[idx + 2] = 200; // B
                     data[idx + 3] = 255; // A
                 } else {
-                    data[idx] = 100;     // R
+                    data[idx] = 100; // R
                     data[idx + 1] = 100; // G
                     data[idx + 2] = 100; // B
                     data[idx + 3] = 255; // A
@@ -380,11 +380,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     }
 
     /// Render texture preview
-    pub fn render(
-        &self,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> Option<&wgpu::TextureView> {
+    pub fn render(&self, device: &wgpu::Device, queue: &wgpu::Queue) -> Option<&wgpu::TextureView> {
         // Only render if we have a texture to preview
         if self.preview_texture.is_none() {
             return self.render_texture_view.as_ref();
@@ -458,7 +454,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     pub fn size(&self) -> (u32, u32) {
         (self.width, self.height)
     }
-    
+
     /// Check if texture preview is ready
     pub fn has_texture(&self) -> bool {
         self.preview_texture.is_some()

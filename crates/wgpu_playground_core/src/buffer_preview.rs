@@ -1,5 +1,5 @@
 /// Buffer preview rendering for the Buffer Config panel
-/// 
+///
 /// Provides live visualization of buffer configurations:
 /// - Vertex buffers: Shows a simple mesh preview
 /// - Uniform buffers: Shows animated values
@@ -84,12 +84,14 @@ impl BufferPreviewState {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Rgba8UnormSrgb,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::TEXTURE_BINDING,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+                | wgpu::TextureUsages::COPY_SRC
+                | wgpu::TextureUsages::TEXTURE_BINDING,
             view_formats: &[],
         });
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-        
+
         self.render_texture = Some(texture);
         self.render_texture_view = Some(view);
     }
@@ -127,9 +129,18 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
         // Create vertex buffer for triangle
         let vertices = [
-            PreviewVertex { position: [0.0, 0.5], color: [1.0, 0.5, 0.5] },
-            PreviewVertex { position: [-0.5, -0.5], color: [0.5, 1.0, 0.5] },
-            PreviewVertex { position: [0.5, -0.5], color: [0.5, 0.5, 1.0] },
+            PreviewVertex {
+                position: [0.0, 0.5],
+                color: [1.0, 0.5, 0.5],
+            },
+            PreviewVertex {
+                position: [-0.5, -0.5],
+                color: [0.5, 1.0, 0.5],
+            },
+            PreviewVertex {
+                position: [0.5, -0.5],
+                color: [0.5, 0.5, 1.0],
+            },
         ];
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -363,7 +374,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
                 if is_vertex {
                     // Render vertex buffer preview
-                    if let (Some(pipeline), Some(vertex_buffer)) = (&self.vertex_pipeline, &self.preview_vertex_buffer) {
+                    if let (Some(pipeline), Some(vertex_buffer)) =
+                        (&self.vertex_pipeline, &self.preview_vertex_buffer)
+                    {
                         render_pass.set_pipeline(pipeline);
                         render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
                         render_pass.draw(0..3, 0..1);
@@ -379,7 +392,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                     }
 
                     // Render uniform buffer preview
-                    if let (Some(pipeline), Some(bind_group)) = (&self.uniform_pipeline, &self.uniform_bind_group) {
+                    if let (Some(pipeline), Some(bind_group)) =
+                        (&self.uniform_pipeline, &self.uniform_bind_group)
+                    {
                         render_pass.set_pipeline(pipeline);
                         render_pass.set_bind_group(0, bind_group, &[]);
                         render_pass.draw(0..4, 0..1);
@@ -401,11 +416,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     ) -> Option<egui::TextureId> {
         if self.texture_id.is_none() {
             if let Some(view) = &self.render_texture_view {
-                let id = renderer.register_native_texture(
-                    device,
-                    view,
-                    wgpu::FilterMode::Linear,
-                );
+                let id = renderer.register_native_texture(device, view, wgpu::FilterMode::Linear);
                 self.texture_id = Some(id);
             }
         }

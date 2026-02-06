@@ -82,7 +82,7 @@ fn test_buffer_preview_animation_time() {
         preview.initialize(&device);
 
         let usage = BufferUsages::UNIFORM;
-        
+
         // Render multiple frames to test animation
         for _ in 0..10 {
             let result = preview.render(&device, &queue, usage, 0.016);

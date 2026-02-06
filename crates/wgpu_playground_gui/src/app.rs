@@ -573,7 +573,10 @@ impl PlaygroundApp {
             Tab::DeviceConfig => self.device_config.ui(ui),
             Tab::DeviceInfo => self.device_info.ui(ui),
             Tab::Rendering => self.rendering_panel.ui(ui, device, queue, renderer),
-            Tab::BufferConfig => self.buffer_panel.ui_with_preview(ui, Some(device), Some(queue), Some(renderer)),
+            Tab::BufferConfig => {
+                self.buffer_panel
+                    .ui_with_preview(ui, Some(device), Some(queue), Some(renderer))
+            }
             Tab::SamplerConfig => self.sampler_panel.ui(ui),
             Tab::TextureConfig => self.texture_panel.ui(ui),
             Tab::ModelLoader => self.model_loader_panel.show(ui, device),

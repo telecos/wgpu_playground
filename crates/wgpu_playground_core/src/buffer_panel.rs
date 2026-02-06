@@ -154,7 +154,7 @@ impl BufferPanel {
     }
 
     /// Render the buffer configuration UI
-    /// 
+    ///
     /// This is a convenience wrapper that delegates to ui_with_preview() with None values.
     /// Use this method when preview functionality is not needed or device/queue are not available.
     pub fn ui(&mut self, ui: &mut egui::Ui) {
@@ -336,7 +336,7 @@ impl BufferPanel {
                 // Update descriptor to reflect current UI state for usage flag checking
                 self.update_descriptor();
                 let usage = self.descriptor.usage();
-                
+
                 // Only show preview for vertex or uniform buffers
                 if usage.contains(BufferUsages::VERTEX) || usage.contains(BufferUsages::UNIFORM) {
                     ui.group(|ui| {
@@ -368,13 +368,13 @@ impl BufferPanel {
                         }
 
                         // Render preview
-                        if let (Some(preview), Some(device), Some(queue), Some(renderer)) = 
-                            (&mut self.preview_state, device, queue, renderer) {
-                            
+                        if let (Some(preview), Some(device), Some(queue), Some(renderer)) =
+                            (&mut self.preview_state, device, queue, renderer)
+                        {
                             // Render the preview
                             let delta_time = ui.input(|i| i.stable_dt);
                             preview.render(device, queue, usage, delta_time);
-                            
+
                             // Display the preview texture
                             if let Some(texture_id) = preview.get_texture_id(device, renderer) {
                                 let (width, height) = preview.size();
@@ -383,7 +383,7 @@ impl BufferPanel {
                                     egui::vec2(width as f32, height as f32),
                                 )));
                             }
-                            
+
                             // Request repaint only for animated previews (uniform buffers)
                             if usage.contains(BufferUsages::UNIFORM) {
                                 ui.ctx().request_repaint();
@@ -396,8 +396,9 @@ impl BufferPanel {
                         }
                     });
                 }
-            } else if self.descriptor.usage().contains(BufferUsages::VERTEX) || 
-                      self.descriptor.usage().contains(BufferUsages::UNIFORM) {
+            } else if self.descriptor.usage().contains(BufferUsages::VERTEX)
+                || self.descriptor.usage().contains(BufferUsages::UNIFORM)
+            {
                 // Show button to enable preview
                 if ui.button("🎨 Show Live Preview").clicked() {
                     self.show_preview = true;

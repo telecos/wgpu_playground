@@ -1,4 +1,5 @@
 use crate::buffer::{BufferDescriptor, BufferUsages};
+use crate::buffer_preview::BufferPreviewState;
 
 /// UI panel for creating and configuring GPU buffers
 pub struct BufferPanel {
@@ -25,6 +26,10 @@ pub struct BufferPanel {
     validation_error: Option<String>,
     /// Success message
     success_message: Option<String>,
+    /// Buffer preview rendering state
+    preview_state: Option<BufferPreviewState>,
+    /// Whether preview is enabled
+    show_preview: bool,
 }
 
 impl Default for BufferPanel {
@@ -53,6 +58,8 @@ impl BufferPanel {
             mapped_at_creation: false,
             validation_error: None,
             success_message: None,
+            preview_state: None,
+            show_preview: true,
         }
     }
 
@@ -147,7 +154,21 @@ impl BufferPanel {
     }
 
     /// Render the buffer configuration UI
+    ///
+    /// This is a convenience wrapper that delegates to ui_with_preview() with None values.
+    /// Use this method when preview functionality is not needed or device/queue are not available.
     pub fn ui(&mut self, ui: &mut egui::Ui) {
+        self.ui_with_preview(ui, None, None, None);
+    }
+
+    /// Render the buffer configuration UI with optional preview
+    pub fn ui_with_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: Option<&wgpu::Device>,
+        queue: Option<&wgpu::Queue>,
+        renderer: Option<&mut egui_wgpu::Renderer>,
+    ) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("📐 Buffer Configuration");
             ui.label("Configure and create GPU buffers with custom parameters.");
@@ -307,6 +328,82 @@ impl BufferPanel {
                     }
                 }
             });
+
+            ui.add_space(15.0);
+
+            // Live Preview Section
+            if self.show_preview {
+                // Update descriptor to reflect current UI state for usage flag checking
+                self.update_descriptor();
+                let usage = self.descriptor.usage();
+
+                // Only show preview for vertex or uniform buffers
+                if usage.contains(BufferUsages::VERTEX) || usage.contains(BufferUsages::UNIFORM) {
+                    ui.group(|ui| {
+                        ui.horizontal(|ui| {
+                            ui.heading("🎨 Live Preview");
+                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                if ui.small_button("✕").on_hover_text("Hide preview").clicked() {
+                                    self.show_preview = false;
+                                }
+                            });
+                        });
+                        ui.add_space(5.0);
+
+                        if usage.contains(BufferUsages::VERTEX) {
+                            ui.label("Preview shows how this vertex buffer could render a simple triangle mesh:");
+                        } else if usage.contains(BufferUsages::UNIFORM) {
+                            ui.label("Preview shows animated uniform buffer values affecting rendering:");
+                        }
+
+                        ui.add_space(5.0);
+
+                        // Initialize preview if we have device
+                        if let Some(device) = device {
+                            if self.preview_state.is_none() {
+                                let mut preview = BufferPreviewState::new();
+                                preview.initialize(device);
+                                self.preview_state = Some(preview);
+                            }
+                        }
+
+                        // Render preview
+                        if let (Some(preview), Some(device), Some(queue), Some(renderer)) =
+                            (&mut self.preview_state, device, queue, renderer)
+                        {
+                            // Render the preview
+                            let delta_time = ui.input(|i| i.stable_dt);
+                            preview.render(device, queue, usage, delta_time);
+
+                            // Display the preview texture
+                            if let Some(texture_id) = preview.get_texture_id(device, renderer) {
+                                let (width, height) = preview.size();
+                                ui.add(egui::Image::new(egui::load::SizedTexture::new(
+                                    texture_id,
+                                    egui::vec2(width as f32, height as f32),
+                                )));
+                            }
+
+                            // Request repaint only for animated previews (uniform buffers)
+                            if usage.contains(BufferUsages::UNIFORM) {
+                                ui.ctx().request_repaint();
+                            }
+                        } else if device.is_none() {
+                            ui.colored_label(
+                                egui::Color32::YELLOW,
+                                "⚠ Preview requires GPU device to be initialized"
+                            );
+                        }
+                    });
+                }
+            } else if self.descriptor.usage().contains(BufferUsages::VERTEX)
+                || self.descriptor.usage().contains(BufferUsages::UNIFORM)
+            {
+                // Show button to enable preview
+                if ui.button("🎨 Show Live Preview").clicked() {
+                    self.show_preview = true;
+                }
+            }
         });
     }
 

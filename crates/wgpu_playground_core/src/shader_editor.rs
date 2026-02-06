@@ -194,13 +194,10 @@ fn fs_main() -> @location(0) vec4<f32> {
                 log::trace!("Real-time validation: OK");
             }
             Err(parse_error) => {
-                // Format error for display
-                let error_string = format!("{:?}", parse_error);
-                log::trace!("Real-time validation errors: {}", error_string);
-
                 // Extract location information from the error
                 // Naga errors contain source location in their error message
                 let error_message = parse_error.to_string();
+                log::trace!("Real-time validation errors: {}", error_message);
                 
                 // Try to parse line information from error message
                 // Look for patterns like ":line:col" or "line X"
@@ -243,9 +240,9 @@ fn fs_main() -> @location(0) vec4<f32> {
     fn extract_line_number(&self, text: &str) -> Option<usize> {
         // Look for patterns like ":12:" or "line 12" 
         // Simple pattern matching for common error formats
-        if let Some(pos) = text.find(":") {
+        if let Some(pos) = text.find(':') {
             let after_colon = &text[pos + 1..];
-            if let Some(end) = after_colon.find(":") {
+            if let Some(end) = after_colon.find(':') {
                 if let Ok(num) = after_colon[..end].trim().parse::<usize>() {
                     return Some(num);
                 }
@@ -369,26 +366,26 @@ fn fs_main() -> @location(0) vec4<f32> {
         // Shader code editor
         ui.label("Shader Code:");
 
-        // Store old source code to detect changes
-        let old_source = self.source_code.clone();
-
-        egui::ScrollArea::vertical()
+        // Check if the text changed after rendering
+        let text_changed = egui::ScrollArea::vertical()
             .max_height(500.0)
             .show(ui, |ui| {
                 if self.show_line_numbers {
-                    self.render_with_line_numbers(ui);
+                    self.render_with_line_numbers(ui)
                 } else {
-                    ui.add(
+                    let response = ui.add(
                         egui::TextEdit::multiline(&mut self.source_code)
                             .code_editor()
                             .desired_width(f32::INFINITY)
                             .desired_rows(20),
                     );
+                    response.changed()
                 }
-            });
+            })
+            .inner;
 
         // Trigger real-time validation if source changed and validation is enabled
-        if self.realtime_validation_enabled && old_source != self.source_code {
+        if self.realtime_validation_enabled && text_changed {
             self.realtime_validate();
         }
 
@@ -468,7 +465,8 @@ fn fs_main() -> @location(0) vec4<f32> {
     }
 
     /// Render editor with line numbers
-    fn render_with_line_numbers(&mut self, ui: &mut egui::Ui) {
+    /// Returns true if the text was changed
+    fn render_with_line_numbers(&mut self, ui: &mut egui::Ui) -> bool {
         // Split into lines
         let lines: Vec<&str> = self.source_code.lines().collect();
         let line_count = lines.len();
@@ -508,13 +506,15 @@ fn fs_main() -> @location(0) vec4<f32> {
             ui.separator();
 
             // Code editor column
-            ui.add(
+            let response = ui.add(
                 egui::TextEdit::multiline(&mut self.source_code)
                     .code_editor()
                     .desired_width(f32::INFINITY)
                     .desired_rows(20),
             );
-        });
+            response.changed()
+        })
+        .inner
     }
 
     /// Apply syntax highlighting to the code (basic implementation)
@@ -791,7 +791,7 @@ mod tests {
         let mut editor = ShaderEditor::new();
         // Default shader should be valid
         editor.realtime_validate();
-        assert!(editor.validation_errors.is_empty());
+        assert!(editor.validation_errors().is_empty());
     }
 
     #[test]
@@ -799,7 +799,13 @@ mod tests {
         let mut editor = ShaderEditor::new();
         editor.set_source_code("invalid wgsl code @@@".to_string());
         // Real-time validation should have been triggered by set_source_code
-        assert!(!editor.validation_errors.is_empty());
+        assert!(!editor.validation_errors().is_empty());
+        // Should have at least one error
+        assert!(editor.validation_errors().len() > 0);
+        // Error should have a valid line number
+        assert!(editor.validation_errors()[0].line > 0);
+        // Error should have a message
+        assert!(!editor.validation_errors()[0].message.is_empty());
     }
 
     #[test]
@@ -808,7 +814,7 @@ mod tests {
         editor.realtime_validation_enabled = true;
         editor.set_source_code("".to_string());
         // Empty shader should not produce errors (validation is skipped)
-        assert!(editor.validation_errors.is_empty());
+        assert!(editor.validation_errors().is_empty());
     }
 
     #[test]
@@ -820,7 +826,7 @@ mod tests {
         editor.realtime_validation_enabled = false;
         editor.set_source_code("invalid code".to_string());
         // Should not validate when disabled
-        assert!(editor.validation_errors.is_empty());
+        assert!(editor.validation_errors().is_empty());
     }
 
     #[test]

@@ -6,6 +6,7 @@ pub mod assets;
 pub mod bind_group;
 pub mod bind_group_layout_panel;
 pub mod bind_group_panel;
+pub mod bind_group_viz;
 pub mod buffer;
 pub mod buffer_inspector;
 pub mod buffer_panel;

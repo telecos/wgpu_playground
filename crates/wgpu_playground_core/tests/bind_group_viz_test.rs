@@ -26,7 +26,7 @@ fn test_visualizer_with_basic_layout() {
     let viz = BindGroupVisualizer::new();
 
     // Create a simple bind group layout with one uniform buffer
-    let layout_entries = vec![BindGroupLayoutEntryConfig {
+    let layout_entries = [BindGroupLayoutEntryConfig {
         binding: 0,
         visibility: ShaderStagesConfig {
             vertex: true,
@@ -36,7 +36,7 @@ fn test_visualizer_with_basic_layout() {
         binding_type: BindingTypeConfig::UniformBuffer,
     }];
 
-    let binding_assignments = vec![(0, "MVP Matrix Uniform".to_string())];
+    let binding_assignments = [(0, "MVP Matrix Uniform".to_string())];
 
     // Verify the data structure is set up correctly
     assert_eq!(layout_entries.len(), 1);

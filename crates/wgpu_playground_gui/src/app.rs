@@ -1,6 +1,7 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
 use wgpu_playground_core::api_coverage::ApiCoverageTracker;
 use wgpu_playground_core::api_coverage_panel::ApiCoveragePanel;
+use wgpu_playground_core::api_reference_panel::ApiReferencePanel;
 use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
 use wgpu_playground_core::buffer_inspector::BufferInspector;
@@ -54,6 +55,7 @@ pub struct PlaygroundApp {
     command_recording_panel: CommandRecordingPanel,
     settings_panel: SettingsPanel,
     api_coverage_panel: ApiCoveragePanel,
+    api_reference_panel: ApiReferencePanel,
     tutorial_panel: TutorialPanel,
     preset_panel: PresetPanel,
     selected_tab: Tab,
@@ -98,6 +100,7 @@ enum Tab {
     Settings,
     ModelLoader,
     ApiCoverage,
+    ApiReference,
     Tutorials,
     Presets,
 }
@@ -135,6 +138,7 @@ impl PlaygroundApp {
             command_recording_panel: CommandRecordingPanel::new(),
             settings_panel: SettingsPanel::new(),
             api_coverage_panel: ApiCoveragePanel::new(),
+            api_reference_panel: ApiReferencePanel::new(),
             tutorial_panel: TutorialPanel::new(),
             preset_panel: PresetPanel::new(),
             selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
@@ -583,6 +587,11 @@ impl PlaygroundApp {
                             Tab::ApiCoverage,
                             "  API Coverage",
                         ).on_hover_text("Track and visualize WebGPU API usage");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
+                            Tab::ApiReference,
+                            "  API Reference",
+                        ).on_hover_text("Browse WebGPU API documentation and examples");
                         ui.selectable_value(&mut self.selected_tab, Tab::Console, "  Console")
                             .on_hover_text("View GPU errors and validation messages (Ctrl+5)");
                         ui.selectable_value(
@@ -637,6 +646,7 @@ impl PlaygroundApp {
                 let tracker = ApiCoverageTracker::global();
                 self.api_coverage_panel.ui(ui, tracker);
             }
+            Tab::ApiReference => self.api_reference_panel.ui(ui),
             Tab::Tutorials => self.tutorial_panel.ui(ui),
             Tab::Presets => {
                 // Handle preset loading

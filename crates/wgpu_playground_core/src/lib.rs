@@ -2,6 +2,7 @@ pub mod adapter;
 pub mod adapter_selection;
 pub mod api_coverage;
 pub mod api_coverage_panel;
+pub mod api_reference_panel;
 pub mod assets;
 pub mod bind_group;
 pub mod bind_group_layout_panel;

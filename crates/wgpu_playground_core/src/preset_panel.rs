@@ -2,7 +2,6 @@
 ///
 /// This panel allows users to browse and load preset configurations
 /// for common rendering scenarios.
-
 use crate::preset::{get_all_presets, ConfigPreset, PresetCategory};
 use crate::state::PlaygroundState;
 use egui::{Color32, RichText};

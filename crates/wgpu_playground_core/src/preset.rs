@@ -2,7 +2,6 @@
 ///
 /// This module provides preset configurations that users can load and customize
 /// for common rendering scenarios like PBR materials, shadow mapping, and post-processing.
-
 use crate::state::{
     BufferPanelState, PlaygroundState, RenderPipelinePanelState, SamplerPanelState,
     ShaderEditorState, TexturePanelState,

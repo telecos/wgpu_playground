@@ -303,7 +303,7 @@ impl BindGroupVisualizer {
         from: Pos2,
         to: Pos2,
         color: Color32,
-        _label: &str,
+        _label: &str, // TODO: Add labels to connection lines for better clarity
     ) {
         // Simple line (can be upgraded to curved later)
         painter.line_segment(

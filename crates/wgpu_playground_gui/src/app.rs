@@ -586,7 +586,10 @@ impl PlaygroundApp {
             Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
             Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
             Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),
-            Tab::RenderPipelineConfig => self.render_pipeline_panel.ui(ui),
+            Tab::RenderPipelineConfig => {
+                self.render_pipeline_panel
+                    .ui_with_preview(ui, Some(device), Some(queue), Some(renderer))
+            }
             Tab::DrawCommand => self.draw_command_panel.ui(ui),
             Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
             Tab::ComputeDispatch => self.compute_dispatch_panel.ui(ui),

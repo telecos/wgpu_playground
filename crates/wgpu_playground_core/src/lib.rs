@@ -39,6 +39,7 @@ pub mod render_pass_panel;
 pub mod render_pipeline;
 pub mod render_pipeline_panel;
 pub mod rendering;
+pub mod report_html;
 pub mod resource_inspector;
 pub mod sampler;
 pub mod sampler_panel;

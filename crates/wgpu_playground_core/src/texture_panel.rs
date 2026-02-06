@@ -1,3 +1,4 @@
+use crate::texture_preview::TexturePreviewState;
 use image::GenericImageView;
 use wgpu::{TextureDimension, TextureFormat, TextureUsages};
 
@@ -35,6 +36,10 @@ pub struct TexturePanel {
     loaded_texture_dimensions: Option<(u32, u32)>,
     /// File load message
     file_load_message: Option<String>,
+    /// Texture preview rendering state
+    preview_state: Option<TexturePreviewState>,
+    /// Whether preview is enabled
+    show_preview: bool,
 }
 
 impl Default for TexturePanel {
@@ -65,6 +70,8 @@ impl TexturePanel {
             loaded_texture_data: None,
             loaded_texture_dimensions: None,
             file_load_message: None,
+            preview_state: None,
+            show_preview: true,
         }
     }
 
@@ -221,6 +228,8 @@ impl TexturePanel {
         self.loaded_texture_data = None;
         self.loaded_texture_dimensions = None;
         self.file_load_message = None;
+        // Clear preview state so it regenerates
+        self.preview_state = None;
     }
 
     /// Get loaded texture data
@@ -234,7 +243,20 @@ impl TexturePanel {
     }
 
     /// Render the texture configuration UI
+    /// This is a convenience wrapper that delegates to ui_with_preview() with None values.
+    /// Use this method when preview functionality is not needed or device/queue are not available.
     pub fn ui(&mut self, ui: &mut egui::Ui) {
+        self.ui_with_preview(ui, None, None, None);
+    }
+
+    /// Render the texture configuration UI with optional preview
+    pub fn ui_with_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: Option<&wgpu::Device>,
+        queue: Option<&wgpu::Queue>,
+        renderer: Option<&mut egui_wgpu::Renderer>,
+    ) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("🖼️ Texture Configuration");
             ui.label("Configure and create GPU textures with custom parameters.");
@@ -446,6 +468,94 @@ impl TexturePanel {
                 ui.add_space(5.0);
                 ui.label("💡 Tip: Drag and drop image files onto the application window to load them.");
             });
+
+            ui.add_space(15.0);
+
+            // Preview Section
+            if self.show_preview && (self.loaded_texture_data.is_some() || self.width_input.parse::<u32>().is_ok()) {
+                ui.group(|ui| {
+                    ui.horizontal(|ui| {
+                        ui.heading("🎨 Texture Preview");
+                        if ui.small_button("✕").on_hover_text("Hide preview").clicked() {
+                            self.show_preview = false;
+                        }
+                    });
+                    ui.add_space(5.0);
+
+                    if self.loaded_texture_data.is_some() {
+                        ui.label("Preview shows the loaded image texture:");
+                    } else {
+                        ui.label("Preview shows a procedural checkerboard texture:");
+                    }
+
+                    ui.add_space(5.0);
+
+                    // Initialize preview if we have device
+                    if let Some(device) = device {
+                        if self.preview_state.is_none() {
+                            let mut preview = TexturePreviewState::new();
+                            preview.initialize(device);
+                            self.preview_state = Some(preview);
+                        }
+                    }
+
+                    // Update preview texture based on loaded data or generate procedural
+                    if let (Some(preview), Some(device), Some(queue)) =
+                        (&mut self.preview_state, device, queue)
+                    {
+                        if let Some(loaded_data) = &self.loaded_texture_data {
+                            // Display loaded image
+                            if let Some((width, height)) = self.loaded_texture_dimensions {
+                                // Convert image data to RGBA if needed
+                                if let Ok(img) = image::load_from_memory(loaded_data) {
+                                    let rgba = img.to_rgba8();
+                                    let rgba_data = rgba.as_raw();
+
+                                    if !preview.has_texture() || self.file_load_message.is_some() {
+                                        preview.update_from_image_data(device, queue, rgba_data, width, height);
+                                        // Clear the file load message after updating preview
+                                        self.file_load_message = None;
+                                    }
+                                }
+                            }
+                        } else if self.width_input.parse::<u32>().is_ok() && self.height_input.parse::<u32>().is_ok() {
+                            // Generate procedural texture
+                            let width = self.width_input.parse::<u32>().unwrap_or(256);
+                            let height = self.height_input.parse::<u32>().unwrap_or(256);
+
+                            if !preview.has_texture() {
+                                preview.generate_procedural_texture(device, queue, width, height);
+                            }
+                        }
+
+                        // Render preview
+                        preview.render(device, queue);
+
+                        // Display the preview texture
+                        if let Some(renderer) = renderer {
+                            if let Some(texture_id) = preview.get_texture_id(device, renderer) {
+                                let (width, height) = preview.size();
+                                ui.add(egui::Image::new(egui::load::SizedTexture::new(
+                                    texture_id,
+                                    egui::vec2(width as f32, height as f32),
+                                )));
+                            }
+                        }
+                    } else if device.is_none() {
+                        ui.colored_label(
+                            egui::Color32::YELLOW,
+                            "⚠ Preview requires GPU device to be initialized"
+                        );
+                    }
+                });
+
+                ui.add_space(15.0);
+            } else if self.loaded_texture_data.is_some() || self.width_input.parse::<u32>().is_ok() {
+                // Show button to enable preview
+                if ui.button("🎨 Show Texture Preview").clicked() {
+                    self.show_preview = true;
+                }
+            }
 
             ui.add_space(15.0);
 

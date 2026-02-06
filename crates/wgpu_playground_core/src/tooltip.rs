@@ -398,12 +398,12 @@ pub mod sampler {
 
     pub const LOD_MIN_CLAMP: TooltipInfo = TooltipInfo::new(
         "Minimum level of detail (LOD) to use when sampling. Lower values use higher resolution mipmap levels. Typically 0.0 to use the highest resolution.",
-        Some("#dom-gputextureviewdescriptor-basemiplevel"),
+        Some("#dom-gpusamplerdescriptor-lodminclamp"),
     );
 
     pub const LOD_MAX_CLAMP: TooltipInfo = TooltipInfo::new(
         "Maximum level of detail (LOD) to use when sampling. Higher values allow using lower resolution mipmap levels. Common values are 32.0 or the actual mip level count.",
-        Some("#dom-gputextureviewdescriptor-miplevelcount"),
+        Some("#dom-gpusamplerdescriptor-lodmaxclamp"),
     );
 
     pub const MAX_ANISOTROPY: TooltipInfo = TooltipInfo::new(

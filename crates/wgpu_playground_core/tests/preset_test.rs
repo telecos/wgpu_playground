@@ -169,8 +169,9 @@ fn test_preset_state_serialization() {
 
     for preset in presets {
         // Test that the state can be serialized and deserialized
-        let json = serde_json::to_string(&preset.state)
-            .expect(&format!("Failed to serialize preset: {}", preset.id));
+        let json = serde_json::to_string(&preset.state).unwrap_or_else(|_| {
+            panic!("Failed to serialize preset: {}", preset.id)
+        });
 
         assert!(
             !json.is_empty(),
@@ -179,8 +180,9 @@ fn test_preset_state_serialization() {
         );
 
         let _deserialized: wgpu_playground_core::state::PlaygroundState =
-            serde_json::from_str(&json)
-                .expect(&format!("Failed to deserialize preset: {}", preset.id));
+            serde_json::from_str(&json).unwrap_or_else(|_| {
+                panic!("Failed to deserialize preset: {}", preset.id)
+            });
     }
 }
 

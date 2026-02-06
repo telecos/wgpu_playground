@@ -37,22 +37,24 @@ enum UiMode {
     CreateLayout,
     /// Binding resources
     BindResources,
+    /// Visualization
+    Visualization,
 }
 
 /// Configuration for a bind group layout entry in the UI
 #[derive(Debug, Clone)]
-struct BindGroupLayoutEntryConfig {
-    binding: u32,
-    visibility: ShaderStagesConfig,
-    binding_type: BindingTypeConfig,
+pub struct BindGroupLayoutEntryConfig {
+    pub binding: u32,
+    pub visibility: ShaderStagesConfig,
+    pub binding_type: BindingTypeConfig,
 }
 
 /// Shader stages configuration for UI
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct ShaderStagesConfig {
-    vertex: bool,
-    fragment: bool,
-    compute: bool,
+pub struct ShaderStagesConfig {
+    pub vertex: bool,
+    pub fragment: bool,
+    pub compute: bool,
 }
 
 impl ShaderStagesConfig {
@@ -81,7 +83,7 @@ impl ShaderStagesConfig {
 
 /// Binding type configuration for UI
 #[derive(Debug, Clone, PartialEq)]
-enum BindingTypeConfig {
+pub enum BindingTypeConfig {
     UniformBuffer,
     StorageBuffer { read_only: bool },
     Texture,
@@ -90,7 +92,7 @@ enum BindingTypeConfig {
 }
 
 impl BindingTypeConfig {
-    fn to_binding_type(&self) -> BindingType {
+    pub fn to_binding_type(&self) -> BindingType {
         match self {
             BindingTypeConfig::UniformBuffer => BindingType::UniformBuffer {
                 has_dynamic_offset: false,
@@ -117,7 +119,7 @@ impl BindingTypeConfig {
         }
     }
 
-    fn name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         match self {
             BindingTypeConfig::UniformBuffer => "Uniform Buffer",
             BindingTypeConfig::StorageBuffer { read_only: true } => "Storage Buffer (Read-Only)",
@@ -337,6 +339,7 @@ impl BindGroupPanel {
                     UiMode::BindResources,
                     "2️⃣ Bind Resources",
                 );
+                ui.selectable_value(&mut self.ui_mode, UiMode::Visualization, "3️⃣ Visualization");
             });
 
             ui.add_space(10.0);
@@ -344,6 +347,7 @@ impl BindGroupPanel {
             match self.ui_mode {
                 UiMode::CreateLayout => self.render_layout_ui(ui),
                 UiMode::BindResources => self.render_binding_ui(ui),
+                UiMode::Visualization => self.render_visualization_ui(ui),
             }
 
             ui.add_space(10.0);
@@ -628,6 +632,72 @@ impl BindGroupPanel {
             }
             ui.label(format!("  Filter: {}", sampler.filter_mode));
         }
+    }
+
+    /// Render the visualization UI
+    fn render_visualization_ui(&mut self, ui: &mut egui::Ui) {
+        use crate::bind_group_viz::BindGroupVisualizer;
+
+        if self.layout_entries.is_empty() {
+            ui.colored_label(
+                egui::Color32::from_rgb(200, 150, 50),
+                "⚠ Create a bind group layout first in the 'Create Layout' tab",
+            );
+            return;
+        }
+
+        ui.heading("Bind Group Flow Diagram");
+        ui.label("Visual representation of how resources flow through the rendering pipeline.");
+        ui.add_space(10.0);
+
+        // Prepare binding assignments for visualization
+        let binding_assignments: Vec<(u32, String)> = self
+            .binding_assignments
+            .iter()
+            .map(|(binding, resource)| {
+                let resource_name = match resource {
+                    ResourceAssignment::Buffer(idx) => self
+                        .mock_buffers
+                        .get(*idx)
+                        .map(|b| b.name.clone())
+                        .unwrap_or_else(|| "Unknown Buffer".to_string()),
+                    ResourceAssignment::Texture(idx) => self
+                        .mock_textures
+                        .get(*idx)
+                        .map(|t| t.name.clone())
+                        .unwrap_or_else(|| "Unknown Texture".to_string()),
+                    ResourceAssignment::Sampler(idx) => self
+                        .mock_samplers
+                        .get(*idx)
+                        .map(|s| s.name.clone())
+                        .unwrap_or_else(|| "Unknown Sampler".to_string()),
+                };
+                (*binding, resource_name)
+            })
+            .collect();
+
+        // Render the visualization
+        let visualizer = BindGroupVisualizer::new();
+        visualizer.render(
+            ui,
+            &self.layout_entries,
+            &self.layout_label_input,
+            &binding_assignments,
+        );
+
+        ui.add_space(10.0);
+
+        // Add description
+        ui.group(|ui| {
+            ui.heading("How to read this diagram:");
+            ui.label("• Pipeline Stages (left): Shader stages where bindings are accessible");
+            ui.label("• Bindings (center): Configured binding slots with their types");
+            ui.label("• Resources (right): Actual GPU resources bound to each slot");
+            ui.label(
+                "• Arrows: Show the data flow from resources through bindings to pipeline stages",
+            );
+            ui.label("• Colors: Different binding types are color-coded (see legend)");
+        });
     }
 
     /// Get the current bind group layout descriptor

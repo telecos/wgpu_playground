@@ -37,18 +37,20 @@ impl ConformanceTracker {
     fn generate_report(&self) -> ConformanceReport {
         let outcomes = self.outcomes.lock().unwrap();
         let mut by_test: HashMap<String, Vec<TestOutcome>> = HashMap::new();
+        let mut all_backends = std::collections::HashSet::new();
         
         for outcome in outcomes.iter() {
             by_test.entry(outcome.test_name.clone())
                 .or_default()
                 .push(outcome.clone());
+            all_backends.insert(outcome.backend_name.clone());
         }
 
         let total_tests = by_test.len();
         let mut passing_tests = 0;
         let mut conformant_tests = 0;
         let mut divergent_tests = Vec::new();
-        let backend_count = by_test.values().next().map(|v| v.len()).unwrap_or(1);
+        let backend_count = all_backends.len();
 
         for (test_name, test_outcomes) in by_test.iter() {
             // Count tests that passed on any backend
@@ -56,7 +58,9 @@ impl ConformanceTracker {
                 passing_tests += 1;
             }
 
-            // For conformance, we need multiple backends
+            // For conformance, we need multiple backends to compare behavior.
+            // Single-backend tests are included in passing_tests but not conformant_tests,
+            // as we can't verify cross-backend conformance without comparison.
             if test_outcomes.len() < 2 {
                 continue;
             }
@@ -603,7 +607,7 @@ fn cs(@builtin(global_invocation_id) gid: vec3<u32>) {
 
             let buf = dev.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: None,
-                contents: &vec![0u8; 256],
+                contents: &[0u8; 256],
                 usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
             });
 

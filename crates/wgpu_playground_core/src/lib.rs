@@ -32,6 +32,7 @@ pub mod performance_metrics;
 pub mod performance_panel;
 pub mod pipeline_debugger;
 pub mod pipeline_layout;
+pub mod pipeline_preview;
 pub mod query_set;
 pub mod queue;
 pub mod render_bundle_encoder;

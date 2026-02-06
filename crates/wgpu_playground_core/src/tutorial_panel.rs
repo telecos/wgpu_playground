@@ -220,7 +220,11 @@ impl TutorialPanel {
             ui.group(|ui| {
                 ui.set_min_width(ui.available_width() - 20.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("✅ Action:").strong().color(Color32::LIGHT_BLUE));
+                    ui.label(
+                        RichText::new("✅ Action:")
+                            .strong()
+                            .color(Color32::LIGHT_BLUE),
+                    );
                     ui.label(action_hint);
                 });
             });
@@ -231,7 +235,11 @@ impl TutorialPanel {
             if let Some(validation) = &step.validation {
                 ui.group(|ui| {
                     ui.set_min_width(ui.available_width() - 20.0);
-                    ui.label(RichText::new("💭 Hint").strong().color(Color32::LIGHT_GREEN));
+                    ui.label(
+                        RichText::new("💭 Hint")
+                            .strong()
+                            .color(Color32::LIGHT_GREEN),
+                    );
                     ui.add_space(3.0);
                     ui.label(&validation.hint);
                 });
@@ -281,9 +289,13 @@ impl TutorialPanel {
     fn render_tutorial_completion(&mut self, ui: &mut Ui, tutorial_id: &str) {
         ui.vertical_centered(|ui| {
             ui.add_space(40.0);
-            ui.heading(RichText::new("🎉 Congratulations!").size(24.0).color(Color32::GREEN));
+            ui.heading(
+                RichText::new("🎉 Congratulations!")
+                    .size(24.0)
+                    .color(Color32::GREEN),
+            );
             ui.add_space(20.0);
-            
+
             let tutorial_title = match tutorial_id {
                 "hello_triangle" => "Hello Triangle",
                 "adding_textures" => "Adding Textures",
@@ -291,8 +303,14 @@ impl TutorialPanel {
                 "gpu_compute" => "GPU Compute",
                 _ => "Tutorial",
             };
-            
-            ui.label(RichText::new(format!("You've completed the '{}' tutorial!", tutorial_title)).size(18.0));
+
+            ui.label(
+                RichText::new(format!(
+                    "You've completed the '{}' tutorial!",
+                    tutorial_title
+                ))
+                .size(18.0),
+            );
             ui.add_space(30.0);
 
             ui.label("You've learned:");
@@ -341,9 +359,7 @@ impl TutorialPanel {
         if let Some(validation) = &step.validation {
             match &validation.check_type {
                 ValidationCheck::ManualConfirm => true, // Always allow manual confirmation
-                ValidationCheck::PanelVisited(panel) => {
-                    self.state.visited_panels.contains(panel)
-                }
+                ValidationCheck::PanelVisited(panel) => self.state.visited_panels.contains(panel),
                 ValidationCheck::ShaderCompiled => {
                     // For now, allow manual progression
                     // This could be integrated with actual shader compilation state
@@ -396,7 +412,10 @@ mod tests {
     fn test_panel_visited_tracking() {
         let mut panel = TutorialPanel::new();
         panel.mark_panel_visited(HighlightTarget::BufferConfig);
-        assert!(panel.state.visited_panels.contains(&HighlightTarget::BufferConfig));
+        assert!(panel
+            .state
+            .visited_panels
+            .contains(&HighlightTarget::BufferConfig));
     }
 
     #[test]

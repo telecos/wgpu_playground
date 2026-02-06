@@ -638,7 +638,7 @@ impl PlaygroundApp {
     /// Track panel visits for tutorial system
     fn track_panel_visit(&mut self, tab: Tab) {
         use wgpu_playground_core::tutorial::HighlightTarget;
-        
+
         let highlight_target = match tab {
             Tab::RenderPipelineConfig => Some(HighlightTarget::RenderPipeline),
             Tab::BufferConfig => Some(HighlightTarget::BufferConfig),

@@ -138,10 +138,14 @@ fn test_panel_visit_tracking() {
 
     // Track panel visits
     state.mark_panel_visited(HighlightTarget::BufferConfig);
-    assert!(state.visited_panels.contains(&HighlightTarget::BufferConfig));
+    assert!(state
+        .visited_panels
+        .contains(&HighlightTarget::BufferConfig));
 
     state.mark_panel_visited(HighlightTarget::RenderPipeline);
-    assert!(state.visited_panels.contains(&HighlightTarget::RenderPipeline));
+    assert!(state
+        .visited_panels
+        .contains(&HighlightTarget::RenderPipeline));
     assert_eq!(state.visited_panels.len(), 2);
 }
 
@@ -259,7 +263,7 @@ fn test_tutorial_descriptions_are_educational() {
             let explanation_lower = step.explanation.to_lowercase();
             let description_lower = step.description.to_lowercase();
             let combined = format!("{} {}", explanation_lower, description_lower);
-            
+
             let has_educational_content = combined.contains("gpu")
                 || combined.contains("webgpu")
                 || combined.contains("shader")

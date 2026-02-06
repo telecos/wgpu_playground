@@ -771,7 +771,17 @@ impl CodeGenerator {
 
     /// Generate buffer creation code
     fn generate_buffer_creation(&self, buffer_state: &BufferPanelState) -> String {
-        let size = buffer_state.size.parse::<u64>().unwrap_or(256);
+        let size = buffer_state
+            .size
+            .parse::<u64>()
+            .inspect_err(|e| {
+                log::warn!(
+                    "Failed to parse buffer size '{}': {}. Using default 256.",
+                    buffer_state.size,
+                    e
+                )
+            })
+            .unwrap_or(256);
         let mut usage_flags = Vec::new();
 
         if buffer_state.usage_vertex {
@@ -812,9 +822,39 @@ impl CodeGenerator {
 
     /// Generate texture creation code
     fn generate_texture_creation(&self, texture_state: &TexturePanelState) -> String {
-        let width = texture_state.width.parse::<u32>().unwrap_or(256);
-        let height = texture_state.height.parse::<u32>().unwrap_or(256);
-        let depth = texture_state.depth.parse::<u32>().unwrap_or(1);
+        let width = texture_state
+            .width
+            .parse::<u32>()
+            .inspect_err(|e| {
+                log::warn!(
+                    "Failed to parse texture width '{}': {}. Using default 256.",
+                    texture_state.width,
+                    e
+                )
+            })
+            .unwrap_or(256);
+        let height = texture_state
+            .height
+            .parse::<u32>()
+            .inspect_err(|e| {
+                log::warn!(
+                    "Failed to parse texture height '{}': {}. Using default 256.",
+                    texture_state.height,
+                    e
+                )
+            })
+            .unwrap_or(256);
+        let depth = texture_state
+            .depth
+            .parse::<u32>()
+            .inspect_err(|e| {
+                log::warn!(
+                    "Failed to parse texture depth '{}': {}. Using default 1.",
+                    texture_state.depth,
+                    e
+                )
+            })
+            .unwrap_or(1);
 
         let mut usage_flags = Vec::new();
         if texture_state.usage_texture_binding {
@@ -872,12 +912,14 @@ impl CodeGenerator {
     }
 
     /// Generate shader module creation code
-    fn generate_shader_module_creation(&self, _shader_state: &ShaderEditorState) -> String {
-        "        let shader_module = device.create_shader_module(wgpu::ShaderModuleDescriptor {\n            \
-            label: Some(\"Shader\"),\n            \
-            source: wgpu::ShaderSource::Wgsl(SHADER_SOURCE.into()),\n        \
-        });\n\n"
-            .to_string()
+    fn generate_shader_module_creation(&self, shader_state: &ShaderEditorState) -> String {
+        format!(
+            "        let shader_module = device.create_shader_module(wgpu::ShaderModuleDescriptor {{\n            \
+                label: Some(\"{}\"),\n            \
+                source: wgpu::ShaderSource::Wgsl(SHADER_SOURCE.into()),\n        \
+            }});\n\n",
+            shader_state.label
+        )
     }
 
     /// Generate render pipeline creation code
@@ -1013,7 +1055,8 @@ impl CodeGenerator {
     }
 
     /// Generate main function
-    fn generate_main_function(&self, _state: &PlaygroundState) -> String {
+    /// Note: playground_state is reserved for future use (e.g., window title customization)
+    fn generate_main_function(&self, _playground_state: &PlaygroundState) -> String {
         format!(
             "fn main() {{\n    \
                 env_logger::init();\n    \

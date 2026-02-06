@@ -40,7 +40,7 @@ impl ConformanceTracker {
         
         for outcome in outcomes.iter() {
             by_test.entry(outcome.test_name.clone())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(outcome.clone());
         }
 
@@ -95,6 +95,7 @@ struct ConformanceReport {
     total_tests: usize,
     passing_tests: usize,
     conformant_tests: usize,
+    #[allow(clippy::type_complexity)]
     divergent_tests: Vec<(String, Vec<TestOutcome>)>,
     conformance_percentage: f64,
     backend_count: usize,

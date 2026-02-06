@@ -142,6 +142,11 @@ fn fs_main() -> @location(0) vec4<f32> {
         &self.compilation_result
     }
 
+    /// Get the current validation errors
+    pub fn validation_errors(&self) -> &[ValidationError] {
+        &self.validation_errors
+    }
+
     /// Compile the current shader
     pub fn compile(&mut self, device: &wgpu::Device) {
         // Try to create a shader module

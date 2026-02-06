@@ -38,9 +38,10 @@ impl ConformanceTracker {
         let outcomes = self.outcomes.lock().unwrap();
         let mut by_test: HashMap<String, Vec<TestOutcome>> = HashMap::new();
         let mut all_backends = std::collections::HashSet::new();
-        
+
         for outcome in outcomes.iter() {
-            by_test.entry(outcome.test_name.clone())
+            by_test
+                .entry(outcome.test_name.clone())
                 .or_default()
                 .push(outcome.clone());
             all_backends.insert(outcome.backend_name.clone());
@@ -67,7 +68,7 @@ impl ConformanceTracker {
 
             let all_passed = test_outcomes.iter().all(|o| o.passed);
             let all_failed = test_outcomes.iter().all(|o| !o.passed);
-            
+
             if all_passed || all_failed {
                 conformant_tests += 1;
             } else {
@@ -112,20 +113,28 @@ impl ConformanceReport {
         println!("========================================");
         println!("Backends Tested: {}", self.backend_count);
         println!("Total Tests: {}", self.total_tests);
-        println!("Passing Tests: {} ({:.1}%)", self.passing_tests, 
-                 if self.total_tests > 0 { 
-                     (self.passing_tests as f64 / self.total_tests as f64) * 100.0 
-                 } else { 0.0 });
-        
+        println!(
+            "Passing Tests: {} ({:.1}%)",
+            self.passing_tests,
+            if self.total_tests > 0 {
+                (self.passing_tests as f64 / self.total_tests as f64) * 100.0
+            } else {
+                0.0
+            }
+        );
+
         if self.backend_count >= 2 {
-            println!("Conformant: {} ({:.1}%)", self.conformant_tests, self.conformance_percentage);
+            println!(
+                "Conformant: {} ({:.1}%)",
+                self.conformant_tests, self.conformance_percentage
+            );
         } else if self.passing_tests == 0 {
             println!("\nNote: All tests skipped (likely no GPU available)");
             println!("Conformance testing requires 2+ backends and GPU support");
         } else {
             println!("\nNote: Conformance testing requires 2+ backends");
         }
-        
+
         if !self.divergent_tests.is_empty() {
             println!("\nDivergent Behaviors:");
             for (test_name, outcomes) in &self.divergent_tests {
@@ -144,7 +153,7 @@ impl ConformanceReport {
                 }
             }
         }
-        
+
         // Show test coverage summary
         println!("\nTest Coverage by API Category:");
         println!("  ✓ Buffer Operations: 3 tests");
@@ -157,7 +166,7 @@ impl ConformanceReport {
         println!("    - draw_basic");
         println!("  ✓ Compute Dispatch: 1 test");
         println!("    - dispatch_1d");
-        
+
         println!("========================================\n");
     }
 }
@@ -173,7 +182,7 @@ mod buffer_ops {
 
     pub async fn test_buffer_create_vertex(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "buffer_create_vertex";
-        
+
         let result = async {
             let Some((dev, _q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -191,7 +200,8 @@ mod buffer_ops {
             } else {
                 Err(format!("Size mismatch: expected 1024, got {}", buf.size()))
             }
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -203,7 +213,7 @@ mod buffer_ops {
 
     pub async fn test_buffer_init_data(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "buffer_init_data";
-        
+
         let result = async {
             let Some((dev, _q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -221,7 +231,8 @@ mod buffer_ops {
             } else {
                 Err(format!("Size error: got {}", buf.size()))
             }
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -233,7 +244,7 @@ mod buffer_ops {
 
     pub async fn test_buffer_copy_ops(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "buffer_copy_ops";
-        
+
         let result = async {
             let Some((dev, q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -261,7 +272,8 @@ mod buffer_ops {
             q.submit(Some(enc.finish()));
 
             Ok(())
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -282,7 +294,7 @@ mod texture_ops {
 
     pub async fn test_texture_format_rgba8(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "texture_format_rgba8";
-        
+
         let result = async {
             let Some((dev, _q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -290,7 +302,11 @@ mod texture_ops {
 
             let tex = dev.create_texture(&wgpu::TextureDescriptor {
                 label: Some("rgba8"),
-                size: wgpu::Extent3d { width: 64, height: 64, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d {
+                    width: 64,
+                    height: 64,
+                    depth_or_array_layers: 1,
+                },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -304,7 +320,8 @@ mod texture_ops {
             } else {
                 Err("Texture property mismatch".to_string())
             }
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -316,7 +333,7 @@ mod texture_ops {
 
     pub async fn test_texture_create_view(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "texture_create_view";
-        
+
         let result = async {
             let Some((dev, _q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -324,7 +341,11 @@ mod texture_ops {
 
             let tex = dev.create_texture(&wgpu::TextureDescriptor {
                 label: Some("view_test"),
-                size: wgpu::Extent3d { width: 128, height: 128, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d {
+                    width: 128,
+                    height: 128,
+                    depth_or_array_layers: 1,
+                },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -335,7 +356,8 @@ mod texture_ops {
 
             let _view = tex.create_view(&wgpu::TextureViewDescriptor::default());
             Ok(())
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -356,7 +378,7 @@ mod pipeline_ops {
 
     pub async fn test_render_pipeline_basic(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "render_pipeline_basic";
-        
+
         let result = async {
             let Some((dev, _q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -406,7 +428,8 @@ fn fs() -> @location(0) vec4<f32> {
             });
 
             Ok(())
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -418,7 +441,7 @@ fn fs() -> @location(0) vec4<f32> {
 
     pub async fn test_compute_pipeline_basic(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "compute_pipeline_basic";
-        
+
         let result = async {
             let Some((dev, _q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -446,7 +469,8 @@ fn cs() {
             });
 
             Ok(())
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -467,7 +491,7 @@ mod draw_ops {
 
     pub async fn test_draw_basic(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "draw_basic";
-        
+
         let result = async {
             let Some((dev, q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -518,7 +542,11 @@ fn fs() -> @location(0) vec4<f32> {
 
             let target = dev.create_texture(&wgpu::TextureDescriptor {
                 label: None,
-                size: wgpu::Extent3d { width: 64, height: 64, depth_or_array_layers: 1 },
+                size: wgpu::Extent3d {
+                    width: 64,
+                    height: 64,
+                    depth_or_array_layers: 1,
+                },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -528,8 +556,9 @@ fn fs() -> @location(0) vec4<f32> {
             });
 
             let view = target.create_view(&wgpu::TextureViewDescriptor::default());
-            let mut enc = dev.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-            
+            let mut enc =
+                dev.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+
             {
                 let mut rp = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: None,
@@ -553,7 +582,8 @@ fn fs() -> @location(0) vec4<f32> {
 
             q.submit(Some(enc.finish()));
             Ok(())
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),
@@ -575,7 +605,7 @@ mod compute_dispatch {
 
     pub async fn test_dispatch_1d(tracker: &ConformanceTracker, backend: &str) {
         let test_name = "dispatch_1d";
-        
+
         let result = async {
             let Some((dev, q)) = create_test_device().await else {
                 return Err("No device".to_string());
@@ -621,7 +651,8 @@ fn cs(@builtin(global_invocation_id) gid: vec3<u32>) {
                 }],
             });
 
-            let mut enc = dev.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+            let mut enc =
+                dev.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
             {
                 let mut cp = enc.begin_compute_pass(&wgpu::ComputePassDescriptor {
                     label: None,
@@ -634,7 +665,8 @@ fn cs(@builtin(global_invocation_id) gid: vec3<u32>) {
 
             q.submit(Some(enc.finish()));
             Ok(())
-        }.await;
+        }
+        .await;
 
         tracker.record(TestOutcome {
             backend_name: backend.to_string(),

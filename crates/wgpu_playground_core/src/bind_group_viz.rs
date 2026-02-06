@@ -9,8 +9,8 @@ use egui::{Color32, Pos2, Rect, Stroke, Vec2};
 /// Visualizer for bind group layouts
 pub struct BindGroupVisualizer {
     /// Preview canvas size
-    width: f32,
-    height: f32,
+    pub width: f32,
+    pub height: f32,
 }
 
 impl Default for BindGroupVisualizer {
@@ -328,7 +328,7 @@ impl BindGroupVisualizer {
     }
 
     /// Get color for binding type
-    fn get_binding_type_color(&self, binding_type: &BindingTypeConfig) -> Color32 {
+    pub fn get_binding_type_color(&self, binding_type: &BindingTypeConfig) -> Color32 {
         match binding_type {
             BindingTypeConfig::UniformBuffer => Color32::from_rgb(50, 150, 100), // Sea Green
             BindingTypeConfig::StorageBuffer { .. } => Color32::from_rgb(70, 130, 180), // Steel Blue

@@ -14,6 +14,7 @@ use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
+use wgpu_playground_core::learning_path_panel::LearningPathPanel;
 use wgpu_playground_core::model_loader_panel::ModelLoaderPanel;
 use wgpu_playground_core::performance_panel::PerformancePanel;
 use wgpu_playground_core::pipeline_debugger::PipelineDebugger;
@@ -58,6 +59,7 @@ pub struct PlaygroundApp {
     api_reference_panel: ApiReferencePanel,
     tutorial_panel: TutorialPanel,
     preset_panel: PresetPanel,
+    learning_path_panel: LearningPathPanel,
     selected_tab: Tab,
     // Collapsible section states
     setup_section_open: bool,
@@ -103,6 +105,7 @@ enum Tab {
     ApiReference,
     Tutorials,
     Presets,
+    LearningPath,
 }
 
 impl PlaygroundApp {
@@ -141,6 +144,7 @@ impl PlaygroundApp {
             api_reference_panel: ApiReferencePanel::new(),
             tutorial_panel: TutorialPanel::new(),
             preset_panel: PresetPanel::new(),
+            learning_path_panel: LearningPathPanel::new(),
             selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
             // Initialize section states - Rendering open by default
             setup_section_open: false,
@@ -554,6 +558,11 @@ impl PlaygroundApp {
                         ).on_hover_text("Interactive guided tutorials for learning WebGPU");
                         ui.selectable_value(
                             &mut self.selected_tab,
+                            Tab::LearningPath,
+                            "  Learning Path",
+                        ).on_hover_text("Visual learning path showing WebGPU concepts and progress");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
                             Tab::Presets,
                             "  Configuration Presets",
                         ).on_hover_text("Browse and load preset configurations for common rendering scenarios");
@@ -648,6 +657,7 @@ impl PlaygroundApp {
             }
             Tab::ApiReference => self.api_reference_panel.ui(ui),
             Tab::Tutorials => self.tutorial_panel.ui(ui),
+            Tab::LearningPath => self.learning_path_panel.ui(ui),
             Tab::Presets => {
                 // Handle preset loading
                 if let Some(preset_state) = self.preset_panel.ui(ui) {

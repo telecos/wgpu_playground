@@ -264,11 +264,55 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Validate GitHub Pages configuration before attempting deployment
+  validate-pages-config:
+    name: Validate GitHub Pages Configuration
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Check GitHub Pages status
+        id: pages-check
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking GitHub Pages configuration..."
+          
+          # Try to get Pages configuration
+          PAGES_STATUS=$(gh api repos/${{ github.repository }}/pages 2>&1 || echo "NOT_CONFIGURED")
+          
+          if echo "$PAGES_STATUS" | grep -q "Not Found"; then
+            echo "pages_enabled=false" >> $GITHUB_OUTPUT
+            echo "::warning::GitHub Pages is not enabled for this repository"
+          else
+            echo "pages_enabled=true" >> $GITHUB_OUTPUT
+            echo "GitHub Pages is properly configured"
+          fi
+      
+      - name: Display setup instructions if Pages not enabled
+        if: steps.pages-check.outputs.pages_enabled == 'false'
+        run: |
+          echo "## ⚠️ GitHub Pages Not Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The deployment will likely fail because GitHub Pages is not enabled." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Setup Required (One-time)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to [Repository Settings → Pages](https://github.com/${{ github.repository }}/settings/pages)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Under **Source**, select **GitHub Actions**" >> $GITHUB_STEP_SUMMARY
+          echo "3. Click **Save**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "After enabling Pages, re-run this workflow." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See [WASM Deployment Documentation](https://github.com/${{ github.repository }}/blob/main/docs/WASM_DEMO_DEPLOYMENT.md) for details." >> $GITHUB_STEP_SUMMARY
+          
+          echo "::notice::GitHub Pages must be enabled in repository settings. See job summary for instructions."
+
   # Deploy to GitHub Pages (only on main branch)
   deploy-pages:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    needs: [prepare-deployment, check-links]
+    needs: [prepare-deployment, check-links, validate-pages-config]
     if: github.ref == 'refs/heads/main'
     permissions:
       pages: write
@@ -279,9 +323,36 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
       
+      - name: Handle deployment failure
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The deployment to GitHub Pages failed. This is most likely because:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### GitHub Pages is not enabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Solution**: Enable GitHub Pages in repository settings:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to [Repository Settings → Pages](https://github.com/${{ github.repository }}/settings/pages)" >> $GITHUB_STEP_SUMMARY
+          echo "2. Under **Source**, select **GitHub Actions**" >> $GITHUB_STEP_SUMMARY
+          echo "3. Click **Save**" >> $GITHUB_STEP_SUMMARY
+          echo "4. Re-run this workflow" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Additional Resources" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [Setup Instructions](https://github.com/${{ github.repository }}/blob/main/docs/WASM_DEMO_DEPLOYMENT.md#prerequisites)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Troubleshooting Guide](https://github.com/${{ github.repository }}/blob/main/docs/WASM_DEMO_DEPLOYMENT.md#troubleshooting)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Workflow README](.github/workflows/README.md#setup-requirements)" >> $GITHUB_STEP_SUMMARY
+          
+          echo "::error::Deployment failed. GitHub Pages may not be enabled. See job summary for setup instructions."
+          exit 1
+      
       - name: Display deployment URL
+        if: steps.deployment.outcome == 'success'
         run: |
           echo "## Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

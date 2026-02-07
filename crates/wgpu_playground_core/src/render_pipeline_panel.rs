@@ -1288,7 +1288,9 @@ impl RenderPipelinePanel {
             BlendFactor::DstAlpha => blend_factor::DST_ALPHA.apply(response),
             BlendFactor::OneMinusDstAlpha => blend_factor::ONE_MINUS_DST_ALPHA.apply(response),
             // Note: Constant and SrcAlphaSaturated are not in the tooltip module
-            BlendFactor::Constant | BlendFactor::OneMinusConstant | BlendFactor::SrcAlphaSaturated => response,
+            BlendFactor::Constant
+            | BlendFactor::OneMinusConstant
+            | BlendFactor::SrcAlphaSaturated => response,
         }
     }
 

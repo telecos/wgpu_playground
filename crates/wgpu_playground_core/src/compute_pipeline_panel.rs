@@ -176,9 +176,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                         ui.end_row();
 
                         ui.label("Entry Point:");
-                        compute::ENTRY_POINT.apply(
-                            ui.text_edit_singleline(&mut self.entry_point_input),
-                        );
+                        compute::ENTRY_POINT
+                            .apply(ui.text_edit_singleline(&mut self.entry_point_input));
                         ui.end_row();
                     });
             });
@@ -242,9 +241,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 ui.label("Configure how bind groups are organized in the pipeline.");
                 ui.add_space(5.0);
 
-                compute::PIPELINE_LAYOUT.apply(
-                    ui.checkbox(&mut self.use_auto_layout, "Use Auto-Generated Layout"),
-                );
+                compute::PIPELINE_LAYOUT
+                    .apply(ui.checkbox(&mut self.use_auto_layout, "Use Auto-Generated Layout"));
 
                 if !self.use_auto_layout {
                     ui.add_space(5.0);

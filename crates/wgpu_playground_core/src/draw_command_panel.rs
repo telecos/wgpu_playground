@@ -350,44 +350,40 @@ impl DrawCommandPanel {
                 .num_columns(2)
                 .spacing([10.0, 8.0])
                 .show(ui, |ui| {
-                    ui.label("Vertex Count:")
-                        .webgpu_tooltip(
-                            crate::tooltip::draw::VERTEX_COUNT.description,
-                            crate::tooltip::draw::VERTEX_COUNT.spec_anchor,
-                        );
+                    ui.label("Vertex Count:").webgpu_tooltip(
+                        crate::tooltip::draw::VERTEX_COUNT.description,
+                        crate::tooltip::draw::VERTEX_COUNT.spec_anchor,
+                    );
                     ui.add(
                         egui::TextEdit::singleline(&mut self.vertex_count_input)
                             .desired_width(100.0),
                     );
                     ui.end_row();
 
-                    ui.label("First Vertex:")
-                        .webgpu_tooltip(
-                            crate::tooltip::draw::FIRST_VERTEX.description,
-                            crate::tooltip::draw::FIRST_VERTEX.spec_anchor,
-                        );
+                    ui.label("First Vertex:").webgpu_tooltip(
+                        crate::tooltip::draw::FIRST_VERTEX.description,
+                        crate::tooltip::draw::FIRST_VERTEX.spec_anchor,
+                    );
                     ui.add(
                         egui::TextEdit::singleline(&mut self.first_vertex_input)
                             .desired_width(100.0),
                     );
                     ui.end_row();
 
-                    ui.label("Instance Count:")
-                        .webgpu_tooltip(
-                            crate::tooltip::draw::INSTANCE_COUNT.description,
-                            crate::tooltip::draw::INSTANCE_COUNT.spec_anchor,
-                        );
+                    ui.label("Instance Count:").webgpu_tooltip(
+                        crate::tooltip::draw::INSTANCE_COUNT.description,
+                        crate::tooltip::draw::INSTANCE_COUNT.spec_anchor,
+                    );
                     ui.add(
                         egui::TextEdit::singleline(&mut self.instance_count_input)
                             .desired_width(100.0),
                     );
                     ui.end_row();
 
-                    ui.label("First Instance:")
-                        .webgpu_tooltip(
-                            crate::tooltip::draw::FIRST_INSTANCE.description,
-                            crate::tooltip::draw::FIRST_INSTANCE.spec_anchor,
-                        );
+                    ui.label("First Instance:").webgpu_tooltip(
+                        crate::tooltip::draw::FIRST_INSTANCE.description,
+                        crate::tooltip::draw::FIRST_INSTANCE.spec_anchor,
+                    );
                     ui.add(
                         egui::TextEdit::singleline(&mut self.first_instance_input)
                             .desired_width(100.0),
@@ -428,22 +424,20 @@ impl DrawCommandPanel {
                     );
                     ui.end_row();
 
-                    ui.label("Instance Count:")
-                        .webgpu_tooltip(
-                            crate::tooltip::draw::INSTANCE_COUNT.description,
-                            crate::tooltip::draw::INSTANCE_COUNT.spec_anchor,
-                        );
+                    ui.label("Instance Count:").webgpu_tooltip(
+                        crate::tooltip::draw::INSTANCE_COUNT.description,
+                        crate::tooltip::draw::INSTANCE_COUNT.spec_anchor,
+                    );
                     ui.add(
                         egui::TextEdit::singleline(&mut self.instance_count_input)
                             .desired_width(100.0),
                     );
                     ui.end_row();
 
-                    ui.label("First Instance:")
-                        .webgpu_tooltip(
-                            crate::tooltip::draw::FIRST_INSTANCE.description,
-                            crate::tooltip::draw::FIRST_INSTANCE.spec_anchor,
-                        );
+                    ui.label("First Instance:").webgpu_tooltip(
+                        crate::tooltip::draw::FIRST_INSTANCE.description,
+                        crate::tooltip::draw::FIRST_INSTANCE.spec_anchor,
+                    );
                     ui.add(
                         egui::TextEdit::singleline(&mut self.first_instance_input)
                             .desired_width(100.0),

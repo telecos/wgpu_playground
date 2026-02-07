@@ -293,24 +293,30 @@ impl ComputeDispatchPanel {
                 .spacing([10.0, 8.0])
                 .show(ui, |ui| {
                     ui.label("Workgroups X:");
-                    compute::WORKGROUP_COUNT_X.apply(ui.add(
-                        egui::TextEdit::singleline(&mut self.workgroups_x_input)
-                            .desired_width(100.0),
-                    ));
+                    compute::WORKGROUP_COUNT_X.apply(
+                        ui.add(
+                            egui::TextEdit::singleline(&mut self.workgroups_x_input)
+                                .desired_width(100.0),
+                        ),
+                    );
                     ui.end_row();
 
                     ui.label("Workgroups Y:");
-                    compute::WORKGROUP_COUNT_Y.apply(ui.add(
-                        egui::TextEdit::singleline(&mut self.workgroups_y_input)
-                            .desired_width(100.0),
-                    ));
+                    compute::WORKGROUP_COUNT_Y.apply(
+                        ui.add(
+                            egui::TextEdit::singleline(&mut self.workgroups_y_input)
+                                .desired_width(100.0),
+                        ),
+                    );
                     ui.end_row();
 
                     ui.label("Workgroups Z:");
-                    compute::WORKGROUP_COUNT_Z.apply(ui.add(
-                        egui::TextEdit::singleline(&mut self.workgroups_z_input)
-                            .desired_width(100.0),
-                    ));
+                    compute::WORKGROUP_COUNT_Z.apply(
+                        ui.add(
+                            egui::TextEdit::singleline(&mut self.workgroups_z_input)
+                                .desired_width(100.0),
+                        ),
+                    );
                     ui.end_row();
                 });
 

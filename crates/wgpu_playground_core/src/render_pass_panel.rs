@@ -249,18 +249,16 @@ impl RenderPassPanel {
                 for op in LoadOpChoice::all() {
                     match op {
                         LoadOpChoice::Clear => {
-                            ui.selectable_value(load_op, op, op.name())
-                                .webgpu_tooltip(
-                                    crate::tooltip::load_store_op::LOAD_OP_CLEAR.description,
-                                    crate::tooltip::load_store_op::LOAD_OP_CLEAR.spec_anchor,
-                                );
+                            ui.selectable_value(load_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::LOAD_OP_CLEAR.description,
+                                crate::tooltip::load_store_op::LOAD_OP_CLEAR.spec_anchor,
+                            );
                         }
                         LoadOpChoice::Load => {
-                            ui.selectable_value(load_op, op, op.name())
-                                .webgpu_tooltip(
-                                    crate::tooltip::load_store_op::LOAD_OP_LOAD.description,
-                                    crate::tooltip::load_store_op::LOAD_OP_LOAD.spec_anchor,
-                                );
+                            ui.selectable_value(load_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::LOAD_OP_LOAD.description,
+                                crate::tooltip::load_store_op::LOAD_OP_LOAD.spec_anchor,
+                            );
                         }
                     }
                 }
@@ -275,18 +273,16 @@ impl RenderPassPanel {
                 for op in StoreOpChoice::all() {
                     match op {
                         StoreOpChoice::Store => {
-                            ui.selectable_value(store_op, op, op.name())
-                                .webgpu_tooltip(
-                                    crate::tooltip::load_store_op::STORE_OP_STORE.description,
-                                    crate::tooltip::load_store_op::STORE_OP_STORE.spec_anchor,
-                                );
+                            ui.selectable_value(store_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::STORE_OP_STORE.description,
+                                crate::tooltip::load_store_op::STORE_OP_STORE.spec_anchor,
+                            );
                         }
                         StoreOpChoice::Discard => {
-                            ui.selectable_value(store_op, op, op.name())
-                                .webgpu_tooltip(
-                                    crate::tooltip::load_store_op::STORE_OP_DISCARD.description,
-                                    crate::tooltip::load_store_op::STORE_OP_DISCARD.spec_anchor,
-                                );
+                            ui.selectable_value(store_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::STORE_OP_DISCARD.description,
+                                crate::tooltip::load_store_op::STORE_OP_DISCARD.spec_anchor,
+                            );
                         }
                     }
                 }

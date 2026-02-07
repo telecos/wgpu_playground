@@ -2,6 +2,7 @@ use crate::bind_group::{
     BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType, SamplerBindingType,
     StorageTextureAccess, TextureSampleType, TextureViewDimension,
 };
+use crate::tooltip;
 use wgpu::ShaderStages;
 
 /// UI panel for creating and configuring bind groups
@@ -408,9 +409,9 @@ impl BindGroupPanel {
                             ui.label(format!("{}", entry.binding));
                             ui.label(entry.binding_type.name());
 
-                            ui.checkbox(&mut entry.visibility.vertex, "");
-                            ui.checkbox(&mut entry.visibility.fragment, "");
-                            ui.checkbox(&mut entry.visibility.compute, "");
+                            tooltip::shader_visibility::VERTEX.apply(ui.checkbox(&mut entry.visibility.vertex, ""));
+                            tooltip::shader_visibility::FRAGMENT.apply(ui.checkbox(&mut entry.visibility.fragment, ""));
+                            tooltip::shader_visibility::COMPUTE.apply(ui.checkbox(&mut entry.visibility.compute, ""));
 
                             if ui.button("🗑").clicked() {
                                 to_remove = Some(idx);

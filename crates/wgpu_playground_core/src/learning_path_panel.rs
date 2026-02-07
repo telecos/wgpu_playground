@@ -126,8 +126,11 @@ impl LearningPathPanel {
                 RichText::new(format!("◐ In Progress: {}", in_progress)).color(Color32::YELLOW),
             );
             ui.label(
-                RichText::new(format!("○ Remaining: {}", total_nodes - completed - in_progress))
-                    .color(Color32::GRAY),
+                RichText::new(format!(
+                    "○ Remaining: {}",
+                    total_nodes - completed - in_progress
+                ))
+                .color(Color32::GRAY),
             );
 
             if total_nodes > 0 {
@@ -218,7 +221,12 @@ impl LearningPathPanel {
         let column_width = (rect.width() - margin * 2.0) / 3.0;
 
         // Layout nodes in columns by difficulty
-        self.layout_column(&beginner_nodes, rect.left() + margin, rect.top() + 80.0, column_width);
+        self.layout_column(
+            &beginner_nodes,
+            rect.left() + margin,
+            rect.top() + 80.0,
+            column_width,
+        );
         self.layout_column(
             &intermediate_nodes,
             rect.left() + margin + column_width,
@@ -265,10 +273,7 @@ impl LearningPathPanel {
                     Color32::from_rgba_unmultiplied(100, 100, 100, 50)
                 };
 
-                painter.line_segment(
-                    [*prereq_pos, *node_pos],
-                    Stroke::new(2.0, color),
-                );
+                painter.line_segment([*prereq_pos, *node_pos], Stroke::new(2.0, color));
 
                 // Draw arrowhead
                 self.draw_arrow_head(painter, *prereq_pos, *node_pos, color);
@@ -276,13 +281,7 @@ impl LearningPathPanel {
         }
     }
 
-    fn draw_arrow_head(
-        &self,
-        painter: &egui::Painter,
-        from: Pos2,
-        to: Pos2,
-        color: Color32,
-    ) {
+    fn draw_arrow_head(&self, painter: &egui::Painter, from: Pos2, to: Pos2, color: Color32) {
         let arrow_size = 8.0;
         let dir = (to - from).normalized();
         let perp = Vec2::new(-dir.y, dir.x);
@@ -320,28 +319,27 @@ impl LearningPathPanel {
             let rect = Rect::from_center_size(*center, Vec2::new(node_width, node_height));
 
             // Determine node state and color
-            let (bg_color, border_color, border_width) =
-                if self.progress.is_node_completed(node) {
-                    (
-                        node.category.color().linear_multiply(0.4),
-                        Color32::GREEN,
-                        3.0,
-                    )
-                } else if self.progress.is_node_in_progress(node) {
-                    (
-                        node.category.color().linear_multiply(0.3),
-                        Color32::YELLOW,
-                        2.5,
-                    )
-                } else if self.progress.are_prerequisites_met(node, &self.nodes) {
-                    (
-                        node.category.color().linear_multiply(0.2),
-                        node.category.color(),
-                        2.0,
-                    )
-                } else {
-                    (Color32::from_rgb(40, 40, 45), Color32::DARK_GRAY, 1.5)
-                };
+            let (bg_color, border_color, border_width) = if self.progress.is_node_completed(node) {
+                (
+                    node.category.color().linear_multiply(0.4),
+                    Color32::GREEN,
+                    3.0,
+                )
+            } else if self.progress.is_node_in_progress(node) {
+                (
+                    node.category.color().linear_multiply(0.3),
+                    Color32::YELLOW,
+                    2.5,
+                )
+            } else if self.progress.are_prerequisites_met(node, &self.nodes) {
+                (
+                    node.category.color().linear_multiply(0.2),
+                    node.category.color(),
+                    2.0,
+                )
+            } else {
+                (Color32::from_rgb(40, 40, 45), Color32::DARK_GRAY, 1.5)
+            };
 
             // Draw node box
             painter.rect_filled(rect, 8.0, bg_color);
@@ -519,7 +517,10 @@ mod tests {
         let tutorials = vec!["hello_triangle".to_string()];
 
         panel.update_from_tutorial_state(&tutorials);
-        assert!(panel.progress.completed_tutorials.contains("hello_triangle"));
+        assert!(panel
+            .progress
+            .completed_tutorials
+            .contains("hello_triangle"));
     }
 
     #[test]

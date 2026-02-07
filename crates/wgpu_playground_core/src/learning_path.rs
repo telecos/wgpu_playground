@@ -287,7 +287,10 @@ pub fn get_learning_path() -> Vec<LearningNode> {
             difficulty: NodeDifficulty::Advanced,
             prerequisites: vec!["compute_shaders".to_string(), "3d_rendering".to_string()],
             tutorials: vec![],
-            examples: vec!["compute_render_sharing".to_string(), "particle_system".to_string()],
+            examples: vec![
+                "compute_render_sharing".to_string(),
+                "particle_system".to_string(),
+            ],
             category: NodeCategory::Compute,
         },
         // Advanced Topics

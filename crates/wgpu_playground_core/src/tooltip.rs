@@ -555,6 +555,16 @@ pub mod compute {
         "Number of workgroups dispatched in the Z dimension. Each workgroup executes the compute shader with the workgroup size defined in the shader. Total invocations in Z = workgroup_count_z * workgroup_size_z.",
         Some("#dom-gpucomputepassencoder-dispatchworkgroups"),
     );
+
+    pub const ENTRY_POINT: TooltipInfo = TooltipInfo::new(
+        "Name of the compute shader function to use as the entry point. This function must be marked with @compute attribute in WGSL.",
+        Some("#dom-gpuprogrammablestage-entrypoint"),
+    );
+
+    pub const PIPELINE_LAYOUT: TooltipInfo = TooltipInfo::new(
+        "Defines the layout of bind groups for the compute pipeline. Can be auto-generated from the shader or manually specified to control bind group organization.",
+        Some("#dom-gpucomputepipelinedescriptor-layout"),
+    );
 }
 
 /// Render pass load/store operation tooltips

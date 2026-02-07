@@ -1,5 +1,6 @@
 use crate::compute::ComputePipelineDescriptor;
 use crate::shader::ShaderModule;
+use crate::tooltip::compute;
 
 /// UI panel for creating and configuring compute pipelines
 pub struct ComputePipelinePanel {
@@ -175,10 +176,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                         ui.end_row();
 
                         ui.label("Entry Point:");
-                        ui.text_edit_singleline(&mut self.entry_point_input)
-                            .on_hover_text(
-                                "Entry point function name in the shader (e.g., 'main')",
-                            );
+                        compute::ENTRY_POINT
+                            .apply(ui.text_edit_singleline(&mut self.entry_point_input));
                         ui.end_row();
                     });
             });
@@ -242,11 +241,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 ui.label("Configure how bind groups are organized in the pipeline.");
                 ui.add_space(5.0);
 
-                ui.checkbox(&mut self.use_auto_layout, "Use Auto-Generated Layout")
-                    .on_hover_text(
-                        "When enabled, the pipeline layout will be automatically \
-                         generated from the shader. Disable to manually configure bind groups.",
-                    );
+                compute::PIPELINE_LAYOUT
+                    .apply(ui.checkbox(&mut self.use_auto_layout, "Use Auto-Generated Layout"));
 
                 if !self.use_auto_layout {
                     ui.add_space(5.0);

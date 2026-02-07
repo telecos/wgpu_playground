@@ -1,4 +1,5 @@
 use crate::texture_preview::TexturePreviewState;
+use crate::tooltip::{property, texture_usage, TooltipExt};
 use image::GenericImageView;
 use wgpu::{TextureDimension, TextureFormat, TextureUsages};
 
@@ -271,27 +272,28 @@ impl TexturePanel {
                     .num_columns(2)
                     .spacing([10.0, 8.0])
                     .show(ui, |ui| {
-                        ui.label("Label:");
+                        ui.label("Label:")
+                            .webgpu_tooltip("Optional label for debugging and identification", Some("#dom-gpuobjectbase-label"));
                         ui.text_edit_singleline(&mut self.label_input);
                         ui.end_row();
 
-                        ui.label("Width:");
+                        property::TEXTURE_WIDTH.apply(ui.label("Width:"));
                         ui.text_edit_singleline(&mut self.width_input);
                         ui.end_row();
 
-                        ui.label("Height:");
+                        property::TEXTURE_HEIGHT.apply(ui.label("Height:"));
                         ui.text_edit_singleline(&mut self.height_input);
                         ui.end_row();
 
-                        ui.label("Depth/Array Layers:");
+                        property::TEXTURE_DEPTH.apply(ui.label("Depth/Array Layers:"));
                         ui.text_edit_singleline(&mut self.depth_input);
                         ui.end_row();
 
-                        ui.label("Mip Levels:");
+                        property::TEXTURE_MIP_LEVELS.apply(ui.label("Mip Levels:"));
                         ui.text_edit_singleline(&mut self.mip_levels_input);
                         ui.end_row();
 
-                        ui.label("Sample Count:");
+                        property::TEXTURE_SAMPLE_COUNT.apply(ui.label("Sample Count:"));
                         ui.text_edit_singleline(&mut self.sample_count_input);
                         ui.end_row();
                     });
@@ -390,35 +392,35 @@ impl TexturePanel {
                     .spacing([10.0, 4.0])
                     .striped(true)
                     .show(ui, |ui| {
-                        Self::render_usage_checkbox(
+                        Self::render_usage_checkbox_with_tooltip(
                             ui,
                             "COPY_SRC",
                             &mut self.usage_copy_src,
-                            "Texture can be used as a copy source",
+                            &texture_usage::COPY_SRC,
                         );
-                        Self::render_usage_checkbox(
+                        Self::render_usage_checkbox_with_tooltip(
                             ui,
                             "COPY_DST",
                             &mut self.usage_copy_dst,
-                            "Texture can be used as a copy destination",
+                            &texture_usage::COPY_DST,
                         );
-                        Self::render_usage_checkbox(
+                        Self::render_usage_checkbox_with_tooltip(
                             ui,
                             "TEXTURE_BINDING",
                             &mut self.usage_texture_binding,
-                            "Texture can be bound in a shader",
+                            &texture_usage::TEXTURE_BINDING,
                         );
-                        Self::render_usage_checkbox(
+                        Self::render_usage_checkbox_with_tooltip(
                             ui,
                             "STORAGE_BINDING",
                             &mut self.usage_storage_binding,
-                            "Texture can be used as a storage texture",
+                            &texture_usage::STORAGE_BINDING,
                         );
-                        Self::render_usage_checkbox(
+                        Self::render_usage_checkbox_with_tooltip(
                             ui,
                             "RENDER_ATTACHMENT",
                             &mut self.usage_render_attachment,
-                            "Texture can be used as a render attachment",
+                            &texture_usage::RENDER_ATTACHMENT,
                         );
                     });
             });
@@ -642,8 +644,13 @@ impl TexturePanel {
         ui.selectable_value(current, format, format!("{:?}", format));
     }
 
-    fn render_usage_checkbox(ui: &mut egui::Ui, label: &str, value: &mut bool, tooltip: &str) {
-        ui.checkbox(value, label).on_hover_text(tooltip);
+    fn render_usage_checkbox_with_tooltip(
+        ui: &mut egui::Ui,
+        label: &str,
+        value: &mut bool,
+        tooltip_info: &crate::tooltip::TooltipInfo,
+    ) {
+        tooltip_info.apply(ui.checkbox(value, label));
         ui.end_row();
     }
 

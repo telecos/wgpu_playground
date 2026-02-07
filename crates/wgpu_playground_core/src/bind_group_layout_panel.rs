@@ -2,6 +2,7 @@ use crate::bind_group::{
     BindGroupLayoutDescriptor, BindGroupLayoutEntry, BindingType, SamplerBindingType,
     StorageTextureAccess, TextureSampleType, TextureViewDimension,
 };
+use crate::tooltip::{shader_visibility, TooltipExt};
 use wgpu::ShaderStages;
 
 /// Represents a single bind group layout entry being configured in the UI
@@ -320,12 +321,12 @@ impl BindGroupLayoutPanel {
                         // Visibility flags
                         ui.label("Visibility:");
                         ui.horizontal(|ui| {
-                            ui.checkbox(&mut entry.visibility_vertex, "Vertex")
-                                .on_hover_text("Visible in vertex shaders");
-                            ui.checkbox(&mut entry.visibility_fragment, "Fragment")
-                                .on_hover_text("Visible in fragment shaders");
-                            ui.checkbox(&mut entry.visibility_compute, "Compute")
-                                .on_hover_text("Visible in compute shaders");
+                            shader_visibility::VERTEX
+                                .apply(ui.checkbox(&mut entry.visibility_vertex, "Vertex"));
+                            shader_visibility::FRAGMENT
+                                .apply(ui.checkbox(&mut entry.visibility_fragment, "Fragment"));
+                            shader_visibility::COMPUTE
+                                .apply(ui.checkbox(&mut entry.visibility_compute, "Compute"));
                         });
 
                         ui.add_space(5.0);
@@ -478,11 +479,16 @@ impl BindGroupLayoutPanel {
                 min_binding_size,
             } => {
                 ui.checkbox(has_dynamic_offset, "Has Dynamic Offset")
-                    .on_hover_text("Enable dynamic offsets for this buffer");
+                    .webgpu_tooltip(
+                        "Enable dynamic offsets for this buffer. Allows binding different regions of the same buffer at different offsets during rendering.",
+                        Some("#dom-gpubufferbindinglayout-hasdynamicoffset"),
+                    );
                 ui.horizontal(|ui| {
                     ui.label("Min Binding Size:");
-                    ui.text_edit_singleline(min_binding_size)
-                        .on_hover_text("Minimum size in bytes (optional)");
+                    ui.text_edit_singleline(min_binding_size).webgpu_tooltip(
+                        "Minimum size in bytes that the buffer binding must have. Leave empty to use the actual buffer size.",
+                        Some("#dom-gpubufferbindinglayout-minbindingsize"),
+                    );
                 });
             }
             ResourceTypeConfig::StorageBuffer {
@@ -491,13 +497,20 @@ impl BindGroupLayoutPanel {
                 read_only,
             } => {
                 ui.checkbox(has_dynamic_offset, "Has Dynamic Offset")
-                    .on_hover_text("Enable dynamic offsets for this buffer");
-                ui.checkbox(read_only, "Read Only")
-                    .on_hover_text("Buffer is read-only in shaders");
+                    .webgpu_tooltip(
+                        "Enable dynamic offsets for this buffer. Allows binding different regions of the same buffer at different offsets during rendering.",
+                        Some("#dom-gpubufferbindinglayout-hasdynamicoffset"),
+                    );
+                ui.checkbox(read_only, "Read Only").webgpu_tooltip(
+                    "Buffer is read-only in shaders. Read-only storage buffers allow multiple concurrent reads without synchronization concerns.",
+                    Some("#dom-gpubufferbindinglayout-type"),
+                );
                 ui.horizontal(|ui| {
                     ui.label("Min Binding Size:");
-                    ui.text_edit_singleline(min_binding_size)
-                        .on_hover_text("Minimum size in bytes (optional)");
+                    ui.text_edit_singleline(min_binding_size).webgpu_tooltip(
+                        "Minimum size in bytes that the buffer binding must have. Leave empty to use the actual buffer size.",
+                        Some("#dom-gpubufferbindinglayout-minbindingsize"),
+                    );
                 });
             }
             ResourceTypeConfig::Texture {
@@ -527,7 +540,12 @@ impl BindGroupLayoutPanel {
                                 TextureSampleTypeConfig::Depth,
                                 "Depth",
                             );
-                        });
+                        })
+                        .response
+                        .webgpu_tooltip(
+                            "The data type of the texture. Float types support filtering, while integer types (Sint/Uint) do not. Depth is for depth textures.",
+                            Some("#dom-gputexturebindinglayout-sampletype"),
+                        );
                 });
                 ui.horizontal(|ui| {
                     ui.label("View Dimension:");
@@ -548,10 +566,17 @@ impl BindGroupLayoutPanel {
                                 "Cube Array",
                             );
                             ui.selectable_value(view_dimension, TextureViewDimension::D3, "3D");
-                        });
+                        })
+                        .response
+                        .webgpu_tooltip(
+                            "The dimensionality of the texture view. 1D, 2D, and 3D are standard dimensions. Cube and CubeArray are for environment mapping.",
+                            Some("#dom-gputexturebindinglayout-viewdimension"),
+                        );
                 });
-                ui.checkbox(multisampled, "Multisampled")
-                    .on_hover_text("Texture uses multisampling");
+                ui.checkbox(multisampled, "Multisampled").webgpu_tooltip(
+                    "Whether the texture uses multisampling for anti-aliasing. Multisampled textures cannot be filtered.",
+                    Some("#dom-gputexturebindinglayout-multisampled"),
+                );
             }
             ResourceTypeConfig::Sampler { sampler_type } => {
                 ui.horizontal(|ui| {
@@ -574,7 +599,12 @@ impl BindGroupLayoutPanel {
                                 SamplerBindingType::Comparison,
                                 "Comparison",
                             );
-                        });
+                        })
+                        .response
+                        .webgpu_tooltip(
+                            "Sampler type determines how textures are accessed. Filtering samplers support linear interpolation, Non-Filtering only supports nearest neighbor, and Comparison samplers are used for shadow mapping.",
+                            Some("#dom-gpusamplerbindinglayout-type"),
+                        );
                 });
             }
             ResourceTypeConfig::StorageTexture {
@@ -602,7 +632,12 @@ impl BindGroupLayoutPanel {
                                 StorageTextureAccess::ReadWrite,
                                 "Read Write",
                             );
-                        });
+                        })
+                        .response
+                        .webgpu_tooltip(
+                            "Access mode for the storage texture. Write Only is most common for compute shader outputs. Read Write requires specific hardware support.",
+                            Some("#dom-gpustoragetexturebindinglayout-access"),
+                        );
                 });
                 ui.horizontal(|ui| {
                     ui.label("Format:");
@@ -627,7 +662,12 @@ impl BindGroupLayoutPanel {
                             ui.selectable_value(format, wgpu::TextureFormat::R32Float, "R32Float");
                             ui.selectable_value(format, wgpu::TextureFormat::R32Uint, "R32Uint");
                             ui.selectable_value(format, wgpu::TextureFormat::R32Sint, "R32Sint");
-                        });
+                        })
+                        .response
+                        .webgpu_tooltip(
+                            "Pixel format of the storage texture. Must match the format used in the shader. Only certain formats support storage texture usage.",
+                            Some("#dom-gpustoragetexturebindinglayout-format"),
+                        );
                 });
                 ui.horizontal(|ui| {
                     ui.label("View Dimension:");
@@ -648,7 +688,12 @@ impl BindGroupLayoutPanel {
                                 "Cube Array",
                             );
                             ui.selectable_value(view_dimension, TextureViewDimension::D3, "3D");
-                        });
+                        })
+                        .response
+                        .webgpu_tooltip(
+                            "The dimensionality of the texture view. 1D, 2D, and 3D are standard dimensions. Cube and CubeArray are for environment mapping.",
+                            Some("#dom-gpustoragetexturebindinglayout-viewdimension"),
+                        );
                 });
             }
         }

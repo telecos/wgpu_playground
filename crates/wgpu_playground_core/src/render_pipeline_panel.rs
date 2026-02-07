@@ -4,6 +4,10 @@ use crate::render_pipeline::{
     CompareFunction, CullMode, DepthStencilState, FrontFace, MultisampleState, PrimitiveState,
     PrimitiveTopology, RenderPipelineDescriptor, StencilFaceState, StencilOperation,
 };
+use crate::tooltip::{
+    blend_factor, blend_operation, compare_function, cull_mode, front_face, primitive_topology,
+    property, stencil_operation,
+};
 
 /// UI panel for configuring render pipelines
 pub struct RenderPipelinePanel {
@@ -492,18 +496,15 @@ impl RenderPipelinePanel {
                     .num_columns(2)
                     .spacing([10.0, 8.0])
                     .show(ui, |ui| {
-                        ui.label("Topology:")
-                            .on_hover_text("How vertices are assembled into primitives");
+                        Self::topology_tooltip(ui.label("Topology:"), self.topology);
                         Self::render_topology_combo(ui, &mut self.topology);
                         ui.end_row();
 
-                        ui.label("Cull Mode:")
-                            .on_hover_text("Which faces to cull (not render)");
+                        Self::cull_mode_tooltip(ui.label("Cull Mode:"), self.cull_mode);
                         Self::render_cull_mode_combo(ui, &mut self.cull_mode);
                         ui.end_row();
 
-                        ui.label("Front Face:")
-                            .on_hover_text("Winding order that determines front-facing");
+                        Self::front_face_tooltip(ui.label("Front Face:"), self.front_face);
                         Self::render_front_face_combo(ui, &mut self.front_face);
                         ui.end_row();
                     });
@@ -526,12 +527,11 @@ impl RenderPipelinePanel {
                             Self::render_depth_format_combo(ui, &mut self.depth_format);
                             ui.end_row();
 
-                            ui.label("Depth Write:");
+                            property::DEPTH_WRITE_ENABLED.apply(ui.label("Depth Write:"));
                             ui.checkbox(&mut self.depth_write_enabled, "Enabled");
                             ui.end_row();
 
-                            ui.label("Depth Compare:")
-                                .on_hover_text("Comparison function for depth test");
+                            Self::compare_function_tooltip(ui.label("Depth Compare:"), self.depth_compare);
                             Self::render_compare_function_combo(ui, &mut self.depth_compare, "depth_compare");
                             ui.end_row();
 
@@ -551,19 +551,19 @@ impl RenderPipelinePanel {
                             .num_columns(2)
                             .spacing([10.0, 8.0])
                             .show(ui, |ui| {
-                                ui.label("Compare:");
+                                Self::compare_function_tooltip(ui.label("Compare:"), self.stencil_front_compare);
                                 Self::render_compare_function_combo(ui, &mut self.stencil_front_compare, "stencil_front_compare");
                                 ui.end_row();
 
-                                ui.label("Fail Operation:");
+                                Self::stencil_operation_tooltip(ui.label("Fail Operation:"), self.stencil_front_fail_op);
                                 Self::render_stencil_operation_combo(ui, &mut self.stencil_front_fail_op, "stencil_front_fail");
                                 ui.end_row();
 
-                                ui.label("Depth Fail Operation:");
+                                Self::stencil_operation_tooltip(ui.label("Depth Fail Operation:"), self.stencil_front_depth_fail_op);
                                 Self::render_stencil_operation_combo(ui, &mut self.stencil_front_depth_fail_op, "stencil_front_depth_fail");
                                 ui.end_row();
 
-                                ui.label("Pass Operation:");
+                                Self::stencil_operation_tooltip(ui.label("Pass Operation:"), self.stencil_front_pass_op);
                                 Self::render_stencil_operation_combo(ui, &mut self.stencil_front_pass_op, "stencil_front_pass");
                                 ui.end_row();
                             });
@@ -574,19 +574,19 @@ impl RenderPipelinePanel {
                             .num_columns(2)
                             .spacing([10.0, 8.0])
                             .show(ui, |ui| {
-                                ui.label("Compare:");
+                                Self::compare_function_tooltip(ui.label("Compare:"), self.stencil_back_compare);
                                 Self::render_compare_function_combo(ui, &mut self.stencil_back_compare, "stencil_back_compare");
                                 ui.end_row();
 
-                                ui.label("Fail Operation:");
+                                Self::stencil_operation_tooltip(ui.label("Fail Operation:"), self.stencil_back_fail_op);
                                 Self::render_stencil_operation_combo(ui, &mut self.stencil_back_fail_op, "stencil_back_fail");
                                 ui.end_row();
 
-                                ui.label("Depth Fail Operation:");
+                                Self::stencil_operation_tooltip(ui.label("Depth Fail Operation:"), self.stencil_back_depth_fail_op);
                                 Self::render_stencil_operation_combo(ui, &mut self.stencil_back_depth_fail_op, "stencil_back_depth_fail");
                                 ui.end_row();
 
-                                ui.label("Pass Operation:");
+                                Self::stencil_operation_tooltip(ui.label("Pass Operation:"), self.stencil_back_pass_op);
                                 Self::render_stencil_operation_combo(ui, &mut self.stencil_back_pass_op, "stencil_back_pass");
                                 ui.end_row();
                             });
@@ -606,8 +606,7 @@ impl RenderPipelinePanel {
                     .num_columns(2)
                     .spacing([10.0, 8.0])
                     .show(ui, |ui| {
-                        ui.label("Sample Count:")
-                            .on_hover_text("Number of samples per pixel (1, 2, 4, or 8)");
+                        property::SAMPLE_COUNT.apply(ui.label("Sample Count:"));
                         egui::ComboBox::from_id_salt("sample_count")
                             .selected_text(format!("{}", self.sample_count))
                             .show_ui(ui, |ui| {
@@ -618,8 +617,7 @@ impl RenderPipelinePanel {
                             });
                         ui.end_row();
 
-                        ui.label("Alpha to Coverage:")
-                            .on_hover_text("Enable alpha to coverage for transparency");
+                        property::ALPHA_TO_COVERAGE.apply(ui.label("Alpha to Coverage:"));
                         ui.checkbox(&mut self.alpha_to_coverage_enabled, "Enabled");
                         ui.end_row();
                     });
@@ -658,15 +656,15 @@ impl RenderPipelinePanel {
                             .num_columns(2)
                             .spacing([10.0, 8.0])
                             .show(ui, |ui| {
-                                ui.label("Source Factor:");
+                                Self::blend_factor_tooltip(ui.label("Source Factor:"), self.color_blend_src);
                                 Self::render_blend_factor_combo(ui, &mut self.color_blend_src, "color_src");
                                 ui.end_row();
 
-                                ui.label("Destination Factor:");
+                                Self::blend_factor_tooltip(ui.label("Destination Factor:"), self.color_blend_dst);
                                 Self::render_blend_factor_combo(ui, &mut self.color_blend_dst, "color_dst");
                                 ui.end_row();
 
-                                ui.label("Operation:");
+                                Self::blend_operation_tooltip(ui.label("Operation:"), self.color_blend_op);
                                 Self::render_blend_operation_combo(ui, &mut self.color_blend_op, "color_op");
                                 ui.end_row();
                             });
@@ -677,15 +675,15 @@ impl RenderPipelinePanel {
                             .num_columns(2)
                             .spacing([10.0, 8.0])
                             .show(ui, |ui| {
-                                ui.label("Source Factor:");
+                                Self::blend_factor_tooltip(ui.label("Source Factor:"), self.alpha_blend_src);
                                 Self::render_blend_factor_combo(ui, &mut self.alpha_blend_src, "alpha_src");
                                 ui.end_row();
 
-                                ui.label("Destination Factor:");
+                                Self::blend_factor_tooltip(ui.label("Destination Factor:"), self.alpha_blend_dst);
                                 Self::render_blend_factor_combo(ui, &mut self.alpha_blend_dst, "alpha_dst");
                                 ui.end_row();
 
-                                ui.label("Operation:");
+                                Self::blend_operation_tooltip(ui.label("Operation:"), self.alpha_blend_op);
                                 Self::render_blend_operation_combo(ui, &mut self.alpha_blend_op, "alpha_op");
                                 ui.end_row();
                             });
@@ -1223,6 +1221,87 @@ impl RenderPipelinePanel {
                 *self = Self::new();
             }
         });
+    }
+
+    // Helper methods for applying tooltips based on enum values
+    fn topology_tooltip(response: egui::Response, topology: PrimitiveTopology) -> egui::Response {
+        match topology {
+            PrimitiveTopology::PointList => primitive_topology::POINT_LIST.apply(response),
+            PrimitiveTopology::LineList => primitive_topology::LINE_LIST.apply(response),
+            PrimitiveTopology::LineStrip => primitive_topology::LINE_STRIP.apply(response),
+            PrimitiveTopology::TriangleList => primitive_topology::TRIANGLE_LIST.apply(response),
+            PrimitiveTopology::TriangleStrip => primitive_topology::TRIANGLE_STRIP.apply(response),
+        }
+    }
+
+    fn cull_mode_tooltip(response: egui::Response, mode: CullMode) -> egui::Response {
+        match mode {
+            CullMode::None => cull_mode::NONE.apply(response),
+            CullMode::Front => cull_mode::FRONT.apply(response),
+            CullMode::Back => cull_mode::BACK.apply(response),
+        }
+    }
+
+    fn front_face_tooltip(response: egui::Response, face: FrontFace) -> egui::Response {
+        match face {
+            FrontFace::Ccw => front_face::CCW.apply(response),
+            FrontFace::Cw => front_face::CW.apply(response),
+        }
+    }
+
+    fn compare_function_tooltip(response: egui::Response, func: CompareFunction) -> egui::Response {
+        match func {
+            CompareFunction::Never => compare_function::NEVER.apply(response),
+            CompareFunction::Less => compare_function::LESS.apply(response),
+            CompareFunction::Equal => compare_function::EQUAL.apply(response),
+            CompareFunction::LessEqual => compare_function::LESS_EQUAL.apply(response),
+            CompareFunction::Greater => compare_function::GREATER.apply(response),
+            CompareFunction::NotEqual => compare_function::NOT_EQUAL.apply(response),
+            CompareFunction::GreaterEqual => compare_function::GREATER_EQUAL.apply(response),
+            CompareFunction::Always => compare_function::ALWAYS.apply(response),
+        }
+    }
+
+    fn stencil_operation_tooltip(response: egui::Response, op: StencilOperation) -> egui::Response {
+        match op {
+            StencilOperation::Keep => stencil_operation::KEEP.apply(response),
+            StencilOperation::Zero => stencil_operation::ZERO.apply(response),
+            StencilOperation::Replace => stencil_operation::REPLACE.apply(response),
+            StencilOperation::Invert => stencil_operation::INVERT.apply(response),
+            StencilOperation::IncrementClamp => stencil_operation::INCREMENT_CLAMP.apply(response),
+            StencilOperation::DecrementClamp => stencil_operation::DECREMENT_CLAMP.apply(response),
+            StencilOperation::IncrementWrap => stencil_operation::INCREMENT_WRAP.apply(response),
+            StencilOperation::DecrementWrap => stencil_operation::DECREMENT_WRAP.apply(response),
+        }
+    }
+
+    fn blend_factor_tooltip(response: egui::Response, factor: BlendFactor) -> egui::Response {
+        match factor {
+            BlendFactor::Zero => blend_factor::ZERO.apply(response),
+            BlendFactor::One => blend_factor::ONE.apply(response),
+            BlendFactor::Src => blend_factor::SRC.apply(response),
+            BlendFactor::OneMinusSrc => blend_factor::ONE_MINUS_SRC.apply(response),
+            BlendFactor::SrcAlpha => blend_factor::SRC_ALPHA.apply(response),
+            BlendFactor::OneMinusSrcAlpha => blend_factor::ONE_MINUS_SRC_ALPHA.apply(response),
+            BlendFactor::Dst => blend_factor::DST.apply(response),
+            BlendFactor::OneMinusDst => blend_factor::ONE_MINUS_DST.apply(response),
+            BlendFactor::DstAlpha => blend_factor::DST_ALPHA.apply(response),
+            BlendFactor::OneMinusDstAlpha => blend_factor::ONE_MINUS_DST_ALPHA.apply(response),
+            // Note: Constant and SrcAlphaSaturated are not in the tooltip module
+            BlendFactor::Constant
+            | BlendFactor::OneMinusConstant
+            | BlendFactor::SrcAlphaSaturated => response,
+        }
+    }
+
+    fn blend_operation_tooltip(response: egui::Response, op: BlendOperation) -> egui::Response {
+        match op {
+            BlendOperation::Add => blend_operation::ADD.apply(response),
+            BlendOperation::Subtract => blend_operation::SUBTRACT.apply(response),
+            BlendOperation::ReverseSubtract => blend_operation::REVERSE_SUBTRACT.apply(response),
+            BlendOperation::Min => blend_operation::MIN.apply(response),
+            BlendOperation::Max => blend_operation::MAX.apply(response),
+        }
     }
 
     // Helper methods for rendering combo boxes

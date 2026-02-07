@@ -1,5 +1,6 @@
 use crate::implementation::WebGPUImplementation;
 use crate::state::Theme;
+use crate::tooltip::TooltipExt;
 
 /// UI panel for application settings
 pub struct SettingsPanel {
@@ -110,7 +111,10 @@ impl SettingsPanel {
                     WebGPUImplementation::Wgpu,
                     "🦀 wgpu-rs (Rust implementation)",
                 )
-                .on_hover_text("Used by Firefox, fully featured and stable");
+                .webgpu_tooltip(
+                    "wgpu-rs is a Rust implementation of the WebGPU API. Used by Firefox and Servo, it provides a fully featured and stable WebGPU implementation with excellent support for Vulkan, Metal, DirectX 12, and OpenGL backends.",
+                    None
+                );
 
                 // Show Dawn option only if available
                 #[cfg(feature = "dawn")]
@@ -120,14 +124,20 @@ impl SettingsPanel {
                         WebGPUImplementation::Dawn,
                         "🌅 Dawn Native (C++ implementation)",
                     )
-                    .on_hover_text("Used by Chromium browsers");
+                    .webgpu_tooltip(
+                        "Dawn is Google's C++ implementation of the WebGPU API. Used by Chromium-based browsers (Chrome, Edge, Opera), it provides native WebGPU support with backends for Vulkan, Metal, and DirectX 12.",
+                        None
+                    );
                 }
 
                 // Show Dawn as disabled if not compiled in
                 #[cfg(not(feature = "dawn"))]
                 {
                     ui.add_enabled(false, egui::Label::new("🌅 Dawn Native (Not Available)"))
-                        .on_hover_text("Compile with --features dawn to enable");
+                        .webgpu_tooltip(
+                            "Dawn is not available in this build. Compile with --features dawn to enable Google's C++ implementation of the WebGPU API used by Chromium browsers.",
+                            None
+                        );
                 }
             });
 

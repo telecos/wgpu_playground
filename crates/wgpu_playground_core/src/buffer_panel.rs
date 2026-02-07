@@ -1,5 +1,6 @@
 use crate::buffer::{BufferDescriptor, BufferUsages};
 use crate::buffer_preview::BufferPreviewState;
+use crate::tooltip::{buffer_usage, property, TooltipExt};
 
 /// UI panel for creating and configuring GPU buffers
 pub struct BufferPanel {
@@ -183,11 +184,12 @@ impl BufferPanel {
                     .num_columns(2)
                     .spacing([10.0, 8.0])
                     .show(ui, |ui| {
-                        ui.label("Label:");
+                        ui.label("Label:")
+                            .webgpu_tooltip("Optional label for debugging and identification", Some("#dom-gpuobjectbase-label"));
                         ui.text_edit_singleline(&mut self.label_input);
                         ui.end_row();
 
-                        ui.label("Size (bytes):");
+                        property::BUFFER_SIZE.apply(ui.label("Size (bytes):"));
                         ui.text_edit_singleline(&mut self.size_input);
                         ui.end_row();
                     });
@@ -206,16 +208,16 @@ impl BufferPanel {
                     .spacing([10.0, 4.0])
                     .striped(true)
                     .show(ui, |ui| {
-                        Self::render_usage_checkbox(ui, "VERTEX", &mut self.usage_vertex, "Buffer can be used as a vertex buffer");
-                        Self::render_usage_checkbox(ui, "INDEX", &mut self.usage_index, "Buffer can be used as an index buffer");
-                        Self::render_usage_checkbox(ui, "UNIFORM", &mut self.usage_uniform, "Buffer can be used as a uniform buffer");
-                        Self::render_usage_checkbox(ui, "STORAGE", &mut self.usage_storage, "Buffer can be used as a storage buffer");
-                        Self::render_usage_checkbox(ui, "INDIRECT", &mut self.usage_indirect, "Buffer can be used for indirect draw commands");
-                        Self::render_usage_checkbox(ui, "COPY_SRC", &mut self.usage_copy_src, "Buffer can be used as a copy source");
-                        Self::render_usage_checkbox(ui, "COPY_DST", &mut self.usage_copy_dst, "Buffer can be used as a copy destination");
-                        Self::render_usage_checkbox(ui, "MAP_READ", &mut self.usage_map_read, "Buffer can be mapped for reading");
-                        Self::render_usage_checkbox(ui, "MAP_WRITE", &mut self.usage_map_write, "Buffer can be mapped for writing");
-                        Self::render_usage_checkbox(ui, "QUERY_RESOLVE", &mut self.usage_query_resolve, "Buffer can be used to resolve query results");
+                        Self::render_usage_checkbox_with_tooltip(ui, "VERTEX", &mut self.usage_vertex, &buffer_usage::VERTEX);
+                        Self::render_usage_checkbox_with_tooltip(ui, "INDEX", &mut self.usage_index, &buffer_usage::INDEX);
+                        Self::render_usage_checkbox_with_tooltip(ui, "UNIFORM", &mut self.usage_uniform, &buffer_usage::UNIFORM);
+                        Self::render_usage_checkbox_with_tooltip(ui, "STORAGE", &mut self.usage_storage, &buffer_usage::STORAGE);
+                        Self::render_usage_checkbox_with_tooltip(ui, "INDIRECT", &mut self.usage_indirect, &buffer_usage::INDIRECT);
+                        Self::render_usage_checkbox_with_tooltip(ui, "COPY_SRC", &mut self.usage_copy_src, &buffer_usage::COPY_SRC);
+                        Self::render_usage_checkbox_with_tooltip(ui, "COPY_DST", &mut self.usage_copy_dst, &buffer_usage::COPY_DST);
+                        Self::render_usage_checkbox_with_tooltip(ui, "MAP_READ", &mut self.usage_map_read, &buffer_usage::MAP_READ);
+                        Self::render_usage_checkbox_with_tooltip(ui, "MAP_WRITE", &mut self.usage_map_write, &buffer_usage::MAP_WRITE);
+                        Self::render_usage_checkbox_with_tooltip(ui, "QUERY_RESOLVE", &mut self.usage_query_resolve, &buffer_usage::QUERY_RESOLVE);
                     });
 
                 ui.add_space(5.0);
@@ -232,8 +234,9 @@ impl BufferPanel {
                 ui.heading("Additional Options");
                 ui.add_space(5.0);
 
-                ui.checkbox(&mut self.mapped_at_creation, "Mapped at creation")
-                    .on_hover_text("Whether the buffer should be mapped immediately after creation");
+                property::BUFFER_MAPPED_AT_CREATION.apply(
+                    ui.checkbox(&mut self.mapped_at_creation, "Mapped at creation")
+                );
             });
 
             ui.add_space(15.0);
@@ -407,8 +410,13 @@ impl BufferPanel {
         });
     }
 
-    fn render_usage_checkbox(ui: &mut egui::Ui, label: &str, value: &mut bool, tooltip: &str) {
-        ui.checkbox(value, label).on_hover_text(tooltip);
+    fn render_usage_checkbox_with_tooltip(
+        ui: &mut egui::Ui,
+        label: &str,
+        value: &mut bool,
+        tooltip_info: &crate::tooltip::TooltipInfo,
+    ) {
+        tooltip_info.apply(ui.checkbox(value, label));
         ui.end_row();
     }
 

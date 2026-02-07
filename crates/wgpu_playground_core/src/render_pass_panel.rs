@@ -1,4 +1,5 @@
 use crate::render_pass_encoder::{Color, LoadOp, StoreOp};
+use crate::tooltip::TooltipExt;
 
 /// UI panel for configuring render passes
 pub struct RenderPassPanel {
@@ -246,7 +247,20 @@ impl RenderPassPanel {
             .selected_text(load_op.name())
             .show_ui(ui, |ui| {
                 for op in LoadOpChoice::all() {
-                    ui.selectable_value(load_op, op, op.name());
+                    match op {
+                        LoadOpChoice::Clear => {
+                            ui.selectable_value(load_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::LOAD_OP_CLEAR.description,
+                                crate::tooltip::load_store_op::LOAD_OP_CLEAR.spec_anchor,
+                            );
+                        }
+                        LoadOpChoice::Load => {
+                            ui.selectable_value(load_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::LOAD_OP_LOAD.description,
+                                crate::tooltip::load_store_op::LOAD_OP_LOAD.spec_anchor,
+                            );
+                        }
+                    }
                 }
             });
     }
@@ -257,7 +271,20 @@ impl RenderPassPanel {
             .selected_text(store_op.name())
             .show_ui(ui, |ui| {
                 for op in StoreOpChoice::all() {
-                    ui.selectable_value(store_op, op, op.name());
+                    match op {
+                        StoreOpChoice::Store => {
+                            ui.selectable_value(store_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::STORE_OP_STORE.description,
+                                crate::tooltip::load_store_op::STORE_OP_STORE.spec_anchor,
+                            );
+                        }
+                        StoreOpChoice::Discard => {
+                            ui.selectable_value(store_op, op, op.name()).webgpu_tooltip(
+                                crate::tooltip::load_store_op::STORE_OP_DISCARD.description,
+                                crate::tooltip::load_store_op::STORE_OP_DISCARD.spec_anchor,
+                            );
+                        }
+                    }
                 }
             });
     }
@@ -291,7 +318,11 @@ impl RenderPassPanel {
                 ui.heading("🎨 Color Attachment");
                 ui.add_space(5.0);
 
-                ui.checkbox(&mut self.enable_color_attachment, "Enable color attachment");
+                ui.checkbox(&mut self.enable_color_attachment, "Enable color attachment")
+                    .webgpu_tooltip(
+                        crate::tooltip::load_store_op::COLOR_ATTACHMENT.description,
+                        crate::tooltip::load_store_op::COLOR_ATTACHMENT.spec_anchor,
+                    );
 
                 if self.enable_color_attachment {
                     ui.add_space(5.0);
@@ -360,7 +391,11 @@ impl RenderPassPanel {
                 ui.heading("📏 Depth-Stencil Attachment");
                 ui.add_space(5.0);
 
-                ui.checkbox(&mut self.enable_depth_stencil, "Enable depth-stencil attachment");
+                ui.checkbox(&mut self.enable_depth_stencil, "Enable depth-stencil attachment")
+                    .webgpu_tooltip(
+                        crate::tooltip::load_store_op::DEPTH_STENCIL_ATTACHMENT.description,
+                        crate::tooltip::load_store_op::DEPTH_STENCIL_ATTACHMENT.spec_anchor,
+                    );
 
                 if self.enable_depth_stencil {
                     ui.add_space(5.0);

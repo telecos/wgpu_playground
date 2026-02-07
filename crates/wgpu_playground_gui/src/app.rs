@@ -656,8 +656,20 @@ impl PlaygroundApp {
                 self.api_coverage_panel.ui(ui, tracker);
             }
             Tab::ApiReference => self.api_reference_panel.ui(ui),
-            Tab::Tutorials => self.tutorial_panel.ui(ui),
-            Tab::LearningPath => self.learning_path_panel.ui(ui),
+            Tab::Tutorials => {
+                self.tutorial_panel.ui(ui);
+                // Sync tutorial completions to learning path
+                let tutorial_state = self.tutorial_panel.export_state();
+                self.learning_path_panel
+                    .update_from_tutorial_state(&tutorial_state.completed_tutorials);
+            }
+            Tab::LearningPath => {
+                // Sync tutorial state before displaying learning path
+                let tutorial_state = self.tutorial_panel.export_state();
+                self.learning_path_panel
+                    .update_from_tutorial_state(&tutorial_state.completed_tutorials);
+                self.learning_path_panel.ui(ui);
+            }
             Tab::Presets => {
                 // Handle preset loading
                 if let Some(preset_state) = self.preset_panel.ui(ui) {
@@ -737,6 +749,8 @@ impl PlaygroundApp {
             bind_group_panel: None,      // TODO: Add when BindGroupPanel has export_state
             bind_group_layout_panel: None, // TODO: Add when BindGroupLayoutPanel has export_state
             api_coverage: None,          // API coverage is tracked globally, not exported per-state
+            tutorial_state: Some(self.tutorial_panel.export_state()),
+            learning_progress: Some(self.learning_path_panel.progress().clone()),
         }
     }
 
@@ -757,6 +771,13 @@ impl PlaygroundApp {
         if let Some(shader_state) = &state.shader_editor {
             self.rendering_panel
                 .import_shader_editor_state(shader_state);
+        }
+        if let Some(tutorial_state) = &state.tutorial_state {
+            self.tutorial_panel.import_state(tutorial_state);
+        }
+        if let Some(learning_progress) = &state.learning_progress {
+            self.learning_path_panel
+                .set_progress(learning_progress.clone());
         }
         // TODO: Import other panel states when available
     }

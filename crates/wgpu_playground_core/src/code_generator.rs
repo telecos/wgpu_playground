@@ -1226,6 +1226,8 @@ mod tests {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         let config = CodeGenConfig::new("playground_export".to_string())
@@ -1310,6 +1312,8 @@ mod tests {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         let config =

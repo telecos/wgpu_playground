@@ -15,6 +15,8 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 
 use crate::api_coverage::CoverageData;
+use crate::learning_path::LearningProgress;
+use crate::tutorial::TutorialState;
 
 /// Serializable version of BufferPanel state
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -171,6 +173,12 @@ pub struct PlaygroundState {
     /// API coverage data
     #[serde(default)]
     pub api_coverage: Option<CoverageData>,
+    /// Tutorial state
+    #[serde(default)]
+    pub tutorial_state: Option<TutorialState>,
+    /// Learning progress
+    #[serde(default)]
+    pub learning_progress: Option<LearningProgress>,
 }
 
 impl Default for PlaygroundState {
@@ -187,6 +195,8 @@ impl Default for PlaygroundState {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         }
     }
 }
@@ -367,6 +377,8 @@ mod tests {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         // Test JSON serialization
@@ -403,6 +415,8 @@ mod tests {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         let json = state.to_json().unwrap();
@@ -471,6 +485,8 @@ mod tests {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         let encoded = state.to_url_encoded().unwrap();
@@ -516,6 +532,8 @@ fn fs_main() -> @location(0) vec4<f32> {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         let encoded = state.to_url_encoded().unwrap();
@@ -555,6 +573,8 @@ fn fs_main() -> @location(0) vec4<f32> {
             compute_pipeline_panel: None,
             bind_group_panel: None,
             bind_group_layout_panel: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         let base_url = "https://example.com/playground";
@@ -661,6 +681,8 @@ fn fs_main() -> @location(0) vec4<f32> {
             compute_pipeline_panel: None,
             bind_group_panel: None,
             bind_group_layout_panel: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         // Test full roundtrip

@@ -1206,6 +1206,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             bind_group_panel: None,
             bind_group_layout_panel: None,
             api_coverage: None,
+            tutorial_state: None,
+            learning_progress: None,
         };
 
         self.export_to_standalone_project_with_state(&playground_state);

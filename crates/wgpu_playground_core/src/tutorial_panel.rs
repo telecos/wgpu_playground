@@ -395,6 +395,16 @@ impl TutorialPanel {
     pub fn should_highlight_panel(&self, panel: HighlightTarget) -> bool {
         self.get_current_highlight() == Some(panel)
     }
+
+    /// Export tutorial state for persistence
+    pub fn export_state(&self) -> TutorialState {
+        self.state.clone()
+    }
+
+    /// Import tutorial state from saved data
+    pub fn import_state(&mut self, state: &TutorialState) {
+        self.state = state.clone();
+    }
 }
 
 #[cfg(test)]

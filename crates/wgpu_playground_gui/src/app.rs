@@ -14,6 +14,7 @@ use wgpu_playground_core::console::ConsolePanel;
 use wgpu_playground_core::device_config::DeviceConfigPanel;
 use wgpu_playground_core::device_info::DeviceInfo;
 use wgpu_playground_core::draw_command_panel::DrawCommandPanel;
+use wgpu_playground_core::learning_path_panel::LearningPathPanel;
 use wgpu_playground_core::model_loader_panel::ModelLoaderPanel;
 use wgpu_playground_core::performance_panel::PerformancePanel;
 use wgpu_playground_core::pipeline_debugger::PipelineDebugger;
@@ -58,6 +59,7 @@ pub struct PlaygroundApp {
     api_reference_panel: ApiReferencePanel,
     tutorial_panel: TutorialPanel,
     preset_panel: PresetPanel,
+    learning_path_panel: LearningPathPanel,
     selected_tab: Tab,
     // Collapsible section states
     setup_section_open: bool,
@@ -103,6 +105,7 @@ enum Tab {
     ApiReference,
     Tutorials,
     Presets,
+    LearningPath,
 }
 
 impl PlaygroundApp {
@@ -141,6 +144,7 @@ impl PlaygroundApp {
             api_reference_panel: ApiReferencePanel::new(),
             tutorial_panel: TutorialPanel::new(),
             preset_panel: PresetPanel::new(),
+            learning_path_panel: LearningPathPanel::new(),
             selected_tab: Tab::Rendering, // Start with Rendering tab to show visual example
             // Initialize section states - Rendering open by default
             setup_section_open: false,
@@ -554,6 +558,11 @@ impl PlaygroundApp {
                         ).on_hover_text("Interactive guided tutorials for learning WebGPU");
                         ui.selectable_value(
                             &mut self.selected_tab,
+                            Tab::LearningPath,
+                            "  Learning Path",
+                        ).on_hover_text("Visual learning path showing WebGPU concepts and progress");
+                        ui.selectable_value(
+                            &mut self.selected_tab,
                             Tab::Presets,
                             "  Configuration Presets",
                         ).on_hover_text("Browse and load preset configurations for common rendering scenarios");
@@ -607,63 +616,73 @@ impl PlaygroundApp {
         });
 
         // Main canvas area
-        egui::CentralPanel::default().show(ctx, |ui| match self.selected_tab {
-            Tab::AdapterSelection => self.adapter_selection.ui(ui),
-            Tab::DeviceConfig => self.device_config.ui(ui),
-            Tab::DeviceInfo => self.device_info.ui(ui),
-            Tab::Rendering => self.rendering_panel.ui(ui, device, queue, renderer),
-            Tab::BufferConfig => {
-                self.buffer_panel
-                    .ui_with_preview(ui, Some(device), Some(queue), Some(renderer))
-            }
-            Tab::SamplerConfig => self.sampler_panel.ui(ui),
-            Tab::TextureConfig => {
-                self.texture_panel
-                    .ui_with_preview(ui, Some(device), Some(queue), Some(renderer))
-            }
-            Tab::ModelLoader => self.model_loader_panel.show(ui, device),
-            Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
-            Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
-            Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),
-            Tab::RenderPipelineConfig => self.render_pipeline_panel.ui_with_preview(
-                ui,
-                Some(device),
-                Some(queue),
-                Some(renderer),
-            ),
-            Tab::DrawCommand => self.draw_command_panel.ui(ui),
-            Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
-            Tab::ComputeDispatch => self.compute_dispatch_panel.ui(ui),
-            Tab::Compute => self.compute_panel.ui(ui),
-            Tab::Console => self.console_panel.ui(ui),
-            Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
-            Tab::BufferInspector => self.buffer_inspector.ui(ui),
-            Tab::TextureInspector => self.texture_inspector.ui(ui),
-            Tab::PipelineDebugger => self.pipeline_debugger.ui(ui),
-            Tab::Performance => self.performance_panel.ui(ui),
-            Tab::CommandRecording => self.command_recording_panel.ui(ui),
-            Tab::ApiCoverage => {
-                let tracker = ApiCoverageTracker::global();
-                self.api_coverage_panel.ui(ui, tracker);
-            }
-            Tab::ApiReference => self.api_reference_panel.ui(ui),
-            Tab::Tutorials => self.tutorial_panel.ui(ui),
-            Tab::Presets => {
-                // Handle preset loading
-                if let Some(preset_state) = self.preset_panel.ui(ui) {
-                    // Apply the preset state to the panels
-                    self.load_state_from_preset(preset_state);
+        egui::CentralPanel::default().show(ctx, |ui| {
+            // Sync tutorial state for learning path before rendering any tab
+            let tutorial_state = self.tutorial_panel.export_state();
+            self.learning_path_panel
+                .update_from_tutorial_state(&tutorial_state.completed_tutorials);
+
+            match self.selected_tab {
+                Tab::AdapterSelection => self.adapter_selection.ui(ui),
+                Tab::DeviceConfig => self.device_config.ui(ui),
+                Tab::DeviceInfo => self.device_info.ui(ui),
+                Tab::Rendering => self.rendering_panel.ui(ui, device, queue, renderer),
+                Tab::BufferConfig => {
+                    self.buffer_panel
+                        .ui_with_preview(ui, Some(device), Some(queue), Some(renderer))
                 }
-            }
-            Tab::Settings => {
-                if let Some(new_theme) = self.settings_panel.ui(ui) {
-                    // Apply the theme change
-                    Self::apply_theme(ctx, new_theme);
-                    // Save the state with the new theme
-                    let filename = self.save_load_filename.clone();
-                    let path = std::path::Path::new(&filename);
-                    if let Err(e) = self.save_state_to_file(path) {
-                        log::warn!("Failed to save theme preference: {}", e);
+                Tab::SamplerConfig => self.sampler_panel.ui(ui),
+                Tab::TextureConfig => self.texture_panel.ui_with_preview(
+                    ui,
+                    Some(device),
+                    Some(queue),
+                    Some(renderer),
+                ),
+                Tab::ModelLoader => self.model_loader_panel.show(ui, device),
+                Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
+                Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
+                Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),
+                Tab::RenderPipelineConfig => self.render_pipeline_panel.ui_with_preview(
+                    ui,
+                    Some(device),
+                    Some(queue),
+                    Some(renderer),
+                ),
+                Tab::DrawCommand => self.draw_command_panel.ui(ui),
+                Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
+                Tab::ComputeDispatch => self.compute_dispatch_panel.ui(ui),
+                Tab::Compute => self.compute_panel.ui(ui),
+                Tab::Console => self.console_panel.ui(ui),
+                Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
+                Tab::BufferInspector => self.buffer_inspector.ui(ui),
+                Tab::TextureInspector => self.texture_inspector.ui(ui),
+                Tab::PipelineDebugger => self.pipeline_debugger.ui(ui),
+                Tab::Performance => self.performance_panel.ui(ui),
+                Tab::CommandRecording => self.command_recording_panel.ui(ui),
+                Tab::ApiCoverage => {
+                    let tracker = ApiCoverageTracker::global();
+                    self.api_coverage_panel.ui(ui, tracker);
+                }
+                Tab::ApiReference => self.api_reference_panel.ui(ui),
+                Tab::Tutorials => self.tutorial_panel.ui(ui),
+                Tab::LearningPath => self.learning_path_panel.ui(ui),
+                Tab::Presets => {
+                    // Handle preset loading
+                    if let Some(preset_state) = self.preset_panel.ui(ui) {
+                        // Apply the preset state to the panels
+                        self.load_state_from_preset(preset_state);
+                    }
+                }
+                Tab::Settings => {
+                    if let Some(new_theme) = self.settings_panel.ui(ui) {
+                        // Apply the theme change
+                        Self::apply_theme(ctx, new_theme);
+                        // Save the state with the new theme
+                        let filename = self.save_load_filename.clone();
+                        let path = std::path::Path::new(&filename);
+                        if let Err(e) = self.save_state_to_file(path) {
+                            log::warn!("Failed to save theme preference: {}", e);
+                        }
                     }
                 }
             }
@@ -727,6 +746,8 @@ impl PlaygroundApp {
             bind_group_panel: None,      // TODO: Add when BindGroupPanel has export_state
             bind_group_layout_panel: None, // TODO: Add when BindGroupLayoutPanel has export_state
             api_coverage: None,          // API coverage is tracked globally, not exported per-state
+            tutorial_state: Some(self.tutorial_panel.export_state()),
+            learning_progress: Some(self.learning_path_panel.progress().clone()),
         }
     }
 
@@ -747,6 +768,13 @@ impl PlaygroundApp {
         if let Some(shader_state) = &state.shader_editor {
             self.rendering_panel
                 .import_shader_editor_state(shader_state);
+        }
+        if let Some(tutorial_state) = &state.tutorial_state {
+            self.tutorial_panel.import_state(tutorial_state);
+        }
+        if let Some(learning_progress) = &state.learning_progress {
+            self.learning_path_panel
+                .set_progress(learning_progress.clone());
         }
         // TODO: Import other panel states when available
     }

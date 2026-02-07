@@ -59,6 +59,8 @@ fn test_save_and_load_state() {
         bind_group_panel: None,
         bind_group_layout_panel: None,
         api_coverage: None,
+        tutorial_state: None,
+        learning_progress: None,
     };
 
     // Save state to a temp file
@@ -136,6 +138,8 @@ fn test_json_serialization_format() {
         bind_group_panel: None,
         bind_group_layout_panel: None,
         api_coverage: None,
+        tutorial_state: None,
+        learning_progress: None,
     };
 
     // Convert to JSON
@@ -185,6 +189,8 @@ fn test_partial_state_loading() {
         bind_group_panel: None,
         bind_group_layout_panel: None,
         api_coverage: None,
+        tutorial_state: None,
+        learning_progress: None,
     };
 
     let json = state.to_json().expect("Failed to serialize");
@@ -241,6 +247,8 @@ fn test_url_encoding_integration() {
         bind_group_panel: None,
         bind_group_layout_panel: None,
         api_coverage: None,
+        tutorial_state: None,
+        learning_progress: None,
     };
 
     // Test URL encoding and decoding
@@ -299,6 +307,8 @@ fn test_shareable_url_generation_integration() {
         bind_group_panel: None,
         bind_group_layout_panel: None,
         api_coverage: None,
+        tutorial_state: None,
+        learning_progress: None,
     };
 
     // Test shareable URL generation
@@ -371,6 +381,8 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         bind_group_panel: None,
         bind_group_layout_panel: None,
         api_coverage: None,
+        tutorial_state: None,
+        learning_progress: None,
     };
 
     // Encode to URL
@@ -418,6 +430,8 @@ fn test_url_parameter_extraction() {
         bind_group_panel: None,
         bind_group_layout_panel: None,
         api_coverage: None,
+        tutorial_state: None,
+        learning_progress: None,
     };
 
     let encoded = state.to_url_encoded().unwrap();

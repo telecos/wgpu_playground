@@ -1,5 +1,15 @@
 name: Documentation & WASM Demo
 
+# IMPORTANT: This workflow requires GitHub Pages to be enabled in repository settings.
+# 
+# Setup (one-time, requires admin access):
+#   1. Go to repository Settings → Pages
+#   2. Under "Source", select "GitHub Actions"
+#   3. Click Save
+#
+# Without this setup, the deploy-pages job will fail with a 404 error.
+# See docs/WASM_DEMO_DEPLOYMENT.md for detailed instructions.
+
 on:
   push:
     branches: [main]

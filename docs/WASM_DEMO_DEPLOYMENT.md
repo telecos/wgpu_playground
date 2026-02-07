@@ -6,6 +6,30 @@ This document describes the WebGPU demo deployment setup for wgpu_playground.
 
 The wgpu_playground project includes a WebAssembly demo that showcases WebGPU capabilities directly in the browser. The demo is automatically built and deployed to GitHub Pages on every push to the main branch.
 
+## Prerequisites
+
+### Enabling GitHub Pages (Required)
+
+**IMPORTANT**: Before the automated deployment can work, GitHub Pages must be enabled in the repository settings. This is a one-time setup step that requires repository admin access.
+
+#### Setup Steps:
+
+1. Go to your repository on GitHub
+2. Click on **Settings** tab
+3. Navigate to **Pages** in the left sidebar
+4. Under **Source**, select:
+   - Source: **GitHub Actions** (not "Deploy from a branch")
+5. Click **Save**
+
+After completing these steps, the workflow will be able to deploy successfully.
+
+#### Verification:
+
+You can verify GitHub Pages is properly configured by checking:
+- The Pages section shows "Your site is ready to be published"
+- The workflow runs complete successfully without 404 errors
+- The deployment URL is accessible at `https://<username>.github.io/<repository>/`
+
 ## Live Demo
 
 🚀 **[Try the Demo](https://telecos.github.io/wgpu_playground/demo/)**
@@ -162,6 +186,32 @@ To configure a custom domain for the demo:
 4. Enable HTTPS in GitHub repository settings under Pages
 
 ## Troubleshooting
+
+### Deployment Fails with 404 Error
+
+**Problem**: GitHub Actions deployment step fails with "Not Found" or "Failed to create deployment (status: 404)"
+
+**Error Message**:
+```
+Error: Failed to create deployment (status: 404)
+Ensure GitHub Pages has been enabled: https://github.com/<owner>/<repo>/settings/pages
+```
+
+**Solutions**:
+1. **Enable GitHub Pages** (most common cause):
+   - Go to repository Settings → Pages
+   - Under "Source", select **GitHub Actions**
+   - Click Save
+   - Wait a few minutes for GitHub to process the change
+   - Re-run the failed workflow
+
+2. **Verify Permissions**:
+   - Ensure the workflow has correct permissions (already configured in `.github/workflows/docs.yml`)
+   - Check that Actions have permission to deploy to Pages in repository settings
+
+3. **Check Repository Settings**:
+   - Ensure Pages is not disabled in repository settings
+   - Verify the repository is public (or has GitHub Pro/Enterprise for private repos)
 
 ### Demo Not Loading
 

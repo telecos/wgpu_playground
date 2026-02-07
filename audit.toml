@@ -8,6 +8,12 @@ ignore = [
     # This is a transitive dependency from metal -> wgpu-hal and there's no alternative
     # The crate is widely used and considered stable despite being archived
     "RUSTSEC-2024-0436",
+    
+    # RUSTSEC-2024-0384: instant crate is marked as unmaintained
+    # This is a transitive dependency and the recommended replacement web-time
+    # is not compatible with non-WASM targets. The instant crate is still widely
+    # used and considered stable despite being unmaintained.
+    "RUSTSEC-2024-0384",
 ]
 
 # Warn for yanked crates instead of erroring

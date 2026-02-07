@@ -556,3 +556,63 @@ pub mod compute {
         Some("#dom-gpucomputepassencoder-dispatchworkgroups"),
     );
 }
+
+/// Render pass load/store operation tooltips
+pub mod load_store_op {
+    use super::TooltipInfo;
+
+    pub const LOAD_OP_CLEAR: TooltipInfo = TooltipInfo::new(
+        "Clear the attachment to a specified value at the start of the render pass. Discards previous contents and sets all pixels to the clear value.",
+        Some("#dom-gpuloadop-clear"),
+    );
+
+    pub const LOAD_OP_LOAD: TooltipInfo = TooltipInfo::new(
+        "Load the existing contents of the attachment at the start of the render pass. Preserves previous pixel values for modification or blending.",
+        Some("#dom-gpuloadop-load"),
+    );
+
+    pub const STORE_OP_STORE: TooltipInfo = TooltipInfo::new(
+        "Store the results of the render pass to the attachment. Writes all rendered pixels to memory for later use.",
+        Some("#dom-gpustoreop-store"),
+    );
+
+    pub const STORE_OP_DISCARD: TooltipInfo = TooltipInfo::new(
+        "Discard the results of the render pass. The attachment contents become undefined after the pass. Useful for temporary rendering or when results aren't needed.",
+        Some("#dom-gpustoreop-discard"),
+    );
+
+    pub const COLOR_ATTACHMENT: TooltipInfo = TooltipInfo::new(
+        "Color attachment configuration for the render pass. Specifies the texture to render into and how to handle its contents at the start and end of the pass.",
+        Some("#dictdef-gpurenderpasscolorattachment"),
+    );
+
+    pub const DEPTH_STENCIL_ATTACHMENT: TooltipInfo = TooltipInfo::new(
+        "Depth-stencil attachment configuration for the render pass. Specifies the depth/stencil texture and operations for depth testing and stencil operations.",
+        Some("#dictdef-gpurenderpassdepthstencilattachment"),
+    );
+}
+
+/// Draw command parameter tooltips
+pub mod draw {
+    use super::TooltipInfo;
+
+    pub const VERTEX_COUNT: TooltipInfo = TooltipInfo::new(
+        "Number of vertices to draw. For triangle lists, this is typically a multiple of 3. Each vertex is processed by the vertex shader.",
+        Some("#dom-gpurendercommandsmixin-draw"),
+    );
+
+    pub const INSTANCE_COUNT: TooltipInfo = TooltipInfo::new(
+        "Number of instances to draw. Instance count greater than 1 enables instanced rendering, where the same geometry is drawn multiple times with different instance data.",
+        Some("#dom-gpurendercommandsmixin-draw"),
+    );
+
+    pub const FIRST_VERTEX: TooltipInfo = TooltipInfo::new(
+        "Offset of the first vertex to draw from the vertex buffer. Allows drawing a subset of vertices from a buffer without creating separate buffers.",
+        Some("#dom-gpurendercommandsmixin-draw"),
+    );
+
+    pub const FIRST_INSTANCE: TooltipInfo = TooltipInfo::new(
+        "Offset of the first instance to draw. Affects the built-in instance_index value in the vertex shader, useful for accessing instance-specific data.",
+        Some("#dom-gpurendercommandsmixin-draw"),
+    );
+}

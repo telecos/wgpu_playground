@@ -616,7 +616,13 @@ impl PlaygroundApp {
         });
 
         // Main canvas area
-        egui::CentralPanel::default().show(ctx, |ui| match self.selected_tab {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            // Sync tutorial state for learning path before rendering any tab
+            let tutorial_state = self.tutorial_panel.export_state();
+            self.learning_path_panel
+                .update_from_tutorial_state(&tutorial_state.completed_tutorials);
+
+            match self.selected_tab {
             Tab::AdapterSelection => self.adapter_selection.ui(ui),
             Tab::DeviceConfig => self.device_config.ui(ui),
             Tab::DeviceInfo => self.device_info.ui(ui),
@@ -656,20 +662,8 @@ impl PlaygroundApp {
                 self.api_coverage_panel.ui(ui, tracker);
             }
             Tab::ApiReference => self.api_reference_panel.ui(ui),
-            Tab::Tutorials => {
-                self.tutorial_panel.ui(ui);
-                // Sync tutorial completions to learning path
-                let tutorial_state = self.tutorial_panel.export_state();
-                self.learning_path_panel
-                    .update_from_tutorial_state(&tutorial_state.completed_tutorials);
-            }
-            Tab::LearningPath => {
-                // Sync tutorial state before displaying learning path
-                let tutorial_state = self.tutorial_panel.export_state();
-                self.learning_path_panel
-                    .update_from_tutorial_state(&tutorial_state.completed_tutorials);
-                self.learning_path_panel.ui(ui);
-            }
+            Tab::Tutorials => self.tutorial_panel.ui(ui),
+            Tab::LearningPath => self.learning_path_panel.ui(ui),
             Tab::Presets => {
                 // Handle preset loading
                 if let Some(preset_state) = self.preset_panel.ui(ui) {
@@ -688,6 +682,7 @@ impl PlaygroundApp {
                         log::warn!("Failed to save theme preference: {}", e);
                     }
                 }
+            }
             }
         });
 

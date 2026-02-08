@@ -15,9 +15,3 @@ ignore = [
     # used and considered stable despite being unmaintained.
     "RUSTSEC-2024-0384",
 ]
-
-# Warn for yanked crates instead of erroring
-yanked = "warn"
-
-# Set informational advisories to warning level instead of error
-informational_warnings = ["unmaintained"]

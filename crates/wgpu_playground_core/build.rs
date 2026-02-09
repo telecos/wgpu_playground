@@ -51,11 +51,7 @@ fn find_cmake() -> Option<String> {
         ]
     } else {
         // Linux
-        vec![
-            "/usr/bin/cmake",
-            "/usr/local/bin/cmake",
-            "/snap/bin/cmake",
-        ]
+        vec!["/usr/bin/cmake", "/usr/local/bin/cmake", "/snap/bin/cmake"]
     };
 
     for path in candidate_paths {
@@ -92,15 +88,9 @@ fn find_ninja() -> Option<String> {
             r"C:\Users\Public\scoop\shims\ninja.exe",
         ]
     } else if cfg!(target_os = "macos") {
-        vec![
-            "/opt/homebrew/bin/ninja",
-            "/usr/local/bin/ninja",
-        ]
+        vec!["/opt/homebrew/bin/ninja", "/usr/local/bin/ninja"]
     } else {
-        vec![
-            "/usr/bin/ninja",
-            "/usr/local/bin/ninja",
-        ]
+        vec!["/usr/bin/ninja", "/usr/local/bin/ninja"]
     };
 
     for path in candidate_paths {
@@ -127,7 +117,9 @@ fn find_python() -> Option<String> {
             if output.status.success() {
                 let version = String::from_utf8_lossy(&output.stdout);
                 // Make sure it's Python 3
-                if version.contains("Python 3") || String::from_utf8_lossy(&output.stderr).contains("Python 3") {
+                if version.contains("Python 3")
+                    || String::from_utf8_lossy(&output.stderr).contains("Python 3")
+                {
                     return Some(cmd.to_string());
                 }
             }
@@ -158,10 +150,7 @@ fn find_python() -> Option<String> {
             "/usr/bin/python3",
         ]
     } else {
-        vec![
-            "/usr/bin/python3",
-            "/usr/local/bin/python3",
-        ]
+        vec!["/usr/bin/python3", "/usr/local/bin/python3"]
     };
 
     for path in candidate_paths {
@@ -206,31 +195,40 @@ fn fetch_dawn_dependencies(dawn_dir: &std::path::Path, python_path: &str) {
 
     // The script is at tools/fetch_dawn_dependencies.py
     let fetch_script = dawn_dir.join("tools").join("fetch_dawn_dependencies.py");
-    
+
     if fetch_script.exists() {
         println!("cargo:warning=Running fetch_dawn_dependencies.py...");
         let fetch_result = Command::new(python_path)
             .args([fetch_script.to_str().unwrap()])
             .current_dir(dawn_dir)
             .output();
-        
+
         match fetch_result {
             Ok(output) if output.status.success() => {
                 println!("cargo:warning=Dawn dependencies fetched successfully");
             }
             Ok(output) => {
-                println!("cargo:warning=fetch_dawn_dependencies.py exited with code {}", output.status);
+                println!(
+                    "cargo:warning=fetch_dawn_dependencies.py exited with code {}",
+                    output.status
+                );
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 for line in stderr.lines().take(10) {
                     println!("cargo:warning=  {}", line);
                 }
             }
             Err(e) => {
-                println!("cargo:warning=Could not run fetch_dawn_dependencies.py: {}", e);
+                println!(
+                    "cargo:warning=Could not run fetch_dawn_dependencies.py: {}",
+                    e
+                );
             }
         }
     } else {
-        println!("cargo:warning=fetch_dawn_dependencies.py not found at {:?}", fetch_script);
+        println!(
+            "cargo:warning=fetch_dawn_dependencies.py not found at {:?}",
+            fetch_script
+        );
         println!("cargo:warning=CMake's DAWN_FETCH_DEPENDENCIES will attempt to fetch deps");
     }
 }
@@ -242,26 +240,44 @@ fn configure_and_build_dawn() {
     use std::process::{Command, Stdio};
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    
+
     // Try to use the Dawn source from the workspace first (if available)
     // This is much faster than cloning and already has all dependencies
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let workspace_dawn = manifest_dir.parent().unwrap().parent().unwrap().join("dawn");
-    
-    let dawn_dir = if workspace_dawn.join("third_party").join("CMakeLists.txt").exists() {
-        println!("cargo:warning=Using Dawn source from workspace: {}", workspace_dawn.display());
+    let workspace_dawn = manifest_dir
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("dawn");
+
+    let dawn_dir = if workspace_dawn
+        .join("third_party")
+        .join("CMakeLists.txt")
+        .exists()
+    {
+        println!(
+            "cargo:warning=Using Dawn source from workspace: {}",
+            workspace_dawn.display()
+        );
         workspace_dawn
     } else {
         println!("cargo:warning=Workspace Dawn not found or incomplete, will clone");
         out_dir.join("dawn")
     };
-    
+
     let dawn_build_dir = out_dir.join("dawn-build");
     let dawn_install_dir = out_dir.join("dawn-install");
 
     println!("cargo:warning=Building Dawn from source - this may take 30+ minutes on first build");
-    println!("cargo:warning=Dawn source directory: {}", dawn_dir.display());
-    println!("cargo:warning=Dawn build directory: {}", dawn_build_dir.display());
+    println!(
+        "cargo:warning=Dawn source directory: {}",
+        dawn_dir.display()
+    );
+    println!(
+        "cargo:warning=Dawn build directory: {}",
+        dawn_build_dir.display()
+    );
 
     // Check if Dawn is already built and installed
     let lib_dir = dawn_install_dir.join("lib");
@@ -308,7 +324,7 @@ fn configure_and_build_dawn() {
         }
 
         println!("cargo:warning=Cloning Dawn repository (this takes a few minutes)...");
-        
+
         // Configure git for long paths on Windows
         if cfg!(target_os = "windows") {
             let _ = Command::new("git")
@@ -319,7 +335,8 @@ fn configure_and_build_dawn() {
         let clone_status = Command::new("git")
             .args([
                 "clone",
-                "--depth", "1",  // Shallow clone for faster download
+                "--depth",
+                "1", // Shallow clone for faster download
                 "https://dawn.googlesource.com/dawn",
                 dawn_dir.to_str().unwrap(),
             ])
@@ -348,13 +365,13 @@ fn configure_and_build_dawn() {
     let cmake_cache = dawn_build_dir.join("CMakeCache.txt");
     if !cmake_cache.exists() {
         println!("cargo:warning=Configuring Dawn with CMake (this takes 10-30 minutes)...");
-        
+
         // Clean any partial build
         let _ = std::fs::remove_dir_all(&dawn_build_dir);
         std::fs::create_dir_all(&dawn_build_dir).ok();
 
         let ninja_path = find_ninja();
-        
+
         let mut cmake_args = vec![
             "-S".to_string(),
             dawn_dir.to_str().unwrap().to_string(),
@@ -388,7 +405,10 @@ fn configure_and_build_dawn() {
                 println!("cargo:warning=CMake configuration successful");
             }
             Ok(s) => {
-                println!("cargo:warning=CMake configuration failed (exit code: {})", s);
+                println!(
+                    "cargo:warning=CMake configuration failed (exit code: {})",
+                    s
+                );
                 println!("cargo:warning=Using wgpu-core fallback");
                 return;
             }

@@ -425,6 +425,7 @@ impl<'a> RenderPassEncoder<'a> {
                 .map(|a| a.to_wgpu()),
             timestamp_writes: None,
             occlusion_query_set: None,
+            multiview_mask: None,
         });
 
         Ok(Self { pass })

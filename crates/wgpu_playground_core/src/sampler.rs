@@ -74,11 +74,11 @@ pub enum MipmapFilterMode {
 }
 
 impl MipmapFilterMode {
-    /// Convert to wgpu::FilterMode
-    pub fn to_wgpu(&self) -> wgpu::FilterMode {
+    /// Convert to wgpu::MipmapFilterMode
+    pub fn to_wgpu(&self) -> wgpu::MipmapFilterMode {
         match self {
-            MipmapFilterMode::Nearest => wgpu::FilterMode::Nearest,
-            MipmapFilterMode::Linear => wgpu::FilterMode::Linear,
+            MipmapFilterMode::Nearest => wgpu::MipmapFilterMode::Nearest,
+            MipmapFilterMode::Linear => wgpu::MipmapFilterMode::Linear,
         }
     }
 }

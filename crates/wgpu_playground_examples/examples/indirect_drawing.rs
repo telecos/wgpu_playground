@@ -170,7 +170,7 @@ fn example_draw_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Indirect Pipeline Layout"),
         bind_group_layouts: &[],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -198,7 +198,7 @@ fn example_draw_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
                 write_mask: wgpu::ColorWrites::ALL,
             })],
         }),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
 
@@ -317,7 +317,7 @@ fn example_draw_indexed_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Indexed Indirect Pipeline Layout"),
         bind_group_layouts: &[],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -345,7 +345,7 @@ fn example_draw_indexed_indirect(device: &wgpu::Device, queue: &wgpu::Queue) {
                 write_mask: wgpu::ColorWrites::ALL,
             })],
         }),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
 

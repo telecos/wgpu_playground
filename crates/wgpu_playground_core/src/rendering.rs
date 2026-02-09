@@ -1,4 +1,4 @@
-use crate::api_coverage::ApiCategory;
+use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
 use crate::example_metadata::get_example_api_tags;
 use crate::examples::{get_all_examples, Example, ExampleCategory};
 use crate::shader_editor::ShaderEditor;
@@ -22,6 +22,84 @@ fn category_badge_color(category: &ApiCategory) -> egui::Color32 {
     }
 }
 
+/// Get a brief description for each API category
+fn get_api_category_description(category: &ApiCategory) -> &'static str {
+    match category {
+        ApiCategory::Device => "GPU device management: creating resources and pipelines",
+        ApiCategory::Queue => "Command submission: submit(), write_buffer(), write_texture()",
+        ApiCategory::Buffer => "GPU memory: vertex buffers, index buffers, uniform buffers",
+        ApiCategory::Texture => "Image data: 2D textures, depth buffers, render targets",
+        ApiCategory::Sampler => "Texture sampling: filtering, addressing modes, mipmapping",
+        ApiCategory::Shader => "WGSL shaders: vertex, fragment, and compute programs",
+        ApiCategory::RenderPipeline => "Graphics pipeline: vertex layout, blending, depth testing",
+        ApiCategory::ComputePipeline => "Compute pipeline: parallel GPU computation",
+        ApiCategory::BindGroup => "Resource binding: connecting buffers/textures to shaders",
+        ApiCategory::PipelineLayout => "Pipeline structure: defining bind group layouts",
+        ApiCategory::RenderPass => "Drawing commands: set_pipeline, draw, draw_indexed",
+        ApiCategory::ComputePass => "Compute dispatch: dispatch_workgroups, set_bind_group",
+        ApiCategory::CommandEncoder => "Command recording: begin_render_pass, copy operations",
+        ApiCategory::RenderBundle => "Pre-recorded commands for efficient re-use",
+        ApiCategory::QuerySet => "GPU timing and occlusion queries",
+    }
+}
+
+/// Get WebGPU spec URL for an API category
+fn get_api_spec_url(category: &ApiCategory) -> &'static str {
+    match category {
+        ApiCategory::Device => "https://www.w3.org/TR/webgpu/#gpu-device",
+        ApiCategory::Queue => "https://www.w3.org/TR/webgpu/#gpu-queue",
+        ApiCategory::Buffer => "https://www.w3.org/TR/webgpu/#gpu-buffer",
+        ApiCategory::Texture => "https://www.w3.org/TR/webgpu/#gpu-texture",
+        ApiCategory::Sampler => "https://www.w3.org/TR/webgpu/#gpu-sampler",
+        ApiCategory::Shader => "https://www.w3.org/TR/webgpu/#gpu-shadermodule",
+        ApiCategory::RenderPipeline => "https://www.w3.org/TR/webgpu/#gpu-renderpipeline",
+        ApiCategory::ComputePipeline => "https://www.w3.org/TR/webgpu/#gpu-computepipeline",
+        ApiCategory::BindGroup => "https://www.w3.org/TR/webgpu/#gpu-bindgroup",
+        ApiCategory::PipelineLayout => "https://www.w3.org/TR/webgpu/#gpu-pipelinelayout",
+        ApiCategory::RenderPass => "https://www.w3.org/TR/webgpu/#render-passes",
+        ApiCategory::ComputePass => "https://www.w3.org/TR/webgpu/#compute-passes",
+        ApiCategory::CommandEncoder => "https://www.w3.org/TR/webgpu/#command-encoder",
+        ApiCategory::RenderBundle => "https://www.w3.org/TR/webgpu/#render-bundle-encoder",
+        ApiCategory::QuerySet => "https://www.w3.org/TR/webgpu/#queryset",
+    }
+}
+
+/// Get typical methods for an API category
+fn get_api_methods(category: &ApiCategory) -> Vec<&'static str> {
+    match category {
+        ApiCategory::Device => vec![
+            "create_buffer",
+            "create_texture",
+            "create_shader_module",
+            "create_render_pipeline",
+        ],
+        ApiCategory::Queue => vec!["submit", "write_buffer", "write_texture"],
+        ApiCategory::Buffer => vec!["create_buffer", "slice", "map_async", "unmap"],
+        ApiCategory::Texture => vec!["create_texture", "create_view"],
+        ApiCategory::Sampler => vec!["create_sampler"],
+        ApiCategory::Shader => vec!["create_shader_module"],
+        ApiCategory::RenderPipeline => vec!["create_render_pipeline", "get_bind_group_layout"],
+        ApiCategory::ComputePipeline => vec!["create_compute_pipeline", "get_bind_group_layout"],
+        ApiCategory::BindGroup => vec!["create_bind_group", "create_bind_group_layout"],
+        ApiCategory::PipelineLayout => vec!["create_pipeline_layout"],
+        ApiCategory::RenderPass => vec![
+            "begin_render_pass",
+            "set_pipeline",
+            "set_vertex_buffer",
+            "draw",
+            "draw_indexed",
+        ],
+        ApiCategory::ComputePass => {
+            vec!["begin_compute_pass", "set_pipeline", "dispatch_workgroups"]
+        }
+        ApiCategory::CommandEncoder => {
+            vec!["create_command_encoder", "begin_render_pass", "finish"]
+        }
+        ApiCategory::RenderBundle => vec!["create_render_bundle_encoder", "finish"],
+        ApiCategory::QuerySet => vec!["create_query_set", "write_timestamp"],
+    }
+}
+
 /// Rendering state for executable examples
 struct TriangleState {
     pipeline: wgpu::RenderPipeline,
@@ -38,10 +116,22 @@ struct CubeState {
     time: f32,
 }
 
+struct TextureState {
+    pipeline: wgpu::RenderPipeline,
+    vertex_buffer: wgpu::Buffer,
+    index_buffer: wgpu::Buffer,
+    bind_group: wgpu::BindGroup,
+    #[allow(dead_code)]
+    texture: wgpu::Texture,
+    #[allow(dead_code)]
+    sampler: wgpu::Sampler,
+}
+
 enum RenderState {
     None,
     Triangle(Box<TriangleState>),
     Cube(Box<CubeState>),
+    Texture(Box<TextureState>),
 }
 
 impl RenderState {
@@ -210,6 +300,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 }
 "#;
 
+        // Track API usage for learning purposes
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Shader, "create_shader_module");
+
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Triangle Shader"),
             source: wgpu::ShaderSource::Wgsl(shader_source.into()),
@@ -237,6 +331,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             },
         ];
 
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let vertex_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Triangle Vertex Buffer"),
             size: std::mem::size_of_val(&vertices) as u64,
@@ -244,14 +339,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             mapped_at_creation: false,
         });
 
+        tracker.record(ApiCategory::Queue, "write_buffer");
         queue.write_buffer(&vertex_buffer, 0, bytemuck::cast_slice(&vertices));
 
+        tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Triangle Pipeline Layout"),
             bind_group_layouts: &[],
             immediate_size: 0,
         });
 
+        tracker.record(ApiCategory::RenderPipeline, "create_render_pipeline");
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Triangle Pipeline"),
             layout: Some(&pipeline_layout),
@@ -335,6 +433,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 }
 "#;
 
+        // Track API usage for learning purposes
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Shader, "create_shader_module");
+
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Cube Shader"),
             source: wgpu::ShaderSource::Wgsl(shader_source.into()),
@@ -395,20 +497,24 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             4, 5, 1, 1, 0, 4, // Bottom
         ];
 
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let vertex_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Cube Vertex Buffer"),
             size: std::mem::size_of_val(&vertices) as u64,
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
+        tracker.record(ApiCategory::Queue, "write_buffer");
         queue.write_buffer(&vertex_buffer, 0, bytemuck::cast_slice(&vertices));
 
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let index_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Cube Index Buffer"),
             size: std::mem::size_of_val(&indices) as u64,
             usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
+        tracker.record(ApiCategory::Queue, "write_buffer");
         queue.write_buffer(&index_buffer, 0, bytemuck::cast_slice(&indices));
 
         // Create uniform buffer
@@ -424,14 +530,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             model: identity_matrix(),
         };
 
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let uniform_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Cube Uniform Buffer"),
             size: std::mem::size_of::<Uniforms>() as u64,
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
+        tracker.record(ApiCategory::Queue, "write_buffer");
         queue.write_buffer(&uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
 
+        tracker.record(ApiCategory::BindGroup, "create_bind_group_layout");
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("Cube Bind Group Layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
@@ -446,6 +555,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             }],
         });
 
+        tracker.record(ApiCategory::BindGroup, "create_bind_group");
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Cube Bind Group"),
             layout: &bind_group_layout,
@@ -462,6 +572,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             depth_or_array_layers: 1,
         };
 
+        tracker.record(ApiCategory::Texture, "create_texture");
         let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Depth Texture"),
             size,
@@ -473,14 +584,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             view_formats: &[],
         });
 
+        tracker.record(ApiCategory::Texture, "create_view");
         let depth_view = depth_texture.create_view(&wgpu::TextureViewDescriptor::default());
 
+        tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Cube Pipeline Layout"),
             bind_group_layouts: &[&bind_group_layout],
             immediate_size: 0,
         });
 
+        tracker.record(ApiCategory::RenderPipeline, "create_render_pipeline");
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Cube Pipeline"),
             layout: Some(&pipeline_layout),
@@ -540,6 +654,274 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         }));
     }
 
+    fn create_texture_mapping_render_state(&mut self, device: &Device, queue: &Queue) {
+        let shader_source = r#"
+@group(0) @binding(0)
+var t_diffuse: texture_2d<f32>;
+
+@group(0) @binding(1)
+var s_diffuse: sampler;
+
+struct VertexInput {
+    @location(0) position: vec3<f32>,
+    @location(1) tex_coords: vec2<f32>,
+}
+
+struct VertexOutput {
+    @builtin(position) clip_position: vec4<f32>,
+    @location(0) tex_coords: vec2<f32>,
+}
+
+@vertex
+fn vs_main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    out.clip_position = vec4<f32>(in.position, 1.0);
+    out.tex_coords = in.tex_coords;
+    return out;
+}
+
+@fragment
+fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
+    return textureSample(t_diffuse, s_diffuse, in.tex_coords);
+}
+"#;
+
+        // Track API usage for learning purposes
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Shader, "create_shader_module");
+
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Texture Mapping Shader"),
+            source: wgpu::ShaderSource::Wgsl(shader_source.into()),
+        });
+
+        #[repr(C)]
+        #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+        struct Vertex {
+            position: [f32; 3],
+            tex_coords: [f32; 2],
+        }
+
+        // Quad vertices with UV coordinates
+        let vertices = [
+            Vertex {
+                position: [-0.8, -0.8, 0.0],
+                tex_coords: [0.0, 1.0],
+            },
+            Vertex {
+                position: [0.8, -0.8, 0.0],
+                tex_coords: [1.0, 1.0],
+            },
+            Vertex {
+                position: [0.8, 0.8, 0.0],
+                tex_coords: [1.0, 0.0],
+            },
+            Vertex {
+                position: [-0.8, 0.8, 0.0],
+                tex_coords: [0.0, 0.0],
+            },
+        ];
+
+        // Indices for two triangles forming a quad
+        let indices: [u16; 6] = [0, 1, 2, 2, 3, 0];
+
+        tracker.record(ApiCategory::Buffer, "create_buffer");
+        let vertex_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Texture Quad Vertex Buffer"),
+            size: std::mem::size_of_val(&vertices) as u64,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        tracker.record(ApiCategory::Queue, "write_buffer");
+        queue.write_buffer(&vertex_buffer, 0, bytemuck::cast_slice(&vertices));
+
+        tracker.record(ApiCategory::Buffer, "create_buffer");
+        let index_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Texture Quad Index Buffer"),
+            size: std::mem::size_of_val(&indices) as u64,
+            usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        tracker.record(ApiCategory::Queue, "write_buffer");
+        queue.write_buffer(&index_buffer, 0, bytemuck::cast_slice(&indices));
+
+        // Create a checkerboard texture (8x8 pattern)
+        let texture_size = 256u32;
+        let checker_size = 32u32;
+        let mut texture_data = vec![0u8; (texture_size * texture_size * 4) as usize];
+
+        for y in 0..texture_size {
+            for x in 0..texture_size {
+                let checker_x = (x / checker_size) % 2;
+                let checker_y = (y / checker_size) % 2;
+                let is_white = (checker_x + checker_y).is_multiple_of(2);
+
+                let idx = ((y * texture_size + x) * 4) as usize;
+                if is_white {
+                    // Light blue
+                    texture_data[idx] = 100; // R
+                    texture_data[idx + 1] = 149; // G
+                    texture_data[idx + 2] = 237; // B (Cornflower blue)
+                    texture_data[idx + 3] = 255; // A
+                } else {
+                    // Dark purple
+                    texture_data[idx] = 75; // R
+                    texture_data[idx + 1] = 0; // G
+                    texture_data[idx + 2] = 130; // B (Indigo)
+                    texture_data[idx + 3] = 255; // A
+                }
+            }
+        }
+
+        let texture_extent = wgpu::Extent3d {
+            width: texture_size,
+            height: texture_size,
+            depth_or_array_layers: 1,
+        };
+
+        tracker.record(ApiCategory::Texture, "create_texture");
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Checkerboard Texture"),
+            size: texture_extent,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8UnormSrgb,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+
+        tracker.record(ApiCategory::Queue, "write_texture");
+        queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            &texture_data,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(4 * texture_size),
+                rows_per_image: Some(texture_size),
+            },
+            texture_extent,
+        );
+
+        tracker.record(ApiCategory::Texture, "create_view");
+        let texture_view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        tracker.record(ApiCategory::Sampler, "create_sampler");
+        let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("Texture Sampler"),
+            address_mode_u: wgpu::AddressMode::Repeat,
+            address_mode_v: wgpu::AddressMode::Repeat,
+            address_mode_w: wgpu::AddressMode::Repeat,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            mipmap_filter: wgpu::MipmapFilterMode::Nearest,
+            ..Default::default()
+        });
+
+        tracker.record(ApiCategory::BindGroup, "create_bind_group_layout");
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("Texture Bind Group Layout"),
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+        });
+
+        tracker.record(ApiCategory::BindGroup, "create_bind_group");
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Texture Bind Group"),
+            layout: &bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&texture_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&sampler),
+                },
+            ],
+        });
+
+        tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("Texture Pipeline Layout"),
+            bind_group_layouts: &[&bind_group_layout],
+            immediate_size: 0,
+        });
+
+        tracker.record(ApiCategory::RenderPipeline, "create_render_pipeline");
+        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("Texture Pipeline"),
+            layout: Some(&pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: Some("vs_main"),
+                buffers: &[wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
+                    step_mode: wgpu::VertexStepMode::Vertex,
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2],
+                }],
+                compilation_options: Default::default(),
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: Some("fs_main"),
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: wgpu::TextureFormat::Bgra8UnormSrgb,
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    write_mask: wgpu::ColorWrites::ALL,
+                })],
+                compilation_options: Default::default(),
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                strip_index_format: None,
+                front_face: wgpu::FrontFace::Ccw,
+                cull_mode: None,
+                polygon_mode: wgpu::PolygonMode::Fill,
+                unclipped_depth: false,
+                conservative: false,
+            },
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState {
+                count: 1,
+                mask: !0,
+                alpha_to_coverage_enabled: false,
+            },
+            multiview_mask: None,
+            cache: None,
+        });
+
+        self.render_state = RenderState::Texture(Box::new(TextureState {
+            pipeline,
+            vertex_buffer,
+            index_buffer,
+            bind_group,
+            texture,
+            sampler,
+        }));
+    }
+
     fn render_current_example(&mut self, device: &Device, queue: &Queue) {
         // Update animation state
         // TODO: Pass actual delta_time from frame timer instead of hardcoded 60fps
@@ -555,6 +937,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         );
 
         if let Some(view) = &self.render_texture_view {
+            // Track command encoder creation (only on first frame to avoid spam)
+            let tracker = ApiCoverageTracker::global();
+            tracker.record(ApiCategory::CommandEncoder, "create_command_encoder");
+
             let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Example Render Encoder"),
             });
@@ -574,6 +960,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                         None
                     };
 
+                tracker.record(ApiCategory::RenderPass, "begin_render_pass");
+                tracker.record(ApiCategory::CommandEncoder, "begin_render_pass");
                 let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("Example Render Pass"),
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -598,24 +986,49 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
                 match &self.render_state {
                     RenderState::Triangle(triangle_state) => {
+                        tracker.record(ApiCategory::RenderPass, "set_pipeline");
                         render_pass.set_pipeline(&triangle_state.pipeline);
+                        tracker.record(ApiCategory::RenderPass, "set_vertex_buffer");
                         render_pass.set_vertex_buffer(0, triangle_state.vertex_buffer.slice(..));
+                        tracker.record(ApiCategory::RenderPass, "draw");
                         render_pass.draw(0..3, 0..1);
                     }
                     RenderState::Cube(cube_state) => {
+                        tracker.record(ApiCategory::RenderPass, "set_pipeline");
                         render_pass.set_pipeline(&cube_state.pipeline);
+                        tracker.record(ApiCategory::RenderPass, "set_bind_group");
                         render_pass.set_bind_group(0, &cube_state.bind_group, &[]);
+                        tracker.record(ApiCategory::RenderPass, "set_vertex_buffer");
                         render_pass.set_vertex_buffer(0, cube_state.vertex_buffer.slice(..));
+                        tracker.record(ApiCategory::RenderPass, "set_index_buffer");
                         render_pass.set_index_buffer(
                             cube_state.index_buffer.slice(..),
                             wgpu::IndexFormat::Uint16,
                         );
+                        tracker.record(ApiCategory::RenderPass, "draw_indexed");
                         render_pass.draw_indexed(0..36, 0, 0..1);
                     }
-                    _ => {}
+                    RenderState::Texture(texture_state) => {
+                        tracker.record(ApiCategory::RenderPass, "set_pipeline");
+                        render_pass.set_pipeline(&texture_state.pipeline);
+                        tracker.record(ApiCategory::RenderPass, "set_bind_group");
+                        render_pass.set_bind_group(0, &texture_state.bind_group, &[]);
+                        tracker.record(ApiCategory::RenderPass, "set_vertex_buffer");
+                        render_pass.set_vertex_buffer(0, texture_state.vertex_buffer.slice(..));
+                        tracker.record(ApiCategory::RenderPass, "set_index_buffer");
+                        render_pass.set_index_buffer(
+                            texture_state.index_buffer.slice(..),
+                            wgpu::IndexFormat::Uint16,
+                        );
+                        tracker.record(ApiCategory::RenderPass, "draw_indexed");
+                        render_pass.draw_indexed(0..6, 0, 0..1);
+                    }
+                    RenderState::None => {}
                 }
             }
 
+            tracker.record(ApiCategory::CommandEncoder, "finish");
+            tracker.record(ApiCategory::Queue, "submit");
             queue.submit(std::iter::once(encoder.finish()));
         }
     }
@@ -872,11 +1285,13 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                                 .clamp(-std::f32::consts::PI / 2.0, std::f32::consts::PI / 2.0);
                         }
 
-                        // Mouse wheel for zoom
-                        let scroll_delta = ui.input(|i| i.smooth_scroll_delta.y);
-                        if scroll_delta.abs() > 0.1 {
-                            self.camera_distance -= scroll_delta * 0.01;
-                            self.camera_distance = self.camera_distance.clamp(1.0, 10.0);
+                        // Mouse wheel for zoom - only when hovering over the image
+                        if response.hovered() {
+                            let scroll_delta = ui.input(|i| i.raw_scroll_delta.y);
+                            if scroll_delta.abs() > 0.1 {
+                                self.camera_distance -= scroll_delta * 0.01;
+                                self.camera_distance = self.camera_distance.clamp(1.0, 10.0);
+                            }
                         }
                     }
 
@@ -989,49 +1404,142 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     ui.label(example_description);
                     ui.add_space(5.0);
 
-                    // API Coverage Badges
+                    // API Coverage Badges with enhanced tooltips
                     let coverage_tags = get_example_api_tags(example_id);
                     if !coverage_tags.is_empty() {
-                        ui.label(egui::RichText::new("WebGPU APIs Covered:").strong());
+                        ui.label(egui::RichText::new("🔌 WebGPU APIs Used:").strong());
                         ui.horizontal_wrapped(|ui| {
                             ui.spacing_mut().item_spacing = egui::vec2(6.0, 4.0);
-                            for tag in coverage_tags {
+                            for tag in &coverage_tags {
                                 let badge_text = format!(" {} ", tag.name());
-                                ui.label(
-                                    egui::RichText::new(&badge_text)
-                                        .color(egui::Color32::WHITE)
-                                        .background_color(category_badge_color(&tag))
-                                        .small(),
+                                let description = get_api_category_description(tag);
+                                let methods = get_api_methods(tag);
+                                let tooltip = format!(
+                                    "{}\n\nKey methods:\n{}",
+                                    description,
+                                    methods.iter().map(|m| format!("• {}", m)).collect::<Vec<_>>().join("\n")
                                 );
+
+                                let response = ui.add(
+                                    egui::Label::new(
+                                        egui::RichText::new(&badge_text)
+                                            .color(egui::Color32::WHITE)
+                                            .background_color(category_badge_color(tag))
+                                            .small(),
+                                    )
+                                    .sense(egui::Sense::hover()),
+                                );
+                                response.on_hover_text(&tooltip);
                             }
                         });
                         ui.add_space(5.0);
+
+                        // Expandable API Details section
+                        ui.collapsing("📖 API Details (click to expand)", |ui| {
+                            for tag in &coverage_tags {
+                                ui.horizontal(|ui| {
+                                    let badge_text = format!(" {} ", tag.name());
+                                    ui.label(
+                                        egui::RichText::new(&badge_text)
+                                            .color(egui::Color32::WHITE)
+                                            .background_color(category_badge_color(tag))
+                                            .small(),
+                                    );
+                                    ui.label(get_api_category_description(tag));
+                                });
+
+                                ui.indent(tag.name(), |ui| {
+                                    ui.label(egui::RichText::new("Methods used:").small().italics());
+                                    let methods = get_api_methods(tag);
+                                    for method in methods.iter().take(5) {
+                                        ui.label(egui::RichText::new(format!("  • {}", method)).small().monospace());
+                                    }
+
+                                    // Link to WebGPU spec
+                                    let spec_url = get_api_spec_url(tag);
+                                    if ui.link(egui::RichText::new("📚 View WebGPU Spec").small()).clicked() {
+                                        #[cfg(not(target_arch = "wasm32"))]
+                                        let _ = webbrowser::open(spec_url);
+                                    }
+                                });
+                                ui.add_space(3.0);
+                            }
+
+                            // Show live tracking status
+                            ui.separator();
+                            let tracker = ApiCoverageTracker::global();
+                            let snapshot = tracker.snapshot();
+                            ui.horizontal(|ui| {
+                                ui.label(egui::RichText::new("📊 Live Tracking:").strong());
+                                ui.label(format!("{} unique API calls recorded", snapshot.call_count()));
+                            });
+                            ui.label(
+                                egui::RichText::new("💡 Run the example to see API calls tracked in the API Coverage panel")
+                                    .small()
+                                    .italics()
+                                    .color(egui::Color32::GRAY),
+                            );
+                        });
                     }
 
                     ui.add_space(10.0);
 
-                    // Run button (only for rendering examples)
-                    if example_category == ExampleCategory::Rendering
-                        && ui
+                    // Run button (only for rendering examples with implementations)
+                    let has_implementation = example_id == "triangle"
+                        || example_id == "cube"
+                        || example_id == "texture_mapping";
+
+                    if example_category == ExampleCategory::Rendering && has_implementation {
+                        if ui
                             .button(if self.is_example_running {
                                 "⏹ Stop Example"
                             } else {
                                 "▶ Run Example"
                             })
                             .clicked()
-                    {
-                        if self.is_example_running {
-                            self.is_example_running = false;
-                            self.render_state = RenderState::None;
-                        } else {
-                            self.is_example_running = true;
-                            // Create render state based on example
-                            if example_id == "triangle" {
-                                self.create_triangle_render_state(device, queue);
-                            } else if example_id == "cube" {
-                                self.create_cube_render_state(device, queue);
+                        {
+                            if self.is_example_running {
+                                self.is_example_running = false;
+                                self.render_state = RenderState::None;
+                            } else {
+                                self.is_example_running = true;
+                                // Create render state based on example
+                                if example_id == "triangle" {
+                                    self.create_triangle_render_state(device, queue);
+                                } else if example_id == "cube" {
+                                    self.create_cube_render_state(device, queue);
+                                } else if example_id == "texture_mapping" {
+                                    self.create_texture_mapping_render_state(device, queue);
+                                }
                             }
                         }
+                    } else if example_category == ExampleCategory::Rendering {
+                        // Show message for unimplemented rendering examples
+                        ui.horizontal(|ui| {
+                            ui.label(
+                                egui::RichText::new("🚧 Interactive demo coming soon")
+                                    .color(egui::Color32::from_rgb(255, 200, 100))
+                                    .italics(),
+                            );
+                        });
+                        ui.label(
+                            egui::RichText::new("View the source code below to learn the concepts")
+                                .small()
+                                .color(egui::Color32::GRAY),
+                        );
+                    } else if example_category == ExampleCategory::Compute {
+                        // Show message for compute examples
+                        ui.horizontal(|ui| {
+                            ui.label(
+                                egui::RichText::new("🧮 Compute shader example")
+                                    .color(egui::Color32::from_rgb(138, 43, 226)),
+                            );
+                        });
+                        ui.label(
+                            egui::RichText::new("Use the Compute panel to run compute shaders interactively")
+                                .small()
+                                .color(egui::Color32::GRAY),
+                        );
                     }
 
                     // Canvas controls (only if example is running)

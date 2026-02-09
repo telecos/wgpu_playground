@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^cmd /c \"dir C:\\\\Work\\\\wgpu_playground\\\\target\\\\debug\\\\build\\\\wgpu_playground_core-c2b513a80b2678e3\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

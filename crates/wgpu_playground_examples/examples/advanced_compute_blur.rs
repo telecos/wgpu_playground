@@ -216,7 +216,7 @@ fn main() {
         device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Horizontal Blur Pipeline Layout"),
             bind_group_layouts: &[&horizontal_bind_group_layout],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
     let horizontal_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
@@ -276,7 +276,7 @@ fn main() {
     let vertical_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Vertical Blur Pipeline Layout"),
         bind_group_layouts: &[&vertical_bind_group_layout],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let vertical_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
@@ -300,7 +300,7 @@ fn main() {
         address_mode_w: wgpu::AddressMode::ClampToEdge,
         mag_filter: wgpu::FilterMode::Linear,
         min_filter: wgpu::FilterMode::Linear,
-        mipmap_filter: wgpu::FilterMode::Nearest,
+        mipmap_filter: wgpu::MipmapFilterMode::Nearest,
         ..Default::default()
     });
 

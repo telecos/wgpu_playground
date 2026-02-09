@@ -4,6 +4,8 @@ use wgpu::{
     TextureViewDescriptor, TextureViewDimension,
 };
 
+use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+
 /// Builder for creating GPU textures with flexible configuration
 ///
 /// This builder provides a fluent interface for creating textures with all
@@ -166,6 +168,9 @@ impl TextureBuilder {
             self.mip_level_count,
             self.sample_count
         );
+
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Texture, "create_texture");
 
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: self.label.as_deref(),
@@ -373,6 +378,9 @@ impl TextureViewBuilder {
             self.format,
             self.dimension
         );
+
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Texture, "create_view");
 
         let view = texture.create_view(&TextureViewDescriptor {
             label: self.label.as_deref(),

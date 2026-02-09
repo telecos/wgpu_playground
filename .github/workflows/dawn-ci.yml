@@ -29,6 +29,9 @@ jobs:
       # Install Dawn build dependencies
       - name: Install Dawn dependencies
         run: |
+          # Remove problematic Microsoft repositories to avoid apt-get update failures
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/azure-cli.list
           sudo apt-get update
           sudo apt-get install -y \
             cmake \

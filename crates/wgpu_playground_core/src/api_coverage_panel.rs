@@ -4,65 +4,127 @@ use crate::api_coverage::{ApiCategory, ApiCoverageTracker, CoverageData};
 use egui::{CollapsingHeader, Color32, RichText, ScrollArea, Ui};
 use std::collections::HashMap;
 
+/// Navigation request from the API Coverage panel
+/// Used to navigate to appropriate panels when user clicks "Try" buttons
+#[derive(Debug, Clone, PartialEq)]
+pub enum NavigationRequest {
+    /// Navigate to buffer configuration panel
+    BufferConfig,
+    /// Navigate to texture configuration panel
+    TextureConfig,
+    /// Navigate to sampler configuration panel
+    SamplerConfig,
+    /// Navigate to shader/render pipeline panel
+    RenderPipelineConfig,
+    /// Navigate to compute pipeline panel
+    ComputePipelineConfig,
+    /// Navigate to bind group panel
+    BindGroupConfig,
+    /// Navigate to rendering examples panel
+    RenderingExamples,
+    /// Navigate to compute panel
+    ComputePanel,
+    /// Navigate to draw commands panel
+    DrawCommandPanel,
+    /// Navigate to render pass panel
+    RenderPassConfig,
+    /// Navigate to compute dispatch panel
+    ComputeDispatchConfig,
+}
+
+impl NavigationRequest {
+    /// Get a human-readable description of the navigation target
+    pub fn description(&self) -> &'static str {
+        match self {
+            NavigationRequest::BufferConfig => {
+                "Buffer Configuration panel - create and configure GPU buffers"
+            }
+            NavigationRequest::TextureConfig => {
+                "Texture Configuration panel - load and configure textures"
+            }
+            NavigationRequest::SamplerConfig => {
+                "Sampler Configuration panel - configure texture sampling"
+            }
+            NavigationRequest::RenderPipelineConfig => {
+                "Render Pipeline panel - configure graphics pipelines and shaders"
+            }
+            NavigationRequest::ComputePipelineConfig => {
+                "Compute Pipeline panel - configure compute pipelines"
+            }
+            NavigationRequest::BindGroupConfig => "Bind Group panel - create resource bind groups",
+            NavigationRequest::RenderingExamples => {
+                "Rendering Examples - see GPU rendering in action"
+            }
+            NavigationRequest::ComputePanel => "Compute panel - GPU compute operations",
+            NavigationRequest::DrawCommandPanel => "Draw Commands panel - configure draw calls",
+            NavigationRequest::RenderPassConfig => "Render Pass panel - configure render passes",
+            NavigationRequest::ComputeDispatchConfig => {
+                "Compute Dispatch panel - dispatch compute workgroups"
+            }
+        }
+    }
+}
+
+/// Map an API category and method to a navigation target
+fn get_navigation_for_api(category: ApiCategory, method: &str) -> Option<NavigationRequest> {
+    match category {
+        ApiCategory::Buffer => Some(NavigationRequest::BufferConfig),
+        ApiCategory::Texture => Some(NavigationRequest::TextureConfig),
+        ApiCategory::Sampler => Some(NavigationRequest::SamplerConfig),
+        ApiCategory::Shader => Some(NavigationRequest::RenderPipelineConfig),
+        ApiCategory::RenderPipeline => Some(NavigationRequest::RenderPipelineConfig),
+        ApiCategory::ComputePipeline => Some(NavigationRequest::ComputePipelineConfig),
+        ApiCategory::BindGroup | ApiCategory::PipelineLayout => {
+            Some(NavigationRequest::BindGroupConfig)
+        }
+        ApiCategory::RenderPass => {
+            // Specific render pass methods map to different panels
+            match method {
+                "draw" | "draw_indexed" | "draw_indirect" | "draw_indexed_indirect" => {
+                    Some(NavigationRequest::DrawCommandPanel)
+                }
+                "begin_render_pass" | "end_pass" => Some(NavigationRequest::RenderPassConfig),
+                _ => Some(NavigationRequest::RenderingExamples),
+            }
+        }
+        ApiCategory::ComputePass => match method {
+            "dispatch_workgroups" | "dispatch_workgroups_indirect" => {
+                Some(NavigationRequest::ComputeDispatchConfig)
+            }
+            _ => Some(NavigationRequest::ComputePanel),
+        },
+        ApiCategory::CommandEncoder => Some(NavigationRequest::RenderingExamples),
+        ApiCategory::Device | ApiCategory::Queue => Some(NavigationRequest::RenderingExamples),
+        ApiCategory::RenderBundle | ApiCategory::QuerySet => None, // No direct panel for these yet
+    }
+}
+
 /// Expected WebGPU APIs organized by category
+/// Only includes APIs that can be exercised through the playground UI
 fn get_expected_apis() -> HashMap<ApiCategory, Vec<&'static str>> {
     let mut apis = HashMap::new();
 
-    apis.insert(
-        ApiCategory::Device,
-        vec![
-            "create_buffer",
-            "create_texture",
-            "create_sampler",
-            "create_shader_module",
-            "create_bind_group",
-            "create_bind_group_layout",
-            "create_pipeline_layout",
-            "create_render_pipeline",
-            "create_compute_pipeline",
-            "create_command_encoder",
-            "create_render_bundle_encoder",
-            "create_query_set",
-        ],
-    );
+    // Note: We don't track Device category separately since those methods
+    // are tracked under their respective resource categories
 
     apis.insert(
         ApiCategory::Queue,
         vec!["submit", "write_buffer", "write_texture"],
     );
 
-    apis.insert(
-        ApiCategory::Buffer,
-        vec![
-            "create_buffer",
-            "map_read",
-            "map_write",
-            "unmap",
-            "destroy",
-            "slice",
-        ],
-    );
+    apis.insert(ApiCategory::Buffer, vec!["create_buffer"]);
 
-    apis.insert(
-        ApiCategory::Texture,
-        vec!["create_texture", "create_view", "destroy", "as_image_copy"],
-    );
+    apis.insert(ApiCategory::Texture, vec!["create_texture", "create_view"]);
 
     apis.insert(ApiCategory::Sampler, vec!["create_sampler"]);
 
-    apis.insert(
-        ApiCategory::Shader,
-        vec!["create_shader_module", "get_compilation_info"],
-    );
+    apis.insert(ApiCategory::Shader, vec!["create_shader_module"]);
 
-    apis.insert(
-        ApiCategory::RenderPipeline,
-        vec!["create_render_pipeline", "get_bind_group_layout"],
-    );
+    apis.insert(ApiCategory::RenderPipeline, vec!["create_render_pipeline"]);
 
     apis.insert(
         ApiCategory::ComputePipeline,
-        vec!["create_compute_pipeline", "get_bind_group_layout"],
+        vec!["create_compute_pipeline"],
     );
 
     apis.insert(
@@ -82,14 +144,6 @@ fn get_expected_apis() -> HashMap<ApiCategory, Vec<&'static str>> {
             "set_index_buffer",
             "draw",
             "draw_indexed",
-            "draw_indirect",
-            "draw_indexed_indirect",
-            "set_viewport",
-            "set_scissor_rect",
-            "set_blend_constant",
-            "set_stencil_reference",
-            "execute_bundles",
-            "end_pass",
         ],
     );
 
@@ -100,35 +154,26 @@ fn get_expected_apis() -> HashMap<ApiCategory, Vec<&'static str>> {
             "set_pipeline",
             "set_bind_group",
             "dispatch_workgroups",
-            "dispatch_workgroups_indirect",
-            "end_pass",
         ],
     );
 
     apis.insert(
         ApiCategory::CommandEncoder,
         vec![
+            "create_command_encoder",
             "begin_render_pass",
             "begin_compute_pass",
-            "copy_buffer_to_buffer",
-            "copy_buffer_to_texture",
-            "copy_texture_to_buffer",
-            "copy_texture_to_texture",
-            "clear_buffer",
-            "clear_texture",
-            "finish",
         ],
     );
 
-    apis.insert(
-        ApiCategory::RenderBundle,
-        vec!["create_render_bundle_encoder", "finish", "execute_bundles"],
-    );
-
-    apis.insert(
-        ApiCategory::QuerySet,
-        vec!["create_query_set", "write_timestamp", "resolve_query_set"],
-    );
+    // Advanced features not yet implemented in playground:
+    // - RenderBundle (for optimized rendering)
+    // - QuerySet (for GPU timing/occlusion queries)
+    // - Buffer mapping (map_read, map_write, unmap)
+    // - Resource destruction (destroy)
+    // - Indirect drawing (draw_indirect, draw_indexed_indirect)
+    // - Advanced render pass features (set_viewport, set_scissor_rect, etc.)
+    // - Copy operations (copy_buffer_to_buffer, etc.)
 
     apis
 }
@@ -202,20 +247,27 @@ impl ApiCoveragePanel {
     }
 
     /// Show the panel UI
-    pub fn show(&mut self, ctx: &egui::Context, tracker: &ApiCoverageTracker) {
+    pub fn show(
+        &mut self,
+        ctx: &egui::Context,
+        tracker: &ApiCoverageTracker,
+    ) -> Option<NavigationRequest> {
         let mut is_open = self.is_open;
+        let mut nav_request = None;
         egui::Window::new("📊 API Coverage Tracker")
             .open(&mut is_open)
             .default_width(500.0)
             .default_height(600.0)
             .show(ctx, |ui| {
-                self.ui(ui, tracker);
+                nav_request = self.ui(ui, tracker);
             });
         self.is_open = is_open;
+        nav_request
     }
 
     /// Render the panel contents
-    pub fn ui(&mut self, ui: &mut Ui, tracker: &ApiCoverageTracker) {
+    /// Returns a NavigationRequest if the user clicks a "Try" button
+    pub fn ui(&mut self, ui: &mut Ui, tracker: &ApiCoverageTracker) -> Option<NavigationRequest> {
         let snapshot = tracker.snapshot();
 
         // Header with overall statistics
@@ -228,13 +280,15 @@ impl ApiCoveragePanel {
 
         ui.separator();
 
-        // Category breakdown
-        self.render_category_breakdown(ui, &snapshot);
+        // Category breakdown - may return navigation request
+        let nav_request = self.render_category_breakdown(ui, &snapshot);
 
         ui.separator();
 
         // Detailed API call list
         self.render_api_call_list(ui, &snapshot);
+
+        nav_request
     }
 
     fn render_header(
@@ -337,7 +391,13 @@ impl ApiCoveragePanel {
         });
     }
 
-    fn render_category_breakdown(&mut self, ui: &mut Ui, snapshot: &CoverageData) {
+    fn render_category_breakdown(
+        &mut self,
+        ui: &mut Ui,
+        snapshot: &CoverageData,
+    ) -> Option<NavigationRequest> {
+        let mut nav_request: Option<NavigationRequest> = None;
+
         CollapsingHeader::new("📂 Category Coverage")
             .default_open(true)
             .show(ui, |ui| {
@@ -482,20 +542,22 @@ impl ApiCoveragePanel {
                                                 );
 
                                                 // "Try this API" button for uncovered APIs
-                                                if !is_covered
-                                                    && ui
-                                                        .button("Try")
-                                                        .on_hover_text(
-                                                            "Jump to panel to try this API",
-                                                        )
-                                                        .clicked()
-                                                {
-                                                    log::info!(
-                                                        "Try this API: {} -> {}",
-                                                        category.name(),
-                                                        api_name
-                                                    );
-                                                    // TODO: Could trigger navigation to relevant panel
+                                                if !is_covered {
+                                                    if let Some(target) = get_navigation_for_api(category, api_name) {
+                                                        if ui
+                                                            .button("Try")
+                                                            .on_hover_text(target.description())
+                                                            .clicked()
+                                                        {
+                                                            log::info!(
+                                                                "Navigating to try API: {} -> {} (target: {:?})",
+                                                                category.name(),
+                                                                api_name,
+                                                                target
+                                                            );
+                                                            nav_request = Some(target);
+                                                        }
+                                                    }
                                                 }
                                             });
                                         }
@@ -508,6 +570,8 @@ impl ApiCoveragePanel {
                     }
                 });
             });
+
+        nav_request
     }
 
     fn render_api_call_list(&mut self, ui: &mut Ui, snapshot: &CoverageData) {

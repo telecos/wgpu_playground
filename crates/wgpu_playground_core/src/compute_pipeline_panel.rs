@@ -156,6 +156,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     /// Render the compute pipeline configuration UI
     pub fn ui(&mut self, ui: &mut egui::Ui) {
+        self.ui_with_device(ui, None);
+    }
+
+    /// Render the compute pipeline configuration UI with optional device for pipeline creation
+    pub fn ui_with_device(&mut self, ui: &mut egui::Ui, device: Option<&wgpu::Device>) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("⚙️ Compute Pipeline Configuration");
             ui.label("Configure and create compute pipelines for GPU compute operations.");
@@ -267,12 +272,24 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
                 ui.add_space(10.0);
 
-                // Note: Creating pipeline requires a device, which we don't have access to in the UI
-                // This button is disabled for now
-                ui.add_enabled_ui(false, |ui| {
-                    ui.button("Create Pipeline")
-                        .on_disabled_hover_text("Pipeline creation requires GPU device access");
-                });
+                // Create Pipeline button - enabled when device is available
+                let can_create = device.is_some();
+                if ui
+                    .add_enabled(can_create, egui::Button::new("✨ Create Pipeline"))
+                    .on_hover_text(if can_create {
+                        "Create the compute pipeline with current configuration"
+                    } else {
+                        "Pipeline creation requires GPU device access"
+                    })
+                    .on_disabled_hover_text("Pipeline creation requires GPU device access")
+                    .clicked()
+                {
+                    if let Some(dev) = device {
+                        if let Some(_pipeline) = self.create_pipeline(dev) {
+                            // Pipeline created successfully, message already set
+                        }
+                    }
+                }
             });
 
             ui.add_space(5.0);

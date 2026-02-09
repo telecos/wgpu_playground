@@ -212,7 +212,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let compute_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Compute Pipeline Layout"),
         bind_group_layouts: &[&compute_bind_group_layout],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let compute_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
@@ -302,7 +302,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Render Pipeline Layout"),
         bind_group_layouts: &[],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -339,7 +339,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 write_mask: wgpu::ColorWrites::ALL,
             })],
         }),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
 
@@ -400,6 +400,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
+                multiview_mask: None,
             });
 
             render_pass.set_pipeline(&render_pipeline);

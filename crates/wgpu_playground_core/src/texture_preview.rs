@@ -3,6 +3,7 @@
 /// Provides live visualization of texture configurations:
 /// - Loaded images: Shows the image as a textured quad
 /// - Procedural textures: Generates and displays procedural patterns
+use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
 use wgpu::util::DeviceExt;
 
 /// Vertex structure for texture quad rendering
@@ -71,6 +72,9 @@ impl TexturePreviewState {
 
     /// Initialize render texture
     fn init_render_texture(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Texture, "create_texture");
+
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Texture Preview Render Texture"),
             size: wgpu::Extent3d {
@@ -88,6 +92,7 @@ impl TexturePreviewState {
             view_formats: &[],
         });
 
+        tracker.record(ApiCategory::Texture, "create_view");
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
 
         self.render_texture = Some(texture);
@@ -96,6 +101,9 @@ impl TexturePreviewState {
 
     /// Initialize sampler
     fn init_sampler(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Sampler, "create_sampler");
+
         let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
             label: Some("Texture Preview Sampler"),
             address_mode_u: wgpu::AddressMode::ClampToEdge,
@@ -112,6 +120,8 @@ impl TexturePreviewState {
 
     /// Initialize quad geometry (vertex and index buffers)
     fn init_quad_geometry(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+
         // Create vertex buffer for textured quad
         let vertices = [
             TextureVertex {
@@ -132,6 +142,7 @@ impl TexturePreviewState {
             },
         ];
 
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Texture Preview Vertex Buffer"),
             contents: bytemuck::cast_slice(&vertices),
@@ -140,6 +151,7 @@ impl TexturePreviewState {
 
         // Create index buffer
         let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Texture Preview Index Buffer"),
             contents: bytemuck::cast_slice(&indices),
@@ -152,6 +164,8 @@ impl TexturePreviewState {
 
     /// Initialize texture preview pipeline
     fn init_texture_pipeline(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+
         // Create shader for texture preview
         let shader_source = r#"
 struct VertexInput {
@@ -181,12 +195,14 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 }
 "#;
 
+        tracker.record(ApiCategory::Shader, "create_shader_module");
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Texture Preview Shader"),
             source: wgpu::ShaderSource::Wgsl(shader_source.into()),
         });
 
         // Create bind group layout
+        tracker.record(ApiCategory::BindGroup, "create_bind_group_layout");
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("Texture Preview Bind Group Layout"),
             entries: &[
@@ -210,6 +226,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create pipeline layout
+        tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Texture Preview Pipeline Layout"),
             bind_group_layouts: &[&bind_group_layout],
@@ -217,6 +234,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create render pipeline
+        tracker.record(ApiCategory::RenderPipeline, "create_render_pipeline");
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Texture Preview Pipeline"),
             layout: Some(&pipeline_layout),
@@ -274,7 +292,10 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         width: u32,
         height: u32,
     ) {
+        let tracker = ApiCoverageTracker::global();
+
         // Create preview texture from image data
+        tracker.record(ApiCategory::Texture, "create_texture");
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Texture Preview Source"),
             size: wgpu::Extent3d {
@@ -291,6 +312,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Write image data to texture
+        tracker.record(ApiCategory::Queue, "write_texture");
         queue.write_texture(
             wgpu::TexelCopyTextureInfo {
                 texture: &texture,
@@ -311,6 +333,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             },
         );
 
+        tracker.record(ApiCategory::Texture, "create_view");
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
 
         self.preview_texture = Some(texture);
@@ -355,11 +378,14 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
     /// Update bind group with current texture
     fn update_bind_group(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+
         if let (Some(texture_view), Some(sampler), Some(layout)) = (
             &self.preview_texture_view,
             &self.sampler,
             &self.bind_group_layout,
         ) {
+            tracker.record(ApiCategory::BindGroup, "create_bind_group");
             let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
                 label: Some("Texture Preview Bind Group"),
                 layout,
@@ -381,18 +407,22 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
     /// Render texture preview
     pub fn render(&self, device: &wgpu::Device, queue: &wgpu::Queue) -> Option<&wgpu::TextureView> {
+        let tracker = ApiCoverageTracker::global();
+
         // Only render if we have a texture to preview
         if self.preview_texture.is_none() {
             return self.render_texture_view.as_ref();
         }
 
         // Create command encoder
+        tracker.record(ApiCategory::CommandEncoder, "create_command_encoder");
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Texture Preview Encoder"),
         });
 
         if let Some(view) = &self.render_texture_view {
             {
+                tracker.record(ApiCategory::RenderPass, "begin_render_pass");
                 let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("Texture Preview Render Pass"),
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -422,14 +452,20 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                     &self.preview_index_buffer,
                     &self.texture_bind_group,
                 ) {
+                    tracker.record(ApiCategory::RenderPass, "set_pipeline");
                     render_pass.set_pipeline(pipeline);
+                    tracker.record(ApiCategory::RenderPass, "set_bind_group");
                     render_pass.set_bind_group(0, bind_group, &[]);
+                    tracker.record(ApiCategory::RenderPass, "set_vertex_buffer");
                     render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+                    tracker.record(ApiCategory::RenderPass, "set_index_buffer");
                     render_pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+                    tracker.record(ApiCategory::RenderPass, "draw_indexed");
                     render_pass.draw_indexed(0..6, 0, 0..1);
                 }
             }
 
+            tracker.record(ApiCategory::Queue, "submit");
             queue.submit(Some(encoder.finish()));
         }
 

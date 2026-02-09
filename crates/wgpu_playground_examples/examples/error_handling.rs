@@ -53,7 +53,7 @@ fn main() {
 
     // Example 2: Using error scopes to catch GPU errors
     println!("2. Testing error scope for validation errors:");
-    ErrorScope::push(&device, ErrorFilter::Validation);
+    let error_scope_guard = ErrorScope::push(&device, ErrorFilter::Validation);
 
     // This would cause a validation error if actually executed on GPU
     // (simulated here for demonstration)
@@ -65,8 +65,8 @@ fn main() {
     .create_buffer(&device)
     .expect("Failed to create buffer");
 
-    // Pop the error scope and check for errors
-    let error = ErrorScope::pop(&device).block_on();
+    // Pop the error scope and check for errors by awaiting the guard's pop()
+    let error = error_scope_guard.pop().block_on();
     match error {
         Some(e) => println!("   ✓ Error scope caught: {}", e),
         None => println!("   ✓ No errors in this scope"),
@@ -134,7 +134,7 @@ fn main() {
 
     // Example 5: Error scope for out-of-memory errors
     println!("5. Testing error scope for out-of-memory errors:");
-    ErrorScope::push(&device, ErrorFilter::OutOfMemory);
+    let oom_error_scope_guard = ErrorScope::push(&device, ErrorFilter::OutOfMemory);
 
     // Create a reasonably sized buffer (won't actually cause OOM)
     let _large_buffer = BufferDescriptor::new(
@@ -145,7 +145,7 @@ fn main() {
     .create_buffer(&device)
     .expect("Failed to create buffer");
 
-    let oom_error = ErrorScope::pop(&device).block_on();
+    let oom_error = oom_error_scope_guard.pop().block_on();
     match oom_error {
         Some(e) => println!("   ✗ Out of memory: {}", e),
         None => println!("   ✓ No out-of-memory errors"),

@@ -370,7 +370,6 @@ impl CodeGenerator {
                             mask: !0,\n                \
                             alpha_to_coverage_enabled: false,\n            \
                         }},\n            \
-                        multiview: None,\n            \
                         cache: None,\n        \
                     }});\n\
                     \n        \
@@ -426,7 +425,8 @@ impl CodeGenerator {
                             }})],\n                \
                             depth_stencil_attachment: None,\n                \
                             occlusion_query_set: None,\n                \
-                            timestamp_writes: None,\n            \
+                            timestamp_writes: None,\n                \
+                            multiview_mask: None,\n            \
                         }});\n\
                         \n            \
                         render_pass.set_pipeline(&self.pipeline);\n            \
@@ -976,7 +976,6 @@ impl CodeGenerator {
                 }},\n            \
                 depth_stencil: None,\n            \
                 multisample: wgpu::MultisampleState::default(),\n            \
-                multiview: None,\n            \
                 cache: None,\n        \
             }});\n\n",
             pipeline_state.label,
@@ -1047,7 +1046,8 @@ impl CodeGenerator {
                         }})],\n                \
                         depth_stencil_attachment: None,\n                \
                         occlusion_query_set: None,\n                \
-                        timestamp_writes: None,\n            \
+                        timestamp_writes: None,\n                \
+                        multiview_mask: None,\n            \
                     }});\n\
                     \n            \
                     render_pass.set_pipeline(&self.render_pipeline);\n            \

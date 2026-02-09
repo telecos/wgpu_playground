@@ -249,7 +249,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Triangle Pipeline Layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -290,7 +290,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 mask: !0,
                 alpha_to_coverage_enabled: false,
             },
-            multiview: None,
+            multiview_mask: None,
             cache: None,
         });
 
@@ -478,7 +478,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Cube Pipeline Layout"),
             bind_group_layouts: &[&bind_group_layout],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -525,7 +525,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 mask: !0,
                 alpha_to_coverage_enabled: false,
             },
-            multiview: None,
+            multiview_mask: None,
             cache: None,
         });
 
@@ -593,6 +593,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     depth_stencil_attachment,
                     timestamp_writes: None,
                     occlusion_query_set: None,
+                    multiview_mask: None,
                 });
 
                 match &self.render_state {
@@ -620,9 +621,13 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     }
 
     /// Register the render texture with egui renderer and return the texture ID
+    /// 
+    /// Note: This method is only available when building for native targets
+    /// due to wgpu version incompatibility with egui-wgpu on WASM.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn register_texture(
         &mut self,
-        device: &Device,
+        device: &egui_wgpu::wgpu::Device,
         renderer: &mut egui_wgpu::Renderer,
     ) -> Option<egui::TextureId> {
         if let Some(view) = &self.render_texture_view {
@@ -633,7 +638,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
             // Register the texture
             let texture_id =
-                renderer.register_native_texture(device, view, wgpu::FilterMode::Linear);
+                renderer.register_native_texture(device, view, egui_wgpu::wgpu::FilterMode::Linear);
             self.render_texture_id = Some(texture_id);
             Some(texture_id)
         } else {
@@ -836,6 +841,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 self.render_current_example(device, queue);
 
                 // Display the rendered texture prominently
+                #[cfg(not(target_arch = "wasm32"))]
                 if let Some(texture_id) = self.register_texture(device, renderer) {
                     let size = egui::vec2(self.canvas_width as f32, self.canvas_height as f32);
 

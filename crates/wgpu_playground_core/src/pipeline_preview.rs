@@ -329,7 +329,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Pipeline Preview Layout"),
             bind_group_layouts: &[&bind_group_layout],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         // Convert our custom types to wgpu types
@@ -484,7 +484,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             primitive: primitive_state,
             depth_stencil: depth_stencil_state,
             multisample: multisample_state,
-            multiview: None,
+            multiview_mask: None,
             cache: None,
         });
 
@@ -561,6 +561,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                         }),
                         timestamp_writes: None,
                         occlusion_query_set: None,
+                        multiview_mask: None,
                     });
 
                     // Render the cube
@@ -584,14 +585,18 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     }
 
     /// Get or register texture ID for egui
+    /// 
+    /// Note: This method is only available when building for native targets
+    /// due to wgpu version incompatibility with egui-wgpu on WASM.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn get_texture_id(
         &mut self,
-        device: &wgpu::Device,
+        device: &egui_wgpu::wgpu::Device,
         renderer: &mut egui_wgpu::Renderer,
     ) -> Option<egui::TextureId> {
         if self.texture_id.is_none() {
             if let Some(view) = &self.render_texture_view {
-                let id = renderer.register_native_texture(device, view, wgpu::FilterMode::Linear);
+                let id = renderer.register_native_texture(device, view, egui_wgpu::wgpu::FilterMode::Linear);
                 self.texture_id = Some(id);
             }
         }

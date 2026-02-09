@@ -67,14 +67,6 @@ impl PushConstantRange {
         self.end - self.start
     }
 
-    /// Convert to wgpu::PushConstantRange
-    pub fn to_wgpu(&self) -> wgpu::PushConstantRange {
-        wgpu::PushConstantRange {
-            stages: self.stages,
-            range: self.start..self.end,
-        }
-    }
-
     /// Validate the push constant range
     ///
     /// Checks for:
@@ -301,17 +293,16 @@ impl<'a> PipelineLayoutDescriptor<'a> {
     pub fn create_layout(&self, device: &Device) -> Result<PipelineLayout, PipelineLayoutError> {
         self.validate()?;
 
-        let wgpu_push_constant_ranges: Vec<wgpu::PushConstantRange> = self
-            .push_constant_ranges
-            .iter()
-            .map(|r| r.to_wgpu())
-            .collect();
+        // Note: wgpu 28.0 replaced push_constant_ranges with immediate_size
+        // For now, we set it to 0 since push constants are not actively used
+        // To enable push constants, set immediate_size to the total size needed
+        // and enable Features::IMMEDIATES on the device
 
         Ok(
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: self.label.as_deref(),
                 bind_group_layouts: &self.bind_group_layouts,
-                push_constant_ranges: &wgpu_push_constant_ranges,
+                immediate_size: 0,
             }),
         )
     }

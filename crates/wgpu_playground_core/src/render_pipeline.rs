@@ -1649,7 +1649,7 @@ impl RenderPipelineDescriptor {
                 compilation_options: Default::default(),
                 targets: &fragment_targets,
             }),
-            multiview: None,
+            multiview_mask: None,
             cache: None,
         });
 

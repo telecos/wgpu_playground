@@ -16,7 +16,7 @@ dawn = []
 wgpu = { version = "27.0", features = ["wgsl"] }
 wgpu-core = "28.0"
 wgpu-types = "28.0"
-naga = { version = "27.0", features = ["wgsl-in"] }
+naga = { version = "28.0", features = ["wgsl-in"] }
 winit = "0.30"
 env_logger = "0.11"
 log = "0.4"
@@ -87,7 +87,7 @@ serial_test = "3.0"
 
 # Criterion doesn't support WASM, so only include it for native targets
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-criterion = { version = "0.5", features = ["html_reports"] }
+criterion = { version = "0.8", features = ["html_reports"] }
 
 # WASM-specific test dependencies
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]

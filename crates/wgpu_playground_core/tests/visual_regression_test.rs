@@ -144,6 +144,7 @@ fn render_triangle(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture 
             depth_stencil_attachment: None,
             timestamp_writes: None,
             occlusion_query_set: None,
+            multiview_mask: None,
         });
 
         render_pass.set_pipeline(&pipeline);
@@ -264,6 +265,7 @@ fn render_solid_quad(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Textur
             depth_stencil_attachment: None,
             timestamp_writes: None,
             occlusion_query_set: None,
+            multiview_mask: None,
         });
 
         render_pass.set_pipeline(&pipeline);

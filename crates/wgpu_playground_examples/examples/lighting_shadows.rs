@@ -196,7 +196,7 @@ fn create_shadow_sampler(device: &wgpu::Device) -> wgpu::Sampler {
         address_mode_w: wgpu::AddressMode::ClampToEdge,
         mag_filter: wgpu::FilterMode::Linear,
         min_filter: wgpu::FilterMode::Linear,
-        mipmap_filter: wgpu::FilterMode::Nearest,
+        mipmap_filter: wgpu::MipmapFilterMode::Nearest,
         compare: Some(wgpu::CompareFunction::LessEqual), // Comparison sampler for shadow mapping
         ..Default::default()
     })
@@ -338,7 +338,7 @@ fn main() {
     let shadow_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Shadow Pipeline Layout"),
         bind_group_layouts: &[&shadow_bind_group_layout],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let shadow_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -376,7 +376,7 @@ fn main() {
         }),
         multisample: wgpu::MultisampleState::default(),
         fragment: None, // No fragment shader needed for shadow pass
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
     println!("✓ Shadow pipeline created\n");
@@ -505,7 +505,7 @@ fn main() {
             &light_bind_group_layout,
             &shadow_map_bind_group_layout,
         ],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let main_depth_texture = device.create_texture(&wgpu::TextureDescriptor {
@@ -575,7 +575,7 @@ fn main() {
                 write_mask: wgpu::ColorWrites::ALL,
             })],
         }),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
     println!("✓ Main pipeline created\n");
@@ -668,6 +668,7 @@ fn main() {
             }),
             timestamp_writes: None,
             occlusion_query_set: None,
+            multiview_mask: None,
         });
 
         shadow_pass.set_pipeline(&shadow_pipeline);
@@ -707,6 +708,7 @@ fn main() {
             }),
             timestamp_writes: None,
             occlusion_query_set: None,
+            multiview_mask: None,
         });
 
         main_pass.set_pipeline(&main_pipeline);

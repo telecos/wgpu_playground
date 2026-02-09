@@ -190,7 +190,7 @@ fn main() {
     let scene_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Scene Pipeline Layout"),
         bind_group_layouts: &[],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let scene_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -242,7 +242,7 @@ fn main() {
                 write_mask: wgpu::ColorWrites::ALL,
             })],
         }),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
     println!("✓ Scene render pipeline created");
@@ -289,7 +289,7 @@ fn main() {
         address_mode_w: wgpu::AddressMode::ClampToEdge,
         mag_filter: wgpu::FilterMode::Linear,
         min_filter: wgpu::FilterMode::Linear,
-        mipmap_filter: wgpu::FilterMode::Nearest,
+        mipmap_filter: wgpu::MipmapFilterMode::Nearest,
         ..Default::default()
     });
     println!("✓ Texture sampler created");
@@ -351,7 +351,7 @@ fn main() {
     let display_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Display Pipeline Layout"),
         bind_group_layouts: &[&bind_group_layout],
-        push_constant_ranges: &[],
+        immediate_size: 0,
     });
 
     let display_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -403,7 +403,7 @@ fn main() {
                 write_mask: wgpu::ColorWrites::ALL,
             })],
         }),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
     println!("✓ Display render pipeline created\n");
@@ -445,6 +445,7 @@ fn main() {
             depth_stencil_attachment: None,
             timestamp_writes: None,
             occlusion_query_set: None,
+            multiview_mask: None,
         });
 
         render_pass.set_pipeline(&scene_pipeline);
@@ -475,6 +476,7 @@ fn main() {
             depth_stencil_attachment: None,
             timestamp_writes: None,
             occlusion_query_set: None,
+            multiview_mask: None,
         });
 
         render_pass.set_pipeline(&display_pipeline);

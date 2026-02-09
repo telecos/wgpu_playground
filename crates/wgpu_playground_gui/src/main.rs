@@ -126,7 +126,8 @@ impl AppState {
         // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
         // We transmute to bridge the version gap until egui-wgpu supports wgpu 28
         let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(&device) };
-        let format_27: egui_wgpu::wgpu::TextureFormat = unsafe { std::mem::transmute(surface_config.format) };
+        let format_27: egui_wgpu::wgpu::TextureFormat =
+            unsafe { std::mem::transmute(surface_config.format) };
         let egui_renderer = egui_wgpu::Renderer::new(
             device_27,
             format_27,
@@ -247,7 +248,8 @@ impl AppState {
         // We transmute to bridge the version gap until egui-wgpu supports wgpu 28
         let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(&self.device) };
         let queue_27: &egui_wgpu::wgpu::Queue = unsafe { std::mem::transmute(&self.queue) };
-        let encoder_27: &mut egui_wgpu::wgpu::CommandEncoder = unsafe { std::mem::transmute(&mut encoder) };
+        let encoder_27: &mut egui_wgpu::wgpu::CommandEncoder =
+            unsafe { std::mem::transmute(&mut encoder) };
 
         for (id, image_delta) in &egui_output.textures_delta.set {
             self.egui_renderer

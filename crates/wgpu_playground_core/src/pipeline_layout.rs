@@ -516,7 +516,7 @@ mod tests {
     // fn test_push_constant_range_to_wgpu() {
     //     let range = PushConstantRange::new(ShaderStages::VERTEX | ShaderStages::FRAGMENT, 0, 128);
     //     let wgpu_range = range.to_wgpu();
-    // 
+    //
     //     assert_eq!(
     //         wgpu_range.stages,
     //         ShaderStages::VERTEX | ShaderStages::FRAGMENT

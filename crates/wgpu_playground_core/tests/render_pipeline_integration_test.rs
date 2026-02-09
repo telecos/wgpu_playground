@@ -183,7 +183,7 @@ fn main() -> @location(0) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         // Create pipeline descriptor
@@ -259,7 +259,7 @@ fn main(@location(0) color: vec4<f32>) -> @location(0) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         // Create pipeline descriptor
@@ -318,7 +318,7 @@ fn main() -> @location(0) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         // Create depth stencil state
@@ -418,7 +418,7 @@ fn main(@location(0) normal: vec3<f32>, @location(1) uv: vec2<f32>) -> @location
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         // Create comprehensive pipeline
@@ -497,7 +497,7 @@ fn main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let descriptor = RenderPipelineDescriptor::new(Some("no_fragment"))
@@ -559,7 +559,7 @@ fn main(@location(0) color: vec3<f32>) -> @location(0) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let descriptor = RenderPipelineDescriptor::new(Some("type_mismatch"))
@@ -625,7 +625,7 @@ fn main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let descriptor = RenderPipelineDescriptor::new(Some("invalid_msaa"))
@@ -718,7 +718,7 @@ fn main(@location(0) pos: vec3<f32>) -> @builtin(position) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let descriptor = RenderPipelineDescriptor::new(Some("duplicate_locations"))
@@ -763,7 +763,7 @@ fn main(@location(2) data: vec4<f32>) -> @builtin(position) vec4<f32> {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("test_layout"),
             bind_group_layouts: &[],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let descriptor = RenderPipelineDescriptor::new(Some("mismatched_inputs"))

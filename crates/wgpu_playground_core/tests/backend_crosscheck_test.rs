@@ -116,7 +116,7 @@ fn draw_colored_triangle(dev: &wgpu::Device, q: &wgpu::Queue) -> wgpu::Texture {
         },
         depth_stencil: None,
         multisample: wgpu::MultisampleState::default(),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
 

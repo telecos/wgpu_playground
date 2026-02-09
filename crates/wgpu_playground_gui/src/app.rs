@@ -1,6 +1,6 @@
 use wgpu_playground_core::adapter_selection::AdapterSelectionPanel;
 use wgpu_playground_core::api_coverage::ApiCoverageTracker;
-use wgpu_playground_core::api_coverage_panel::ApiCoveragePanel;
+use wgpu_playground_core::api_coverage_panel::{ApiCoveragePanel, NavigationRequest};
 use wgpu_playground_core::api_reference_panel::ApiReferencePanel;
 use wgpu_playground_core::bind_group_layout_panel::BindGroupLayoutPanel;
 use wgpu_playground_core::bind_group_panel::BindGroupPanel;
@@ -641,7 +641,9 @@ impl PlaygroundApp {
                 Tab::ModelLoader => self.model_loader_panel.show(ui, device),
                 Tab::BindGroupConfig => self.bind_group_panel.ui(ui),
                 Tab::BindGroupLayoutConfig => self.bind_group_layout_panel.ui(ui),
-                Tab::ComputePipelineConfig => self.compute_pipeline_panel.ui(ui),
+                Tab::ComputePipelineConfig => {
+                    self.compute_pipeline_panel.ui_with_device(ui, Some(device))
+                }
                 Tab::RenderPipelineConfig => self.render_pipeline_panel.ui_with_preview(
                     ui,
                     Some(device),
@@ -651,7 +653,9 @@ impl PlaygroundApp {
                 Tab::DrawCommand => self.draw_command_panel.ui(ui),
                 Tab::RenderPassConfig => self.render_pass_panel.ui(ui),
                 Tab::ComputeDispatch => self.compute_dispatch_panel.ui(ui),
-                Tab::Compute => self.compute_panel.ui(ui),
+                Tab::Compute => self
+                    .compute_panel
+                    .ui_with_device(ui, Some(device), Some(queue)),
                 Tab::Console => self.console_panel.ui(ui),
                 Tab::ResourceInspector => self.resource_inspector_panel.ui(ui),
                 Tab::BufferInspector => self.buffer_inspector.ui(ui),
@@ -661,7 +665,12 @@ impl PlaygroundApp {
                 Tab::CommandRecording => self.command_recording_panel.ui(ui),
                 Tab::ApiCoverage => {
                     let tracker = ApiCoverageTracker::global();
-                    self.api_coverage_panel.ui(ui, tracker);
+                    if let Some(nav_request) = self.api_coverage_panel.ui(ui, tracker) {
+                        // Handle navigation request from API Coverage panel
+                        self.selected_tab = Self::navigation_request_to_tab(nav_request);
+                        // Also open the appropriate section
+                        self.open_section_for_tab(self.selected_tab);
+                    }
                 }
                 Tab::ApiReference => self.api_reference_panel.ui(ui),
                 Tab::Tutorials => self.tutorial_panel.ui(ui),
@@ -711,6 +720,64 @@ impl PlaygroundApp {
 
         if let Some(target) = highlight_target {
             self.tutorial_panel.mark_panel_visited(target);
+        }
+    }
+
+    /// Convert a NavigationRequest from API Coverage panel to a Tab
+    fn navigation_request_to_tab(request: NavigationRequest) -> Tab {
+        match request {
+            NavigationRequest::BufferConfig => Tab::BufferConfig,
+            NavigationRequest::TextureConfig => Tab::TextureConfig,
+            NavigationRequest::SamplerConfig => Tab::SamplerConfig,
+            NavigationRequest::RenderPipelineConfig => Tab::RenderPipelineConfig,
+            NavigationRequest::ComputePipelineConfig => Tab::ComputePipelineConfig,
+            NavigationRequest::BindGroupConfig => Tab::BindGroupConfig,
+            NavigationRequest::RenderingExamples => Tab::Rendering,
+            NavigationRequest::ComputePanel => Tab::Compute,
+            NavigationRequest::DrawCommandPanel => Tab::DrawCommand,
+            NavigationRequest::RenderPassConfig => Tab::RenderPassConfig,
+            NavigationRequest::ComputeDispatchConfig => Tab::ComputeDispatch,
+        }
+    }
+
+    /// Open the sidebar section that contains the given tab
+    fn open_section_for_tab(&mut self, tab: Tab) {
+        match tab {
+            Tab::AdapterSelection | Tab::DeviceConfig | Tab::DeviceInfo => {
+                self.setup_section_open = true;
+            }
+            Tab::Rendering
+            | Tab::RenderPipelineConfig
+            | Tab::RenderPassConfig
+            | Tab::DrawCommand => {
+                self.rendering_section_open = true;
+            }
+            Tab::Compute | Tab::ComputePipelineConfig | Tab::ComputeDispatch => {
+                self.compute_section_open = true;
+            }
+            Tab::BufferConfig
+            | Tab::TextureConfig
+            | Tab::SamplerConfig
+            | Tab::ModelLoader
+            | Tab::BindGroupConfig
+            | Tab::BindGroupLayoutConfig => {
+                self.resources_section_open = true;
+            }
+            Tab::Console
+            | Tab::ResourceInspector
+            | Tab::BufferInspector
+            | Tab::TextureInspector
+            | Tab::PipelineDebugger
+            | Tab::Performance
+            | Tab::CommandRecording
+            | Tab::ApiCoverage
+            | Tab::ApiReference
+            | Tab::Tutorials
+            | Tab::LearningPath
+            | Tab::Presets
+            | Tab::Settings => {
+                self.tools_section_open = true;
+            }
         }
     }
 

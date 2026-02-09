@@ -1,6 +1,8 @@
 use std::fmt;
 use wgpu::{Device, Sampler};
 
+use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+
 /// Errors that can occur during sampler operations
 #[derive(Debug)]
 pub enum SamplerError {
@@ -461,6 +463,9 @@ impl SamplerDescriptor {
     /// ```
     pub fn create_sampler(&self, device: &Device) -> Result<Sampler, SamplerError> {
         self.validate()?;
+
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Sampler, "create_sampler");
 
         Ok(device.create_sampler(&wgpu::SamplerDescriptor {
             label: self.label.as_deref(),

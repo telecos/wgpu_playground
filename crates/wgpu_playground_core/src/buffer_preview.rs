@@ -3,6 +3,7 @@
 /// Provides live visualization of buffer configurations:
 /// - Vertex buffers: Shows a simple mesh preview
 /// - Uniform buffers: Shows animated values
+use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
 use crate::buffer::BufferUsages;
 use wgpu::util::DeviceExt;
 
@@ -73,6 +74,9 @@ impl BufferPreviewState {
 
     /// Initialize render texture
     fn init_render_texture(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::Texture, "create_texture");
+
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Buffer Preview Texture"),
             size: wgpu::Extent3d {
@@ -90,6 +94,7 @@ impl BufferPreviewState {
             view_formats: &[],
         });
 
+        tracker.record(ApiCategory::Texture, "create_view");
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
 
         self.render_texture = Some(texture);
@@ -98,6 +103,8 @@ impl BufferPreviewState {
 
     /// Initialize vertex buffer preview resources
     fn init_vertex_preview(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+
         // Create shader for vertex preview
         let shader_source = r#"
 struct VertexOutput {
@@ -122,6 +129,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 }
 "#;
 
+        tracker.record(ApiCategory::Shader, "create_shader_module");
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Buffer Preview Vertex Shader"),
             source: wgpu::ShaderSource::Wgsl(shader_source.into()),
@@ -143,12 +151,14 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             },
         ];
 
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Preview Vertex Buffer"),
             contents: bytemuck::cast_slice(&vertices),
             usage: wgpu::BufferUsages::VERTEX,
         });
 
+        tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         // Create render pipeline
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Vertex Preview Pipeline Layout"),
@@ -156,6 +166,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             immediate_size: 0,
         });
 
+        tracker.record(ApiCategory::RenderPipeline, "create_render_pipeline");
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Vertex Preview Pipeline"),
             layout: Some(&pipeline_layout),
@@ -206,6 +217,8 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
     /// Initialize uniform buffer preview resources
     fn init_uniform_preview(&mut self, device: &wgpu::Device) {
+        let tracker = ApiCoverageTracker::global();
+
         // Create shader for uniform preview
         let shader_source = r#"
 struct Uniforms {
@@ -246,6 +259,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 }
 "#;
 
+        tracker.record(ApiCategory::Shader, "create_shader_module");
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Buffer Preview Uniform Shader"),
             source: wgpu::ShaderSource::Wgsl(shader_source.into()),
@@ -257,6 +271,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             _padding: [0.0; 3],
         };
 
+        tracker.record(ApiCategory::Buffer, "create_buffer");
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Preview Uniform Buffer"),
             contents: bytemuck::cast_slice(&[uniforms]),
@@ -264,6 +279,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create bind group layout
+        tracker.record(ApiCategory::BindGroup, "create_bind_group_layout");
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("Preview Uniform Bind Group Layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
@@ -279,6 +295,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create bind group
+        tracker.record(ApiCategory::BindGroup, "create_bind_group");
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Preview Uniform Bind Group"),
             layout: &bind_group_layout,
@@ -289,12 +306,14 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         });
 
         // Create pipeline
+        tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Uniform Preview Pipeline Layout"),
             bind_group_layouts: &[&bind_group_layout],
             immediate_size: 0,
         });
 
+        tracker.record(ApiCategory::RenderPipeline, "create_render_pipeline");
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Uniform Preview Pipeline"),
             layout: Some(&pipeline_layout),
@@ -337,10 +356,13 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         usage: BufferUsages,
         delta_time: f32,
     ) -> Option<&wgpu::TextureView> {
+        let tracker = ApiCoverageTracker::global();
+
         // Update animation time
         self.time += delta_time;
 
         // Create command encoder
+        tracker.record(ApiCategory::CommandEncoder, "create_command_encoder");
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Buffer Preview Encoder"),
         });
@@ -351,6 +373,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
         if let Some(view) = &self.render_texture_view {
             {
+                tracker.record(ApiCategory::RenderPass, "begin_render_pass");
                 let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("Buffer Preview Render Pass"),
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -378,8 +401,11 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                     if let (Some(pipeline), Some(vertex_buffer)) =
                         (&self.vertex_pipeline, &self.preview_vertex_buffer)
                     {
+                        tracker.record(ApiCategory::RenderPass, "set_pipeline");
                         render_pass.set_pipeline(pipeline);
+                        tracker.record(ApiCategory::RenderPass, "set_vertex_buffer");
                         render_pass.set_vertex_buffer(0, vertex_buffer.slice(..));
+                        tracker.record(ApiCategory::RenderPass, "draw");
                         render_pass.draw(0..3, 0..1);
                     }
                 } else if is_uniform {
@@ -389,6 +415,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                             time: self.time,
                             _padding: [0.0; 3],
                         };
+                        tracker.record(ApiCategory::Queue, "write_buffer");
                         queue.write_buffer(uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
                     }
 
@@ -396,13 +423,17 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                     if let (Some(pipeline), Some(bind_group)) =
                         (&self.uniform_pipeline, &self.uniform_bind_group)
                     {
+                        tracker.record(ApiCategory::RenderPass, "set_pipeline");
                         render_pass.set_pipeline(pipeline);
+                        tracker.record(ApiCategory::RenderPass, "set_bind_group");
                         render_pass.set_bind_group(0, bind_group, &[]);
+                        tracker.record(ApiCategory::RenderPass, "draw");
                         render_pass.draw(0..4, 0..1);
                     }
                 }
             }
 
+            tracker.record(ApiCategory::Queue, "submit");
             queue.submit(Some(encoder.finish()));
         }
 

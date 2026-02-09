@@ -1,53 +1,40 @@
 # wgpu_playground Documentation
 
-This directory contains design documents, implementation notes, and user guides for the wgpu_playground project.
+This directory contains the documentation for the wgpu_playground project.
 
-## User Documentation
+## Documentation Structure
 
-New to wgpu_playground? Start here:
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture, module structure, and design decisions |
+| [USER_GUIDE.md](USER_GUIDE.md) | Complete user guide for the application |
+| [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) | Developer workflows, testing, and contribution guide |
 
-- **[QUICK_START.md](QUICK_START.md)** - Get up and running in 5 minutes
-- **[USER_GUIDE.md](USER_GUIDE.md)** - Comprehensive user guide with tutorials, workflows, and troubleshooting
+## Quick Links
 
-### Try the Live Demo
+### For Users
+- **Getting Started**: See [USER_GUIDE.md](USER_GUIDE.md) for installation and basic usage
+- **Try the Live Demo**: [WebGPU Demo](https://telecos.github.io/wgpu_playground/demo/) - Try in your browser (requires WebGPU support)
 
-🚀 **[WebGPU Demo](https://telecos.github.io/wgpu_playground/demo/)** - Try wgpu_playground in your browser (requires WebGPU support)
+### For Developers  
+- **Setup**: See [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) for development environment setup
+- **Architecture**: See [ARCHITECTURE.md](ARCHITECTURE.md) for system design and module structure
+- **Contributing**: See [CONTRIBUTING.md](../CONTRIBUTING.md) in the root directory
 
-These guides cover:
-- Installation and setup
-- GUI navigation and usage
-- Creating buffers, textures, and samplers
-- Writing and compiling shaders
-- Step-by-step tutorials for common tasks
-- Troubleshooting common issues
+## Additional Resources
 
-## Developer Documentation
-
-Contributing to the project? Start here:
-
-- **[DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)** - Complete developer guide covering:
-  - Development environment setup
-  - Project architecture and design patterns
-  - Development workflows and common tasks
-  - Debugging and troubleshooting
-  - Performance considerations
-  - IDE setup and recommended tools
-
-- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines covering:
-  - Coding standards and style guide
-  - Testing requirements
-  - Pull request process
-  - Release process
+- **Project README**: [../README.md](../README.md) - Project overview and quick start
+- **Task Tracking**: [../TASKS.md](../TASKS.md) - Current tasks and enhancements
+- **Roadmap**: [../PLAN.md](../PLAN.md) - Project roadmap and milestones
 
 ## API Documentation
 
-The project's API documentation is automatically generated from source code using `cargo doc` and published to GitHub Pages.
+Generate and view Rust API documentation locally:
 
-### Viewing Documentation
+```bash
+cargo doc --workspace --all-features --no-deps --open
+```
 
-- **Online**: The latest documentation is available at the project's GitHub Pages site (published automatically on every push to `main`)
-- **Local**: Generate and view documentation locally:
-  ```bash
   cargo doc --workspace --all-features --no-deps --open
   ```
 

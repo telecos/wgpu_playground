@@ -142,24 +142,24 @@ fn create_hello_triangle_tutorial() -> Tutorial {
             },
             TutorialStep {
                 title: "Create Vertex Buffer".to_string(),
-                description: "Navigate to the Buffer Config panel to create a buffer for triangle vertices.".to_string(),
+                description: "Navigate to the Buffers panel under '📦 Resources' in the left sidebar.".to_string(),
                 explanation: "A vertex buffer stores the positions and attributes of each vertex. For a triangle, we need 3 vertices. Each vertex has a position (x, y) and a color (r, g, b). The GPU will read from this buffer during rendering.".to_string(),
                 highlight_panel: Some(HighlightTarget::BufferConfig),
                 action: StepAction::NavigateToPanel(HighlightTarget::BufferConfig),
                 validation: Some(StepValidation {
                     check_type: ValidationCheck::PanelVisited(HighlightTarget::BufferConfig),
-                    hint: "Click on 'Buffers' in the Resources section".to_string(),
+                    hint: "Expand '📦 Resources' section in the sidebar, then click 'Buffers'".to_string(),
                 }),
             },
             TutorialStep {
                 title: "Configure the Vertex Shader".to_string(),
-                description: "Go to the Render Pipeline panel to set up the vertex shader.".to_string(),
+                description: "Go to the Render Pipeline panel under '🎨 Rendering & Graphics' to set up the vertex shader.".to_string(),
                 explanation: "The vertex shader runs once per vertex and transforms vertex positions. It receives vertex data from buffers and outputs positions in clip space (-1 to 1 range). The vertex shader is the first stage of the rendering pipeline.".to_string(),
                 highlight_panel: Some(HighlightTarget::RenderPipeline),
                 action: StepAction::NavigateToPanel(HighlightTarget::RenderPipeline),
                 validation: Some(StepValidation {
                     check_type: ValidationCheck::PanelVisited(HighlightTarget::RenderPipeline),
-                    hint: "Navigate to 'Render Pipeline' under Rendering & Graphics".to_string(),
+                    hint: "Expand '🎨 Rendering & Graphics' section, then click 'Render Pipeline'".to_string(),
                 }),
             },
             TutorialStep {
@@ -233,13 +233,13 @@ fn create_adding_textures_tutorial() -> Tutorial {
             },
             TutorialStep {
                 title: "Create a Texture".to_string(),
-                description: "Load an image as a texture in the Texture Config panel.".to_string(),
+                description: "Load an image as a texture in the Textures panel under '📦 Resources'.".to_string(),
                 explanation: "Textures can be loaded from image files or created procedurally. The texture format (like RGBA8) determines how color data is stored. Dimensions must be powers of 2 for mipmapping. The GPU can efficiently read texture data during rendering.".to_string(),
                 highlight_panel: Some(HighlightTarget::TextureConfig),
                 action: StepAction::CreateTexture,
                 validation: Some(StepValidation {
                     check_type: ValidationCheck::TextureCreated,
-                    hint: "Navigate to Textures and create a texture".to_string(),
+                    hint: "Expand '📦 Resources' section, then click 'Textures'".to_string(),
                 }),
             },
             TutorialStep {
@@ -261,7 +261,7 @@ fn create_adding_textures_tutorial() -> Tutorial {
                 action: StepAction::CreateBindGroup,
                 validation: Some(StepValidation {
                     check_type: ValidationCheck::BindGroupCreated,
-                    hint: "Navigate to Bind Groups and create a bind group with your texture".to_string(),
+                    hint: "Expand '📦 Resources' section, then click 'Bind Groups'".to_string(),
                 }),
             },
             TutorialStep {
@@ -272,7 +272,7 @@ fn create_adding_textures_tutorial() -> Tutorial {
                 action: StepAction::NavigateToPanel(HighlightTarget::BufferConfig),
                 validation: Some(StepValidation {
                     check_type: ValidationCheck::PanelVisited(HighlightTarget::BufferConfig),
-                    hint: "Go to Buffers to add UV coordinates to vertices".to_string(),
+                    hint: "Go to '📦 Resources' → 'Buffers' to add UV coordinates to vertices".to_string(),
                 }),
             },
             TutorialStep {
@@ -376,7 +376,7 @@ fn create_3d_with_depth_tutorial() -> Tutorial {
                 action: StepAction::ConfigurePipeline,
                 validation: Some(StepValidation {
                     check_type: ValidationCheck::PanelVisited(HighlightTarget::RenderPipeline),
-                    hint: "Navigate to Render Pipeline and enable depth testing".to_string(),
+                    hint: "Go to '🎨 Rendering & Graphics' → 'Render Pipeline' and enable depth testing".to_string(),
                 }),
             },
             TutorialStep {

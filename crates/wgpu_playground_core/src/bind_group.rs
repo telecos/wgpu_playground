@@ -2,6 +2,8 @@ use std::fmt;
 use std::num::{NonZeroU32, NonZeroU64};
 use wgpu::{BindGroup, BindGroupLayout, Buffer, Device, Sampler, ShaderStages, TextureView};
 
+use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+
 /// Errors that can occur during bind group layout operations
 #[derive(Debug)]
 pub enum BindGroupError {
@@ -570,6 +572,9 @@ impl BindGroupLayoutDescriptor {
     pub fn create_layout(&self, device: &Device) -> Result<BindGroupLayout, BindGroupError> {
         self.validate()?;
 
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::BindGroup, "create_bind_group_layout");
+
         let wgpu_entries: Vec<wgpu::BindGroupLayoutEntry> =
             self.entries.iter().map(|e| e.to_wgpu()).collect();
 
@@ -891,6 +896,9 @@ impl<'a> BindGroupDescriptor<'a> {
     /// ```
     pub fn create(&self, device: &Device) -> Result<BindGroup, BindGroupError> {
         self.validate()?;
+
+        let tracker = ApiCoverageTracker::global();
+        tracker.record(ApiCategory::BindGroup, "create_bind_group");
 
         let wgpu_entries: Vec<wgpu::BindGroupEntry> =
             self.entries.iter().map(|e| e.to_wgpu()).collect();

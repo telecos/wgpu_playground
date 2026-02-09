@@ -1,0 +1,61 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug wgpu_playground",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=wgpu_playground",
+                    "--package=wgpu_playground_gui"
+                ],
+                "filter": {
+                    "name": "wgpu_playground",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug wgpu_playground (Release)",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=wgpu_playground",
+                    "--package=wgpu_playground_gui",
+                    "--release"
+                ],
+                "filter": {
+                    "name": "wgpu_playground",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Unit Tests",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=wgpu_playground_core"
+                ],
+                "filter": {
+                    "name": "wgpu_playground_core",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

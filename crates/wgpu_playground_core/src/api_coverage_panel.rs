@@ -678,15 +678,17 @@ mod tests {
     fn test_expected_apis() {
         let apis = get_expected_apis();
 
-        // Verify all categories have some APIs defined
-        assert!(apis.contains_key(&ApiCategory::Device));
+        // Verify key categories have some APIs defined
         assert!(apis.contains_key(&ApiCategory::Buffer));
         assert!(apis.contains_key(&ApiCategory::RenderPass));
+        assert!(apis.contains_key(&ApiCategory::ComputePass));
 
         // Verify specific APIs are present
         let buffer_apis = apis.get(&ApiCategory::Buffer).unwrap();
         assert!(buffer_apis.contains(&"create_buffer"));
-        assert!(buffer_apis.contains(&"map_read"));
+
+        let render_pass_apis = apis.get(&ApiCategory::RenderPass).unwrap();
+        assert!(render_pass_apis.contains(&"begin_render_pass"));
     }
 
     #[test]

@@ -87,7 +87,7 @@ serial_test = "3.0"
 
 # Criterion doesn't support WASM, so only include it for native targets
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-criterion = { version = "0.5", features = ["html_reports"] }
+criterion = { version = "0.8", features = ["html_reports"] }
 
 # WASM-specific test dependencies
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]

@@ -240,8 +240,7 @@ pub fn create_instance_with_options(options: &AdapterOptions) -> Instance {
 pub fn enumerate_adapters(backends: Backends) -> Vec<AdapterInfo> {
     let instance = create_instance(backends);
 
-    instance
-        .enumerate_adapters(backends)
+    pollster::block_on(instance.enumerate_adapters(backends))
         .into_iter()
         .map(|adapter| AdapterInfo::from_adapter(&adapter))
         .collect()

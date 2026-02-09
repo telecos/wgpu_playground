@@ -32,6 +32,7 @@ base64 = "0.22"
 chrono = { version = "0.4", features = ["serde"] }
 gltf = { version = "1.4", default-features = false, features = ["import", "utils"] }
 tobj = { version = "4.0", default-features = false }
+pollster = "0.4"
 
 # File watching for shader hot reload (native only)
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

@@ -119,7 +119,7 @@ fn render_triangle(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture 
         },
         depth_stencil: None,
         multisample: wgpu::MultisampleState::default(),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
 
@@ -239,7 +239,7 @@ fn render_solid_quad(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Textur
         },
         depth_stencil: None,
         multisample: wgpu::MultisampleState::default(),
-        multiview: None,
+        multiview_mask: None,
         cache: None,
     });
 

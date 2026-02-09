@@ -423,7 +423,7 @@ fn fs() -> @location(0) vec4<f32> {
                 primitive: Default::default(),
                 depth_stencil: None,
                 multisample: Default::default(),
-                multiview: None,
+                multiview_mask: None,
                 cache: None,
             });
 
@@ -536,7 +536,7 @@ fn fs() -> @location(0) vec4<f32> {
                 primitive: Default::default(),
                 depth_stencil: None,
                 multisample: Default::default(),
-                multiview: None,
+                multiview_mask: None,
                 cache: None,
             });
 
@@ -574,6 +574,7 @@ fn fs() -> @location(0) vec4<f32> {
                     depth_stencil_attachment: None,
                     timestamp_writes: None,
                     occlusion_query_set: None,
+                    multiview_mask: None,
                 });
 
                 rp.set_pipeline(&pipeline);

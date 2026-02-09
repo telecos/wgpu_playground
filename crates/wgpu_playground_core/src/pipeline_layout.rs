@@ -509,18 +509,21 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_push_constant_range_to_wgpu() {
-        let range = PushConstantRange::new(ShaderStages::VERTEX | ShaderStages::FRAGMENT, 0, 128);
-        let wgpu_range = range.to_wgpu();
-
-        assert_eq!(
-            wgpu_range.stages,
-            ShaderStages::VERTEX | ShaderStages::FRAGMENT
-        );
-        assert_eq!(wgpu_range.range.start, 0);
-        assert_eq!(wgpu_range.range.end, 128);
-    }
+    // Note: This test is commented out because wgpu 28.0 replaced push_constant_ranges
+    // with immediate_size in PipelineLayoutDescriptor. The to_wgpu() method is no longer
+    // applicable as push constants are handled differently in wgpu 28.0.
+    // #[test]
+    // fn test_push_constant_range_to_wgpu() {
+    //     let range = PushConstantRange::new(ShaderStages::VERTEX | ShaderStages::FRAGMENT, 0, 128);
+    //     let wgpu_range = range.to_wgpu();
+    //
+    //     assert_eq!(
+    //         wgpu_range.stages,
+    //         ShaderStages::VERTEX | ShaderStages::FRAGMENT
+    //     );
+    //     assert_eq!(wgpu_range.range.start, 0);
+    //     assert_eq!(wgpu_range.range.end, 128);
+    // }
 
     #[test]
     fn test_default_pipeline_layout_descriptor() {

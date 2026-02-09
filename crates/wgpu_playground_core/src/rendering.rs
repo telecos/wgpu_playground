@@ -1242,6 +1242,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         });
     }
 
+    #[allow(unused_variables)]
     fn render_example_gallery(
         &mut self,
         ui: &mut egui::Ui,
@@ -1456,6 +1457,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                                     }
 
                                     // Link to WebGPU spec
+                                    #[allow(unused_variables)]
                                     let spec_url = get_api_spec_url(tag);
                                     if ui.link(egui::RichText::new("📚 View WebGPU Spec").small()).clicked() {
                                         #[cfg(not(target_arch = "wasm32"))]

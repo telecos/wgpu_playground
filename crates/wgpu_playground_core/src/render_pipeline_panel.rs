@@ -850,6 +850,7 @@ impl RenderPipelinePanel {
                     }
 
                     // Render preview
+                    #[allow(unused_variables)]
                     if let (Some(preview), Some(device), Some(queue), Some(renderer)) =
                         (&mut self.preview_state, device, queue, renderer)
                     {

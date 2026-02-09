@@ -37,6 +37,7 @@ pub struct TexturePreviewState {
     /// Render texture view
     render_texture_view: Option<wgpu::TextureView>,
     /// Texture ID for egui display
+    #[allow(dead_code)]
     texture_id: Option<egui::TextureId>,
     /// Preview canvas size
     width: u32,

@@ -41,6 +41,7 @@ pub struct RenderPipelinePreviewState {
     /// Depth texture view
     depth_texture_view: Option<wgpu::TextureView>,
     /// Texture ID for egui display
+    #[allow(dead_code)]
     texture_id: Option<egui::TextureId>,
     /// Animation time for rotation
     time: f32,

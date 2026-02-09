@@ -256,7 +256,7 @@ impl TexturePanel {
         ui: &mut egui::Ui,
         device: Option<&wgpu::Device>,
         queue: Option<&wgpu::Queue>,
-        renderer: Option<&mut egui_wgpu::Renderer>,
+        #[allow(unused_variables)] renderer: Option<&mut egui_wgpu::Renderer>,
     ) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.heading("🖼️ Texture Configuration");

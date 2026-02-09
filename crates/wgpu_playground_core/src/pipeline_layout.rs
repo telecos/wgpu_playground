@@ -67,15 +67,6 @@ impl PushConstantRange {
         self.end - self.start
     }
 
-    /// Note: wgpu 28.0 replaced push constants with immediate data.
-    /// This method is kept for API compatibility but should not be used.
-    /// Use immediate_size in PipelineLayoutDescriptor instead.
-    #[deprecated(note = "wgpu 28.0 uses immediate_size instead of push_constant_ranges")]
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn to_wgpu_legacy(&self) -> (wgpu::ShaderStages, std::ops::Range<u32>) {
-        (self.stages, self.start..self.end)
-    }
-
     /// Validate the push constant range
     ///
     /// Checks for:

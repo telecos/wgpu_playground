@@ -175,24 +175,6 @@ impl ErrorScope {
         log::debug!("Pushed error scope: {:?}", filter);
         guard
     }
-
-    /// Pop an error scope from the device's error scope stack
-    ///
-    /// Note: This method is deprecated in wgpu 28.0. Use the ErrorScopeGuard
-    /// returned by push() instead. The guard will automatically pop the scope
-    /// when dropped, and errors can be captured via on_uncaptured_error callback.
-    ///
-    /// # Arguments
-    /// * `device` - The GPU device
-    ///
-    /// # Returns
-    /// None - always returns None in wgpu 28.0+
-    #[deprecated(note = "wgpu 28.0 removed pop_error_scope; use ErrorScopeGuard instead")]
-    #[cfg(not(target_arch = "wasm32"))]
-    pub async fn pop(_device: &wgpu::Device) -> Option<Error> {
-        log::warn!("ErrorScope::pop is deprecated in wgpu 28.0 and always returns None");
-        None
-    }
 }
 
 /// Error callback for handling uncaptured errors

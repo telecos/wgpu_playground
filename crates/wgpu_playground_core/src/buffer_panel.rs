@@ -379,6 +379,7 @@ impl BufferPanel {
                             preview.render(device, queue, usage, delta_time);
 
                             // Display the preview texture
+                            #[cfg(not(target_arch = "wasm32"))]
                             if let Some(texture_id) = preview.get_texture_id(device, renderer) {
                                 let (width, height) = preview.size();
                                 ui.add(egui::Image::new(egui::load::SizedTexture::new(

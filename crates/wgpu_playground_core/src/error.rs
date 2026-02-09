@@ -162,40 +162,36 @@ impl ErrorScope {
     /// Push an error scope onto the device's error scope stack
     ///
     /// All GPU errors of the specified type that occur after this call
-    /// will be captured until the scope is popped.
+    /// will be captured until the scope is popped (via dropping the guard).
     ///
     /// # Arguments
     /// * `device` - The GPU device
     /// * `filter` - The type of errors to capture
-    pub fn push(device: &wgpu::Device, filter: ErrorFilter) {
-        device.push_error_scope(filter.to_wgpu());
+    ///
+    /// # Returns
+    /// An ErrorScopeGuard that automatically pops the scope when dropped
+    pub fn push(device: &wgpu::Device, filter: ErrorFilter) -> wgpu::ErrorScopeGuard {
+        let guard = device.push_error_scope(filter.to_wgpu());
         log::debug!("Pushed error scope: {:?}", filter);
+        guard
     }
 
     /// Pop an error scope from the device's error scope stack
     ///
-    /// Returns the first error that was captured in this scope, if any.
-    /// This is an async operation that waits for the GPU to finish
-    /// processing all commands in the scope.
+    /// Note: This method is deprecated in wgpu 28.0. Use the ErrorScopeGuard
+    /// returned by push() instead. The guard will automatically pop the scope
+    /// when dropped, and errors can be captured via on_uncaptured_error callback.
     ///
     /// # Arguments
     /// * `device` - The GPU device
     ///
     /// # Returns
-    /// The first error captured in this scope, or None if no errors occurred
-    pub async fn pop(device: &wgpu::Device) -> Option<Error> {
-        let result = device.pop_error_scope().await;
-        match result {
-            Some(err) => {
-                let error = Error::from(err);
-                log::warn!("Error scope captured: {}", error);
-                Some(error)
-            }
-            None => {
-                log::debug!("Error scope popped with no errors");
-                None
-            }
-        }
+    /// None - always returns None in wgpu 28.0+
+    #[deprecated(note = "wgpu 28.0 removed pop_error_scope; use ErrorScopeGuard instead")]
+    #[cfg(not(target_arch = "wasm32"))]
+    pub async fn pop(_device: &wgpu::Device) -> Option<Error> {
+        log::warn!("ErrorScope::pop is deprecated in wgpu 28.0 and always returns None");
+        None
     }
 }
 

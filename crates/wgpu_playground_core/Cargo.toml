@@ -82,7 +82,7 @@ js-sys = "0.3"
 cc = "1.2"
 
 [dev-dependencies]
-pollster = "0.3"
+pollster = "0.4"
 serial_test = "3.0"
 
 # Criterion doesn't support WASM, so only include it for native targets

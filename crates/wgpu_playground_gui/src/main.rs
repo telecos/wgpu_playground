@@ -123,9 +123,13 @@ impl AppState {
             None,
         );
 
+        // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
+        // We transmute to bridge the version gap until egui-wgpu supports wgpu 28
+        let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(&device) };
+        let format_27: egui_wgpu::wgpu::TextureFormat = unsafe { std::mem::transmute(surface_config.format) };
         let egui_renderer = egui_wgpu::Renderer::new(
-            &device,
-            surface_config.format,
+            device_27,
+            format_27,
             egui_wgpu::RendererOptions {
                 msaa_samples: 1,
                 ..Default::default()
@@ -216,6 +220,7 @@ impl AppState {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
+                multiview_mask: None,
             });
         }
 
@@ -238,15 +243,21 @@ impl AppState {
             pixels_per_point: self.window.scale_factor() as f32,
         };
 
+        // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
+        // We transmute to bridge the version gap until egui-wgpu supports wgpu 28
+        let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(&self.device) };
+        let queue_27: &egui_wgpu::wgpu::Queue = unsafe { std::mem::transmute(&self.queue) };
+        let encoder_27: &mut egui_wgpu::wgpu::CommandEncoder = unsafe { std::mem::transmute(&mut encoder) };
+
         for (id, image_delta) in &egui_output.textures_delta.set {
             self.egui_renderer
-                .update_texture(&self.device, &self.queue, *id, image_delta);
+                .update_texture(device_27, queue_27, *id, image_delta);
         }
 
         self.egui_renderer.update_buffers(
-            &self.device,
-            &self.queue,
-            &mut encoder,
+            device_27,
+            queue_27,
+            encoder_27,
             &clipped_primitives,
             &screen_descriptor,
         );
@@ -267,16 +278,17 @@ impl AppState {
                 depth_stencil_attachment: None,
                 timestamp_writes: None,
                 occlusion_query_set: None,
+                multiview_mask: None,
             });
 
-            // SAFETY: This is safe because we're extending the lifetime of the render pass
-            // only for the duration of the render call, and we drop it immediately after.
-            // The render pass doesn't escape this scope.
-            let render_pass_static: &mut wgpu::RenderPass<'static> =
+            // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
+            // We need to transmute both the lifetime and the version
+            // This is safe because we're extending the lifetime only for the duration of the render call
+            let render_pass_27: &mut egui_wgpu::wgpu::RenderPass<'static> =
                 unsafe { std::mem::transmute(&mut render_pass) };
 
             self.egui_renderer
-                .render(render_pass_static, &clipped_primitives, &screen_descriptor);
+                .render(render_pass_27, &clipped_primitives, &screen_descriptor);
         }
 
         for id in &egui_output.textures_delta.free {

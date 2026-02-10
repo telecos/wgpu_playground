@@ -675,7 +675,6 @@ impl TexturePanel {
 
     /// Internal implementation of texture configuration UI (WASM version)
     #[cfg(target_arch = "wasm32")]
-    
     fn ui_impl_wasm(
         &mut self,
         ui: &mut egui::Ui,
@@ -859,18 +858,8 @@ impl TexturePanel {
                 ui.add_space(5.0);
 
                 ui.horizontal(|ui| {
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        if ui.button("📂 Load Image...").clicked() {
-                            self.file_load_message = Some("Drag and drop an image file onto this window to load it.".to_string());
-                        }
-                    }
-
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        if ui.button("📂 Load Image...").clicked() {
-                            self.file_load_message = Some("Drag and drop an image file onto the browser window to load it.".to_string());
-                        }
+                    if ui.button("📂 Load Image...").clicked() {
+                        self.file_load_message = Some("Drag and drop an image file onto the browser window to load it.".to_string());
                     }
 
                     if self.loaded_texture_data.is_some()

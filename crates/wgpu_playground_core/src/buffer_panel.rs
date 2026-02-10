@@ -161,7 +161,7 @@ impl BufferPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         #[cfg(not(target_arch = "wasm32"))]
         self.ui_with_preview(ui, None, None, None);
-        
+
         #[cfg(target_arch = "wasm32")]
         self.ui_with_preview(ui, None, None);
     }

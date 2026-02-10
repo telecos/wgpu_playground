@@ -1045,7 +1045,6 @@ impl TexturePanel {
         });
     }
 
-
     fn format_option(ui: &mut egui::Ui, current: &mut TextureFormat, format: TextureFormat) {
         ui.selectable_value(current, format, format!("{:?}", format));
     }

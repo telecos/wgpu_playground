@@ -1196,6 +1196,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         }
     }
 
+    /// UI method (Native version with renderer support)
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn ui(
         &mut self,
         ui: &mut egui::Ui,
@@ -1243,6 +1245,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     }
 
     #[allow(unused_variables)]
+    #[cfg(not(target_arch = "wasm32"))]
     fn render_example_gallery(
         &mut self,
         ui: &mut egui::Ui,

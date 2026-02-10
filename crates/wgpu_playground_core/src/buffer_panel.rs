@@ -159,10 +159,15 @@ impl BufferPanel {
     /// This is a convenience wrapper that delegates to ui_with_preview() with None values.
     /// Use this method when preview functionality is not needed or device/queue are not available.
     pub fn ui(&mut self, ui: &mut egui::Ui) {
+        #[cfg(not(target_arch = "wasm32"))]
         self.ui_with_preview(ui, None, None, None);
+        
+        #[cfg(target_arch = "wasm32")]
+        self.ui_with_preview(ui, None, None);
     }
 
-    /// Render the buffer configuration UI with optional preview
+    /// Render the buffer configuration UI with optional preview (Native version)
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn ui_with_preview(
         &mut self,
         ui: &mut egui::Ui,
@@ -408,6 +413,199 @@ impl BufferPanel {
                 if ui.button("🎨 Show Live Preview").clicked() {
                     self.show_preview = true;
                 }
+            }
+        });
+    }
+
+    /// Render the buffer configuration UI with optional preview (WASM version)
+    #[cfg(target_arch = "wasm32")]
+    pub fn ui_with_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: Option<&wgpu::Device>,
+        queue: Option<&wgpu::Queue>,
+    ) {
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            ui.heading("📐 Buffer Configuration");
+            ui.label("Configure and create GPU buffers with custom parameters.");
+            ui.add_space(10.0);
+
+            // Buffer Label
+            ui.group(|ui| {
+                ui.heading("Buffer Properties");
+                ui.add_space(5.0);
+
+                egui::Grid::new("buffer_properties")
+                    .num_columns(2)
+                    .spacing([10.0, 8.0])
+                    .show(ui, |ui| {
+                        ui.label("Label:")
+                            .webgpu_tooltip("Optional label for debugging and identification", Some("#dom-gpuobjectbase-label"));
+                        ui.text_edit_singleline(&mut self.label_input);
+                        ui.end_row();
+
+                        property::BUFFER_SIZE.apply(ui.label("Size (bytes):"));
+                        ui.text_edit_singleline(&mut self.size_input);
+                        ui.end_row();
+                    });
+            });
+
+            ui.add_space(10.0);
+
+            // Usage Flags
+            ui.group(|ui| {
+                ui.heading("Usage Flags");
+                ui.label("Select how the buffer will be used (multiple flags can be selected):");
+                ui.add_space(5.0);
+
+                egui::Grid::new("usage_flags")
+                    .num_columns(2)
+                    .spacing([10.0, 4.0])
+                    .striped(true)
+                    .show(ui, |ui| {
+                        Self::render_usage_checkbox_with_tooltip(ui, "VERTEX", &mut self.usage_vertex, &buffer_usage::VERTEX);
+                        Self::render_usage_checkbox_with_tooltip(ui, "INDEX", &mut self.usage_index, &buffer_usage::INDEX);
+                        Self::render_usage_checkbox_with_tooltip(ui, "UNIFORM", &mut self.usage_uniform, &buffer_usage::UNIFORM);
+                        Self::render_usage_checkbox_with_tooltip(ui, "STORAGE", &mut self.usage_storage, &buffer_usage::STORAGE);
+                        Self::render_usage_checkbox_with_tooltip(ui, "INDIRECT", &mut self.usage_indirect, &buffer_usage::INDIRECT);
+                        Self::render_usage_checkbox_with_tooltip(ui, "COPY_SRC", &mut self.usage_copy_src, &buffer_usage::COPY_SRC);
+                        Self::render_usage_checkbox_with_tooltip(ui, "COPY_DST", &mut self.usage_copy_dst, &buffer_usage::COPY_DST);
+                        Self::render_usage_checkbox_with_tooltip(ui, "MAP_READ", &mut self.usage_map_read, &buffer_usage::MAP_READ);
+                        Self::render_usage_checkbox_with_tooltip(ui, "MAP_WRITE", &mut self.usage_map_write, &buffer_usage::MAP_WRITE);
+                        Self::render_usage_checkbox_with_tooltip(ui, "QUERY_RESOLVE", &mut self.usage_query_resolve, &buffer_usage::QUERY_RESOLVE);
+                    });
+
+                ui.add_space(5.0);
+                ui.colored_label(
+                    egui::Color32::from_rgb(200, 200, 100),
+                    "💡 Note: MAP_READ and MAP_WRITE cannot be used together"
+                );
+            });
+
+            ui.add_space(10.0);
+
+            // Additional Options
+            ui.group(|ui| {
+                ui.heading("Additional Options");
+                ui.add_space(5.0);
+
+                property::BUFFER_MAPPED_AT_CREATION.apply(
+                    ui.checkbox(&mut self.mapped_at_creation, "Mapped at creation")
+                );
+            });
+
+            ui.add_space(15.0);
+
+            // Validation and Creation
+            ui.horizontal(|ui| {
+                if ui.button("🔍 Validate").clicked() {
+                    self.validate();
+                }
+
+                if ui.button("✨ Create Buffer").clicked() {
+                    // Note: In the actual implementation, we would need a device reference
+                    // For now, we just validate
+                    if self.validate() {
+                        self.success_message = Some(
+                            "✓ Configuration is valid. In a full implementation, the buffer would be created here."
+                                .to_string(),
+                        );
+                    }
+                }
+
+                if ui.button("🔄 Reset").clicked() {
+                    *self = Self::new();
+                }
+            });
+
+            ui.add_space(10.0);
+
+            // Display validation errors or success messages
+            if let Some(error) = &self.validation_error {
+                ui.colored_label(egui::Color32::RED, format!("❌ {}", error));
+            }
+
+            if let Some(success) = &self.success_message {
+                ui.colored_label(egui::Color32::GREEN, success);
+            }
+
+            ui.add_space(15.0);
+
+            // Current Configuration Summary
+            ui.group(|ui| {
+                ui.heading("Configuration Summary");
+                ui.add_space(5.0);
+
+                self.update_descriptor();
+
+                ui.monospace(format!(
+                    "Label: {}",
+                    self.descriptor.label().unwrap_or("<none>")
+                ));
+                ui.monospace(format!("Size: {} bytes", self.descriptor.size()));
+                ui.monospace(format!(
+                    "Mapped at creation: {}",
+                    self.descriptor.mapped_at_creation()
+                ));
+
+                ui.add_space(5.0);
+                ui.label("Usage flags:");
+                let usage = self.descriptor.usage();
+                if usage.is_empty() {
+                    ui.monospace("  (none)");
+                } else {
+                    if usage.contains(BufferUsages::VERTEX) {
+                        ui.monospace("  • VERTEX");
+                    }
+                    if usage.contains(BufferUsages::INDEX) {
+                        ui.monospace("  • INDEX");
+                    }
+                    if usage.contains(BufferUsages::UNIFORM) {
+                        ui.monospace("  • UNIFORM");
+                    }
+                    if usage.contains(BufferUsages::STORAGE) {
+                        ui.monospace("  • STORAGE");
+                    }
+                    if usage.contains(BufferUsages::INDIRECT) {
+                        ui.monospace("  • INDIRECT");
+                    }
+                    if usage.contains(BufferUsages::COPY_SRC) {
+                        ui.monospace("  • COPY_SRC");
+                    }
+                    if usage.contains(BufferUsages::COPY_DST) {
+                        ui.monospace("  • COPY_DST");
+                    }
+                    if usage.contains(BufferUsages::MAP_READ) {
+                        ui.monospace("  • MAP_READ");
+                    }
+                    if usage.contains(BufferUsages::MAP_WRITE) {
+                        ui.monospace("  • MAP_WRITE");
+                    }
+                    if usage.contains(BufferUsages::QUERY_RESOLVE) {
+                        ui.monospace("  • QUERY_RESOLVE");
+                    }
+                }
+            });
+
+            ui.add_space(15.0);
+
+            // Live Preview Section - Not available on WASM
+            if self.show_preview {
+                ui.group(|ui| {
+                    ui.heading("🎨 Live Preview");
+                    ui.colored_label(
+                        egui::Color32::YELLOW,
+                        "⚠ Preview is not available in WASM builds"
+                    );
+                    if ui.button("Close Preview").clicked() {
+                        self.show_preview = false;
+                    }
+                });
+            } else if self.descriptor.usage().contains(BufferUsages::VERTEX)
+                || self.descriptor.usage().contains(BufferUsages::UNIFORM)
+            {
+                // Show button to enable preview (but it won't work on WASM)
+                ui.label("💡 Preview is not available in WASM builds");
             }
         });
     }

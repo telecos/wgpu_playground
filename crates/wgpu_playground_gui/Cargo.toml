@@ -23,8 +23,11 @@ env_logger = "0.11"
 log = "0.4"
 bytemuck = { version = "1.19", features = ["derive"] }
 egui = "0.33"
-egui-wgpu = "0.33"
 egui-winit = "0.33"
+
+# Native-only dependencies
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+egui-wgpu = "0.33"
 
 # WASM dependencies
 [target.'cfg(target_arch = "wasm32")'.dependencies]

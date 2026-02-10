@@ -718,7 +718,8 @@ impl RenderPipelinePanel {
         });
     }
 
-    /// UI with live pipeline preview
+    /// UI with live pipeline preview (Native version)
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn ui_with_preview(
         &mut self,
         ui: &mut egui::Ui,

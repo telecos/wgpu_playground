@@ -21,7 +21,6 @@ winit = "0.30"
 env_logger = "0.11"
 log = "0.4"
 egui = "0.33"
-egui-wgpu = "0.33"
 egui_plot = "0.34"
 bytemuck = { version = "1.14", features = ["derive"] }
 futures-channel = "0.3"
@@ -38,6 +37,7 @@ pollster = "0.4"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 notify = { version = "8.2", default-features = false, features = ["macos_kqueue"] }
 webbrowser = "1.1"
+egui-wgpu = "0.33"
 
 # Dawn FFI bindings (optional) - currently using custom bindings
 # dawn-sys has compatibility issues on Linux, so we build our own

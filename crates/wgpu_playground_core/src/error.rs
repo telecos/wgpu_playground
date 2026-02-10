@@ -145,15 +145,14 @@ impl ErrorFilter {
 /// use wgpu_playground_core::error::{ErrorScope, ErrorFilter};
 /// # async fn example(device: &wgpu::Device) {
 /// // Push an error scope to capture validation errors
-/// ErrorScope::push(device, ErrorFilter::Validation);
+/// // The guard automatically pops the scope when dropped
+/// let guard = ErrorScope::push(device, ErrorFilter::Validation);
 ///
 /// // Perform operations that might generate errors
 /// // ... GPU operations ...
 ///
-/// // Pop the scope and check for errors
-/// if let Some(error) = ErrorScope::pop(device).await {
-///     eprintln!("Caught error: {}", error);
-/// }
+/// // Scope is automatically popped when guard is dropped
+/// // Use on_uncaptured_error callback to handle errors
 /// # }
 /// ```
 pub struct ErrorScope;

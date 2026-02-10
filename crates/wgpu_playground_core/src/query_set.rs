@@ -286,6 +286,7 @@ impl QuerySetOps {
     ///     depth_stencil_attachment: None,
     ///     timestamp_writes: None,
     ///     occlusion_query_set: Some(&query_set),
+    ///     multiview_mask: None,
     /// });
     ///
     /// QuerySetOps::begin_occlusion_query(&mut render_pass, 0);

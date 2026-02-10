@@ -243,15 +243,46 @@ impl TexturePanel {
         self.loaded_texture_dimensions
     }
 
-    /// Render the texture configuration UI
+    /// Render the texture configuration UI (WASM version)
+    #[cfg(target_arch = "wasm32")]
+    pub fn ui(&mut self, ui: &mut egui::Ui) {
+        self.ui_impl_wasm(ui, None, None);
+    }
+
+    /// Render the texture configuration UI (Native version)
     /// This is a convenience wrapper that delegates to ui_with_preview() with None values.
     /// Use this method when preview functionality is not needed or device/queue are not available.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         self.ui_with_preview(ui, None, None, None);
     }
 
-    /// Render the texture configuration UI with optional preview
+    /// Render the texture configuration UI with optional preview (Native version)
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn ui_with_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: Option<&wgpu::Device>,
+        queue: Option<&wgpu::Queue>,
+        renderer: Option<&mut egui_wgpu::Renderer>,
+    ) {
+        self.ui_impl_native(ui, device, queue, renderer);
+    }
+
+    /// Render the texture configuration UI with optional preview (WASM version)
+    #[cfg(target_arch = "wasm32")]
+    pub fn ui_with_preview(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: Option<&wgpu::Device>,
+        queue: Option<&wgpu::Queue>,
+    ) {
+        self.ui_impl_wasm(ui, device, queue);
+    }
+
+    /// Internal implementation of texture configuration UI (Native version)
+    #[cfg(not(target_arch = "wasm32"))]
+    fn ui_impl_native(
         &mut self,
         ui: &mut egui::Ui,
         device: Option<&wgpu::Device>,
@@ -262,6 +293,7 @@ impl TexturePanel {
             ui.heading("🖼️ Texture Configuration");
             ui.label("Configure and create GPU textures with custom parameters.");
             ui.add_space(10.0);
+
 
             // Texture Properties
             ui.group(|ui| {
@@ -544,6 +576,378 @@ impl TexturePanel {
                                 )));
                             }
                         }
+                    } else if device.is_none() {
+                        ui.colored_label(
+                            egui::Color32::YELLOW,
+                            "⚠ Preview requires GPU device to be initialized"
+                        );
+                    }
+                });
+
+                ui.add_space(15.0);
+            } else if self.loaded_texture_data.is_some() || self.width_input.parse::<u32>().is_ok() {
+                // Show button to enable preview
+                if ui.button("🎨 Show Texture Preview").clicked() {
+                    self.show_preview = true;
+                }
+            }
+
+            ui.add_space(15.0);
+
+            // Validation and Creation
+            ui.horizontal(|ui| {
+                if ui.button("🔍 Validate").clicked() && self.validate() {
+                    self.success_message = Some("✓ Configuration is valid".to_string());
+                }
+
+                if ui.button("✨ Create Texture").clicked() && self.validate() {
+                    self.success_message = Some(
+                        "✓ Configuration is valid. In a full implementation, the texture would be created here."
+                            .to_string(),
+                    );
+                }
+
+                if ui.button("🔄 Reset").clicked() {
+                    *self = Self::new();
+                }
+            });
+
+            ui.add_space(10.0);
+
+            // Display validation errors or success messages
+            if let Some(error) = &self.validation_error {
+                ui.colored_label(egui::Color32::RED, format!("❌ {}", error));
+            }
+
+            if let Some(success) = &self.success_message {
+                ui.colored_label(egui::Color32::GREEN, success);
+            }
+
+            ui.add_space(15.0);
+
+            // Current Configuration Summary
+            ui.group(|ui| {
+                ui.heading("Configuration Summary");
+                ui.add_space(5.0);
+
+                ui.monospace(format!(
+                    "Label: {}",
+                    if self.label_input.is_empty() {
+                        "<none>"
+                    } else {
+                        &self.label_input
+                    }
+                ));
+                ui.monospace(format!("Dimension: {:?}", self.selected_dimension));
+                ui.monospace(format!(
+                    "Size: {}x{}x{}",
+                    self.width_input, self.height_input, self.depth_input
+                ));
+                ui.monospace(format!("Format: {:?}", self.selected_format));
+                ui.monospace(format!("Mip Levels: {}", self.mip_levels_input));
+                ui.monospace(format!("Sample Count: {}", self.sample_count_input));
+
+                ui.add_space(5.0);
+                ui.label("Usage flags:");
+                let usage = self.build_usage_flags();
+                if usage.is_empty() {
+                    ui.monospace("  (none)");
+                } else {
+                    if usage.contains(TextureUsages::COPY_SRC) {
+                        ui.monospace("  • COPY_SRC");
+                    }
+                    if usage.contains(TextureUsages::COPY_DST) {
+                        ui.monospace("  • COPY_DST");
+                    }
+                    if usage.contains(TextureUsages::TEXTURE_BINDING) {
+                        ui.monospace("  • TEXTURE_BINDING");
+                    }
+                    if usage.contains(TextureUsages::STORAGE_BINDING) {
+                        ui.monospace("  • STORAGE_BINDING");
+                    }
+                    if usage.contains(TextureUsages::RENDER_ATTACHMENT) {
+                        ui.monospace("  • RENDER_ATTACHMENT");
+                    }
+                }
+            });
+        });
+    }
+
+    /// Internal implementation of texture configuration UI (WASM version)
+    #[cfg(target_arch = "wasm32")]
+    fn ui_impl_wasm(
+        &mut self,
+        ui: &mut egui::Ui,
+        device: Option<&wgpu::Device>,
+        queue: Option<&wgpu::Queue>,
+    ) {
+        egui::ScrollArea::vertical().show(ui, |ui| {
+            ui.heading("🖼️ Texture Configuration");
+            ui.label("Configure and create GPU textures with custom parameters.");
+            ui.add_space(10.0);
+
+
+            // Texture Properties
+            ui.group(|ui| {
+                ui.heading("Texture Properties");
+                ui.add_space(5.0);
+
+                egui::Grid::new("texture_properties")
+                    .num_columns(2)
+                    .spacing([10.0, 8.0])
+                    .show(ui, |ui| {
+                        ui.label("Label:")
+                            .webgpu_tooltip("Optional label for debugging and identification", Some("#dom-gpuobjectbase-label"));
+                        ui.text_edit_singleline(&mut self.label_input);
+                        ui.end_row();
+
+                        property::TEXTURE_WIDTH.apply(ui.label("Width:"));
+                        ui.text_edit_singleline(&mut self.width_input);
+                        ui.end_row();
+
+                        property::TEXTURE_HEIGHT.apply(ui.label("Height:"));
+                        ui.text_edit_singleline(&mut self.height_input);
+                        ui.end_row();
+
+                        property::TEXTURE_DEPTH.apply(ui.label("Depth/Array Layers:"));
+                        ui.text_edit_singleline(&mut self.depth_input);
+                        ui.end_row();
+
+                        property::TEXTURE_MIP_LEVELS.apply(ui.label("Mip Levels:"));
+                        ui.text_edit_singleline(&mut self.mip_levels_input);
+                        ui.end_row();
+
+                        property::TEXTURE_SAMPLE_COUNT.apply(ui.label("Sample Count:"));
+                        ui.text_edit_singleline(&mut self.sample_count_input);
+                        ui.end_row();
+                    });
+            });
+
+            ui.add_space(10.0);
+
+            // Texture Dimension
+            ui.group(|ui| {
+                ui.heading("Texture Dimension");
+                ui.add_space(5.0);
+
+                ui.horizontal(|ui| {
+                    ui.radio_value(&mut self.selected_dimension, TextureDimension::D1, "1D");
+                    ui.radio_value(&mut self.selected_dimension, TextureDimension::D2, "2D");
+                    ui.radio_value(&mut self.selected_dimension, TextureDimension::D3, "3D");
+                });
+            });
+
+            ui.add_space(10.0);
+
+            // Texture Format
+            ui.group(|ui| {
+                ui.heading("Texture Format");
+                ui.add_space(5.0);
+
+                egui::ComboBox::from_label("Format")
+                    .selected_text(format!("{:?}", self.selected_format))
+                    .show_ui(ui, |ui| {
+                        ui.label("Color Formats");
+                        ui.separator();
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba8Unorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba8UnormSrgb);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bgra8Unorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bgra8UnormSrgb);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba16Float);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba32Float);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgb10a2Unorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::R8Unorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::R8Snorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::R8Uint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::R8Sint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::R16Uint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::R16Sint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::R16Float);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rg8Unorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rg8Snorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rg8Uint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rg8Sint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rg16Uint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rg16Sint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rg16Float);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba16Uint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba16Sint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba32Uint);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Rgba32Sint);
+
+                        ui.add_space(5.0);
+                        ui.label("Depth/Stencil Formats");
+                        ui.separator();
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Depth32Float);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Depth24Plus);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Depth24PlusStencil8);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Stencil8);
+
+                        ui.add_space(5.0);
+                        ui.label("Compressed Formats (BC)");
+                        ui.separator();
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc1RgbaUnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc1RgbaUnormSrgb);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc2RgbaUnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc2RgbaUnormSrgb);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc3RgbaUnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc3RgbaUnormSrgb);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc4RUnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc4RSnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc5RgUnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc5RgSnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc6hRgbUfloat);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc6hRgbFloat);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc7RgbaUnorm);
+                        Self::format_option(ui, &mut self.selected_format, TextureFormat::Bc7RgbaUnormSrgb);
+                    });
+            });
+
+            ui.add_space(10.0);
+
+            // Usage Flags
+            ui.group(|ui| {
+                ui.heading("Usage Flags");
+                ui.label("Select how the texture will be used (multiple flags can be selected):");
+                ui.add_space(5.0);
+
+                egui::Grid::new("usage_flags")
+                    .num_columns(2)
+                    .spacing([10.0, 4.0])
+                    .striped(true)
+                    .show(ui, |ui| {
+                        Self::render_usage_checkbox_with_tooltip(
+                            ui,
+                            "COPY_SRC",
+                            &mut self.usage_copy_src,
+                            &texture_usage::COPY_SRC,
+                        );
+                        Self::render_usage_checkbox_with_tooltip(
+                            ui,
+                            "COPY_DST",
+                            &mut self.usage_copy_dst,
+                            &texture_usage::COPY_DST,
+                        );
+                        Self::render_usage_checkbox_with_tooltip(
+                            ui,
+                            "TEXTURE_BINDING",
+                            &mut self.usage_texture_binding,
+                            &texture_usage::TEXTURE_BINDING,
+                        );
+                        Self::render_usage_checkbox_with_tooltip(
+                            ui,
+                            "STORAGE_BINDING",
+                            &mut self.usage_storage_binding,
+                            &texture_usage::STORAGE_BINDING,
+                        );
+                        Self::render_usage_checkbox_with_tooltip(
+                            ui,
+                            "RENDER_ATTACHMENT",
+                            &mut self.usage_render_attachment,
+                            &texture_usage::RENDER_ATTACHMENT,
+                        );
+                    });
+            });
+
+            ui.add_space(15.0);
+
+            // File Loading Section
+            ui.group(|ui| {
+                ui.heading("📁 Load Texture from File");
+                ui.label("Load image files (PNG, JPEG) to create textures.");
+                ui.add_space(5.0);
+
+                ui.horizontal(|ui| {
+                    if ui.button("📂 Load Image...").clicked() {
+                        self.file_load_message = Some("Drag and drop an image file onto the browser window to load it.".to_string());
+                    }
+
+                    if self.loaded_texture_data.is_some()
+                        && ui.button("🗑️ Clear Loaded Image").clicked()
+                    {
+                        self.clear_loaded_texture();
+                    }
+                });
+
+                ui.add_space(5.0);
+
+                // Display file load message or loaded texture info
+                if let Some(msg) = &self.file_load_message {
+                    ui.colored_label(egui::Color32::GREEN, msg);
+                }
+
+                if let Some((width, height)) = self.loaded_texture_dimensions {
+                    ui.label(format!("📐 Loaded image: {} x {} pixels", width, height));
+                    ui.label("Image dimensions have been applied to Width and Height fields.");
+                }
+
+                ui.add_space(5.0);
+                ui.label("💡 Tip: Drag and drop image files onto the application window to load them.");
+            });
+
+            ui.add_space(15.0);
+
+            // Preview Section
+            if self.show_preview && (self.loaded_texture_data.is_some() || self.width_input.parse::<u32>().is_ok()) {
+                ui.group(|ui| {
+                    ui.horizontal(|ui| {
+                        ui.heading("🎨 Texture Preview");
+                        if ui.small_button("✕").on_hover_text("Hide preview").clicked() {
+                            self.show_preview = false;
+                        }
+                    });
+                    ui.add_space(5.0);
+
+                    if self.loaded_texture_data.is_some() {
+                        ui.label("Preview shows the loaded image texture:");
+                    } else {
+                        ui.label("Preview shows a procedural checkerboard texture:");
+                    }
+
+                    ui.add_space(5.0);
+
+                    // Initialize preview if we have device
+                    if let Some(device) = device {
+                        if self.preview_state.is_none() {
+                            let mut preview = TexturePreviewState::new();
+                            preview.initialize(device);
+                            self.preview_state = Some(preview);
+                        }
+                    }
+
+                    // Update preview texture based on loaded data or generate procedural
+                    if let (Some(preview), Some(device), Some(queue)) =
+                        (&mut self.preview_state, device, queue)
+                    {
+                        if let Some(loaded_data) = &self.loaded_texture_data {
+                            // Display loaded image
+                            if let Some((width, height)) = self.loaded_texture_dimensions {
+                                // Convert image data to RGBA if needed
+                                if let Ok(img) = image::load_from_memory(loaded_data) {
+                                    let rgba = img.to_rgba8();
+                                    let rgba_data = rgba.as_raw();
+
+                                    if !preview.has_texture() || self.file_load_message.is_some() {
+                                        preview.update_from_image_data(device, queue, rgba_data, width, height);
+                                        // Clear the file load message after updating preview
+                                        self.file_load_message = None;
+                                    }
+                                }
+                            }
+                        } else if self.width_input.parse::<u32>().is_ok() && self.height_input.parse::<u32>().is_ok() {
+                            // Generate procedural texture
+                            let width = self.width_input.parse::<u32>().unwrap_or(256);
+                            let height = self.height_input.parse::<u32>().unwrap_or(256);
+
+                            if !preview.has_texture() {
+                                preview.generate_procedural_texture(device, queue, width, height);
+                            }
+                        }
+
+                        // Render preview
+                        preview.render(device, queue);
+
+                        // Display the preview texture - not available on WASM
                     } else if device.is_none() {
                         ui.colored_label(
                             egui::Color32::YELLOW,

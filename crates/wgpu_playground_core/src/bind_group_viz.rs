@@ -344,7 +344,7 @@ impl BindGroupVisualizer {
 
         // Add label at midpoint of line if provided and non-empty
         if !label.is_empty() {
-            let midpoint = (from + to.to_vec2()) * 0.5;
+            let midpoint = Pos2::new((from.x + to.x) * 0.5, (from.y + to.y) * 0.5);
             let label_color = Color32::from_gray(200);
             painter.text(
                 midpoint,

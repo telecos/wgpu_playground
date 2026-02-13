@@ -1,6 +1,7 @@
 use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
 use crate::example_metadata::get_example_api_tags;
 use crate::examples::{get_all_examples, Example, ExampleCategory};
+use crate::math_utils::{cross, dot, normalize};
 use crate::shader_editor::ShaderEditor;
 use wgpu::{Device, Queue};
 
@@ -1847,27 +1848,6 @@ fn matrix_multiply(a: &[[f32; 4]; 4], b: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
         }
     }
     result
-}
-
-fn normalize(v: [f32; 3]) -> [f32; 3] {
-    let len = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
-    if len < f32::EPSILON {
-        v
-    } else {
-        [v[0] / len, v[1] / len, v[2] / len]
-    }
-}
-
-fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ]
-}
-
-fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
-    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }
 
 #[cfg(test)]

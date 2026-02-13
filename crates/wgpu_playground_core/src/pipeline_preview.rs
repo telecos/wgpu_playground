@@ -6,6 +6,7 @@
 /// - Blend mode demonstration
 /// - Depth testing effect
 use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
+use crate::math_utils::{cross, dot, normalize};
 use crate::render_pipeline::{
     BlendState, CompareFunction, CullMode, DepthStencilState, FrontFace, MultisampleState,
     PrimitiveState, PrimitiveTopology,
@@ -732,25 +733,4 @@ fn rotation_matrix_x(angle: f32) -> Matrix4 {
             [0.0, 0.0, 0.0, 1.0],
         ],
     }
-}
-
-fn normalize(v: [f32; 3]) -> [f32; 3] {
-    let len = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
-    if len < f32::EPSILON {
-        [0.0, 0.0, 1.0] // Return default up vector for degenerate case
-    } else {
-        [v[0] / len, v[1] / len, v[2] / len]
-    }
-}
-
-fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ]
-}
-
-fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
-    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }

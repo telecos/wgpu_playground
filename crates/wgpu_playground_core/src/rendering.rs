@@ -925,8 +925,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     fn render_current_example(&mut self, device: &Device, queue: &Queue) {
         // Update animation state
-        // TODO: Pass actual delta_time from frame timer instead of hardcoded 60fps
-        // This currently assumes constant frame rate, causing animation speed to vary
+        // NOTE: Currently assumes 60fps with hardcoded 0.016s delta_time.
+        // For variable frame rates, RenderingPanel would need to track last_frame_time
+        // using std::time::Instant and calculate actual delta_time between frames.
+        // This is acceptable for preview purposes but may cause animation speed
+        // variations on systems that can't maintain 60fps.
         let aspect = self.canvas_width as f32 / self.canvas_height as f32;
         self.render_state.update(
             queue,

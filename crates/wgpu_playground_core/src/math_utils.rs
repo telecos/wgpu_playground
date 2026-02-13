@@ -87,7 +87,7 @@ mod tests {
         let len = (normalized[0] * normalized[0]
             + normalized[1] * normalized[1]
             + normalized[2] * normalized[2])
-        .sqrt();
+            .sqrt();
         assert!((len - 1.0).abs() < 1e-6);
     }
 

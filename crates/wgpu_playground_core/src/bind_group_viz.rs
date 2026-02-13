@@ -322,7 +322,7 @@ impl BindGroupVisualizer {
         from: Pos2,
         to: Pos2,
         color: Color32,
-        _label: &str, // TODO: Add labels to connection lines for better clarity
+        label: &str,
     ) {
         // Simple line (can be upgraded to curved later)
         painter.line_segment([from, to], Stroke::new(2.0, color.linear_multiply(0.6)));
@@ -341,6 +341,19 @@ impl BindGroupVisualizer {
             color.linear_multiply(0.6),
             Stroke::NONE,
         ));
+
+        // Add label at midpoint of line if provided and non-empty
+        if !label.is_empty() {
+            let midpoint = (from + to.to_vec2()) * 0.5;
+            let label_color = Color32::from_gray(200);
+            painter.text(
+                midpoint,
+                egui::Align2::CENTER_CENTER,
+                label,
+                egui::FontId::proportional(10.0),
+                label_color,
+            );
+        }
     }
 
     /// Get color for binding type

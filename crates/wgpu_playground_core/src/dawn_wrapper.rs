@@ -460,7 +460,12 @@ impl DawnAdapter {
         match &self.inner {
             #[cfg(dawn_enabled)]
             DawnAdapterInner::NativeDawn(_) => {
-                // TODO: Query actual Dawn adapter info via FFI
+                // NOTE: Currently returns placeholder values because Dawn FFI bindings
+                // don't expose adapter info query methods. To implement proper info:
+                // 1. Add FFI binding for wgpuAdapterGetProperties in dawn_ffi module
+                // 2. Define WGPUAdapterProperties C struct mapping
+                // 3. Call wgpuAdapterGetProperties and convert to DawnAdapterInfo
+                // See: https://github.com/webgpu-native/webgpu-headers for API reference
                 DawnAdapterInfo {
                     name: "Dawn Native Adapter".to_string(),
                     vendor: 0,

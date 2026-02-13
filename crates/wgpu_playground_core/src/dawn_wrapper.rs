@@ -40,11 +40,12 @@
 //! When using the fallback, it uses safe wgpu-core APIs.
 
 // FFI type definitions for Dawn's webgpu.h API
+// FFI definitions for Dawn native WebGPU implementation
 // These match the actual Dawn C API for compatibility
 #[cfg(feature = "dawn")]
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
-#[allow(dead_code)]
+#[allow(dead_code)] // FFI bindings may not all be used yet; kept for API completeness
 mod ffi {
     use std::os::raw::c_void;
 
@@ -711,7 +712,7 @@ pub enum DawnPowerPreference {
 
 #[cfg(feature = "dawn")]
 impl DawnPowerPreference {
-    #[allow(dead_code)]
+    #[allow(dead_code)] // Utility function for FFI interop; not currently used but may be needed
     fn to_wgpu(self) -> ffi::WGPUPowerPreference {
         match self {
             Self::Undefined => ffi::WGPUPowerPreference_Undefined,

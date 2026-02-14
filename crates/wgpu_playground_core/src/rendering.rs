@@ -122,9 +122,11 @@ struct TextureState {
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
-    #[allow(dead_code)] // Kept for proper resource lifecycle; prevents premature GPU resource deallocation
+    #[allow(dead_code)]
+    // Kept for proper resource lifecycle; prevents premature GPU resource deallocation
     texture: wgpu::Texture,
-    #[allow(dead_code)] // Kept for proper resource lifecycle; prevents premature GPU resource deallocation
+    #[allow(dead_code)]
+    // Kept for proper resource lifecycle; prevents premature GPU resource deallocation
     sampler: wgpu::Sampler,
 }
 

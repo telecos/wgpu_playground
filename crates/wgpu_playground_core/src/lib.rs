@@ -30,6 +30,7 @@ pub mod examples;
 pub mod implementation;
 pub mod learning_path;
 pub mod learning_path_panel;
+pub mod math_utils;
 pub mod model_loader;
 pub mod model_loader_panel;
 pub mod performance_metrics;

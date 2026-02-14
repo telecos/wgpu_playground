@@ -1,6 +1,7 @@
 use crate::api_coverage::{ApiCategory, ApiCoverageTracker};
 use crate::example_metadata::get_example_api_tags;
 use crate::examples::{get_all_examples, Example, ExampleCategory};
+use crate::math_utils::{cross, dot, normalize};
 use crate::shader_editor::ShaderEditor;
 use wgpu::{Device, Queue};
 
@@ -122,8 +123,10 @@ struct TextureState {
     index_buffer: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
     #[allow(dead_code)]
+    // Kept for proper resource lifecycle; prevents premature GPU resource deallocation
     texture: wgpu::Texture,
     #[allow(dead_code)]
+    // Kept for proper resource lifecycle; prevents premature GPU resource deallocation
     sampler: wgpu::Sampler,
 }
 
@@ -924,8 +927,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     fn render_current_example(&mut self, device: &Device, queue: &Queue) {
         // Update animation state
-        // TODO: Pass actual delta_time from frame timer instead of hardcoded 60fps
-        // This currently assumes constant frame rate, causing animation speed to vary
+        // NOTE: Currently assumes 60fps with hardcoded 0.016s delta_time.
+        // For variable frame rates, RenderingPanel would need to track last_frame_time
+        // using std::time::Instant and calculate actual delta_time between frames.
+        // This is acceptable for preview purposes but may cause animation speed
+        // variations on systems that can't maintain 60fps.
         let aspect = self.canvas_width as f32 / self.canvas_height as f32;
         self.render_state.update(
             queue,
@@ -1847,27 +1853,6 @@ fn matrix_multiply(a: &[[f32; 4]; 4], b: &[[f32; 4]; 4]) -> [[f32; 4]; 4] {
         }
     }
     result
-}
-
-fn normalize(v: [f32; 3]) -> [f32; 3] {
-    let len = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
-    if len < f32::EPSILON {
-        v
-    } else {
-        [v[0] / len, v[1] / len, v[2] / len]
-    }
-}
-
-fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ]
-}
-
-fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
-    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }
 
 #[cfg(test)]

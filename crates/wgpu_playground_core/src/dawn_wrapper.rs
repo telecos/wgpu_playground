@@ -40,11 +40,12 @@
 //! When using the fallback, it uses safe wgpu-core APIs.
 
 // FFI type definitions for Dawn's webgpu.h API
+// FFI definitions for Dawn native WebGPU implementation
 // These match the actual Dawn C API for compatibility
 #[cfg(feature = "dawn")]
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
-#[allow(dead_code)]
+#[allow(dead_code)] // FFI bindings may not all be used yet; kept for API completeness
 mod ffi {
     use std::os::raw::c_void;
 
@@ -460,7 +461,12 @@ impl DawnAdapter {
         match &self.inner {
             #[cfg(dawn_enabled)]
             DawnAdapterInner::NativeDawn(_) => {
-                // TODO: Query actual Dawn adapter info via FFI
+                // NOTE: Currently returns placeholder values because Dawn FFI bindings
+                // don't expose adapter info query methods. To implement proper info:
+                // 1. Add FFI binding for wgpuAdapterGetProperties in dawn_ffi module
+                // 2. Define WGPUAdapterProperties C struct mapping
+                // 3. Call wgpuAdapterGetProperties and convert to DawnAdapterInfo
+                // See: https://github.com/webgpu-native/webgpu-headers for API reference
                 DawnAdapterInfo {
                     name: "Dawn Native Adapter".to_string(),
                     vendor: 0,
@@ -706,7 +712,7 @@ pub enum DawnPowerPreference {
 
 #[cfg(feature = "dawn")]
 impl DawnPowerPreference {
-    #[allow(dead_code)]
+    #[allow(dead_code)] // Utility function for FFI interop; not currently used but may be needed
     fn to_wgpu(self) -> ffi::WGPUPowerPreference {
         match self {
             Self::Undefined => ffi::WGPUPowerPreference_Undefined,

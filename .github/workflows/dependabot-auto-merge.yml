@@ -22,11 +22,9 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
       
-      - name: Auto-approve PR
-        run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Note: GitHub Actions cannot approve PRs using the default GITHUB_TOKEN.
+      # Auto-merge is enabled without prior approval. Configure branch protection
+      # rules to require fewer approvals or allow auto-merge without approval.
       
       - name: Enable auto-merge for minor and patch updates
         # Auto-merge for patch and minor version updates only

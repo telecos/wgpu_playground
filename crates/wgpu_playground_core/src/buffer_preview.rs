@@ -40,7 +40,7 @@ pub struct BufferPreviewState {
     /// Render texture view
     render_texture_view: Option<wgpu::TextureView>,
     /// Texture ID for egui display
-    #[allow(dead_code)]
+    #[allow(dead_code)] // Reserved for future egui texture integration
     texture_id: Option<egui::TextureId>,
     /// Animation time
     time: f32,

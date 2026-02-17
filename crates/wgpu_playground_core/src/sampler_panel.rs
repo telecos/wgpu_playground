@@ -600,9 +600,14 @@ impl SamplerPanel {
         }
         self.enable_compare = state.compare.is_some();
 
-        // TODO: Parse address modes, filters, and compare function from strings
-        // For now, these remain at their default values
-        // The string values are preserved in the saved state for reference
+        // NOTE: Address modes, filters, and compare function are not parsed from strings.
+        // Current behavior: These fields reset to default values when loading state.
+        // To implement parsing:
+        // 1. Add parse_address_mode(&str) -> Option<AddressMode> helper
+        // 2. Add parse_filter_mode(&str) -> Option<FilterMode> helper
+        // 3. Add parse_compare_function(&str) -> Option<CompareFunction> helper
+        // 4. Use state.address_mode_u_str, mag_filter_str, etc. to restore values
+        // Alternative: Store enum discriminants as integers in state instead of strings
 
         self.validation_error = None;
         self.success_message = None;

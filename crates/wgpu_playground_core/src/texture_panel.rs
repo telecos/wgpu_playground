@@ -1096,9 +1096,13 @@ impl TexturePanel {
         self.usage_storage_binding = state.usage_storage_binding;
         self.usage_render_attachment = state.usage_render_attachment;
 
-        // TODO: Parse format and dimension from strings
-        // For now, these remain at their default values
-        // The string values are preserved in the saved state for reference
+        // NOTE: Format and dimension are not parsed from saved state strings.
+        // Current behavior: These fields reset to default values when loading state.
+        // To implement parsing:
+        // 1. Add parse_texture_format(&str) -> Option<TextureFormat> helper
+        // 2. Add parse_texture_dimension(&str) -> Option<TextureDimension> helper
+        // 3. Use these to restore format/dimension from state.format_str/dimension_str
+        // Alternative: Store enum discriminants as integers in state instead of strings
 
         self.validation_error = None;
         self.success_message = None;

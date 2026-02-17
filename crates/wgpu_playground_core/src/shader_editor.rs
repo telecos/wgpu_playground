@@ -534,8 +534,11 @@ fn fs_main() -> @location(0) vec4<f32> {
     /// syntax highlighting feature. It will be integrated when we implement
     /// colored text rendering in the editor.
     ///
-    /// TODO(future): Integrate this into the editor's rendering to display
-    /// colored syntax highlighting instead of plain monospace text.
+    /// # Future Integration Steps
+    /// 1. Replace egui::TextEdit::multiline with custom rendering
+    /// 2. Use egui::text::LayoutJob for rich text formatting
+    /// 3. Call this method during text rendering to colorize keywords/types
+    /// 4. Consider using tree-sitter-wgsl for more accurate highlighting
     #[allow(dead_code)]
     fn highlight_wgsl(&self, text: &str) -> Vec<(String, egui::Color32)> {
         // WGSL keywords

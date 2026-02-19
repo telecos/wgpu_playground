@@ -1,29 +1,21 @@
 use std::fs;
 /// Integration test for state save/load functionality
 use wgpu_playground_core::state::{
-    BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState, Theme,
+    BufferPanelState, PlaygroundState, SamplerPanelState, TexturePanelState,
 };
 
 #[test]
 fn test_save_and_load_state() {
     // Create a playground state with some panel configurations
     let state = PlaygroundState {
-        version: "1.0".to_string(),
-        theme: Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "test_buffer".to_string(),
             size: "2048".to_string(),
             usage_vertex: true,
-            usage_index: false,
             usage_uniform: true,
-            usage_storage: false,
-            usage_indirect: false,
             usage_copy_src: true,
             usage_copy_dst: true,
-            usage_map_read: false,
-            usage_map_write: false,
-            usage_query_resolve: false,
-            mapped_at_creation: false,
+            ..Default::default()
         }),
         texture_panel: Some(TexturePanelState {
             label: "test_texture".to_string(),
@@ -34,11 +26,10 @@ fn test_save_and_load_state() {
             sample_count: "1".to_string(),
             format: "Rgba8Unorm".to_string(),
             dimension: "D2".to_string(),
-            usage_copy_src: false,
             usage_copy_dst: true,
             usage_texture_binding: true,
-            usage_storage_binding: false,
             usage_render_attachment: true,
+            ..Default::default()
         }),
         sampler_panel: Some(SamplerPanelState {
             label: "test_sampler".to_string(),
@@ -50,17 +41,10 @@ fn test_save_and_load_state() {
             mipmap_filter: "Linear".to_string(),
             lod_min_clamp: "0.0".to_string(),
             lod_max_clamp: "32.0".to_string(),
-            compare: None,
             max_anisotropy: "1".to_string(),
+            ..Default::default()
         }),
-        shader_editor: None,
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     // Save state to a temp file
@@ -113,33 +97,14 @@ fn test_save_and_load_state() {
 #[test]
 fn test_json_serialization_format() {
     let state = PlaygroundState {
-        version: "1.0".to_string(),
-        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "my_buffer".to_string(),
             size: "1024".to_string(),
             usage_vertex: true,
-            usage_index: false,
-            usage_uniform: false,
-            usage_storage: false,
-            usage_indirect: false,
-            usage_copy_src: false,
             usage_copy_dst: true,
-            usage_map_read: false,
-            usage_map_write: false,
-            usage_query_resolve: false,
-            mapped_at_creation: false,
+            ..Default::default()
         }),
-        texture_panel: None,
-        sampler_panel: None,
-        shader_editor: None,
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     // Convert to JSON
@@ -164,9 +129,6 @@ fn test_json_serialization_format() {
 fn test_partial_state_loading() {
     // Test loading a state with only some panels configured
     let state = PlaygroundState {
-        version: "1.0".to_string(),
-        theme: wgpu_playground_core::state::Theme::default(),
-        buffer_panel: None,
         texture_panel: Some(TexturePanelState {
             label: "only_texture".to_string(),
             width: "256".to_string(),
@@ -176,21 +138,11 @@ fn test_partial_state_loading() {
             sample_count: "1".to_string(),
             format: "Rgba8Unorm".to_string(),
             dimension: "D2".to_string(),
-            usage_copy_src: false,
             usage_copy_dst: true,
             usage_texture_binding: true,
-            usage_storage_binding: false,
-            usage_render_attachment: false,
+            ..Default::default()
         }),
-        sampler_panel: None,
-        shader_editor: None,
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     let json = state.to_json().expect("Failed to serialize");
@@ -208,22 +160,15 @@ fn test_partial_state_loading() {
 fn test_url_encoding_integration() {
     // Create a complex state
     let state = PlaygroundState {
-        version: "1.0".to_string(),
-        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "shared_buffer".to_string(),
             size: "4096".to_string(),
             usage_vertex: true,
             usage_index: true,
-            usage_uniform: false,
             usage_storage: true,
-            usage_indirect: false,
             usage_copy_src: true,
             usage_copy_dst: true,
-            usage_map_read: false,
-            usage_map_write: false,
-            usage_query_resolve: false,
-            mapped_at_creation: false,
+            ..Default::default()
         }),
         texture_panel: Some(TexturePanelState {
             label: "shared_texture".to_string(),
@@ -234,21 +179,12 @@ fn test_url_encoding_integration() {
             sample_count: "1".to_string(),
             format: "Rgba8Unorm".to_string(),
             dimension: "D2".to_string(),
-            usage_copy_src: false,
             usage_copy_dst: true,
             usage_texture_binding: true,
-            usage_storage_binding: false,
             usage_render_attachment: true,
+            ..Default::default()
         }),
-        sampler_panel: None,
-        shader_editor: None,
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     // Test URL encoding and decoding
@@ -282,33 +218,15 @@ fn test_url_encoding_integration() {
 #[test]
 fn test_shareable_url_generation_integration() {
     let state = PlaygroundState {
-        version: "1.0".to_string(),
-        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "url_buffer".to_string(),
             size: "2048".to_string(),
             usage_vertex: true,
-            usage_index: false,
             usage_uniform: true,
-            usage_storage: false,
-            usage_indirect: false,
-            usage_copy_src: false,
             usage_copy_dst: true,
-            usage_map_read: false,
-            usage_map_write: false,
-            usage_query_resolve: false,
-            mapped_at_creation: false,
+            ..Default::default()
         }),
-        texture_panel: None,
-        sampler_panel: None,
-        shader_editor: None,
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     // Test shareable URL generation
@@ -366,23 +284,12 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 "#;
 
     let state = PlaygroundState {
-        version: "1.0".to_string(),
-        theme: wgpu_playground_core::state::Theme::default(),
-        buffer_panel: None,
-        texture_panel: None,
-        sampler_panel: None,
         shader_editor: Some(ShaderEditorState {
             source_code: shader_code.to_string(),
             label: "transform_shader".to_string(),
             file_path: "transform.wgsl".to_string(),
         }),
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     // Encode to URL
@@ -405,33 +312,13 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 fn test_url_parameter_extraction() {
     // Test extracting state from various URL formats
     let state = PlaygroundState {
-        version: "1.0".to_string(),
-        theme: wgpu_playground_core::state::Theme::default(),
         buffer_panel: Some(BufferPanelState {
             label: "test".to_string(),
             size: "1024".to_string(),
             usage_vertex: true,
-            usage_index: false,
-            usage_uniform: false,
-            usage_storage: false,
-            usage_indirect: false,
-            usage_copy_src: false,
-            usage_copy_dst: false,
-            usage_map_read: false,
-            usage_map_write: false,
-            usage_query_resolve: false,
-            mapped_at_creation: false,
+            ..Default::default()
         }),
-        texture_panel: None,
-        sampler_panel: None,
-        shader_editor: None,
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     let encoded = state.to_url_encoded().unwrap();

@@ -252,8 +252,14 @@ impl ComputePipelineDescriptor {
 
         let tracker = ApiCoverageTracker::global();
 
-        let shader = self.shader.as_ref().unwrap();
-        let _entry_point = self.entry_point.as_ref().unwrap();
+        let shader = self
+            .shader
+            .as_ref()
+            .expect("shader is Some after validate()");
+        let _entry_point = self
+            .entry_point
+            .as_ref()
+            .expect("entry_point is Some after validate()");
 
         tracker.record(ApiCategory::Shader, "create_shader_module");
         let shader_module = shader.create_module(device);

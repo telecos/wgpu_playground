@@ -1,23 +1,43 @@
 /// Example gallery and metadata
 ///
 /// This module defines preset examples with descriptions and source code
+use std::fmt;
 
+/// Category for classifying examples by rendering type
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExampleCategory {
+    /// Rasterization-based rendering examples
     Rendering,
+    /// GPU compute shader examples
     Compute,
 }
 
+impl fmt::Display for ExampleCategory {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ExampleCategory::Rendering => write!(f, "Rendering"),
+            ExampleCategory::Compute => write!(f, "Compute"),
+        }
+    }
+}
+
+/// A WebGPU example with metadata and WGSL source code
 #[derive(Debug, Clone)]
 pub struct Example {
+    /// Unique identifier used to look up the example programmatically
     pub id: &'static str,
+    /// Human-readable display name
     pub name: &'static str,
+    /// Category this example belongs to
     pub category: ExampleCategory,
+    /// Brief description of what the example demonstrates
     pub description: &'static str,
+    /// Complete WGSL shader source code for the example
     pub source_code: &'static str,
 }
 
 impl Example {
+    /// Create a new example with all required metadata
     pub fn new(
         id: &'static str,
         name: &'static str,

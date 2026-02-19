@@ -16,19 +16,8 @@ fn test_theme_switching_workflow() {
 
     // Step 3: Export state with theme preference
     let state = PlaygroundState {
-        version: "1.0".to_string(),
         theme: settings.get_theme(),
-        buffer_panel: None,
-        texture_panel: None,
-        sampler_panel: None,
-        shader_editor: None,
-        render_pipeline_panel: None,
-        compute_pipeline_panel: None,
-        bind_group_panel: None,
-        bind_group_layout_panel: None,
-        api_coverage: None,
-        tutorial_state: None,
-        learning_progress: None,
+        ..Default::default()
     };
 
     // Step 4: Save to file

@@ -19,7 +19,7 @@ use crate::learning_path::LearningProgress;
 use crate::tutorial::TutorialState;
 
 /// Serializable version of BufferPanel state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BufferPanelState {
     pub label: String,
     pub size: String,
@@ -37,7 +37,7 @@ pub struct BufferPanelState {
 }
 
 /// Serializable version of TexturePanel state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TexturePanelState {
     pub label: String,
     pub width: String,
@@ -55,7 +55,7 @@ pub struct TexturePanelState {
 }
 
 /// Serializable version of SamplerPanel state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct SamplerPanelState {
     pub label: String,
     pub address_mode_u: String,
@@ -71,7 +71,7 @@ pub struct SamplerPanelState {
 }
 
 /// Serializable version of ShaderEditor state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ShaderEditorState {
     pub source_code: String,
     pub label: String,
@@ -79,7 +79,7 @@ pub struct ShaderEditorState {
 }
 
 /// Serializable version of RenderPipelinePanel state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RenderPipelinePanelState {
     pub label: String,
     pub vertex_entry_point: String,
@@ -118,21 +118,21 @@ pub struct RenderPipelinePanelState {
 }
 
 /// Serializable version of ComputePipelinePanel state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ComputePipelinePanelState {
     pub label: String,
     pub entry_point: String,
 }
 
 /// Serializable version of BindGroupPanel state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BindGroupPanelState {
     pub label: String,
     // Additional bind group configuration fields can be added here
 }
 
 /// Serializable version of BindGroupLayoutPanel state
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BindGroupLayoutPanelState {
     pub label: String,
     // Additional bind group layout configuration fields can be added here
@@ -352,33 +352,14 @@ mod tests {
     #[test]
     fn test_state_serialization() {
         let state = PlaygroundState {
-            version: "1.0".to_string(),
-            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "test_buffer".to_string(),
                 size: "1024".to_string(),
                 usage_vertex: true,
-                usage_index: false,
-                usage_uniform: false,
-                usage_storage: false,
-                usage_indirect: false,
-                usage_copy_src: false,
                 usage_copy_dst: true,
-                usage_map_read: false,
-                usage_map_write: false,
-                usage_query_resolve: false,
-                mapped_at_creation: false,
+                ..Default::default()
             }),
-            texture_panel: None,
-            sampler_panel: None,
-            shader_editor: None,
-            render_pipeline_panel: None,
-            compute_pipeline_panel: None,
-            bind_group_panel: None,
-            bind_group_layout_panel: None,
-            api_coverage: None,
-            tutorial_state: None,
-            learning_progress: None,
+            ..Default::default()
         };
 
         // Test JSON serialization
@@ -400,23 +381,12 @@ mod tests {
     #[test]
     fn test_shader_editor_state_serialization() {
         let state = PlaygroundState {
-            version: "1.0".to_string(),
-            theme: Theme::default(),
-            buffer_panel: None,
-            texture_panel: None,
-            sampler_panel: None,
             shader_editor: Some(ShaderEditorState {
                 source_code: "@vertex fn main() {}".to_string(),
                 label: "my_shader".to_string(),
                 file_path: "shader.wgsl".to_string(),
             }),
-            render_pipeline_panel: None,
-            compute_pipeline_panel: None,
-            bind_group_panel: None,
-            bind_group_layout_panel: None,
-            api_coverage: None,
-            tutorial_state: None,
-            learning_progress: None,
+            ..Default::default()
         };
 
         let json = state.to_json().unwrap();
@@ -460,33 +430,15 @@ mod tests {
     #[test]
     fn test_url_encoding_with_buffer_state() {
         let state = PlaygroundState {
-            version: "1.0".to_string(),
-            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "vertex_buffer".to_string(),
                 size: "2048".to_string(),
                 usage_vertex: true,
-                usage_index: false,
                 usage_uniform: true,
-                usage_storage: false,
-                usage_indirect: false,
                 usage_copy_src: true,
-                usage_copy_dst: false,
-                usage_map_read: false,
-                usage_map_write: false,
-                usage_query_resolve: false,
-                mapped_at_creation: false,
+                ..Default::default()
             }),
-            texture_panel: None,
-            sampler_panel: None,
-            shader_editor: None,
-            render_pipeline_panel: None,
-            compute_pipeline_panel: None,
-            bind_group_panel: None,
-            bind_group_layout_panel: None,
-            api_coverage: None,
-            tutorial_state: None,
-            learning_progress: None,
+            ..Default::default()
         };
 
         let encoded = state.to_url_encoded().unwrap();
@@ -517,23 +469,12 @@ fn fs_main() -> @location(0) vec4<f32> {
 "#;
 
         let state = PlaygroundState {
-            version: "1.0".to_string(),
-            theme: Theme::default(),
-            buffer_panel: None,
-            texture_panel: None,
-            sampler_panel: None,
             shader_editor: Some(ShaderEditorState {
                 source_code: shader_code.to_string(),
                 label: "red_shader".to_string(),
                 file_path: "shader.wgsl".to_string(),
             }),
-            render_pipeline_panel: None,
-            compute_pipeline_panel: None,
-            bind_group_panel: None,
-            bind_group_layout_panel: None,
-            api_coverage: None,
-            tutorial_state: None,
-            learning_progress: None,
+            ..Default::default()
         };
 
         let encoded = state.to_url_encoded().unwrap();
@@ -548,33 +489,13 @@ fn fs_main() -> @location(0) vec4<f32> {
     #[test]
     fn test_shareable_url_generation() {
         let state = PlaygroundState {
-            version: "1.0".to_string(),
-            theme: Theme::default(),
-            api_coverage: None,
             buffer_panel: Some(BufferPanelState {
                 label: "test".to_string(),
                 size: "1024".to_string(),
                 usage_vertex: true,
-                usage_index: false,
-                usage_uniform: false,
-                usage_storage: false,
-                usage_indirect: false,
-                usage_copy_src: false,
-                usage_copy_dst: false,
-                usage_map_read: false,
-                usage_map_write: false,
-                usage_query_resolve: false,
-                mapped_at_creation: false,
+                ..Default::default()
             }),
-            texture_panel: None,
-            sampler_panel: None,
-            shader_editor: None,
-            render_pipeline_panel: None,
-            compute_pipeline_panel: None,
-            bind_group_panel: None,
-            bind_group_layout_panel: None,
-            tutorial_state: None,
-            learning_progress: None,
+            ..Default::default()
         };
 
         let base_url = "https://example.com/playground";
@@ -626,9 +547,6 @@ fn fs_main() -> @location(0) vec4<f32> {
     #[test]
     fn test_complex_state_roundtrip() {
         let state = PlaygroundState {
-            version: "1.0".to_string(),
-            api_coverage: None,
-            theme: Theme::default(),
             buffer_panel: Some(BufferPanelState {
                 label: "complex_buffer".to_string(),
                 size: "4096".to_string(),
@@ -636,13 +554,11 @@ fn fs_main() -> @location(0) vec4<f32> {
                 usage_index: true,
                 usage_uniform: true,
                 usage_storage: true,
-                usage_indirect: false,
                 usage_copy_src: true,
                 usage_copy_dst: true,
                 usage_map_read: true,
-                usage_map_write: false,
-                usage_query_resolve: false,
                 mapped_at_creation: true,
+                ..Default::default()
             }),
             texture_panel: Some(TexturePanelState {
                 label: "render_target".to_string(),
@@ -653,11 +569,10 @@ fn fs_main() -> @location(0) vec4<f32> {
                 sample_count: "1".to_string(),
                 format: "Rgba8Unorm".to_string(),
                 dimension: "D2".to_string(),
-                usage_copy_src: false,
                 usage_copy_dst: true,
                 usage_texture_binding: true,
-                usage_storage_binding: false,
                 usage_render_attachment: true,
+                ..Default::default()
             }),
             sampler_panel: Some(SamplerPanelState {
                 label: "linear_sampler".to_string(),
@@ -669,20 +584,15 @@ fn fs_main() -> @location(0) vec4<f32> {
                 mipmap_filter: "Linear".to_string(),
                 lod_min_clamp: "0.0".to_string(),
                 lod_max_clamp: "32.0".to_string(),
-                compare: None,
                 max_anisotropy: "1".to_string(),
+                ..Default::default()
             }),
             shader_editor: Some(ShaderEditorState {
                 source_code: "@vertex fn main() {}".to_string(),
                 label: "test_shader".to_string(),
                 file_path: "test.wgsl".to_string(),
             }),
-            render_pipeline_panel: None,
-            compute_pipeline_panel: None,
-            bind_group_panel: None,
-            bind_group_layout_panel: None,
-            tutorial_state: None,
-            learning_progress: None,
+            ..Default::default()
         };
 
         // Test full roundtrip

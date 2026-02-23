@@ -84,7 +84,7 @@ cc = "1.2"
 
 [dev-dependencies]
 pollster = "0.4"
-serial_test = "3.0"
+serial_test = "3.4"
 
 # Criterion doesn't support WASM, so only include it for native targets
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]

@@ -69,6 +69,9 @@ jobs:
       
       - name: Install software rendering dependencies for headless GPU testing
         run: |
+          # Remove problematic Microsoft repositories to avoid apt-get update failures
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/azure-cli.list
           sudo apt-get update
           # Install Mesa software rendering (lavapipe for Vulkan, llvmpipe for OpenGL) for headless GPU testing
           sudo apt-get install -y \

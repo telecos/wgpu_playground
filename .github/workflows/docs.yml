@@ -257,8 +257,14 @@ jobs:
       - name: Check links with lychee
         uses: lycheeverse/lychee-action@v2
         with:
-          # Check all HTML files in the documentation
-          args: --verbose --no-progress --accept 200,429 'docs/**/*.html'
+          # Check all HTML files in the documentation.
+          # Exclude broken relative cross-crate fragment links that rustdoc generates
+          # for transitive dependencies (e.g. tracing) excluded by --no-deps; these
+          # are false positives since the referenced pages do exist in the full crate docs.
+          args: >-
+            --verbose --no-progress --accept 200,429
+            --exclude 'dispatcher#setting-the-default-subscriber'
+            'docs/**/*.html'
           # Fail the job on broken links
           fail: true
         env:

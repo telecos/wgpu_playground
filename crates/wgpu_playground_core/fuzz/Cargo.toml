@@ -1,0 +1,34 @@
+[package]
+name = "wgpu_playground_core-fuzz"
+version = "0.0.1"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+# This package intentionally lives outside the main workspace so that cargo-fuzz
+# can manage it independently.  The empty [workspace] table below prevents Cargo
+# from associating this package with the root workspace.
+[workspace]
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+wgpu = { version = "28.0", features = ["wgsl"] }
+wgpu_playground_core = { path = ".." }
+
+[[bin]]
+name = "fuzz_math_utils"
+path = "fuzz_targets/fuzz_math_utils.rs"
+doc = false
+
+[[bin]]
+name = "fuzz_buffer_descriptor"
+path = "fuzz_targets/fuzz_buffer_descriptor.rs"
+doc = false
+
+[[bin]]
+name = "fuzz_shader_module"
+path = "fuzz_targets/fuzz_shader_module.rs"
+doc = false

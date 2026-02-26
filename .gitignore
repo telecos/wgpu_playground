@@ -2,6 +2,9 @@
 **/*.rs.bk
 *.pdb
 
+# Fuzz build artifacts
+crates/wgpu_playground_core/fuzz/target/
+
 # WASM build artifacts
 pkg/
 wasm-pack.log

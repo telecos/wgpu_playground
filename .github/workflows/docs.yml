@@ -258,7 +258,8 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           # Check all HTML files in the documentation
-          args: --verbose --no-progress --accept 200,429 'docs/**/*.html'
+          # Exclude cross-crate rustdoc links to tracing::dispatcher (not built with --no-deps)
+          args: --verbose --no-progress --accept 200,429 --exclude 'dispatcher#setting-the-default-subscriber' 'docs/**/*.html'
           # Fail the job on broken links
           fail: true
         env:

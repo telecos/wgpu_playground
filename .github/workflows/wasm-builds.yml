@@ -55,7 +55,7 @@ jobs:
           wasm-pack build --target web --release
 
       - name: Upload core WASM artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: wasm-core
           path: crates/wgpu_playground_core/pkg/
@@ -152,7 +152,7 @@ jobs:
           fi
 
       - name: Upload deployment bundle
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: wasm-deployment-bundle
           path: dist/

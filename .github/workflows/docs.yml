@@ -76,7 +76,7 @@ jobs:
         run: touch target/doc/.nojekyll
       
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: documentation
           path: target/doc
@@ -134,7 +134,7 @@ jobs:
           ls -lah wasm-demo/pkg/
 
       - name: Upload WASM demo artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: wasm-demo
           path: wasm-demo/

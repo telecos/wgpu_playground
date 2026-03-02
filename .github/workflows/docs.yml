@@ -148,13 +148,13 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Download documentation
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: documentation
           path: deployment
 
       - name: Download WASM demo
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: wasm-demo
           path: deployment/demo
@@ -249,7 +249,7 @@ jobs:
     needs: build-docs
     steps:
       - name: Download documentation
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: documentation
           path: docs

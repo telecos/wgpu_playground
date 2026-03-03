@@ -73,7 +73,7 @@ jobs:
           Compress-Archive -Path artifacts/${{ matrix.config.binary_name }} -DestinationPath artifacts/${{ matrix.config.artifact_name }}.zip
       
       - name: Upload native artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.config.artifact_name }}
           path: |
@@ -123,7 +123,7 @@ jobs:
           tar czf wgpu_playground-wasm-bundle.tar.gz wasm-bundle/
       
       - name: Upload WASM artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: wasm-bundle
           path: artifacts/wgpu_playground-wasm-bundle.tar.gz
@@ -172,7 +172,7 @@ jobs:
           tar czf ../wgpu_playground-docs.tar.gz doc/
       
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: documentation
           path: wgpu_playground-docs.tar.gz

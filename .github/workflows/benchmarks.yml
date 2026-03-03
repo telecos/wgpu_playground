@@ -106,7 +106,7 @@ jobs:
 
       # Upload benchmark results as artifacts
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: benchmark-results-${{ github.run_number }}
@@ -120,7 +120,7 @@ jobs:
       # Store baseline on main branch
       - name: Store baseline (main branch only)
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-baseline-${{ github.sha }}
           path: target/criterion/
@@ -227,7 +227,7 @@ jobs:
           echo "ℹ️ For detailed trend analysis, download the benchmark-results artifacts." >> $GITHUB_STEP_SUMMARY
 
       - name: Upload trend data
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-trends-${{ github.run_number }}
           path: benchmark-history/

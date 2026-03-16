@@ -1656,9 +1656,9 @@ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "lib3mf"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3d22c8948596bbd1275c4f68f5004a0a7806450a6e28b3c608cd3335b79a439"
+checksum = "909b625efea54d0a560d2a1b2483cedb313f90200f7fc5e39e7e3a191b87fe6a"
 dependencies = [
  "quick-xml 0.39.2",
  "thiserror 2.0.18",

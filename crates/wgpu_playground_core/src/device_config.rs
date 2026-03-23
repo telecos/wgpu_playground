@@ -159,7 +159,7 @@ impl DeviceConfigPanel {
                 self.render_feature_checkbox(
                     ui,
                     "Shader Primitive Index",
-                    Features::SHADER_PRIMITIVE_INDEX,
+                    Features::PRIMITIVE_INDEX,
                 );
             });
     }
@@ -245,7 +245,7 @@ impl DeviceConfigPanel {
                 );
 
                 // Buffer limits
-                Self::render_limit_u32(
+                Self::render_limit_u64(
                     ui,
                     "Max Uniform Buffer Binding Size",
                     &mut config_limits.max_uniform_buffer_binding_size,
@@ -253,7 +253,7 @@ impl DeviceConfigPanel {
                     1,
                 );
 
-                Self::render_limit_u32(
+                Self::render_limit_u64(
                     ui,
                     "Max Storage Buffer Binding Size",
                     &mut config_limits.max_storage_buffer_binding_size,

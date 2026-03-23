@@ -27,9 +27,9 @@ const IMAGE_HEIGHT: u32 = 512;
 
 /// Create GPU device and queue with required features
 async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     let adapter = instance
@@ -215,7 +215,7 @@ fn main() {
     let horizontal_pipeline_layout =
         device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Horizontal Blur Pipeline Layout"),
-            bind_group_layouts: &[&horizontal_bind_group_layout],
+            bind_group_layouts: &[Some(&horizontal_bind_group_layout)],
             immediate_size: 0,
         });
 
@@ -275,7 +275,7 @@ fn main() {
 
     let vertical_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Vertical Blur Pipeline Layout"),
-        bind_group_layouts: &[&vertical_bind_group_layout],
+        bind_group_layouts: &[Some(&vertical_bind_group_layout)],
         immediate_size: 0,
     });
 

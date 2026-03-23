@@ -41,9 +41,9 @@ impl Particle {
 
 /// Create GPU device and queue
 async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     let adapter = instance
@@ -211,7 +211,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let compute_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Compute Pipeline Layout"),
-        bind_group_layouts: &[&compute_bind_group_layout],
+        bind_group_layouts: &[Some(&compute_bind_group_layout)],
         immediate_size: 0,
     });
 

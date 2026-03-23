@@ -491,7 +491,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         let second_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Second Pass Layout"),
-                bind_group_layouts: &[&second_bind_group_layout],
+                bind_group_layouts: &[Some(&second_bind_group_layout)],
                 immediate_size: 0,
             });
 
@@ -963,8 +963,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             primitive: wgpu::PrimitiveState::default(),
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth32Float,
-                depth_write_enabled: true,
-                depth_compare: wgpu::CompareFunction::Less,
+                depth_write_enabled: Some(true),
+                depth_compare: Some(wgpu::CompareFunction::Less),
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),

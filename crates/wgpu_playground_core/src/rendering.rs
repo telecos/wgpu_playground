@@ -593,7 +593,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Cube Pipeline Layout"),
-            bind_group_layouts: &[&bind_group_layout],
+            bind_group_layouts: &[Some(&bind_group_layout)],
             immediate_size: 0,
         });
 
@@ -632,8 +632,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             },
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth32Float,
-                depth_write_enabled: true,
-                depth_compare: wgpu::CompareFunction::Less,
+                depth_write_enabled: Some(true),
+                depth_compare: Some(wgpu::CompareFunction::Less),
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
@@ -868,7 +868,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Texture Pipeline Layout"),
-            bind_group_layouts: &[&bind_group_layout],
+            bind_group_layouts: &[Some(&bind_group_layout)],
             immediate_size: 0,
         });
 

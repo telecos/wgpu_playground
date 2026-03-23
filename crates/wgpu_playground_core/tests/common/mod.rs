@@ -49,9 +49,9 @@ pub async fn create_test_device() -> Option<(Device, Queue)> {
         wgpu::Backends::all()
     };
 
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     let adapter = instance
@@ -96,9 +96,9 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
         wgpu::Backends::all()
     };
 
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     let adapter = instance
@@ -148,9 +148,9 @@ pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Dev
         wgpu::Backends::all()
     };
 
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     let adapter = instance
@@ -191,9 +191,9 @@ pub async fn create_test_instance_and_adapter() -> Option<(Instance, Adapter)> {
         wgpu::Backends::all()
     };
 
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     let adapter = instance

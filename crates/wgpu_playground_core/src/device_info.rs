@@ -71,7 +71,7 @@ impl DeviceInfo {
             limits.max_vertex_buffer_array_stride,
             limits.min_uniform_buffer_offset_alignment,
             limits.min_storage_buffer_offset_alignment,
-            limits.max_inter_stage_shader_components,
+            limits.max_inter_stage_shader_variables,
             limits.max_compute_workgroup_storage_size,
             limits.max_compute_invocations_per_workgroup,
             limits.max_compute_workgroup_size_x,

@@ -501,9 +501,9 @@ fn main() {
     let main_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("Main Pipeline Layout"),
         bind_group_layouts: &[
-            &camera_bind_group_layout,
-            &light_bind_group_layout,
-            &shadow_map_bind_group_layout,
+            Some(&camera_bind_group_layout),
+            Some(&light_bind_group_layout),
+            Some(&shadow_map_bind_group_layout),
         ],
         immediate_size: 0,
     });

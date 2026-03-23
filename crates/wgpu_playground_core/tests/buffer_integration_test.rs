@@ -779,9 +779,8 @@ fn test_buffer_map_write_modify_read() {
         BufferOps::map_write(&write_buffer).await.unwrap();
         {
             let mut view = BufferOps::get_mapped_range_mut(&write_buffer);
-            for (i, byte) in view.iter_mut().enumerate() {
-                *byte = (i % 256) as u8;
-            }
+            let data: Vec<u8> = (0..256).map(|i| (i % 256) as u8).collect();
+            view.copy_from_slice(&data);
         }
         BufferOps::unmap(&write_buffer);
 

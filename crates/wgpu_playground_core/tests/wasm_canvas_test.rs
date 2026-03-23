@@ -276,9 +276,9 @@ async fn test_wgpu_surface_from_canvas() {
     canvas.set_height(600);
 
     // Create wgpu instance
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::BROWSER_WEBGPU,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     // Create surface from canvas

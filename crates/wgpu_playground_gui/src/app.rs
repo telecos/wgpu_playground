@@ -957,9 +957,9 @@ mod tests {
         // This test verifies that the app can be created with a GPU adapter/device
         // We use pollster to block on async GPU initialization
         pollster::block_on(async {
-            let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+            let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
                 backends: wgpu::Backends::all(),
-                ..Default::default()
+                ..wgpu::InstanceDescriptor::new_without_display_handle()
             });
 
             let adapter = instance

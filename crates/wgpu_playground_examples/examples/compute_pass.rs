@@ -14,9 +14,9 @@ use wgpu_playground_core::compute_pass_encoder::{ComputePassDescriptor, ComputeP
 use wgpu_playground_core::shader::ShaderModule;
 
 async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
-    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     let adapter = instance

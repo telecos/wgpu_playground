@@ -12,6 +12,12 @@ mod app;
 
 use app::PlaygroundApp;
 
+#[derive(Debug)]
+enum RenderError {
+    /// Surface is lost or outdated and needs to be reconfigured
+    SurfaceReconfigure,
+}
+
 struct AppState {
     window: Arc<Window>,
     surface: wgpu::Surface<'static>,
@@ -188,8 +194,17 @@ impl AppState {
         }
     }
 
-    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let surface_texture = self.surface.get_current_texture()?;
+    fn render(&mut self) -> Result<(), RenderError> {
+        let surface_texture = match self.surface.get_current_texture() {
+            wgpu::CurrentSurfaceTexture::Success(t)
+            | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
+            wgpu::CurrentSurfaceTexture::Outdated | wgpu::CurrentSurfaceTexture::Lost => {
+                return Err(RenderError::SurfaceReconfigure)
+            }
+            wgpu::CurrentSurfaceTexture::Timeout
+            | wgpu::CurrentSurfaceTexture::Occluded
+            | wgpu::CurrentSurfaceTexture::Validation => return Ok(()),
+        };
         let view = surface_texture
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
@@ -345,9 +360,7 @@ impl ApplicationHandler for App {
             }
             WindowEvent::RedrawRequested => match state.render() {
                 Ok(_) => {}
-                Err(wgpu::SurfaceError::Lost) => state.resize(state.window.inner_size()),
-                Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
-                Err(e) => eprintln!("Surface error: {:?}", e),
+                Err(RenderError::SurfaceReconfigure) => state.resize(state.window.inner_size()),
             },
             WindowEvent::DroppedFile(path) => {
                 // Handle file drop

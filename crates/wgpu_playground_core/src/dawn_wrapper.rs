@@ -231,9 +231,9 @@ impl DawnInstance {
 
         log::info!("Creating Dawn-compatible WebGPU instance using wgpu-core backend");
 
-        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
-            ..Default::default()
+            ..wgpu::InstanceDescriptor::new_without_display_handle()
         });
 
         log::info!("Dawn-compatible instance created successfully");

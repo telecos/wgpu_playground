@@ -59,9 +59,9 @@ fn test_shader_editor_set_valid_shader() {
 fn test_shader_editor_compile_with_device() {
     // This test requires a GPU device
     pollster::block_on(async {
-        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
-            ..Default::default()
+            ..wgpu::InstanceDescriptor::new_without_display_handle()
         });
 
         let adapter = instance

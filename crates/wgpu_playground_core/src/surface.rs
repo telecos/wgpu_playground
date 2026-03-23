@@ -1,6 +1,6 @@
 use wgpu::{
-    CompositeAlphaMode, Device, Instance, PresentMode, Surface, SurfaceConfiguration,
-    SurfaceTexture, TextureFormat, TextureUsages,
+    CompositeAlphaMode, CurrentSurfaceTexture, Device, Instance, PresentMode, Surface,
+    SurfaceConfiguration, TextureFormat, TextureUsages,
 };
 
 /// Builder for creating and configuring GPU surfaces
@@ -169,26 +169,24 @@ pub fn configure_surface(surface: &Surface, device: &Device, config: &SurfaceCon
 /// * `surface` - The surface to get the texture from
 ///
 /// # Returns
-/// The current surface texture, or an error if the surface is invalid
-///
-/// # Errors
-/// Returns a `SurfaceError` if:
-/// - The surface was lost and needs to be reconfigured
-/// - The presentation system ran out of memory
-/// - The surface timed out waiting for the next frame
-/// - The surface is outdated and needs to be reconfigured
+/// A [`wgpu::CurrentSurfaceTexture`] indicating the result of the operation.
+/// On success, contains the surface texture ready for rendering.
 ///
 /// # Examples
 /// ```no_run
 /// use wgpu_playground_core::surface::get_current_texture;
-/// # async fn example(surface: &wgpu::Surface<'_>) -> Result<(), wgpu::SurfaceError> {
-/// let texture = get_current_texture(surface)?;
-/// // Use the texture for rendering
-/// texture.present();
-/// # Ok(())
+/// use wgpu::CurrentSurfaceTexture;
+/// # fn example(surface: &wgpu::Surface<'_>) {
+/// match get_current_texture(surface) {
+///     CurrentSurfaceTexture::Success(texture) | CurrentSurfaceTexture::Suboptimal(texture) => {
+///         // Use the texture for rendering
+///         texture.present();
+///     }
+///     _ => {} // Handle other cases (lost, outdated, timeout, etc.)
+/// }
 /// # }
 /// ```
-pub fn get_current_texture(surface: &Surface) -> Result<SurfaceTexture, wgpu::SurfaceError> {
+pub fn get_current_texture(surface: &Surface) -> CurrentSurfaceTexture {
     surface.get_current_texture()
 }
 

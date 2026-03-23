@@ -348,7 +348,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
         tracker.record(ApiCategory::PipelineLayout, "create_pipeline_layout");
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Pipeline Preview Layout"),
-            bind_group_layouts: &[&bind_group_layout],
+            bind_group_layouts: &[Some(&bind_group_layout)],
             immediate_size: 0,
         });
 
@@ -398,8 +398,8 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
 
             wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth24Plus,
-                depth_write_enabled: ds.depth_write_enabled,
-                depth_compare: compare,
+                depth_write_enabled: Some(ds.depth_write_enabled),
+                depth_compare: Some(compare),
                 stencil: wgpu::StencilState {
                     front: wgpu::StencilFaceState::IGNORE,
                     back: wgpu::StencilFaceState::IGNORE,

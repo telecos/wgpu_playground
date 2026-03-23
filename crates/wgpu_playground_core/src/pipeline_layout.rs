@@ -114,7 +114,7 @@ pub struct PipelineLayoutDescriptor<'a> {
     /// Optional label for debugging
     label: Option<String>,
     /// Bind group layouts that will be used with this pipeline layout
-    bind_group_layouts: Vec<&'a BindGroupLayout>,
+    bind_group_layouts: Vec<Option<&'a BindGroupLayout>>,
     /// Push constant ranges (if supported)
     push_constant_ranges: Vec<PushConstantRange>,
 }
@@ -156,7 +156,7 @@ impl<'a> PipelineLayoutDescriptor<'a> {
     /// # }
     /// ```
     pub fn with_bind_group_layout(mut self, layout: &'a BindGroupLayout) -> Self {
-        self.bind_group_layouts.push(layout);
+        self.bind_group_layouts.push(Some(layout));
         self
     }
 
@@ -168,7 +168,8 @@ impl<'a> PipelineLayoutDescriptor<'a> {
     /// # Returns
     /// Self for method chaining
     pub fn with_bind_group_layouts(mut self, layouts: &[&'a BindGroupLayout]) -> Self {
-        self.bind_group_layouts.extend_from_slice(layouts);
+        self.bind_group_layouts
+            .extend(layouts.iter().map(|l| Some(*l)));
         self
     }
 
@@ -215,7 +216,7 @@ impl<'a> PipelineLayoutDescriptor<'a> {
     }
 
     /// Get the bind group layouts
-    pub fn bind_group_layouts(&self) -> &[&'a BindGroupLayout] {
+    pub fn bind_group_layouts(&self) -> &[Option<&'a BindGroupLayout>] {
         &self.bind_group_layouts
     }
 

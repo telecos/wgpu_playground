@@ -3985,6 +3985,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "wgpu-types"
+version = "29.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d15ece45db77dd5451f11c0ce898334317ce8502d304a20454b531fdc0652fae"
+dependencies = [
+ "bitflags 2.10.0",
+ "bytemuck",
+ "js-sys",
+ "log",
+ "raw-window-handle",
+ "web-sys",
+]
+
+[[package]]
 name = "wgpu_playground_core"
 version = "0.1.0"
 dependencies = [
@@ -4017,7 +4031,7 @@ dependencies = [
  "webbrowser",
  "wgpu 28.0.0",
  "wgpu-core 28.0.1",
- "wgpu-types 28.0.0",
+ "wgpu-types 29.0.0",
  "winit",
 ]
 

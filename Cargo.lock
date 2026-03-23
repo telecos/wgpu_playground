@@ -4048,8 +4048,10 @@ checksum = "d15ece45db77dd5451f11c0ce898334317ce8502d304a20454b531fdc0652fae"
 dependencies = [
  "bitflags 2.10.0",
  "bytemuck",
+ "js-sys",
  "log",
  "raw-window-handle",
+ "web-sys",
 ]
 
 [[package]]
@@ -4085,7 +4087,7 @@ dependencies = [
  "webbrowser",
  "wgpu 28.0.0",
  "wgpu-core 29.0.0",
- "wgpu-types 28.0.0",
+ "wgpu-types 29.0.0",
  "winit",
 ]
 

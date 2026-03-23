@@ -793,8 +793,8 @@ impl DepthStencilState {
     pub fn to_wgpu(&self) -> wgpu::DepthStencilState {
         wgpu::DepthStencilState {
             format: self.format,
-            depth_write_enabled: self.depth_write_enabled,
-            depth_compare: self.depth_compare.to_wgpu(),
+            depth_write_enabled: Some(self.depth_write_enabled),
+            depth_compare: Some(self.depth_compare.to_wgpu()),
             stencil: wgpu::StencilState {
                 front: self.stencil_front.to_wgpu(),
                 back: self.stencil_back.to_wgpu(),

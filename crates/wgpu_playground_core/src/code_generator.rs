@@ -247,9 +247,9 @@ impl CodeGenerator {
                 async fn new(window: Arc<Window>) -> Self {{\n        \
                     let size = window.inner_size();\n\
                     \n        \
-                    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {{\n            \
+                    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {{\n            \
                         backends: wgpu::Backends::all(),\n            \
-                        ..Default::default()\n        \
+                        ..wgpu::InstanceDescriptor::new_without_display_handle()\n        \
                     }});\n\
                     \n        \
                     let surface = instance.create_surface(window.clone()).unwrap();\n\
@@ -650,9 +650,9 @@ impl CodeGenerator {
         code.push_str(
             "        let size = window.inner_size();\n\
             \n        \
-            let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {\n            \
+            let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {\n            \
                 backends: wgpu::Backends::all(),\n            \
-                ..Default::default()\n        \
+                ..wgpu::InstanceDescriptor::new_without_display_handle()\n        \
             });\n\
             \n        \
             let surface = instance.create_surface(window.clone()).unwrap();\n\

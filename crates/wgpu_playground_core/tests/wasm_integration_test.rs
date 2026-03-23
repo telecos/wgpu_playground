@@ -83,9 +83,9 @@ async fn test_wgpu_instance_creation() {
     use wgpu::Instance;
 
     // Create a WGPU instance
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::BROWSER_WEBGPU,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     // Instance creation should succeed
@@ -98,9 +98,9 @@ async fn test_wgpu_instance_creation() {
 async fn test_adapter_enumeration_browser_backend() {
     use wgpu::Instance;
 
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::BROWSER_WEBGPU,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     // Try to request an adapter
@@ -129,9 +129,9 @@ async fn test_adapter_enumeration_browser_backend() {
 async fn test_device_creation_if_available() {
     use wgpu::Instance;
 
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::BROWSER_WEBGPU,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
 
     if let Ok(adapter) = instance

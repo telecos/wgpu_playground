@@ -222,9 +222,9 @@ pub fn backend_input_options() -> Vec<&'static str> {
 /// Create a wgpu Instance with the specified backends
 pub fn create_instance(backends: Backends) -> Instance {
     log::debug!("Creating wgpu Instance with backends: {:?}", backends);
-    let instance = Instance::new(&wgpu::InstanceDescriptor {
+    let instance = Instance::new(wgpu::InstanceDescriptor {
         backends,
-        ..Default::default()
+        ..wgpu::InstanceDescriptor::new_without_display_handle()
     });
     log::trace!("Instance created successfully");
     instance

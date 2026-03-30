@@ -3768,7 +3768,7 @@ dependencies = [
  "web-sys",
  "wgpu-core 29.0.0",
  "wgpu-hal 29.0.0",
- "wgpu-types 29.0.0",
+ "wgpu-types 29.0.1",
 ]
 
 [[package]]
@@ -3833,7 +3833,7 @@ dependencies = [
  "wgpu-core-deps-windows-linux-android 29.0.0",
  "wgpu-hal 29.0.0",
  "wgpu-naga-bridge",
- "wgpu-types 29.0.0",
+ "wgpu-types 29.0.1",
 ]
 
 [[package]]
@@ -3987,7 +3987,7 @@ dependencies = [
  "wayland-sys",
  "web-sys",
  "wgpu-naga-bridge",
- "wgpu-types 29.0.0",
+ "wgpu-types 29.0.1",
  "windows 0.62.2",
  "windows-core 0.62.2",
 ]
@@ -3999,7 +3999,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0b8e1e505095f24cb4a578f04b1421d456257dca7fac114d9d9dd3d978c34b8"
 dependencies = [
  "naga 29.0.0",
- "wgpu-types 29.0.0",
+ "wgpu-types 29.0.1",
 ]
 
 [[package]]
@@ -4018,9 +4018,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "29.0.0"
+version = "29.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d15ece45db77dd5451f11c0ce898334317ce8502d304a20454b531fdc0652fae"
+checksum = "ec2675540fb1a5cfa5ef122d3d5f390e2c75711a0b946410f2d6ac3a0f77d1f6"
 dependencies = [
  "bitflags 2.10.0",
  "bytemuck",
@@ -4063,7 +4063,7 @@ dependencies = [
  "webbrowser",
  "wgpu 29.0.0",
  "wgpu-core 29.0.0",
- "wgpu-types 29.0.0",
+ "wgpu-types 29.0.1",
  "winit",
 ]
 

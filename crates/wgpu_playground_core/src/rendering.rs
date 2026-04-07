@@ -1297,7 +1297,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
                         // Mouse wheel for zoom - only when hovering over the image
                         if response.hovered() {
-                            let scroll_delta = ui.input(|i| i.raw_scroll_delta.y);
+                            let scroll_delta = ui.input(|i| i.smooth_scroll_delta.y);
                             if scroll_delta.abs() > 0.1 {
                                 self.camera_distance -= scroll_delta * 0.01;
                                 self.camera_distance = self.camera_distance.clamp(1.0, 10.0);

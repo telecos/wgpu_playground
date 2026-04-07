@@ -132,8 +132,7 @@ impl AppState {
         // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
         // We transmute to bridge the version gap until egui-wgpu supports wgpu 28
         let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(&device) };
-        let format_27: egui_wgpu::wgpu::TextureFormat =
-            unsafe { std::mem::transmute(surface_config.format) };
+        let format_27: egui_wgpu::wgpu::TextureFormat = surface_config.format;
         let egui_renderer = egui_wgpu::Renderer::new(
             device_27,
             format_27,
@@ -242,6 +241,7 @@ impl AppState {
 
         // Run egui
         let raw_input = self.egui_state.take_egui_input(&self.window);
+        #[allow(deprecated)]
         let egui_output = self.egui_ctx.run(raw_input, |ctx| {
             self.playground_app
                 .ui(ctx, &self.device, &self.queue, &mut self.egui_renderer);

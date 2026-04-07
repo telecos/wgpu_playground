@@ -212,6 +212,7 @@ impl PlaygroundApp {
         });
 
         // Menu bar at the top
+        #[allow(deprecated)]
         egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading("🎮 WebGPU Playground");
@@ -379,6 +380,7 @@ impl PlaygroundApp {
         });
 
         // Sidebar on the left
+        #[allow(deprecated)]
         egui::SidePanel::left("sidebar").show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("Navigation");
@@ -616,6 +618,7 @@ impl PlaygroundApp {
         });
 
         // Main canvas area
+        #[allow(deprecated)]
         egui::CentralPanel::default().show(ctx, |ui| {
             // Sync tutorial state for learning path before rendering any tab
             let tutorial_state = self.tutorial_panel.export_state();

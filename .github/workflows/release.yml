@@ -246,7 +246,7 @@ jobs:
           echo "Release notes generated successfully"
       
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: Release ${{ steps.version.outputs.version }}
           body_path: release_notes.md

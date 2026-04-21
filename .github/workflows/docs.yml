@@ -238,7 +238,7 @@ jobs:
           find deployment -type f \( -name "*.html" -o -name "*.wasm" \) | head -20
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: deployment
 

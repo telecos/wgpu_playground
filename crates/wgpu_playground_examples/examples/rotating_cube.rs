@@ -108,14 +108,14 @@ fn create_transform_matrix(rotation_radians: f32, aspect_ratio: f32) -> Mat4 {
         Mat4::from_rotation_y(rotation_radians) * Mat4::from_rotation_x(rotation_radians * 0.5);
 
     // View matrix: camera at (0, 0, 3) looking at origin
-    let view = Mat4::look_at_rh(
+    let view = glam::camera::rh::view::look_at_mat4(
         Vec3::new(0.0, 0.0, 3.0), // camera position
         Vec3::new(0.0, 0.0, 0.0), // look at point
         Vec3::new(0.0, 1.0, 0.0), // up vector
     );
 
     // Projection matrix: perspective with 45° FOV
-    let projection = Mat4::perspective_rh(
+    let projection = glam::camera::rh::proj::directx::perspective(
         45.0_f32.to_radians(), // field of view
         aspect_ratio,          // aspect ratio
         0.1,                   // near plane

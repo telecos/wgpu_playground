@@ -241,10 +241,9 @@ impl AppState {
 
         // Run egui
         let raw_input = self.egui_state.take_egui_input(&self.window);
-        #[allow(deprecated)]
-        let egui_output = self.egui_ctx.run(raw_input, |ctx| {
+        let egui_output = self.egui_ctx.run_ui(raw_input, |ui| {
             self.playground_app
-                .ui(ctx, &self.device, &self.queue, &mut self.egui_renderer);
+                .ui(ui, &self.device, &self.queue, &mut self.egui_renderer);
         });
 
         self.egui_state

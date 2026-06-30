@@ -603,8 +603,12 @@ fn main() {
     // Camera setup
     let camera_pos = Vec3::new(3.0, 3.0, 5.0);
     let view = glam::camera::rh::view::look_at_mat4(camera_pos, Vec3::ZERO, Vec3::Y);
-    let projection =
-        glam::camera::rh::proj::directx::perspective(45.0_f32.to_radians(), aspect_ratio, 0.1, 100.0);
+    let projection = glam::camera::rh::proj::directx::perspective(
+        45.0_f32.to_radians(),
+        aspect_ratio,
+        0.1,
+        100.0,
+    );
     let view_proj = projection * view;
 
     let camera_uniforms = CameraUniforms {

@@ -10,7 +10,7 @@
 /// - Basic Phong lighting model
 ///
 /// Run with: cargo run --package wgpu_playground_examples --example lighting_shadows
-use glam::{Mat4, Vec3, Vec4};
+use glam::{Vec3, Vec4};
 use wgpu::util::DeviceExt;
 use wgpu_playground_core::shader::ShaderModule;
 
@@ -602,8 +602,13 @@ fn main() {
 
     // Camera setup
     let camera_pos = Vec3::new(3.0, 3.0, 5.0);
-    let view = Mat4::look_at_rh(camera_pos, Vec3::ZERO, Vec3::Y);
-    let projection = Mat4::perspective_rh(45.0_f32.to_radians(), aspect_ratio, 0.1, 100.0);
+    let view = glam::camera::rh::view::look_at_mat4(camera_pos, Vec3::ZERO, Vec3::Y);
+    let projection = glam::camera::rh::proj::directx::perspective(
+        45.0_f32.to_radians(),
+        aspect_ratio,
+        0.1,
+        100.0,
+    );
     let view_proj = projection * view;
 
     let camera_uniforms = CameraUniforms {
@@ -632,8 +637,9 @@ fn main() {
 
     // Shadow matrix setup (from light's perspective)
     let light_pos = Vec3::new(-3.0, 5.0, -2.0);
-    let light_view = Mat4::look_at_rh(light_pos, Vec3::ZERO, Vec3::Y);
-    let light_projection = Mat4::orthographic_rh(-8.0, 8.0, -8.0, 8.0, 0.1, 20.0);
+    let light_view = glam::camera::rh::view::look_at_mat4(light_pos, Vec3::ZERO, Vec3::Y);
+    let light_projection =
+        glam::camera::rh::proj::directx::orthographic(-8.0, 8.0, -8.0, 8.0, 0.1, 20.0);
     let light_view_proj = light_projection * light_view;
 
     let shadow_uniforms = ShadowUniforms {

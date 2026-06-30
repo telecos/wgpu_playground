@@ -174,8 +174,12 @@ fn create_view_proj_matrix(aspect_ratio: f32) -> Mat4 {
     );
 
     // Projection matrix: perspective
-    let projection =
-        glam::camera::rh::proj::directx::perspective(45.0_f32.to_radians(), aspect_ratio, 0.1, 100.0);
+    let projection = glam::camera::rh::proj::directx::perspective(
+        45.0_f32.to_radians(),
+        aspect_ratio,
+        0.1,
+        100.0,
+    );
 
     projection * view
 }

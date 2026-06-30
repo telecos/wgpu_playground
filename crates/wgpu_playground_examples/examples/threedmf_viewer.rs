@@ -400,8 +400,12 @@ fn main() {
     // Camera positioned to look at the origin from slightly above and in front
     let camera_pos = Vec3::new(0.0, 1.5, 3.5);
     let view = glam::camera::rh::view::look_at_mat4(camera_pos, Vec3::ZERO, Vec3::Y);
-    let proj =
-        glam::camera::rh::proj::directx::perspective(45.0_f32.to_radians(), aspect_ratio, 0.01, 100.0);
+    let proj = glam::camera::rh::proj::directx::perspective(
+        45.0_f32.to_radians(),
+        aspect_ratio,
+        0.01,
+        100.0,
+    );
     let model_view_proj = proj * view * model_matrix;
 
     // Directional light coming from above-left

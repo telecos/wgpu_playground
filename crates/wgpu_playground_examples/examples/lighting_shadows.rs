@@ -603,8 +603,12 @@ fn main() {
     // Camera setup
     let camera_pos = Vec3::new(3.0, 3.0, 5.0);
     let view = glam::camera::rh::view::look_at_mat4(camera_pos, Vec3::ZERO, Vec3::Y);
-    let projection =
-        glam::camera::rh::proj::directx::perspective(45.0_f32.to_radians(), aspect_ratio, 0.1, 100.0);
+    let projection = glam::camera::rh::proj::directx::perspective(
+        45.0_f32.to_radians(),
+        aspect_ratio,
+        0.1,
+        100.0,
+    );
     let view_proj = projection * view;
 
     let camera_uniforms = CameraUniforms {
@@ -634,7 +638,8 @@ fn main() {
     // Shadow matrix setup (from light's perspective)
     let light_pos = Vec3::new(-3.0, 5.0, -2.0);
     let light_view = glam::camera::rh::view::look_at_mat4(light_pos, Vec3::ZERO, Vec3::Y);
-    let light_projection = glam::camera::rh::proj::directx::orthographic(-8.0, 8.0, -8.0, 8.0, 0.1, 20.0);
+    let light_projection =
+        glam::camera::rh::proj::directx::orthographic(-8.0, 8.0, -8.0, 8.0, 0.1, 20.0);
     let light_view_proj = light_projection * light_view;
 
     let shadow_uniforms = ShadowUniforms {

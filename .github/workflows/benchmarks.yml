@@ -33,7 +33,7 @@ jobs:
     name: Run Benchmarks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0  # Fetch all history for baseline comparison
 
@@ -201,7 +201,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'schedule'
     needs: benchmark
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download recent benchmark results
         uses: actions/download-artifact@v8

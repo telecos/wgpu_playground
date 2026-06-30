@@ -17,13 +17,13 @@ dawn = ["wgpu_playground_core/dawn"]
 [dependencies]
 wgpu_playground_core = { path = "../wgpu_playground_core" }
 wgpu = "29.0"
-winit = "0.30"
+winit = { version = "0.30", default-features = false, features = ["rwh_06", "x11", "wayland", "wayland-dlopen"] }
 pollster = "0.4"
 env_logger = "0.11"
 log = "0.4"
 bytemuck = { version = "1.19", features = ["derive"] }
 egui = "0.34"
-egui-winit = "0.34"
+egui-winit = { version = "0.34", default-features = false, features = ["clipboard", "links", "wayland", "x11"] }
 
 # Native-only dependencies
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

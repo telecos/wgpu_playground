@@ -167,14 +167,19 @@ fn create_instances() -> Vec<InstanceData> {
 /// Create view and projection matrices
 fn create_view_proj_matrix(aspect_ratio: f32) -> Mat4 {
     // View matrix: camera positioned to see the grid
-    let view = Mat4::look_at_rh(
+    let view = glam::camera::rh::view::look_at_mat4(
         Vec3::new(0.0, 8.0, 12.0), // camera position (above and back)
         Vec3::new(0.0, 0.0, 0.0),  // look at center
         Vec3::new(0.0, 1.0, 0.0),  // up vector
     );
 
     // Projection matrix: perspective
-    let projection = Mat4::perspective_rh(45.0_f32.to_radians(), aspect_ratio, 0.1, 100.0);
+    let projection = glam::camera::rh::proj::directx::perspective(
+        45.0_f32.to_radians(),
+        aspect_ratio,
+        0.1,
+        100.0,
+    );
 
     projection * view
 }

@@ -161,11 +161,12 @@ impl PlaygroundApp {
 
     pub fn ui(
         &mut self,
-        ctx: &egui::Context,
+        ui: &mut egui::Ui,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         renderer: &mut egui_wgpu::Renderer,
     ) {
+        let ctx = ui.ctx().clone();
         // Update performance metrics each frame
         self.performance_panel.update();
 
@@ -212,8 +213,7 @@ impl PlaygroundApp {
         });
 
         // Menu bar at the top
-        #[allow(deprecated)]
-        egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+        ui.group(|ui| {
             ui.horizontal(|ui| {
                 ui.heading("🎮 WebGPU Playground");
 
@@ -380,8 +380,9 @@ impl PlaygroundApp {
         });
 
         // Sidebar on the left
-        #[allow(deprecated)]
-        egui::SidePanel::left("sidebar").show(ctx, |ui| {
+        ui.add_space(8.0);
+        ui.columns(2, |columns| {
+            let ui = &mut columns[0];
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.heading("Navigation");
 
@@ -615,11 +616,9 @@ impl PlaygroundApp {
                     });
                 }
             });
-        });
-
-        // Main canvas area
-        #[allow(deprecated)]
-        egui::CentralPanel::default().show(ctx, |ui| {
+            // Main canvas area
+            let ui = &mut columns[1];
+            ui.vertical(|ui| {
             // Sync tutorial state for learning path before rendering any tab
             let tutorial_state = self.tutorial_panel.export_state();
             self.learning_path_panel
@@ -688,7 +687,7 @@ impl PlaygroundApp {
                 Tab::Settings => {
                     if let Some(new_theme) = self.settings_panel.ui(ui) {
                         // Apply the theme change
-                        Self::apply_theme(ctx, new_theme);
+                        Self::apply_theme(&ctx, new_theme);
                         // Save the state with the new theme
                         let filename = self.save_load_filename.clone();
                         let path = std::path::Path::new(&filename);
@@ -698,6 +697,7 @@ impl PlaygroundApp {
                     }
                 }
             }
+            });
         });
 
         // Track panel visits for tutorial system

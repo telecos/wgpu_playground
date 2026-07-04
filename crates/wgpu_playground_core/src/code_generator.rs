@@ -150,7 +150,7 @@ impl CodeGenerator {
             \n\
             [dependencies]\n\
             wgpu = \"27.0\"\n\
-            winit = {{ version = \"0.30\", default-features = false, features = [\"rwh_06\", \"x11\", \"wayland\", \"wayland-dlopen\"] }}\n\
+            winit = {{ version = \"0.30\", default-features = false, features = [\"rwh_06\", \"x11\"] }}\n\
             pollster = \"0.4\"\n\
             env_logger = \"0.11\"\n\
             log = \"0.4\"\n\
@@ -1184,7 +1184,7 @@ mod tests {
         assert!(cargo_toml.contains("name = \"my_app\""));
         assert!(cargo_toml.contains("wgpu = \"27.0\""));
         assert!(cargo_toml.contains(
-            "winit = { version = \"0.30\", default-features = false, features = [\"rwh_06\", \"x11\", \"wayland\", \"wayland-dlopen\"] }"
+            "winit = { version = \"0.30\", default-features = false, features = [\"rwh_06\", \"x11\"] }"
         ));
 
         fs::remove_dir_all(&temp_dir).unwrap();

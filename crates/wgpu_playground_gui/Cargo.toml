@@ -27,7 +27,7 @@ egui-winit = { version = "0.34", default-features = false, features = ["clipboar
 
 # Native-only dependencies
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-egui-wgpu = "0.34"
+egui-wgpu = "0.35"
 
 # WASM dependencies
 [target.'cfg(target_arch = "wasm32")'.dependencies]

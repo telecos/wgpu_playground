@@ -1054,11 +1054,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 return Some(id);
             }
 
-            let texture_id = renderer.register_native_texture(
-                device,
-                view,
-                egui_wgpu::wgpu::FilterMode::Linear,
-            );
+            let texture_id =
+                renderer.register_native_texture(device, view, egui_wgpu::wgpu::FilterMode::Linear);
             self.render_texture_id = Some(texture_id);
             Some(texture_id)
         } else {

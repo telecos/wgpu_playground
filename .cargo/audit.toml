@@ -14,4 +14,14 @@ ignore = [
     # is not compatible with non-WASM targets. The instant crate is still widely
     # used and considered stable despite being unmaintained.
     "RUSTSEC-2024-0384",
+
+    # RUSTSEC-2026-0194 / RUSTSEC-2026-0195: quick-xml vulnerabilities in
+    # wayland-scanner are limited to build-time proc-macro code generation over
+    # trusted protocol XML shipped by upstream crates, not untrusted runtime input.
+    "RUSTSEC-2026-0194",
+    "RUSTSEC-2026-0195",
+
+    # RUSTSEC-2026-0204: crossbeam-epoch is only pulled in through criterion for
+    # local benchmarks and is not part of shipped application/runtime code.
+    "RUSTSEC-2026-0204",
 ]

@@ -14,13 +14,8 @@ dawn = []
 
 [dependencies]
 wgpu = { version = "29.0", features = ["wgsl"] }
-<<<<<<< dependabot/cargo/wgpu-types-30.0.0
-wgpu-core = "29.0"
-wgpu-types = "30.0"
-=======
 wgpu-core = "30.0"
-wgpu-types = "29.0"
->>>>>>> main
+wgpu-types = "30.0"
 naga = { version = "30.0", features = ["wgsl-in"] }
 winit = { version = "0.30", default-features = false, features = ["rwh_06", "x11", "wayland", "wayland-dlopen"] }
 env_logger = "0.11"

@@ -1041,10 +1041,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     /// Register the render texture with egui renderer and return the texture ID
     ///
-    /// Note: This method is only available when building for native targets
-    /// due to wgpu version incompatibility with egui-wgpu on WASM.
-    /// We use unsafe transmute to convert wgpu 28 types to wgpu 27 types
-    /// as a temporary workaround until egui-wgpu supports wgpu 28.
+    /// Note: This method is only available when building for native targets.
     #[cfg(not(target_arch = "wasm32"))]
     pub fn register_texture(
         &mut self,
@@ -1057,14 +1054,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 return Some(id);
             }
 
-            // Register the texture
-            // SAFETY: wgpu 28 and wgpu 27 have the same memory layout for these types
-            // This is a temporary workaround until egui-wgpu supports wgpu 28
-            let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(device) };
-            let view_27: &egui_wgpu::wgpu::TextureView = unsafe { std::mem::transmute(view) };
             let texture_id = renderer.register_native_texture(
-                device_27,
-                view_27,
+                device,
+                view,
                 egui_wgpu::wgpu::FilterMode::Linear,
             );
             self.render_texture_id = Some(texture_id);

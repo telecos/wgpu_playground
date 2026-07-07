@@ -129,13 +129,9 @@ impl AppState {
             None,
         );
 
-        // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
-        // We transmute to bridge the version gap until egui-wgpu supports wgpu 28
-        let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(&device) };
-        let format_27: egui_wgpu::wgpu::TextureFormat = surface_config.format;
         let egui_renderer = egui_wgpu::Renderer::new(
-            device_27,
-            format_27,
+            &device,
+            surface_config.format,
             egui_wgpu::RendererOptions {
                 msaa_samples: 1,
                 ..Default::default()
@@ -258,29 +254,22 @@ impl AppState {
             pixels_per_point: self.window.scale_factor() as f32,
         };
 
-        // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
-        // We transmute to bridge the version gap until egui-wgpu supports wgpu 28
-        let device_27: &egui_wgpu::wgpu::Device = unsafe { std::mem::transmute(&self.device) };
-        let queue_27: &egui_wgpu::wgpu::Queue = unsafe { std::mem::transmute(&self.queue) };
-        let encoder_27: &mut egui_wgpu::wgpu::CommandEncoder =
-            unsafe { std::mem::transmute(&mut encoder) };
-
         for (id, image_delta) in &egui_output.textures_delta.set {
             self.egui_renderer
-                .update_texture(device_27, queue_27, *id, image_delta);
+                .update_texture(&self.device, &self.queue, *id, image_delta);
         }
 
         self.egui_renderer.update_buffers(
-            device_27,
-            queue_27,
-            encoder_27,
+            &self.device,
+            &self.queue,
+            &mut encoder,
             &clipped_primitives,
             &screen_descriptor,
         );
 
         // Render egui
         {
-            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            let render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("UI Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &view,
@@ -297,14 +286,9 @@ impl AppState {
                 multiview_mask: None,
             });
 
-            // SAFETY: egui-wgpu 0.33 uses wgpu 27, but we use wgpu 28
-            // We need to transmute both the lifetime and the version
-            // This is safe because we're extending the lifetime only for the duration of the render call
-            let render_pass_27: &mut egui_wgpu::wgpu::RenderPass<'static> =
-                unsafe { std::mem::transmute(&mut render_pass) };
-
+            let mut render_pass = render_pass.forget_lifetime();
             self.egui_renderer
-                .render(render_pass_27, &clipped_primitives, &screen_descriptor);
+                .render(&mut render_pass, &clipped_primitives, &screen_descriptor);
         }
 
         for id in &egui_output.textures_delta.free {

@@ -15,7 +15,7 @@ tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
 bytemuck = { version = "1.14", features = ["derive"] }
 glam = "0.33"
 rand = "0.10.1"
-lib3mf = { version = "0.1.6", default-features = false }
+lib3mf = { git = "https://github.com/telecos/lib3mf_rust", rev = "b883269f9303d73947f0cec04f0be1e4ca779dce", default-features = false }
 
 [[bin]]
 name = "adapter_demo"

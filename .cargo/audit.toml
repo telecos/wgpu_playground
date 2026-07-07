@@ -21,7 +21,4 @@ ignore = [
     "RUSTSEC-2026-0194",
     "RUSTSEC-2026-0195",
 
-    # RUSTSEC-2026-0204: crossbeam-epoch is only pulled in through criterion for
-    # local benchmarks and is not part of shipped application/runtime code.
-    "RUSTSEC-2026-0204",
 ]

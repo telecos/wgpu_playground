@@ -115,4 +115,7 @@ unknown-git = "deny"
 # if not specified.
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 # List of URLs for allowed Git repositories
-allow-git = []
+allow-git = [
+    # Temporary upstream lib3mf revision used to pick up patched quick-xml
+    "https://github.com/telecos/lib3mf_rust",
+]

@@ -12,10 +12,13 @@ cargo-fuzz = true
 # from associating this package with the root workspace.
 [workspace]
 
+[patch.crates-io]
+wayland-scanner = { path = "../../../patches/wayland-scanner" }
+
 [dependencies]
 libfuzzer-sys = "0.4"
 arbitrary = { version = "1", features = ["derive"] }
-wgpu = { version = "28.0", features = ["wgsl"] }
+wgpu = { version = "29.0", features = ["wgsl"] }
 wgpu_playground_core = { path = ".." }
 
 [[bin]]

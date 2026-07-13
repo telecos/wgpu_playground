@@ -31,7 +31,7 @@ base64 = "0.22"
 chrono = { version = "0.4", features = ["serde"] }
 gltf = { version = "1.4", default-features = false, features = ["import", "utils"] }
 tobj = { version = "4.0", default-features = false }
-pollster = "0.4"
+pollster = "1.0"
 
 # File watching for shader hot reload (native only)
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -83,7 +83,7 @@ js-sys = "0.3"
 cc = "1.2"
 
 [dev-dependencies]
-pollster = "0.4"
+pollster = "1.0"
 serial_test = "3.5"
 
 # Criterion doesn't support WASM, so only include it for native targets

@@ -30,7 +30,9 @@ jobs:
         # Auto-merge for patch and minor version updates only
         # Major updates require manual review for breaking changes
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
-        run: gh pr merge --auto --squash "$PR_URL"
+        run: |
+          gh pr merge --auto --squash "$PR_URL" || \
+            echo "Note: Auto-merge is not enabled for this repository. Enable it in Settings → General → Allow auto-merge, or merge manually."
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

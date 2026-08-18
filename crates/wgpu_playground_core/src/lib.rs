@@ -66,3 +66,6 @@ pub mod tooltip;
 pub mod tutorial;
 pub mod tutorial_panel;
 pub mod visual_regression;
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod test_device;

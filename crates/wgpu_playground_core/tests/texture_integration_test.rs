@@ -2,7 +2,8 @@ mod common;
 
 use common::create_test_device;
 use wgpu_playground_core::texture::{
-    create_default_view, create_texture_2d, TextureBuilder, TextureViewBuilder,
+    create_default_view, create_texture_2d, export_texture_to_bytes, TextureBuilder,
+    TextureViewBuilder,
 };
 
 #[test]
@@ -560,5 +561,51 @@ fn test_complex_texture_builder_chain() {
         assert_eq!(texture.format(), wgpu::TextureFormat::Rgba16Float);
         assert_eq!(texture.mip_level_count(), 6);
         assert_eq!(texture.sample_count(), 1);
+    });
+}
+
+#[test]
+fn test_export_texture_to_bytes_produces_png() {
+    pollster::block_on(async {
+        let Some((device, queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let texture = TextureBuilder::new()
+            .with_size(64, 4, 1)
+            .with_format(wgpu::TextureFormat::Rgba8Unorm)
+            .with_label("export_texture")
+            .with_usage(wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST)
+            .build(&device);
+
+        // Fill the texture so the export has deterministic contents
+        let pixels = vec![0xABu8; 64 * 4 * 4];
+        queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            &pixels,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(64 * 4),
+                rows_per_image: Some(4),
+            },
+            wgpu::Extent3d {
+                width: 64,
+                height: 4,
+                depth_or_array_layers: 1,
+            },
+        );
+
+        let png_bytes = export_texture_to_bytes(&device, &queue, &texture, 64, 4)
+            .await
+            .expect("texture export should succeed");
+
+        // PNG magic number
+        assert_eq!(&png_bytes[..4], &[0x89, b'P', b'N', b'G']);
     });
 }

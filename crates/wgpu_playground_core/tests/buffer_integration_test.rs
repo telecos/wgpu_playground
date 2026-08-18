@@ -280,6 +280,39 @@ fn test_buffer_mapped_at_creation() {
 }
 
 #[test]
+fn test_buffer_mapped_at_creation_read_view() {
+    pollster::block_on(async {
+        let Some((device, _queue)) = create_test_device().await else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let descriptor = BufferDescriptor::new(
+            Some("mapped_read_buffer"),
+            256,
+            BufferUsages::VERTEX | BufferUsages::COPY_DST,
+        )
+        .with_mapped_at_creation(true);
+
+        let buffer = descriptor.create_buffer(&device).unwrap();
+
+        // Buffers mapped at creation can be written and read back without map_async
+        {
+            let mut view = BufferOps::get_mapped_range_mut(&buffer);
+            view.copy_from_slice(&vec![7u8; 256]);
+        }
+
+        {
+            let view = BufferOps::get_mapped_range(&buffer);
+            assert_eq!(view.len(), 256);
+            assert!(view.iter().all(|byte| *byte == 7));
+        }
+
+        BufferOps::unmap(&buffer);
+    });
+}
+
+#[test]
 fn test_buffer_size_validation() {
     pollster::block_on(async {
         let Some((device, _queue)) = create_test_device().await else {

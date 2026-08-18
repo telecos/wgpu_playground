@@ -1191,4 +1191,25 @@ mod tests {
         assert!(descriptor.shader().is_some());
         assert!(descriptor.validate().is_ok());
     }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_run_compute_gpu_reads_back_results() {
+        let Some((device, queue)) = pollster::block_on(crate::test_device::create_test_device())
+        else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let mut panel = ComputePanel::new();
+        panel.run_compute_gpu(&device, &queue);
+
+        assert!(panel.has_run, "compute run should be marked as completed");
+        assert_eq!(panel.error_message, None);
+        assert_eq!(panel.output_data.len(), panel.input_data.len());
+
+        // The default example doubles every input element
+        let expected: Vec<f32> = panel.input_data.iter().map(|value| value * 2.0).collect();
+        assert_eq!(panel.output_data, expected);
+    }
 }

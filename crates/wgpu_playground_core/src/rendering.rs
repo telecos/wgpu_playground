@@ -1909,4 +1909,25 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_create_render_states_build_pipelines() {
+        let Some((device, queue)) = pollster::block_on(crate::test_device::create_test_device())
+        else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let mut panel = RenderingPanel::new(&device, &queue);
+
+        panel.create_triangle_render_state(&device, &queue);
+        assert!(matches!(panel.render_state, RenderState::Triangle(_)));
+
+        panel.create_cube_render_state(&device, &queue);
+        assert!(matches!(panel.render_state, RenderState::Cube(_)));
+
+        panel.create_texture_mapping_render_state(&device, &queue);
+        assert!(matches!(panel.render_state, RenderState::Texture(_)));
+    }
 }

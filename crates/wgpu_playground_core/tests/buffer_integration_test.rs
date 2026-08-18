@@ -299,7 +299,7 @@ fn test_buffer_mapped_at_creation_read_view() {
         // Buffers mapped at creation can be written and read back without map_async
         {
             let mut view = BufferOps::get_mapped_range_mut(&buffer);
-            view.copy_from_slice(&vec![7u8; 256]);
+            view.copy_from_slice(&[7u8; 256]);
         }
 
         {

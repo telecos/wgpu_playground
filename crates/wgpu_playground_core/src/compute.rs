@@ -795,7 +795,10 @@ impl ComputePanel {
         });
 
         let mapped_range = match receiver.recv() {
-            Ok(Ok(())) => buffer_slice.get_mapped_range().ok(),
+            Ok(Ok(())) => buffer_slice
+                .get_mapped_range()
+                .inspect_err(|e| log::error!("Failed to get mapped range: {:?}", e))
+                .ok(),
             _ => None,
         };
 

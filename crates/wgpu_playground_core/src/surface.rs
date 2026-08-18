@@ -1,6 +1,6 @@
 use wgpu::{
     CompositeAlphaMode, CurrentSurfaceTexture, Device, Instance, PresentMode, Surface,
-    SurfaceConfiguration, TextureFormat, TextureUsages,
+    SurfaceColorSpace, SurfaceConfiguration, TextureFormat, TextureUsages,
 };
 
 /// Builder for creating and configuring GPU surfaces
@@ -134,6 +134,7 @@ impl SurfaceConfigurationBuilder {
         SurfaceConfiguration {
             usage: self.usage,
             format: self.format,
+            color_space: SurfaceColorSpace::Auto,
             width: self.width,
             height: self.height,
             present_mode: self.present_mode,
@@ -176,11 +177,11 @@ pub fn configure_surface(surface: &Surface, device: &Device, config: &SurfaceCon
 /// ```no_run
 /// use wgpu_playground_core::surface::get_current_texture;
 /// use wgpu::CurrentSurfaceTexture;
-/// # fn example(surface: &wgpu::Surface<'_>) {
+/// # fn example(surface: &wgpu::Surface<'_>, queue: &wgpu::Queue) {
 /// match get_current_texture(surface) {
 ///     CurrentSurfaceTexture::Success(texture) | CurrentSurfaceTexture::Suboptimal(texture) => {
 ///         // Use the texture for rendering
-///         texture.present();
+///         queue.present(texture);
 ///     }
 ///     _ => {} // Handle other cases (lost, outdated, timeout, etc.)
 /// }
@@ -425,6 +426,7 @@ mod tests {
                 TextureFormat::Rgba8UnormSrgb,
                 TextureFormat::Rgba8Unorm,
             ],
+            format_capabilities: Vec::new(),
             present_modes: vec![PresentMode::Fifo],
             alpha_modes: vec![CompositeAlphaMode::Opaque],
             usages: TextureUsages::RENDER_ATTACHMENT,
@@ -438,6 +440,7 @@ mod tests {
     fn test_select_preferred_format_without_srgb() {
         let capabilities = wgpu::SurfaceCapabilities {
             formats: vec![TextureFormat::Bgra8Unorm, TextureFormat::Rgba8Unorm],
+            format_capabilities: Vec::new(),
             present_modes: vec![PresentMode::Fifo],
             alpha_modes: vec![CompositeAlphaMode::Opaque],
             usages: TextureUsages::RENDER_ATTACHMENT,
@@ -451,6 +454,7 @@ mod tests {
     fn test_select_preferred_present_mode_with_mailbox() {
         let capabilities = wgpu::SurfaceCapabilities {
             formats: vec![TextureFormat::Bgra8Unorm],
+            format_capabilities: Vec::new(),
             present_modes: vec![
                 PresentMode::Fifo,
                 PresentMode::Mailbox,
@@ -468,6 +472,7 @@ mod tests {
     fn test_select_preferred_present_mode_without_mailbox() {
         let capabilities = wgpu::SurfaceCapabilities {
             formats: vec![TextureFormat::Bgra8Unorm],
+            format_capabilities: Vec::new(),
             present_modes: vec![PresentMode::Fifo, PresentMode::Immediate],
             alpha_modes: vec![CompositeAlphaMode::Opaque],
             usages: TextureUsages::RENDER_ATTACHMENT,

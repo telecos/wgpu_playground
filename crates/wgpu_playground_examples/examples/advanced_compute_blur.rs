@@ -37,6 +37,7 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
         .ok()?;

@@ -478,6 +478,7 @@ mod bind_group_creation_tests {
                 power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: None,
                 force_fallback_adapter: false,
+                apply_limit_buckets: false,
             })
             .await
             .ok()?;

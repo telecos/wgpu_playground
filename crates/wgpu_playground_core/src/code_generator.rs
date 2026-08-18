@@ -258,7 +258,8 @@ impl CodeGenerator {
                         .request_adapter(&wgpu::RequestAdapterOptions {{\n                \
                             power_preference: wgpu::PowerPreference::default(),\n                \
                             compatible_surface: Some(&surface),\n                \
-                            force_fallback_adapter: false,\n            \
+                            force_fallback_adapter: false,\n                \
+                            apply_limit_buckets: false,\n            \
                         }})\n            \
                         .await\n            \
                         .unwrap();\n\
@@ -293,7 +294,8 @@ impl CodeGenerator {
                         present_mode: wgpu::PresentMode::Fifo,\n            \
                         alpha_mode: surface_caps.alpha_modes[0],\n            \
                         view_formats: vec![],\n            \
-                        desired_maximum_frame_latency: 2,\n        \
+                        desired_maximum_frame_latency: 2,\n            \
+                        color_space: wgpu::SurfaceColorSpace::Auto,\n        \
                     }};\n        \
                     surface.configure(&device, &config);\n\
                     \n        \
@@ -338,11 +340,11 @@ impl CodeGenerator {
                         vertex: wgpu::VertexState {{\n                \
                             module: &shader,\n                \
                             entry_point: Some(\"vs_main\"),\n                \
-                            buffers: &[wgpu::VertexBufferLayout {{\n                    \
+                            buffers: &[Some(wgpu::VertexBufferLayout {{\n                    \
                                 array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,\n                    \
                                 step_mode: wgpu::VertexStepMode::Vertex,\n                    \
                                 attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3],\n                \
-                            }}],\n                \
+                            }})],\n                \
                             compilation_options: Default::default(),\n            \
                         }},\n            \
                         fragment: Some(wgpu::FragmentState {{\n                \
@@ -435,7 +437,7 @@ impl CodeGenerator {
                     }}\n\
                     \n        \
                     self.queue.submit(std::iter::once(encoder.finish()));\n        \
-                    output.present();\n\
+                    self.queue.present(output);\n\
                     \n        \
                     Ok(())\n    \
                 }}\n\
@@ -661,7 +663,8 @@ impl CodeGenerator {
                 .request_adapter(&wgpu::RequestAdapterOptions {\n                \
                     power_preference: wgpu::PowerPreference::default(),\n                \
                     compatible_surface: Some(&surface),\n                \
-                    force_fallback_adapter: false,\n            \
+                    force_fallback_adapter: false,\n                \
+                    apply_limit_buckets: false,\n            \
                 })\n            \
                 .await\n            \
                 .unwrap();\n\
@@ -696,7 +699,8 @@ impl CodeGenerator {
                 present_mode: wgpu::PresentMode::Fifo,\n            \
                 alpha_mode: surface_caps.alpha_modes[0],\n            \
                 view_formats: vec![],\n            \
-                desired_maximum_frame_latency: 2,\n        \
+                desired_maximum_frame_latency: 2,\n            \
+                color_space: wgpu::SurfaceColorSpace::Auto,\n        \
             };\n        \
             surface.configure(&device, &config);\n\n",
         );
@@ -1062,7 +1066,7 @@ impl CodeGenerator {
 
         code.push_str(
             "        self.queue.submit(std::iter::once(encoder.finish()));\n        \
-            output.present();\n        \
+            self.queue.present(output);\n        \
             \n        \
             Ok(())\n    \
             }\n",

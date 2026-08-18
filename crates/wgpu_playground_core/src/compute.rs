@@ -794,8 +794,12 @@ impl ComputePanel {
             timeout: None,
         });
 
-        if let Ok(Ok(())) = receiver.recv() {
-            let data = buffer_slice.get_mapped_range();
+        let mapped_range = match receiver.recv() {
+            Ok(Ok(())) => buffer_slice.get_mapped_range().ok(),
+            _ => None,
+        };
+
+        if let Some(data) = mapped_range {
             self.output_data = bytemuck::cast_slice(&data).to_vec();
             drop(data);
             staging_buffer.unmap();

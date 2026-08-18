@@ -85,7 +85,7 @@ fn render_triangle(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture 
         vertex: wgpu::VertexState {
             module: &shader,
             entry_point: Some("vs_main"),
-            buffers: &[wgpu::VertexBufferLayout {
+            buffers: &[Some(wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Vertex>() as u64,
                 step_mode: wgpu::VertexStepMode::Vertex,
                 attributes: &[
@@ -100,7 +100,7 @@ fn render_triangle(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture 
                         shader_location: 1,
                     },
                 ],
-            }],
+            })],
             compilation_options: Default::default(),
         },
         fragment: Some(wgpu::FragmentState {
@@ -206,7 +206,7 @@ fn render_solid_quad(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Textur
         vertex: wgpu::VertexState {
             module: &shader,
             entry_point: Some("vs_main"),
-            buffers: &[wgpu::VertexBufferLayout {
+            buffers: &[Some(wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Vertex>() as u64,
                 step_mode: wgpu::VertexStepMode::Vertex,
                 attributes: &[
@@ -221,7 +221,7 @@ fn render_solid_quad(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Textur
                         shader_location: 1,
                     },
                 ],
-            }],
+            })],
             compilation_options: Default::default(),
         },
         fragment: Some(wgpu::FragmentState {

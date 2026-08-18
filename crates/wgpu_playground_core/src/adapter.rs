@@ -270,6 +270,7 @@ pub async fn request_adapter(
             power_preference: options.power_preference,
             force_fallback_adapter: options.force_fallback_adapter,
             compatible_surface,
+            apply_limit_buckets: false,
         })
         .await
         .map_err(|e| {

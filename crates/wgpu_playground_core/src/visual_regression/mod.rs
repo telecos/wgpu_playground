@@ -182,7 +182,9 @@ pub async fn capture_texture(
             VisualRegressionError::CaptureError(format!("Failed to map buffer: {:?}", e))
         })?;
 
-    let data = buffer_slice.get_mapped_range();
+    let data = buffer_slice.get_mapped_range().map_err(|e| {
+        VisualRegressionError::CaptureError(format!("Failed to map buffer range: {:?}", e))
+    })?;
 
     // Create image from buffer data (handling padding)
     let mut image_data = Vec::with_capacity((width * height * bytes_per_pixel) as usize);

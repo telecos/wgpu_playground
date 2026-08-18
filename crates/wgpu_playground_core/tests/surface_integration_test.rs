@@ -97,6 +97,7 @@ fn test_select_preferred_format_with_srgb() {
             wgpu::TextureFormat::Rgba8UnormSrgb,
             wgpu::TextureFormat::Rgba8Unorm,
         ],
+        format_capabilities: Vec::new(),
         present_modes: vec![wgpu::PresentMode::Fifo],
         alpha_modes: vec![wgpu::CompositeAlphaMode::Opaque],
         usages: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -113,6 +114,7 @@ fn test_select_preferred_format_without_srgb() {
             wgpu::TextureFormat::Bgra8Unorm,
             wgpu::TextureFormat::Rgba8Unorm,
         ],
+        format_capabilities: Vec::new(),
         present_modes: vec![wgpu::PresentMode::Fifo],
         alpha_modes: vec![wgpu::CompositeAlphaMode::Opaque],
         usages: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -126,6 +128,7 @@ fn test_select_preferred_format_without_srgb() {
 fn test_select_preferred_present_mode_with_mailbox() {
     let capabilities = wgpu::SurfaceCapabilities {
         formats: vec![wgpu::TextureFormat::Bgra8Unorm],
+        format_capabilities: Vec::new(),
         present_modes: vec![
             wgpu::PresentMode::Fifo,
             wgpu::PresentMode::Mailbox,
@@ -143,6 +146,7 @@ fn test_select_preferred_present_mode_with_mailbox() {
 fn test_select_preferred_present_mode_without_mailbox() {
     let capabilities = wgpu::SurfaceCapabilities {
         formats: vec![wgpu::TextureFormat::Bgra8Unorm],
+        format_capabilities: Vec::new(),
         present_modes: vec![wgpu::PresentMode::Fifo, wgpu::PresentMode::Immediate],
         alpha_modes: vec![wgpu::CompositeAlphaMode::Opaque],
         usages: wgpu::TextureUsages::RENDER_ATTACHMENT,

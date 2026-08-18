@@ -59,6 +59,7 @@ pub async fn create_test_device() -> Option<(Device, Queue)> {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: is_headless,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
         .ok()?;
@@ -106,6 +107,7 @@ pub async fn create_test_device_with_features(features: wgpu::Features) -> Optio
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: is_headless,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
         .ok()?;
@@ -158,6 +160,7 @@ pub async fn create_test_device_with_limits(limits: wgpu::Limits) -> Option<(Dev
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: is_headless,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
         .ok()?;
@@ -201,6 +204,7 @@ pub async fn create_test_instance_and_adapter() -> Option<(Instance, Adapter)> {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: is_headless,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
         .ok()?;

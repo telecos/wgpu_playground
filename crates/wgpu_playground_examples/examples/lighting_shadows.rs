@@ -83,6 +83,7 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
         .ok()?;
@@ -348,7 +349,7 @@ fn main() {
             module: &shadow_shader_module,
             entry_point: Some("vs_main"),
             compilation_options: Default::default(),
-            buffers: &[wgpu::VertexBufferLayout {
+            buffers: &[Some(wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Vertex>() as u64,
                 step_mode: wgpu::VertexStepMode::Vertex,
                 attributes: &[wgpu::VertexAttribute {
@@ -356,7 +357,7 @@ fn main() {
                     offset: 0,
                     shader_location: 0,
                 }],
-            }],
+            })],
         },
         primitive: wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleList,
@@ -531,7 +532,7 @@ fn main() {
             module: &main_shader_module,
             entry_point: Some("vs_main"),
             compilation_options: Default::default(),
-            buffers: &[wgpu::VertexBufferLayout {
+            buffers: &[Some(wgpu::VertexBufferLayout {
                 array_stride: std::mem::size_of::<Vertex>() as u64,
                 step_mode: wgpu::VertexStepMode::Vertex,
                 attributes: &[
@@ -546,7 +547,7 @@ fn main() {
                         shader_location: 1,
                     },
                 ],
-            }],
+            })],
         },
         primitive: wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleList,

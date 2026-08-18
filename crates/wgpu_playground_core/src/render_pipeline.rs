@@ -1606,13 +1606,15 @@ impl RenderPipelineDescriptor {
             .map(|layout| layout.to_wgpu_attributes())
             .collect();
 
-        let vertex_buffer_layouts: Vec<wgpu::VertexBufferLayout> = vertex_buffer_attrs
+        let vertex_buffer_layouts: Vec<Option<wgpu::VertexBufferLayout>> = vertex_buffer_attrs
             .iter()
             .enumerate()
-            .map(|(i, attrs)| wgpu::VertexBufferLayout {
-                array_stride: self.vertex_buffers[i].array_stride,
-                step_mode: self.vertex_buffers[i].step_mode.to_wgpu(),
-                attributes: attrs,
+            .map(|(i, attrs)| {
+                Some(wgpu::VertexBufferLayout {
+                    array_stride: self.vertex_buffers[i].array_stride,
+                    step_mode: self.vertex_buffers[i].step_mode.to_wgpu(),
+                    attributes: attrs,
+                })
             })
             .collect();
 

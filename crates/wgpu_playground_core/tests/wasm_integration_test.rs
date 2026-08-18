@@ -109,6 +109,7 @@ async fn test_adapter_enumeration_browser_backend() {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await;
 
@@ -139,6 +140,7 @@ async fn test_device_creation_if_available() {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
     {

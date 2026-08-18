@@ -474,7 +474,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: Some("vs_main"),
-                buffers: &[wgpu::VertexBufferLayout {
+                buffers: &[Some(wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<PreviewVertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &[
@@ -489,7 +489,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
                             shader_location: 1,
                         },
                     ],
-                }],
+                })],
                 compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState {

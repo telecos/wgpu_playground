@@ -55,7 +55,9 @@ fn test_buffer_copy_at_boundaries() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(data[0], 42);
         assert_eq!(data[255], 42);
         drop(data);
@@ -116,7 +118,9 @@ fn test_buffer_copy_from_end() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // Should have copied the second half (value 20)
         assert_eq!(data[0], 20);
         assert_eq!(data[255], 20);
@@ -177,7 +181,9 @@ fn test_buffer_copy_to_end() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // First half should be 0
         assert_eq!(data[0], 0);
         assert_eq!(data[255], 0);
@@ -253,7 +259,9 @@ fn test_small_aligned_copies() {
         });
         rx.await.unwrap().unwrap();
 
-        let result = buffer_slice.get_mapped_range();
+        let result = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(result[0], 1);
         assert_eq!(result[4], 2);
         assert_eq!(result[8], 3);
@@ -319,7 +327,9 @@ fn test_large_buffer_copy() {
         });
         rx.await.unwrap().unwrap();
 
-        let result = buffer_slice.get_mapped_range();
+        let result = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(result[0], 99);
         assert_eq!(result[512], 99);
         assert_eq!(result[1023], 99);
@@ -384,7 +394,9 @@ fn test_overlapping_encoder_submissions() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(data[0], 55);
         assert_eq!(data[127], 55);
         assert_eq!(data[128], 55);
@@ -636,7 +648,9 @@ fn test_texture_to_texture_same_format() {
         });
         rx.await.unwrap().unwrap();
 
-        let result = buffer_slice.get_mapped_range();
+        let result = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(result[0], 75);
         assert_eq!(result[32], 75);
         assert_eq!(result[63], 75);

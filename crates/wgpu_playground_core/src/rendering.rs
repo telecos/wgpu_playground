@@ -359,11 +359,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: Some("vs_main"),
-                buffers: &[wgpu::VertexBufferLayout {
+                buffers: &[Some(wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3],
-                }],
+                })],
                 compilation_options: Default::default(),
             },
             fragment: Some(wgpu::FragmentState {
@@ -604,11 +604,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: Some("vs_main"),
-                buffers: &[wgpu::VertexBufferLayout {
+                buffers: &[Some(wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3],
-                }],
+                })],
                 compilation_options: Default::default(),
             },
             fragment: Some(wgpu::FragmentState {
@@ -879,11 +879,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: Some("vs_main"),
-                buffers: &[wgpu::VertexBufferLayout {
+                buffers: &[Some(wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2],
-                }],
+                })],
                 compilation_options: Default::default(),
             },
             fragment: Some(wgpu::FragmentState {
@@ -1140,7 +1140,14 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
             match rx.recv() {
                 Ok(Ok(())) => {
-                    let data = buffer_slice.get_mapped_range();
+                    let data = match buffer_slice.get_mapped_range() {
+                        Ok(data) => data,
+                        Err(e) => {
+                            log::error!("Failed to get mapped range for screenshot: {:?}", e);
+                            output_buffer.unmap();
+                            return;
+                        }
+                    };
 
                     // Convert BGRA to RGBA
                     let mut rgba_data = vec![0u8; (width * height * 4) as usize];
@@ -1901,5 +1908,26 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn test_create_render_states_build_pipelines() {
+        let Some((device, queue)) = pollster::block_on(crate::test_device::create_test_device())
+        else {
+            eprintln!("Skipping test: No GPU adapter available");
+            return;
+        };
+
+        let mut panel = RenderingPanel::new(&device, &queue);
+
+        panel.create_triangle_render_state(&device, &queue);
+        assert!(matches!(panel.render_state, RenderState::Triangle(_)));
+
+        panel.create_cube_render_state(&device, &queue);
+        assert!(matches!(panel.render_state, RenderState::Cube(_)));
+
+        panel.create_texture_mapping_render_state(&device, &queue);
+        assert!(matches!(panel.render_state, RenderState::Texture(_)));
     }
 }

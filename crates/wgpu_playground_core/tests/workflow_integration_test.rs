@@ -98,7 +98,7 @@ fn fs_main() -> @location(0) vec4<f32> {
                 module: &shader_module,
                 entry_point: Some("vs_main"),
                 compilation_options: Default::default(),
-                buffers: &[vertex_buffer_layout],
+                buffers: &[Some(vertex_buffer_layout)],
             },
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,
@@ -730,7 +730,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 module: &shader_module,
                 entry_point: Some("vs_main"),
                 compilation_options: Default::default(),
-                buffers: &[vertex_buffer_layout, instance_buffer_layout],
+                buffers: &[Some(vertex_buffer_layout), Some(instance_buffer_layout)],
             },
             primitive: wgpu::PrimitiveState::default(),
             depth_stencil: None,
@@ -958,7 +958,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 module: &shader_module,
                 entry_point: Some("vs_main"),
                 compilation_options: Default::default(),
-                buffers: &[vertex_buffer_layout],
+                buffers: &[Some(vertex_buffer_layout)],
             },
             primitive: wgpu::PrimitiveState::default(),
             depth_stencil: Some(wgpu::DepthStencilState {

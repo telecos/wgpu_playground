@@ -537,8 +537,14 @@ impl BufferOps {
     /// BufferOps::unmap(&buffer);
     /// # }
     /// ```
+    ///
+    /// # Panics
+    /// Panics if the buffer is not currently mapped for reading
     pub fn get_mapped_range(buffer: &Buffer) -> BufferView {
-        buffer.slice(..).get_mapped_range()
+        buffer
+            .slice(..)
+            .get_mapped_range()
+            .expect("buffer is not mapped for reading")
     }
 
     /// Get a mutable view of a mapped buffer
@@ -562,8 +568,14 @@ impl BufferOps {
     /// BufferOps::unmap(&buffer);
     /// # }
     /// ```
+    ///
+    /// # Panics
+    /// Panics if the buffer is not currently mapped for writing
     pub fn get_mapped_range_mut(buffer: &Buffer) -> wgpu::BufferViewMut {
-        buffer.slice(..).get_mapped_range_mut()
+        buffer
+            .slice(..)
+            .get_mapped_range_mut()
+            .expect("buffer is not mapped for writing")
     }
 }
 

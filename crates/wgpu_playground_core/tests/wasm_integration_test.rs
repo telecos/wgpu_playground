@@ -109,6 +109,7 @@ async fn test_adapter_enumeration_browser_backend() {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await;
 
@@ -124,10 +125,57 @@ async fn test_adapter_enumeration_browser_backend() {
     }
 }
 
+/// Check whether `navigator.gpu.requestAdapter()` resolves to a real adapter.
+///
+/// The WebGPU backend of `wgpu` reports a successful adapter request even when the
+/// browser resolves `requestAdapter()` with `null`, so any subsequent call on the
+/// returned adapter (for example `Adapter::get_info`) throws a JS exception. Probing
+/// the browser API directly lets tests skip adapter usage in environments without a
+/// GPU, such as headless CI.
+async fn browser_adapter_available() -> bool {
+    use wasm_bindgen::JsValue;
+
+    let Some(window) = web_sys::window() else {
+        return false;
+    };
+    let navigator = window.navigator();
+
+    let Ok(gpu) = js_sys::Reflect::get(&navigator, &JsValue::from_str("gpu")) else {
+        return false;
+    };
+    if gpu.is_undefined() || gpu.is_null() {
+        return false;
+    }
+
+    let Ok(request_adapter) = js_sys::Reflect::get(&gpu, &JsValue::from_str("requestAdapter"))
+    else {
+        return false;
+    };
+    let Ok(request_adapter) = request_adapter.dyn_into::<js_sys::Function>() else {
+        return false;
+    };
+    let Ok(promise) = request_adapter.call0(&gpu) else {
+        return false;
+    };
+    let Ok(promise) = promise.dyn_into::<js_sys::Promise>() else {
+        return false;
+    };
+
+    match wasm_bindgen_futures::JsFuture::from(promise).await {
+        Ok(adapter) => !adapter.is_null() && !adapter.is_undefined(),
+        Err(_) => false,
+    }
+}
+
 /// Test that we can get device info if adapter is available
 #[wasm_bindgen_test]
 async fn test_device_creation_if_available() {
     use wgpu::Instance;
+
+    if !browser_adapter_available().await {
+        // No WebGPU adapter in this environment (e.g. headless CI) - nothing to verify.
+        return;
+    }
 
     let instance = Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::BROWSER_WEBGPU,
@@ -139,6 +187,7 @@ async fn test_device_creation_if_available() {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
     {

@@ -109,6 +109,7 @@ impl AppState {
         let surface_config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
+            color_space: wgpu::SurfaceColorSpace::Auto,
             width: size.width,
             height: size.height,
             present_mode: surface_caps.present_modes[0],
@@ -254,9 +255,11 @@ impl AppState {
             pixels_per_point: self.window.scale_factor() as f32,
         };
 
-        for (id, image_delta) in &egui_output.textures_delta.set {
-            self.egui_renderer
-                .update_texture(&self.device, &self.queue, *id, image_delta);
+        for (id, image_deltas) in &egui_output.textures_delta.set {
+            for image_delta in image_deltas {
+                self.egui_renderer
+                    .update_texture(&self.device, &self.queue, *id, image_delta);
+            }
         }
 
         self.egui_renderer.update_buffers(
@@ -296,7 +299,7 @@ impl AppState {
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
-        surface_texture.present();
+        self.queue.present(surface_texture);
 
         Ok(())
     }

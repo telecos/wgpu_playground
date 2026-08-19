@@ -394,6 +394,7 @@ impl DawnInstance {
                         power_preference: wgpu_power_pref,
                         compatible_surface: None,
                         force_fallback_adapter: false,
+                        apply_limit_buckets: false,
                     })
                     .await
                     .map_err(|_| DawnError::NoAdapterFound)?;

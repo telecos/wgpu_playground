@@ -98,7 +98,9 @@ fn test_copy_buffer_to_buffer() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(data[0], 42);
         assert_eq!(data[255], 42);
         drop(data);
@@ -160,7 +162,9 @@ fn test_copy_buffer_with_offset() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(data[0], 99);
         assert_eq!(data[127], 99);
         drop(data);
@@ -343,7 +347,9 @@ fn test_copy_texture_to_buffer() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // Check first byte of first pixel
         assert_eq!(data[0], 128);
         // Check first byte of last pixel in first row (3 pixels * 4 bytes = offset 12)
@@ -501,7 +507,9 @@ fn test_copy_texture_to_texture() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(data[0], 200);
         assert_eq!(data[63], 200);
         drop(data);
@@ -571,7 +579,9 @@ fn test_multiple_copy_commands() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // First 128 bytes should be 10
         assert_eq!(data[0], 10);
         assert_eq!(data[127], 10);
@@ -647,7 +657,9 @@ fn test_copy_buffer_helper() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         assert_eq!(data[0], 77);
         assert_eq!(data[255], 77);
         drop(data);

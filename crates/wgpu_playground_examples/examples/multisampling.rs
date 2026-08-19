@@ -43,6 +43,7 @@ async fn create_device() -> Option<(wgpu::Device, wgpu::Queue)> {
             power_preference: wgpu::PowerPreference::default(),
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })
         .await
         .ok()?;
@@ -152,7 +153,7 @@ fn create_pipeline(
             module: shader_module,
             entry_point: Some("vs_main"),
             compilation_options: Default::default(),
-            buffers: &[vertex_buffer_layout],
+            buffers: &[Some(vertex_buffer_layout)],
         },
         primitive: wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleList,

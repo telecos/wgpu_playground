@@ -74,7 +74,9 @@ fn test_sequential_command_submission() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // First half should be 1, second half should be 2
         assert_eq!(data[0], 1);
         assert_eq!(data[127], 1);
@@ -258,7 +260,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         let data_u32 = bytemuck::cast_slice::<u8, u32>(&data);
         // Verify compute shader wrote correct values
         assert_eq!(data_u32[0], 0);
@@ -456,7 +460,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         let data_u32 = bytemuck::cast_slice::<u8, u32>(&data);
         // Each value should be 2 (incremented twice)
         assert_eq!(data_u32[0], 2);
@@ -652,7 +658,9 @@ fn test_clear_buffer() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // All bytes should be 0 after clear
         assert_eq!(data[0], 0);
         assert_eq!(data[127], 0);
@@ -707,7 +715,9 @@ fn test_partial_clear_buffer() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // Before cleared region should still be 42
         assert_eq!(data[0], 42);
         assert_eq!(data[95], 42);
@@ -777,7 +787,9 @@ fn test_copy_and_clear_sequence() {
         });
         rx.await.unwrap().unwrap();
 
-        let data = buffer_slice.get_mapped_range();
+        let data = buffer_slice
+            .get_mapped_range()
+            .expect("buffer should be mapped");
         // First half should be original data
         assert_eq!(data[0], 100);
         assert_eq!(data[127], 100);

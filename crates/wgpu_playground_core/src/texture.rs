@@ -654,7 +654,9 @@ pub async fn export_texture_to_bytes(
         })?
         .map_err(|e| format!("Failed to map buffer: {:?}", e))?;
 
-    let data = buffer_slice.get_mapped_range();
+    let data = buffer_slice
+        .get_mapped_range()
+        .map_err(|e| format!("Failed to map buffer range: {:?}", e))?;
     let rgba_data: Vec<u8> = data.to_vec();
     drop(data);
     buffer.unmap();

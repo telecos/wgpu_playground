@@ -18,7 +18,7 @@ wayland-scanner = { path = "../../../patches/wayland-scanner" }
 [dependencies]
 libfuzzer-sys = "0.4"
 arbitrary = { version = "1", features = ["derive"] }
-wgpu = { version = "29.0", features = ["wgsl"] }
+wgpu = { version = "30.0", features = ["wgsl"] }
 wgpu_playground_core = { path = ".." }
 
 [[bin]]

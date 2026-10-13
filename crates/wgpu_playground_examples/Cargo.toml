@@ -13,7 +13,7 @@ env_logger = "0.11"
 log = "0.4"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
 bytemuck = { version = "1.14", features = ["derive"] }
-glam = "0.33"
+glam = "0.34"
 rand = "0.10.1"
 lib3mf = { git = "https://github.com/telecos/lib3mf_rust", rev = "b883269f9303d73947f0cec04f0be1e4ca779dce", default-features = false }
 

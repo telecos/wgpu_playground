@@ -928,7 +928,6 @@ dependencies = [
  "bytemuck",
  "ecolor 0.36.2",
  "emath 0.36.2",
- "epaint_default_fonts",
  "font-types",
  "harfrust",
  "log",
@@ -967,12 +966,6 @@ dependencies = [
  "unicode-segmentation",
  "vello_cpu 0.2.0",
 ]
-
-[[package]]
-name = "epaint_default_fonts"
-version = "0.36.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "773fa9c96dd0dbef887e39d0ed6177f141cce4d68e6041df77570aa3702dfa13"
 
 [[package]]
 name = "equivalent"
@@ -3943,7 +3936,7 @@ dependencies = [
  "chrono",
  "console_error_panic_hook",
  "criterion",
- "egui 0.36.2",
+ "egui 0.37.0",
  "egui-wgpu",
  "egui_plot",
  "env_logger",
@@ -3992,7 +3985,7 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "console_error_panic_hook",
- "egui 0.36.2",
+ "egui 0.37.0",
  "egui-wgpu",
  "egui-winit",
  "env_logger",
